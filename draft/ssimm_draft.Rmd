@@ -1,0 +1,123 @@
+---
+output:
+  bookdown::pdf_document2:
+    toc: no
+    number_sections: no
+    pandoc_args: !expr rmdfiltr::add_wordcount_filter(rmdfiltr::add_citeproc_filter(args = NULL))
+    latex_engine: xelatex
+    keep_tex: yes
+    template: svm-latex-ms.tex
+    
+# output: 
+#   pdf_document:
+#     citation_package: natbib
+#     keep_tex: true
+#     fig_caption: true
+#     latex_engine: pdflatex
+#     template: svm-latex-ms.tex
+
+header-includes:
+  # - \usepackage{setspace}\doublespace
+  # - \usepackage{endnotes}
+  #- \let\footnote=\endnote
+  #- \usepackage{endfloat}
+  - \usepackage{fancyhdr}
+  - \pagestyle{fancy}
+  - \setlength{\headheight}{13.6pt}
+  - \rhead{\textit{Hoffmann and Velasco}}
+  
+editor_options: 
+  chunk_output_type: console
+
+citeproc: no
+fontfamily: mathpazo
+fontsize: 11pt
+geometry: margin=1in
+indent: yes
+link-citations: yes
+linkcolor: blue
+
+# geometry: margin=1in
+# fontfamily: mathpazo
+# fontsize: 11pt
+
+# bibliography: zotero.bib  
+
+
+title: "Making Migration Sexy: Immigrants in Same-Sex Couples in the United States"
+
+date: "`r format(Sys.time(), '%B %d, %Y')`"
+
+author:
+- name: Nathan I. Hoffmann
+  affiliation: Department of Sociology, University of California, Los Angeles
+- name: Kristopher Velasco
+  affiliation: Departmnet of Sociology, University of Texas at Austin
+  
+thanks: "We appreciate...."   
+
+abstract: "Galvanized by greater social acceptance and new rights, numbers of same-sex couples in the United States are increasing, yet few demographers have studied immigrants in same-sex couples. Using the American Community Survey from 2008 to 2018, this study compares same-sex couples including at least one immigrant to corresponding opposite-sex couples in order to characterize and assess the scale of sexual migration to the U.S. Moreover, we evaluate how the policy environment related to same-sex couples shapes migratory patterns. We find that same-sex couples generally have higher incomes and occupational prestige and are somewhat more educated. Moreover these couples are influenced by LGBT policies, both in their origin country and their U.S. state destination, and are less influenced by previous migration of conationals. Our findings put into question predominant models of migration that emphasize economic and and network effects, suggesting the importance of considering political and lifestyle motivations."  
+  
+keywords: "immigration, same-sex couples, LGBTQ policy"  
+---
+
+<!-- Turn off hyphenation -->
+<!-- \usepackage[none]{hyphenat} -->
+
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = F, warning = F, message = F, cache = T)
+
+# knitr::opts_chunk$set(dev = c('pdf', 'png'), 
+#         fig.align = 'center', fig.height = 5, fig.width = 7.5, 
+#         pdf.options(encoding = "ISOLatin9.enc")) 
+
+library(CausalGAM)
+library(here)
+library(knitr)
+library(kableExtra)
+library(broom)
+library(haven)
+library(labelled)
+library(janitor)
+library(sandwich)
+library(stargazer)
+library(RColorBrewer)
+library(scales)    
+library(estimatr)
+library(sensemakr)
+library(cowplot)
+library(ggrepel)
+library(gridExtra)
+library(cem)
+library(tidyverse)
+
+knit_hooks$set(inline = function(x) {
+  prettyNum(x, big.mark=",")
+})
+
+
+# theme_set(theme_cowplot(font_family = 'Palatino') + 
+theme_set(theme_classic(base_family = 'Palatino') + 
+            theme(legend.title=element_blank(), 
+                  panel.grid.major.y = element_line('grey80'),
+                  legend.background = element_rect(fill = "transparent")))
+
+ggplot <- function(...) ggplot2::ggplot(...) + scale_color_brewer(palette="Dark2")
+
+```
+
+# Introduction
+Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Eget felis eget nunc lobortis mattis aliquam faucibus purus. Id semper risus in hendrerit. Adipiscing commodo elit at imperdiet dui accumsan. Penatibus et magnis dis parturient montes nascetur ridiculus. Sed viverra ipsum nunc aliquet bibendum enim facilisis. Cursus in hac habitasse platea dictumst quisque. Blandit turpis cursus in hac habitasse. Arcu dictum varius duis at consectetur lorem donec. Leo in vitae turpis massa sed elementum tempus. Suspendisse ultrices gravida dictum fusce ut placerat orci. Sed cras ornare arcu dui vivamus. Nulla malesuada pellentesque elit eget. Habitant morbi tristique senectus et. Fames ac turpis egestas sed tempus urna. Nibh mauris cursus mattis molestie. Scelerisque viverra mauris in aliquam sem. Ultrices in iaculis nunc sed augue lacus. Dui vivamus arcu felis bibendum ut tristique et egestas quis.
+
+Tellus rutrum tellus pellentesque eu tincidunt tortor aliquam nulla. Id porta nibh venenatis cras sed felis eget velit. Fermentum leo vel orci porta non pulvinar neque laoreet suspendisse. Cras ornare arcu dui vivamus arcu. Purus ut faucibus pulvinar elementum integer enim neque volutpat. Magnis dis parturient montes nascetur ridiculus mus mauris vitae. Convallis tellus id interdum velit laoreet id donec ultrices tincidunt. Mattis ullamcorper velit sed ullamcorper. In tellus integer feugiat scelerisque varius morbi enim nunc. Non nisi est sit amet facilisis. Sollicitudin nibh sit amet commodo. Mauris pharetra et ultrices neque ornare. Faucibus scelerisque eleifend donec pretium vulputate sapien nec. Varius quam quisque id diam. Pulvinar elementum integer enim neque volutpat ac tincidunt vitae semper. In nibh mauris cursus mattis. Sed vulputate mi sit amet.
+
+
+
+# References
+\setlength{\parindent}{-0.2in}
+\setlength{\leftskip}{0.2in}
+\setlength{\parskip}{8pt}
+\noindent
+
+
