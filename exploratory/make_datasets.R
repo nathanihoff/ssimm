@@ -45,7 +45,7 @@ acs_wide <- acs %>%
     cluster, strata, metro, region, state, stateicp, ftotinc,
     # individual variables
     position, sex, related, yrimmig, bpld, bpldid, citizen, educ,
-    occ, inctot, occscore, hwsei, empstat, yrnatur, poverty
+    occ, inctot, occscore, hwsei, empstat, yrnatur, poverty, speakeng, age
     # state_stock_year, state_stock_avg
   ) %>%
   filter(!is.na(position)) %>%
@@ -55,7 +55,7 @@ acs_wide <- acs %>%
   pivot_wider(#id_cols = serial,
     names_from = position,
     values_from = c(sex, related, related, yrimmig, bpld, bpldid, citizen, educ,
-                    occ, inctot, occscore, hwsei, empstat, yrnatur, poverty
+                    occ, inctot, occscore, hwsei, empstat, yrnatur, poverty, speakeng, age
                     #state_stock_year, state_stock_avg
     )) %>%
   filter(!is.na(sex_partner), !is.na(sex_main)) %>%
@@ -63,9 +63,9 @@ acs_wide <- acs %>%
          imm_couple = case_when(
            citizen_main %in% c(0,1) & citizen_partner %in% c(0,1) ~ 'none',
            citizen_main %in% c(2,3) & citizen_partner %in% c(2,3) ~ 'two',
-           citizen_main %in% c(2,3) | citizen_partner %in% c(2,3) ~ 'one')) # %>%
-# convert all labeled variables to factor
-as_factor()
+           citizen_main %in% c(2,3) | citizen_partner %in% c(2,3) ~ 'one')) %>%
+  # convert all labeled variables to factor
+  as_factor()
 
 # Keep only couples with one immigrant
 acs_oneimm <- acs_wide %>%
@@ -74,14 +74,14 @@ acs_oneimm <- acs_wide %>%
                   cluster, strata, metro, region, state, stateicp, ftotinc,
                   same_sex, imm_couple
   ),
-  names_to = c('.value', 'position'),
-  names_sep = '_') %>% 
+    names_to = c('.value', 'position'),
+    names_sep = '_') %>% 
   mutate(immigrant = case_when(citizen %in% c('N/A', 'Born abroad of American parents') ~ 'nonimmigrant',
                                citizen %in% c('Naturalized citizen', 'Not a citizen') ~ 'immigrant')) %>% 
   filter(!is.na(immigrant)) %>%
   pivot_wider(names_from = immigrant,
               values_from = c(position, sex, related, related, yrimmig, bpld, bpldid, citizen, educ,
-                              occ, inctot, occscore, hwsei, empstat, yrnatur, poverty
+                              occ, inctot, occscore, hwsei, empstat, yrnatur, poverty, speakeng, age
                               #state_stock_year, state_stock_avg
               )) %>%
   mutate(relation = case_when(
@@ -90,8 +90,21 @@ acs_oneimm <- acs_wide %>%
   ))
 
 
+# Keep only couples with one immigrant
+acs_coupled_imms <- acs_wide %>%
+  filter(imm_couple == 'one' | imm_couple == 'two') %>%
+  pivot_longer(-c(year, serial, nchild, hhwt, ssmc,
+                  cluster, strata, metro, region, state, stateicp, ftotinc,
+                  same_sex, imm_couple),
+    names_to = c('.value', 'position'),
+    names_sep = '_') %>% 
+  mutate(immigrant = case_when(citizen %in% c('N/A', 'Born abroad of American parents') ~ 'nonimmigrant',
+                               citizen %in% c('Naturalized citizen', 'Not a citizen') ~ 'immigrant')) %>% 
+  filter(immigrant == 'immigrant')
 
 
+
+# Macro dataset of dyadic stock by year
 acs_dyad <- acs_wide %>%
   select(bpld_main, bpld_partner, state, year, same_sex, citizen_main, citizen_partner, hhwt, same_sex,
          yrimmig_main, yrimmig_partner) %>%
@@ -140,7 +153,12 @@ top_countries <- acs %>%
   as_factor() %>%
   as.data.frame()
 
+
+# Person-level dataset of immigrants
+
+
 write_csv(top_countries, here('data', 'top_countries.csv'))
 write_csv(acs_wide, here('data', 'acs_wide.csv'))
 write_csv(acs_oneimm, here('data', 'acs_oneimm.csv'))
+write_csv(acs_coupled_imms, here('data', 'acs_coupled_imms.csv'))
 write_csv(acs_dyad, here('data', 'acs_dyad.csv'))
