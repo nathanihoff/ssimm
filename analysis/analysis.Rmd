@@ -1,6 +1,6 @@
 ---
 title: "Same-Sex Immigrant Couples"
-subtitle: "Descriptive Statistics"
+subtitle: "Models"
 output: html_document
 ---
 
