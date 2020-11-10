@@ -33,12 +33,15 @@ top_countries <- read_csv(here('data', 'top_countries.csv')) %>%
 acs_wide <- read_csv(here('data', 'acs_wide.csv'))
 acs_oneimm <- read_csv(here('data', 'acs_oneimm.csv'))
 
+acs_oneimm <- read_csv(here('data', 'acs_oneimm.csv'))
+acs_coupled_imms <- read_csv(here('data', 'acs_coupled_imms.csv'))
+
 # acs_wide2 <- acs_wide
 # acs_oneimm2 <- acs_oneimm
 ```
 
 # Scale of migration
-## Different- and same-sex couples containing one or two immigrant
+## Different- and same-sex couples containing one or two immigrants
 ```{r}
 acs_wide %>%
   filter(imm_couple != "none") %>%
@@ -59,9 +62,10 @@ acs_wide %>%
 
 ## Only 18+ at time of immigration
 ```{r}
-
 acs_wide %>%
   filter(imm_couple != "none") %>%
+  filter(as.numeric(age_main) - (year - yrimmig_main) >= 18 |
+           as.numeric(age_partner) - (year - yrimmig_partner) >= 18) %>%
   mutate(same_sex = ifelse(same_sex == T, 'Same-Sex', 'Different-Sex')) %>%
   group_by(year, imm_couple, same_sex) %>%
   count(wt = hhwt) %>%
@@ -74,15 +78,13 @@ acs_wide %>%
   labs(color = 'Number of immigrants\nin couple') +
   xlim(2007, 2019) +
   theme(legend.position=c(.15,.35))
-  # ggtitle('Total couples with immigrants')
 ```
 
 ## Immigrants within last year
 ```{r}
 acs_wide %>%
-  filter(is.na(yrimmig_main) | yrimmig_main - year <= 1) %>%
-  filter(is.na(yrimmig_partner) | yrimmig_partner - year <= 1) %>%
   filter(imm_couple != "none") %>%
+  filter(year - yrimmig_partner <= 1 | year - yrimmig_main <= 1) %>%
   mutate(same_sex = ifelse(same_sex == T, 'Same-Sex', 'Different-Sex')) %>%
   group_by(year, imm_couple, same_sex) %>%
   count(wt = hhwt) %>%
@@ -95,8 +97,9 @@ acs_wide %>%
   labs(color = 'Number of immigrants\nin couple') +
   xlim(2007, 2019) +
   theme(legend.position=c(.15,.35))
-  # ggtitle('Total couples with immigrants')
 ```
+
+## 
 
 
 # Differences in characteristics between immigrants in same- and opposite-sex couples

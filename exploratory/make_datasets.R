@@ -51,6 +51,7 @@ acs_wide <- acs %>%
   filter(!is.na(position)) %>%
   mutate(#related = as_factor(related),
     #bpld = as_factor(bpld),
+    age = as.numeric(age),
     yrimmig = ifelse(yrimmig == 0, NA, yrimmig)) %>%
   pivot_wider(#id_cols = serial,
     names_from = position,
@@ -153,8 +154,6 @@ top_countries <- acs %>%
   as_factor() %>%
   as.data.frame()
 
-
-# Person-level dataset of immigrants
 
 
 write_csv(top_countries, here('data', 'top_countries.csv'))
