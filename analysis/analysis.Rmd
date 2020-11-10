@@ -1,6 +1,6 @@
 ---
 title: "Same-Sex Immigrant Couples"
-subtitle: "Fixed Effects Modelsxx"
+subtitle: "Fixed Effects Models"
 output: html_document
 ---
 
