@@ -1,0 +1,41 @@
+---
+title: "Same-Sex Immigrant Couples"
+subtitle: "Descriptive Statistics"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = T, warning = F, message = F, cache = F,
+                      cache.lazy = FALSE)
+
+library(RColorBrewer)
+library(haven)
+library(cowplot)
+library(srvyr)
+library(here)
+library(tidyverse)
+
+# theme_set(theme_cowplot(font_family = 'Palatino') + 
+theme_set(theme_classic() + 
+            theme(#legend.title=element_blank(), 
+                  panel.grid.major.y = element_line('grey80'),
+                  legend.background = element_rect(fill = "transparent")))
+ggplot <- function(...) ggplot2::ggplot(...) #+ scale_color_brewer(palette="Dark2")
+
+options(scipen=999)
+```
+
+```{r load}
+top_countries <- read_csv(here('data', 'top_countries.csv')) %>%
+  pull(1)
+# top_countries <- c("Mexico", "India",  "Philippines", "China",              "El Salvador", "Vietnam",
+#                    "Cuba",               "Korea",              "Dominican Republic", "Guatemala" ) 
+acs_wide <- read_csv(here('data', 'acs_wide.csv'))
+acs_oneimm <- read_csv(here('data', 'acs_oneimm.csv'))
+
+acs_oneimm <- read_csv(here('data', 'acs_oneimm.csv'))
+acs_coupled_imms <- read_csv(here('data', 'acs_coupled_imms.csv'))
+
+# acs_wide2 <- acs_wide
+# acs_oneimm2 <- acs_oneimm
+```
