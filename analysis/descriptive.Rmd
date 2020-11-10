@@ -36,8 +36,6 @@ acs_oneimm <- read_csv(here('data', 'acs_oneimm.csv'))
 acs_oneimm <- read_csv(here('data', 'acs_oneimm.csv'))
 acs_coupled_imms <- read_csv(here('data', 'acs_coupled_imms.csv'))
 
-# acs_wide2 <- acs_wide
-# acs_oneimm2 <- acs_oneimm
 ```
 
 # Scale of migration
@@ -99,10 +97,28 @@ acs_wide %>%
   theme(legend.position=c(.15,.35))
 ```
 
-## 
 
 
 # Differences in characteristics between immigrants in same- and opposite-sex couples
+## Income
+```{r}
+acs_coupled_imms %>%
+  group_by(older18, same_sex) %>%
+  count() 
+
+
+```
+
+
+## Occupational score
+
+## Education
+
+## Year of immigration
+
+
+
+
 
 
 

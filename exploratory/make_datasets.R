@@ -101,7 +101,8 @@ acs_coupled_imms <- acs_wide %>%
     names_sep = '_') %>% 
   mutate(immigrant = case_when(citizen %in% c('N/A', 'Born abroad of American parents') ~ 'nonimmigrant',
                                citizen %in% c('Naturalized citizen', 'Not a citizen') ~ 'immigrant')) %>% 
-  filter(immigrant == 'immigrant')
+  filter(immigrant == 'immigrant') %>%
+  mutate(older18 = (as.numeric(age) - (year - yrimmig) >= 18))
 
 
 
