@@ -32,9 +32,19 @@ acs_dyad_policy <- acs_dyad %>%
   left_join(state_policy,by = c('mean_year_immig' = 'Year', 'state' = 'State'))
 
 
-lm(same_sex_stock ~ origin_score + state_policy, data = acs_dyad_policy) %>%
+
+#Models: Fixed Effects
+  #In these models, we are predicting the within-state change in immigrant stock 
+library(plm)
+fixed <- lm(same_sex_stock ~ origin_score + state_policy + origin_score + factor(state), data = acs_dyad_policy)
+
+
+
+
+lm(same_sex_stock ~ origin_score + state_policy + origin_score, data = acs_dyad_policy) %>%
   summary()
-lm(opp_sex_stock ~ origin_score + state_policy, data = acs_dyad_policy) %>%
+
+lm(opp_sex_stock ~ origin_score + state_policy + origin_score, data = acs_dyad_policy) %>%
   summary()
 
 mod_same <- lm(same_sex_stock ~ origin_score + state_policy + state_stock_year, data = acs_dyad_policy) %>%
