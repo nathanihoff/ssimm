@@ -36,9 +36,13 @@ acs_dyad_policy <- acs_dyad %>%
 #Models: Fixed Effects
   #In these models, we are predicting the within-state change in immigrant stock 
 library(plm)
-fixed <- lm(same_sex_stock ~ origin_score + state_policy + origin_score + factor(state), data = acs_dyad_policy)
+
+acs_dyad_policy$same_prop <- acs_dyad_policy$same_sex_stock/acs_dyad_policy$state_stock_year
 
 
+fixed <- lm(same_sex_stock ~ origin_score + state_policy + state_stock_year + factor(state) + factor(mean_year_immig), data = acs_dyad_policy)
+
+summary(fixed)
 
 
 lm(same_sex_stock ~ origin_score + state_policy + origin_score, data = acs_dyad_policy) %>%
@@ -56,7 +60,7 @@ stargazer(mod_same, mod_opp, header = F)
 
 # models with logged pop variables
 acs_dyad_policy_log <- acs_dyad_policy %>%
-  mutate(same_sex_stock = log(same_sex_stock +1),
+  mutate(same_prop = log(same_prop +1),
          opp_sex_stock = log(opp_sex_stock+1),
          state_stock_year = log(state_stock_year+1))
 
