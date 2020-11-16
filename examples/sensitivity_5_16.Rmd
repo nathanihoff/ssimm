@@ -1,0 +1,199 @@
+---
+title: "200C Diaspora Initial Sensitivity Analysis"
+author: "Bowei Hu, Nathan Hoffmann, Sean Ewing"
+date: "5/16/2020"
+output: 
+  pdf_document:
+    number_sections: true
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = T, warning = F, message = F, cache = T)
+# Setup
+# install.packages("multiwayvcov") # multi-way clustering 
+library(broom)
+library(stargazer)
+library(haven)
+library(multiwayvcov)
+library(lmtest)
+library(sandwich)
+library(sensemakr)
+library(countrycode)
+library(tidyverse)
+
+# load dta into R
+# setwd("/Users/boweihu/Google Drive/200C")
+datapath <- '/Users/nathan/Google Drive/1 UCLA/PS 200C- Causal Inference/200C Group Project/Data & Code/use this/'
+# datapath <- '/Users/boweihu/Google Drive/200C/sensitivity/'
+diaspora_tbl1 <- read_dta(paste0(datapath, 'new_apsr_tbl1.dta')) %>%
+  filter(sample == 1) %>%
+  mutate(origin_country = countrycode(sourcevar = ifs_o, origin = 'imf', 
+                                      destination = 'country.name'),
+         dest_country = countrycode(sourcevar = ifs_d, origin = 'imf', 
+                                    destination = 'country.name'),
+         iso3_o = countrycode(sourcevar = ifs_o, origin = 'imf', 
+                                    destination = 'iso3c'),
+         iso3_d = countrycode(sourcevar = ifs_d, origin = 'imf', 
+                                    destination = 'iso3c')
+         )%>% select(origin_country, dest_country,iso3_o,iso3_d,everything())
+
+table(diaspora_tbl1$origin_country, useNA = 'always')
+table(diaspora_tbl1$dest_country, useNA = 'always')
+
+diaspora_tbl2 <- read_dta(paste0(datapath, 'new_apsr_tbl2.dta')) %>%
+  filter(sample == 1) %>%
+  mutate(origin_country = countrycode(sourcevar = ifs_o, origin = 'imf', 
+                                      destination = 'country.name'),
+         dest_country = countrycode(sourcevar = ifs_d, origin = 'imf', 
+                                    destination = 'country.name'),
+         iso3_o = countrycode(sourcevar = ifs_o, origin = 'imf', 
+                                    destination = 'iso3c'),
+         iso3_d = countrycode(sourcevar = ifs_d, origin = 'imf', 
+                                    destination = 'iso3c')
+         )%>% select(origin_country, dest_country,iso3_o,iso3_d,everything())
+
+# table(diaspora_tbl2$origin_country, useNA = 'always')
+# table(diaspora_tbl1$dest_country, useNA = 'always')
+
+# load new data (including slave) into R
+diaspora_tbl1_slave <- read_dta(paste0(datapath, 'diaspora_tbl1_slave.dta'))                          %>%filter(sample_slave == 1)
+
+diaspora_tbl2_slave <- read_dta(paste0(datapath, 'diaspora_tbl2_slave.dta'))                          %>%filter(sample_slave == 1)
+```
+
+
+
+# Reproducing Tables 1 and 2 by using data including freedom from forced labor
+Using multi-way cluster robust standard errors
+```{r,results = 'asis'}
+table_rep <- function(models, title){
+  stargazer(models[[1]], models[[2]], models[[3]], models[[4]],
+            keep = c('Llgdpproduct2',  'Lldist', 'Lcontig',  'Lcomlang_off',  'Lgrowcorr',
+                     'Lcommoncur',  'Ldtt',  'Lpta2', 'LI',   'commonlegal',  'commonreligion',
+                     'fst_distance_weighted', 'inglehart_dist', 'ltrade', 'LB',      
+                     'Constant','slave_freedom_product'),
+            order = c('LI', 'Llgdpproduct2',  'Lldist', 'Lcontig',  'Lcomlang_off',  
+                      'Lgrowcorr',
+                     'Lcommoncur',  'Ldtt',  'Lpta2',  'LB',  'slave_freedom_product', 
+                     'Constant',
+                     'commonlegal',  'commonreligion',
+                     'fst_distance_weighted', 'inglehart_dist', 'ltrade'),
+            covariate.labels = c("Log(Migrant Stock \\\\from D in S)", 
+                                 "Log(Product of \\\\GDPs)", 
+                                 "Log(Distance)", 
+                                 "Common Border", 
+                                 "Official Common \\\\Language",
+                                 "Correlation of \\\\Growth Rates", 
+                                 "Common Exchange \\\\Rate Peg",
+                                 "Dual Taxation \\\\Treaty", 
+                                 "Preferential Trade \\\\Agreement",
+                                 "Log(bilateral \\\\telephone \\\\volume)", 
+                                 "Freedom from \\\\Forced Labor",
+                                 "Constant",
+                                 "Common Legal \\\\Heritage", 
+                                 "Common Dominant \\\\Religion", 
+                                 "Genetic Distance", 
+                                 "Cultural difference", 
+                                 "Log(bilateral trade)"),
+            dep.var.labels.include = F,
+            keep.stat = c('n', 'adj.rsq'),
+            add.lines = list(c("Multi-way cluster-\\\\robust standard errors?", rep("Yes", 4))),
+            title = title,
+            no.space = T,
+            header = F)
+}
+
+#### Table 1 ####
+tbl1_formula <- "lstocka ~ Llgdpproduct2 + Lldist + Lcontig + Lcomlang_off + 
+                Lgrowcorr + Lcommoncurrency + Ldtt + Lpta2  + factor(ifs_o) +
+                factor(ifs_d)"
+
+m2 <- lm(paste0(tbl1_formula, '+ LI + LB'), data = diaspora_tbl1_slave)  %>%
+  coeftest(vcov = vcovCL(., cluster = ~ ifs_o + ifs_d))
+
+# Taking out bilateral telephone
+m2_no_tele <- lm(paste0(tbl1_formula, '+ LI'), data = diaspora_tbl1_slave)  %>%
+  coeftest(vcov = vcovCL(., cluster = ~ ifs_o + ifs_d))
+
+# Adding slave freedom
+m2_freedom <- lm(paste0(tbl1_formula, '+ LI + LB + slave_freedom_product'), 
+                 data = diaspora_tbl1_slave) %>%
+  coeftest(vcov = vcovCL(., cluster = ~ ifs_o + ifs_d)) 
+
+# Slave freedom but no telephone
+m2_freedom_no_tele <- lm(paste0(tbl1_formula, '+ LI + slave_freedom_product'), 
+                              data = diaspora_tbl1_slave) %>%
+  coeftest(vcov = vcovCL(., cluster = ~ ifs_o + ifs_d)) 
+  
+
+table_rep(models = list(m2, m2_no_tele, m2_freedom, m2_freedom_no_tele), 
+          title = "Determinants of Cross-border Portfolio Investment")
+
+
+
+#### Table 2 ####
+tbl2_formula <- "loutflowsa ~ Llgdpproduct2 + Lldist + Lcontig + Lcomlang_off + 
+                Lgrowcorr + Lcommoncurrency + Ldtt + Lpta2  + factor(ifs_o) +
+                factor(ifs_d)"
+
+m2 <- lm(paste0(tbl2_formula, '+ LI + LB'), data = diaspora_tbl2_slave)  %>%
+  coeftest(vcov = vcovCL(., cluster = ~ ifs_o + ifs_d))
+
+# Taking out bilateral telephone
+m2_no_tele <- lm(paste0(tbl2_formula, '+ LI'), data = diaspora_tbl2_slave)  %>%
+  coeftest(vcov = vcovCL(., cluster = ~ ifs_o + ifs_d))
+
+# Adding slave freedom
+m2_freedom <- lm(paste0(tbl2_formula, '+ LI + LB + slave_freedom_product'), 
+                 data = diaspora_tbl1_slave) %>% 
+  coeftest(vcov = vcovCL(., cluster = ~ ifs_o + ifs_d)) 
+
+# Slave freedom but no telephone
+m2_freedom_no_tele <- lm(paste0(tbl2_formula, '+ LI + slave_freedom_product'), 
+                              data = diaspora_tbl1_slave) %>%
+  coeftest(vcov = vcovCL(., cluster = ~ ifs_o + ifs_d)) 
+
+table_rep(models = list(m2, m2_no_tele, m2_freedom, m2_freedom_no_tele), 
+          "Determinants of Cross-border Foreign Direct Investment")
+
+summary(m2)
+summary(m2_freedom)
+```
+\newpage
+
+# Sensitivity
+Using Model 2 from both tables above.  
+
+## Portfolio Investment
+```{r, results = 'asis'}
+diaspora_sensitivity <- 
+  sensemakr(model = 
+      lm(paste0(tbl1_formula, '+ LI + LB'), 
+         data = diaspora_tbl1), 
+    treatment = "LI",
+    benchmark_covariates = "Llgdpproduct2",
+    kd = 1:3)
+
+ovb_minimal_reporting(diaspora_sensitivity, format = "latex")
+
+plot(diaspora_sensitivity)
+plot(diaspora_sensitivity, sensitivity.of = "t-value")
+plot(diaspora_sensitivity, type = "extreme")
+```
+
+## Foreign Direct Investment
+```{r, results = 'asis'}
+diaspora_sensitivity2 <- 
+  sensemakr(model = 
+      lm(paste0(tbl2_formula, '+ LI + LB'), 
+         data = diaspora_tbl2), 
+    treatment = "LI",
+    benchmark_covariates = "Llgdpproduct2",
+    kd = 1:3)
+
+ovb_minimal_reporting(diaspora_sensitivity2, format = "latex")
+
+plot(diaspora_sensitivity2)
+plot(diaspora_sensitivity2, sensitivity.of = "t-value")
+plot(diaspora_sensitivity2, type = "extreme")
+```
