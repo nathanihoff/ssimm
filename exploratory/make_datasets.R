@@ -156,7 +156,6 @@ top_countries <- acs %>%
   as.data.frame()
 
 
-
 write_csv(top_countries, here('data', 'top_countries.csv'))
 write_csv(acs_wide, here('data', 'acs_wide.csv'))
 write_csv(acs_oneimm, here('data', 'acs_oneimm.csv'))

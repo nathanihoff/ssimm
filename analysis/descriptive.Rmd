@@ -36,6 +36,12 @@ acs_oneimm <- read_csv(here('data', 'acs_oneimm.csv'))
 acs_oneimm <- read_csv(here('data', 'acs_oneimm.csv'))
 acs_coupled_imms <- read_csv(here('data', 'acs_coupled_imms.csv'))
 
+
+acs_coupled_imms <- acs_coupled_imms %>%
+  filter(older18 == T) %>%
+  mutate(same_sex = ifelse(same_sex == T, 'Same Sex', 'Different Sex')) %>%
+  mutate(years_in_us = year - yrimmig) 
+
 ```
 
 # Scale of migration
@@ -103,18 +109,64 @@ acs_wide %>%
 ## Income
 ```{r}
 acs_coupled_imms %>%
-  group_by(older18, same_sex) %>%
-  count() 
-
-
+  group_by(year, same_sex) %>%
+  summarize(inctot = weighted.mean(inctot, w = hhwt, na.rm = T)) %>%
+  ggplot(aes(x = year, y = inctot)) +
+  geom_line() +
+  facet_wrap(~same_sex) +
+  ggtitle('Total Income')
 ```
 
 
 ## Occupational score
+```{r}
+acs_coupled_imms %>%
+  group_by(year, same_sex) %>%
+  summarize(occscore = weighted.mean(occscore, w = hhwt, na.rm = T)) %>%
+  ggplot(aes(x = year, y = occscore)) +
+  geom_line() +
+  facet_wrap(~same_sex) +
+  ggtitle('Occupational Score')
+```
+
+## Years in US
+```{r}
+acs_coupled_imms %>%
+  ggplot(aes(x = years_in_us)) +
+  geom_histogram() +
+  facet_wrap(~same_sex, scales = 'free', nrow = 2) +
+  ggtitle('Years in US')
+
+acs_coupled_imms %>%
+  ggplot(aes(x = years_in_us)) +
+  geom_histogram() +
+  facet_wrap(~same_sex + year, scales = 'free') +
+  ggtitle('Years in US')
+
+acs_coupled_imms %>%
+  group_by(year, same_sex) %>%
+  summarize(years_in_us = weighted.mean(years_in_us, w = hhwt, na.rm = T)) %>%
+  ggplot(aes(x = year, y = years_in_us)) +
+  geom_line() +
+  facet_wrap(~same_sex) +
+  ggtitle('Years in US')
+
+
+```
 
 ## Education
+```{r}
+acs_coupled_imms %>%
+  group_by(year, same_sex, educ) %>%
+  count(wt = hhwt) %>%
+  ggplot(aes(x = year, y = n, fill = educ)) +
+  geom_bar(position="fill", stat="identity") +
+  facet_wrap(~same_sex) +
+  ggtitle('Education')
+```
 
-## Year of immigration
+
+
 
 
 
