@@ -6,7 +6,7 @@ library(here)
 library(tidyverse)
 
 
-acs <- read_dta('/Users/nathan/Data/ACS/acs_2008_2018.dta') %>%
+acs <- read_dta('/Users/nathan/Data/ACS/acs_2008_2019.dta') %>%
   mutate(position = case_when(
     related == 101 ~ 'main',
     related %in% c(201, 1114) ~ 'partner'),
@@ -15,27 +15,6 @@ acs <- read_dta('/Users/nathan/Data/ACS/acs_2008_2018.dta') %>%
     state = stateicp,
     stateicp = as.numeric(stateicp))
 
-# # Make country-of-origin variables
-# # stock by year
-# acs_imm <- filter(acs, citizen %in% c(2,3))
-# 
-# country_year_df <- acs_imm %>%
-#   group_by(bpld, state,  year) %>%
-#   count(wt = hhwt) %>%
-#   rename(state_stock_year = n)
-# # sample_n(country_year_df, 10)
-# # average stock
-# country_df <- acs_imm %>%
-#   group_by(bpld, state) %>%
-#   count(wt = hhwt) %>%
-#   mutate(state_stock_avg = n/11) %>%
-#   select(-n)
-# 
-# acs <- acs %>%
-#   left_join(country_year_df) %>%
-#   left_join(country_df)
-
-# select(acs, bpld, state, state_stock_year, state_stock_avg) %>% sample_n(10)
 
 # Define immigrant as someone born abroad not to US parents
 acs_wide <- acs %>%
@@ -104,6 +83,28 @@ acs_coupled_imms <- acs_wide %>%
   filter(immigrant == 'immigrant') %>%
   mutate(older18 = (as.numeric(age) - (year - yrimmig) >= 18))
 
+# Make country-of-origin variables
+# stock by year
+acs_imm <- filter(acs, citizen %in% c(2,3))
+
+country_year_df <- acs_imm %>%
+  group_by(bpld, state,  year) %>%
+  count(wt = hhwt) %>%
+  rename(state_stock_year = n) %>%
+  as_factor()
+# sample_n(country_year_df, 10)
+# average stock
+# country_df <- acs_imm %>%
+#   group_by(bpld, state) %>%
+#   count(wt = hhwt) %>%
+#   mutate(state_stock_avg = n/11) %>%
+#   select(-n)
+# 
+# acs <- acs %>%
+#   left_join(country_year_df) %>%
+#   left_join(country_df)
+
+# select(acs, bpld, state, state_stock_year, state_stock_avg) %>% sample_n(10)
 
 
 # Macro dataset of dyadic stock by year
@@ -131,7 +132,8 @@ acs_dyad <- acs_wide %>%
   as_factor()
 
 acs_dyad_yrimmig <- acs_wide %>%
-  select(bpld_main, bpld_partner, state, year, same_sex, citizen_main, citizen_partner, hhwt, same_sex,
+  select(bpld_main, bpld_partner, state, year, same_sex, 
+         citizen_main, citizen_partner, hhwt, same_sex,
          yrimmig_main, yrimmig_partner) %>%
   pivot_longer(-c(year, state, same_sex, hhwt),
                names_to = c('.value', 'position'),
