@@ -49,10 +49,10 @@ acs_oneimm <- read_csv(here('data', 'acs_oneimm.csv'))
 # Married and unmarried same-sex couples over time
 acs_wide %>%
   filter(same_sex == T, imm_couple != "none") %>%
-  group_by(year, imm_couple) %>%
+  group_by(year, imm_couple, related_partner) %>%
   count(wt = hhwt) %>%
   ggplot(aes(x = year, y = n, color = imm_couple)) +
-  geom_line() + geom_point() +
+  geom_line() + geom_point() + facet_wrap(~related_partner)
   ggtitle('Married and unmarried same-sex couples over time')
 
 # By sex

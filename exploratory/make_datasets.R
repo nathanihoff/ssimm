@@ -107,16 +107,16 @@ country_year_df <- acs_imm %>%
 # select(acs, bpld, state, state_stock_year, state_stock_avg) %>% sample_n(10)
 
 
-# Macro dataset of dyadic stock by year
+# Macro dataset of dyadic stock by state by year
 acs_dyad <- acs_wide %>%
-  select(bpld_main, bpld_partner, state, year, same_sex, citizen_main, citizen_partner, hhwt, same_sex,
+  select(bpld_main, bpld_partner, state, year, same_sex, citizen_main, 
+         citizen_partner, hhwt, same_sex,
          yrimmig_main, yrimmig_partner) %>%
   pivot_longer(-c(year, state, same_sex, hhwt),
                names_to = c('.value', 'position'),
                names_sep = '_') %>% 
-  mutate(immigrant = case_when(citizen %in% c(0,1) ~ 'nonimmigrant',
-                               citizen %in% c(2,3) ~ 'immigrant')) %>%
-  filter(immigrant == 'immigrant') %>%
+  mutate(immigrant = case_when(citizen %in% c('N/A', 'Born abroad of American parents') ~ 'nonimmigrant',
+                               citizen %in% c('Naturalized citizen', 'Not a citizen') ~ 'immigrant')) %>%
   group_by(bpld, state,  year, same_sex) %>%
   count(wt = hhwt, .drop = F) %>%
   rename(stock = n) %>%
@@ -138,14 +138,34 @@ acs_dyad_yrimmig <- acs_wide %>%
   pivot_longer(-c(year, state, same_sex, hhwt),
                names_to = c('.value', 'position'),
                names_sep = '_') %>% 
-  mutate(immigrant = case_when(citizen %in% c(0,1) ~ 'nonimmigrant',
-                               citizen %in% c(2,3) ~ 'immigrant')) %>%
+  mutate(immigrant = case_when(citizen %in% c('N/A', 'Born abroad of American parents') ~ 'nonimmigrant',
+                               citizen %in% c('Naturalized citizen', 'Not a citizen') ~ 'immigrant')) %>%
   filter(immigrant == 'immigrant')  %>%
   group_by(bpld,  year) %>%
   summarize(mean_year_immig = weighted.mean(yrimmig, w = hhwt, na.rm = T)) %>%
   as_factor()
 
 acs_dyad <- left_join(acs_dyad, acs_dyad_yrimmig)
+
+
+# proportion same sex by year of immigration and country
+# no household weight since pooling
+country_yrimmig_df <- acs_imm %>%
+  group_by(bpld, yrimmig) %>%
+  count() %>%
+  rename(n_total = n) %>%
+  mutate(bpld = as_factor(bpld),
+         yrimmig = as.numeric(yrimmig))
+
+acs_prop_yrimmig <- acs_coupled_imms %>%
+  group_by(yrimmig, bpld, same_sex) %>%
+  count(.drop = F) %>%
+  filter(same_sex == TRUE) %>%
+  rename(n_same_sex = n) %>%
+  left_join(country_yrimmig_df) %>%
+  mutate(prop_same_sex = n_same_sex / n_total)
+
+filter(acs_prop_yrimmig)
 
 # Top-10 immigrant countries
 top_countries <- acs %>%

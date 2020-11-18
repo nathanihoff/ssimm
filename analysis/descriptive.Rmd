@@ -32,9 +32,9 @@ top_countries <- read_csv(here('data', 'top_countries.csv')) %>%
 # top_countries <- c("Mexico", "India",  "Philippines", "China",              "El Salvador", "Vietnam",
 #                    "Cuba",               "Korea",              "Dominican Republic", "Guatemala" ) 
 acs_wide <- read_csv(here('data', 'acs_wide.csv'))
-acs_oneimm <- read_csv(here('data', 'acs_oneimm.csv'))
+# acs_oneimm <- read_csv(here('data', 'acs_oneimm.csv'))
 acs_coupled_imms <- read_csv(here('data', 'acs_coupled_imms.csv'))
-dyad <- read_csv(here('data', 'acs_dyad.csv'))
+# dyad <- read_csv(here('data', 'acs_dyad.csv'))
 
 
 acs_coupled_imms <- acs_coupled_imms %>%
@@ -62,6 +62,18 @@ acs_wide %>%
   xlim(2007, 2019) +
   theme(legend.position=c(.15,.35))
   # ggtitle('Total couples with immigrants')
+```
+
+## Married and unmarried same-sex couples over time
+```{r}
+acs_wide %>%
+  filter(same_sex == T, imm_couple != "none") %>%
+  group_by(year, imm_couple, related_partner) %>%
+  count(wt = hhwt) %>%
+  ggplot(aes(x = year, y = n, color = imm_couple)) +
+  geom_line() + geom_point() + 
+  facet_wrap(~related_partner) +
+  xlim(2007, 2019)
 ```
 
 ## Only 18+ at time of immigration
