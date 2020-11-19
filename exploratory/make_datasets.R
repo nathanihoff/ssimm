@@ -165,10 +165,14 @@ acs_prop_yrimmig <- acs_coupled_imms %>%
   mutate(n_same_sex = ifelse(is.na(n_same_sex), 0, n_same_sex),
          n_dif_sex = ifelse(is.na(n_dif_sex), 0, n_dif_sex)) %>%
   left_join(country_yrimmig_df) %>%
+  left_join(distinct(select(acs_dyad, bpld, bpldid))) %>%
   mutate(prop_same_sex = n_same_sex / n_total,
          se_same_sex = sqrt(prop_same_sex*(1-prop_same_sex)/n_total),
          prop_dif_sex = n_dif_sex / n_total,
          se_dif_sex = sqrt(prop_dif_sex*(1-prop_dif_sex)/n_total)) 
+
+
+
 
 
 # acs_prop_yrimmig %>%

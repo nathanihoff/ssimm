@@ -41,7 +41,7 @@ acs_coupled_imms <- read_csv(here('data', 'acs_coupled_imms.csv'))
 ```
 
 
-```{r load}
+```{r dyadfixed}
 dyad <- read_csv(here('data', 'acs_dyad.csv'))
 
 lgbt_ipums <- read_csv(here('data', 'LGBT Data w IPUMS Code.csv'))
@@ -51,3 +51,12 @@ lgbt_ipums$bpld_id <- lgbt_ipums$Code
 imm <- left_join(dyad,lgbt_ipums,by="bpld_id")
 
 ```
+
+
+```{r}
+acs_prop_yrimmig
+
+
+
+```
+
