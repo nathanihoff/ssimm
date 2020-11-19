@@ -91,7 +91,9 @@ country_year_df <- acs_imm %>%
   group_by(bpld, state,  year) %>%
   count(wt = perwt) %>%
   rename(state_stock_year = n) %>%
+  mutate(bpldid = as.numeric(bpld)) %>%
   as_factor()
+
 # sample_n(country_year_df, 10)
 # average stock
 # country_df <- acs_imm %>%
@@ -108,42 +110,18 @@ country_year_df <- acs_imm %>%
 
 
 # Macro dataset of dyadic stock by state by year
-acs_dyad <- acs_wide %>%
-  select(bpld_main, bpld_partner, state, year, same_sex, citizen_main, 
-         citizen_partner, perwt, same_sex,
-         yrimmig_main, yrimmig_partner) %>%
-  pivot_longer(-c(year, state, same_sex, perwt),
-               names_to = c('.value', 'position'),
-               names_sep = '_') %>% 
-  mutate(immigrant = case_when(citizen %in% c('N/A', 'Born abroad of American parents') ~ 'nonimmigrant',
-                               citizen %in% c('Naturalized citizen', 'Not a citizen') ~ 'immigrant')) %>%
+acs_dyad <- acs_coupled_imms %>%
   group_by(bpld, state,  year, same_sex) %>%
   count(wt = perwt, .drop = F) %>%
-  rename(stock = n) %>%
-  mutate(same_sex = case_when(
-    same_sex == T ~ 'same_sex_stock',
-    same_sex == F ~ 'opp_sex_stock'
-  )) %>%
-  pivot_wider(names_from = same_sex,
-              values_from = stock, 
-              values_fill = 0) %>%
-  left_join(country_year_df) %>%
-  mutate(bpldid = as.numeric(bpld)) %>%
-  as_factor()
+  mutate(same_sex = ifelse(same_sex == T, 'same_sex_stock', 'opp_sex_stock')) %>%
+  pivot_wider(names_from = 'same_sex', values_from = 'n') %>%
+  mutate(same_sex_stock = ifelse(is.na(same_sex_stock), 0, same_sex_stock),
+         opp_sex_stock = ifelse(is.na(opp_sex_stock), 0, opp_sex_stock)) %>%
+  left_join(country_year_df) 
 
-acs_dyad_yrimmig <- acs_wide %>%
-  select(bpld_main, bpld_partner, state, year, same_sex, 
-         citizen_main, citizen_partner, perwt, same_sex,
-         yrimmig_main, yrimmig_partner) %>%
-  pivot_longer(-c(year, state, same_sex, perwt),
-               names_to = c('.value', 'position'),
-               names_sep = '_') %>% 
-  mutate(immigrant = case_when(citizen %in% c('N/A', 'Born abroad of American parents') ~ 'nonimmigrant',
-                               citizen %in% c('Naturalized citizen', 'Not a citizen') ~ 'immigrant')) %>%
-  filter(immigrant == 'immigrant')  %>%
+acs_dyad_yrimmig <- acs_coupled_imms %>%
   group_by(bpld,  year) %>%
-  summarize(mean_year_immig = weighted.mean(yrimmig, w = perwt, na.rm = T)) %>%
-  as_factor()
+  summarize(mean_year_immig = weighted.mean(yrimmig, w = perwt, na.rm = T)) 
 
 acs_dyad <- left_join(acs_dyad, acs_dyad_yrimmig)
 

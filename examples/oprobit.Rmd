@@ -1,0 +1,532 @@
+---
+title: "Lecture 12: Models of ordinal data"
+author: Jeffrey B. Lewis
+date: May 22, 2019
+output:
+  xaringan::moon_reader: 
+    css: ["default", "default-fonts", "hygge"]
+    lib_dir: libs
+    nature:
+      highlightStyle: github
+      highlightLines: true
+      countIncrementalSlides: false
+      ratio: "16:9"
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+
+suppressPackageStartupMessages({
+  library(tidyverse)
+  library(ggplot2)
+})
+```
+
+<style> 
+.big-left {
+  width: 60%;
+  height: 92%;
+  float: left;
+}
+
+.small-right {
+  width: 40%;
+  height: 92%;
+  float: right;
+}
+
+.big-right {
+  width: 60%;
+  height: 92%;
+  float: right;
+}
+
+.small-left {
+  width: 40%;
+  height: 92%;
+  float: left;
+}
+
+</style>
+
+## Things to do today
+
+* Put ordinal logit/probit into practice 
+
+* .blue[Example] from the text: modeling voters' perceptions of 
+President Obama's ideology.
+
+
+---
+class: center, middle, inverse
+
+# A simple application of ordinal logit
+
+---
+## 2016 NES pilot
+
+```{r message=FALSE, warning=FALSE}
+nes <- read_csv("ch8data/anes_pilot_2016.csv") %>%
+       dplyr::select(caseid, weight, lcbo, birthyr, 
+              follow, faminc, pid7, educ, race) %>%
+       mutate( white = ifelse(race==1, 1, 0),
+               age = 2017-birthyr,
+               pid7 = ifelse(pid7>7, NA, pid7),
+               lcbo = ifelse(lcbo>7, NA, lcbo),
+               faminc =ifelse(faminc>16, NA, faminc)) 
+head(nes)
+```
+
+---
+## "How liberal is President Obama?"
+
+.pull-left[
+```{r fig.width=11}
+gg <- ggplot(nes, aes(x=lcbo)) + 
+    geom_histogram(aes(y = ..count../sum(..count..)), fill="grey40") +
+    theme_minimal() + 
+    scale_x_continuous(breaks=1:7,
+      labels=c("Extremely liberal",
+                "Liberal",
+                "Slightly liberal",
+                "Moderate",
+                "Slightly conservative",
+                "Conservative",
+                "Extremely Conservative")) +
+    theme(axis.text.x = 
+            element_text(angle = 45, 
+                         hjust = 1)) +
+    ylab("Frequency") +
+    xlab("How liberal is President Obama?") +
+    theme(
+      axis.text = element_text(size=16),
+      axis.title = element_text(size=16)
+    )
+```
+]
+.pull-right[
+```{r echo=FALSE, message=FALSE, warning=FALSE}
+gg
+```
+]
+
+
+---
+## Ordered logit in R: The `MASS::polr` 
+
+.pull-left[
+```{r}
+ores <- MASS::polr(as.ordered(lcbo) ~ follow + pid7 + age + educ + faminc + white, 
+             data=nes, Hess=TRUE)
+summary(ores)$coefficients
+```
+.red[
+Small differences due to extra subsampling done in the textbook. 
+]
+]
+.pull-right[
+```{r, out.width = "60%", echo=FALSE}
+# Small fig.width
+knitr::include_graphics("img/Fig8-1.png")
+```
+]
+
+---
+## "How liberal is President Obama?" by respondent party id
+
+Make dataset with rows for each value of `pid7` and all other
+variable held at their means:
+
+```{r}
+nes.means <- nes %>% 
+              summarize_all(mean, na.rm=T)
+plot.dat <- bind_rows(rep(list(nes.means),7)) %>%
+              mutate(pid7 = 1:7)
+plot.dat
+```
+
+---
+## "How liberal is President Obama?" by respondent party id
+
+```{r}
+pprobs <- as.data.frame(predict(ores, type="probs", newdata=plot.dat)) %>%
+            mutate(pid7=plot.dat$pid7) 
+pprobs 
+
+pprobs <- pprobs %>%
+            gather(oblc, phat, -pid7) 
+head( pprobs )
+```
+
+---
+## "How liberal is President Obama?" by respondent party id
+
+.pull-left[
+```{r}
+gg <- ggplot(pprobs, aes(x=pid7, y=phat, col=oblc)) + 
+    geom_line(size=1.5) + 
+    geom_point(size=2) +  
+    theme_minimal() +
+    scale_x_continuous(breaks=1:7) +
+    theme(
+      axis.text = element_text(size=16),
+      axis.title = element_text(size=16)
+    )
+```
+]
+.pull-right[
+```{r echo=F}
+gg 
+```
+]
+
+---
+## Adding confidence intervals 
+
+```{r}
+library(mvtnorm)
+sims <- 250
+sim_ores <- list(sims)
+pseudo_ores <- ores
+k <- length(coef(ores))
+for (i in 1:sims) {
+  theta <- as.numeric(rmvnorm(1, mean=c(coef(ores), ores$zeta), sigma=vcov(ores)))
+  pseudo_ores$coefficients <- theta[1:k]
+  pseudo_ores$zeta <- theta[(k+1):length(theta)]
+  sim_ores[[i]] <- as.data.frame(cbind(i,1:7, predict(pseudo_ores, 
+                                   newdata=plot.dat, type="probs")))
+  names(sim_ores[[i]]) <- c("iter","pid7",1:7) 
+}
+sim_ores <- bind_rows(sim_ores) %>%
+              gather(oblc, phat, -iter, -pid7) %>%
+              group_by(pid7, oblc) %>%
+              dplyr::summarize(phat.se = sd(phat),
+                               phat.mean = mean(phat),
+                               phat.lo = phat.mean - 1.96*phat.se,
+                               phat.hi = phat.mean + 1.97*phat.se)
+```
+
+
+---
+## Adding confidence intervals 
+.pull-left[
+```{r}
+gg <- gg + 
+        geom_ribbon(data=sim_ores,
+            aes(ymin=phat.lo,
+                ymax=phat.hi, y=NULL,
+                fill=oblc, color=NULL), 
+            alpha=0.2)
+```
+]
+.pull-right[
+```{r echo=FALSE}
+gg
+```
+]
+
+
+---
+class:center, inverse, middle
+
+# Probing the ordinal logit model's core assumption
+
+---
+## Assumption: Ordinal data come from coarsening of a latent continuous scale
+
+In ordinal logit, 
+
+$$ y_i = \begin{cases}
+            0 & \text{if $y^*_i < \tau_1$} \cr
+            1 & \text{if $\tau_1 \le y^*_i < \tau_2$} \cr
+            2 & \text{if $\tau_2 \le y^*_i < \tau_3$} \cr
+            \vdots & \vdots \cr
+            K & \text{if $ y^*_i \ge \tau_K$} \cr
+          \end{cases} $$
+          
+where $y^*_i$ is the $i$th individual's location of the latent continuous scale, the observable $y_i \in \{0,1,\dots,K\}$ indicates which interval of a partition along $y^*$ that $y^*_i$ falls, and the cutpoints $\tau_k$ for $k \in \{0,1,\dots,K\}$ define the limitis of those intervals.
+
+
+---
+## Assumption: Ordinal data come from coarsening a latent continuous scale
+
+Ordinal logit assumes that 
+
+$$y^*_i ~ \sim ~ \mathrm{Logistic(\mu_i,1)}$$
+and 
+
+$$\mu_i = \beta_1 x_{i1} + \beta_1 x_{i1} + \dots + \beta_J x_{iJ}.$$
+As we have seen, identification of the latent $y^*$ is created by omitting an intercept from the equation above (setting $\beta_0 = 0$) and setting the scale parameter of the logistic distribution to 1.  
+
+If this description of $y^*$ is correct then would be able to consistently estimate $\beta$s regardless of how many intervals $y^*$ is broken into ( $K+1$ ) or where $\tau$s are located as long as we have at least one $\tau$ ( $K>0$ ) 
+
+The more intervals that we have the less coarse the measurement of the underlying $y^*$ provided by $y$ is. 
+
+The more coarse the measurement, the less efficient the estimates.
+
+---
+## The effect of coarseness
+
+To see the loss of efficiency from coarsening, let's generate simulated data with $K=50$ and then collapse the number of intervals in the resulting data until $K=1$ (two intervals) remain.  For each, level of coarseness (value of $K$), we will fit the ordered logit model and note the estimated $\beta_1$ and the associated standard error. 
+
+.pull-left[
+```{r}
+N <- 5000
+x <- rnorm(N)
+xb <- 1*x 
+ystar <- rlogis(N, location=xb)
+# Create 50 taus
+tau <- c(-Inf, sort( runif(50, 
+                           min(ystar), 
+                           max(ystar)) ), Inf)
+y <-  as.integer(cut(ystar, tau)) - 1
+```
+]
+.pull-right[
+```{r echo=FALSE, fig.height=5}
+ggplot(NULL, aes(x=y)) + geom_histogram(bins=101) + theme_minimal()
+```
+]
+
+
+---
+## The effect of coarseness
+
+```{r}
+result <- list()
+for (K in 35:1) {
+   yK <- as.integer(cut(y, breaks=K+1)) - 1
+   if (K==1) {
+     resK <- glm(as.factor(yK) ~ x, family=binomial(logit))
+     result[[K]] <- tibble(K=K, 
+                         b1=resK$coefficients[2],
+                         b1.se = sqrt( vcov(resK)[2,2]))
+   }
+   else {
+     resK <- MASS::polr(as.factor(yK) ~ x, Hess=TRUE)
+     result[[K]] <- tibble(K=K, 
+                         b1=resK$coefficients,
+                         b1.se = sqrt( vcov(resK)[1,1]))
+     
+   }
+}
+result <- bind_rows(result)
+```
+
+---
+## Estimated $\beta_1$ as a function of coarseness
+
+```{r echo=FALSE, fig.width=12, fig.height=6, message=FALSE}
+avg_b1 <- mean(result$b1)
+ggplot(result, aes(x=K, 
+                   y=b1, 
+                   ymin=b1 - 1.96*b1.se,
+                   ymax=b1 + 1.96*b1.se)) +
+    geom_line() +
+    geom_ribbon(fill='blue', alpha=.2) +
+    geom_smooth(aes(y=avg_b1 - 1.96*b1.se), alpha=0.6, se=F) +
+    geom_smooth(aes(y=avg_b1 + 1.96*b1.se), alpha=0.6, se=F) +
+    geom_hline(yintercept  = avg_b1, linetype="dotted") + 
+    theme_minimal() +
+    theme(
+         axis.text = element_text(size=16),
+         axis.title = element_text(size=16),
+         strip.text.x = element_text(size=16)
+    ) +
+    scale_x_continuous(breaks=c(1,seq(5,50,by=5)))
+```
+
+
+---
+## Ordinal logit as a cumulative probability model
+
+Note that we could also coarsen the outcome variable $y$ into $K$ different binary variables each of which indicates whether $y_i$ is greater than some value $k \in \{0, 1, \dots, K\}$.
+
+It follows from the ordinal logit model that
+
+$$\textrm{Logit}( \textrm{Prob}(y_i \ge k) ) = -\tau_k + \beta_1 x_{i1} + \beta_2 x_{i2} + \dots + \beta_J x_{iJ}.$$
+Thus, if we graph the log odds that $y_i \ge k$ as a function of say $x_1$ for a each value of $k$ (holding the other $x$s fixed), the relatioship between the log-odds and $x_1$ will be linear for every $k$ and those lines will be parallel across values of $k$.
+
+A more general model might say that 
+
+$$\textrm{Logit}( \textrm{Prob}(y_i \ge k) ) = -\tau_k + \beta_{1k} x_{i1} + \beta_{2k} x_{i2} + \dots + \beta_{Jk} x_{iJ}.$$
+Here the the log odds are still a linear function of $x_1$ for each value of $k$, but the lines are not parallel across values of $k$ (because $\beta_1$ varies by $k$).
+
+The parameters of this more general model can be estimated by a series of simple binary logits.  If the ordinal logit model is correct, then the $\beta$s will not vary by $k$.
+
+
+---
+## Binary logit estimates versus ordered logit estimates
+
+```{r}
+logit_res <- matrix(NA, 6,15)
+b_pred_values <- list() 
+for (i in 1:6) {
+  this_res <-  glm( I(lcbo>i) ~  follow + pid7 + age + educ + faminc + white,
+                    family=binomial(logit), data=nes )
+  b_pred_values[[i]] <- tibble(cut=i,
+                           pid = plot.dat$pid7,
+                           xb = predict(this_res, newdata = plot.dat,
+                                          type="link"))
+  logit_res[i,] <-  c(i, coef(this_res), diag(vcov(this_res))) 
+}
+b_pred_values <- bind_rows(b_pred_values)
+logit_res <- as.data.frame(logit_res)
+vnames <- c("inter", "follow", "pid7", "age", 
+            "educ", "faminc", "white")
+names(logit_res) <- c("split", paste0("est.", vnames), paste0("se.", vnames))
+
+logit_res <- logit_res %>%
+  gather(coef,value,-split) %>%
+  separate(coef, into=c("type","coef")) %>%
+  spread(type, value) %>%
+  mutate( ci_lo = est - 1.96*se,
+          ci_hi = est + 1.96*se)
+```
+
+
+---
+## Binary logit estimates versus ordinal logit estimates
+
+```{r}
+ores_dat <- data.frame(summary(ores)$coefficients[1:6,]) %>%
+              mutate(coef = rownames(data.frame(ores$coefficients)))
+gg <- ggplot(logit_res %>% filter(coef != "inter"), 
+                            aes(x=split, y=est, ymin=ci_lo, ymax=ci_hi)) +
+       geom_ribbon(fill='grey60', alpha=0.4) +
+       geom_line() + geom_point(size=2.5) +
+       facet_wrap(~coef, scales="free_y") +
+       scale_x_continuous(breaks=1:6,
+                          labels=c("1|2", "2|3", "3|4", "4|5", "5|6", "6|7")) +
+       geom_hline(data=ores_dat, 
+                  aes(yintercept=Value),
+                  col='blue')  +
+       geom_hline(data=ores_dat, aes(yintercept=Value + 1.96*Std..Error),
+                  linetype='dotted', col='blue', size=1.5)  +
+       geom_hline(data=ores_dat, aes(yintercept=Value - 1.96*Std..Error),
+                  linetype='dotted', col='blue', size=1.5) +
+       theme_minimal() +
+       theme(
+         axis.text = element_text(size=16),
+         axis.title = element_text(size=16),
+         strip.text.x = element_text(size=16)
+       ) 
+```
+
+---
+class:center
+##  Binary logit estimates versus ordered logit estimates
+
+```{r echo=FALSE, fig.width=12}
+gg
+```
+
+---
+## Ordinal logit's "parallel lines" assumption
+
+```{r echo=FALSE, fig.width=12}
+cut2thresh = c("1|2", "2|3","3|4","4|5", "5|6", "6|7")
+pprobs2 <- pprobs %>% 
+  group_by(pid7) %>%
+  mutate(xb = -qlogis(cumsum(phat))) %>%
+  rename(pid=pid7, cut=oblc) %>%
+  dplyr::select(pid, cut, xb) %>%
+  ungroup() %>%
+  mutate(cut = as.integer(cut)) %>%
+  filter(cut<7)  %>%
+  mutate(Threshold = cut2thresh[cut])
+
+b_pred_values2 <- bind_rows( b_pred_values %>% 
+                               mutate(pnp = "Non-proportional\n(Binary logits)",
+                                      Threshold=cut2thresh[cut]),
+                             pprobs2 %>% 
+                               mutate(pnp = "Proportional\n(Ordinal logit)")) %>%
+    mutate(Threshold = as.ordered(Threshold))
+
+ggplot(data=b_pred_values2,
+       aes(x=pid, y=xb, group=Threshold, color=Threshold)) +
+       geom_line(size=1.2) +
+       geom_point(size=2) + 
+       facet_wrap(~pnp) +
+       theme_minimal() +        
+       theme(
+         legend.title = element_text(size=16),
+         legend.text = element_text(size=16),
+         axis.text = element_text(size=16),
+         axis.title = element_text(size=16),
+         strip.text.x = element_text(size=16) 
+       ) +
+       ylab("Log-odds above versus below each threshold") +
+       scale_x_continuous(breaks=1:7)
+```
+
+
+---
+## Ordinal logit's proportional-odds assumption
+
+```{r echo=FALSE, fig.width=12}
+ggplot(data=b_pred_values2 %>%
+         mutate(cut = as.factor(cut)), 
+       aes(x=pid, y=exp(xb), group=Threshold, color=Threshold)) +
+       geom_line(size=1.2) +
+       geom_point(size=2) + 
+       facet_wrap(~pnp) +
+       theme_minimal() +        
+       theme(
+         legend.title = element_text(size=16),
+         legend.text = element_text(size=16),
+         axis.text = element_text(size=16),
+         axis.title = element_text(size=16),
+         strip.text.x = element_text(size=16) 
+       ) +
+       ylab("Odd above versus below threshold") +
+       scale_x_continuous(breaks=1:7)
+```
+
+
+---
+## Ordinal logit versus ordinal logit - probabilities 
+
+```{r echo=FALSE, fig.width=12}
+b_pred_values3 <- b_pred_values2 %>% 
+    group_by(pnp, pid) %>% 
+    arrange(cut) %>% 
+    mutate(upper = lag(xb, default=1e10)) %>%
+    ungroup()
+
+ggplot(data=b_pred_values3 %>%
+         mutate(cut = as.factor(cut)), 
+       aes(x=pid, ymax=plogis(upper),
+                  ymin=plogis(xb), 
+                  y = plogis(xb),
+                  group=Threshold, color=Threshold)) +
+       geom_ribbon(aes(fill=Threshold), alpha=0.6) +
+       geom_line() +
+       geom_point(size=2) + 
+       facet_wrap(~pnp) +
+       theme_minimal() +        
+       theme(
+         legend.title = element_text(size=16),
+         legend.text = element_text(size=16),
+         axis.text = element_text(size=16),
+         axis.title = element_text(size=16),
+         strip.text.x = element_text(size=16) 
+       ) +
+       ylab("Probability above threshold") +
+       scale_x_continuous(breaks=1:7)
+```
+
+
+
+---
+## Takeaways
+
+* Ordinal logit and probit are constructed as latent variables models in which it is assumed that there is a continuous variable whose values are partitioned into the observable ordered categories.
+
+* Usually, the meaning of the underlying latent scale is arbitrary is and is determined by setting $\beta_0$ or $\tau_1=0$ and setting $\sigma=1$.
+
+* In those cases, interpretation is generally made in terms of the probabilities of the observable categories.
+
+* Ordinal logit and probit models can be tested by further coarsening the ordinal outcome measure into a series of binary measures.  If the ordinal logit/probit is correct, the coefficients of each of the binary logit/probit models should be similar to those recovered in the ordinal logit/probit.
+
+

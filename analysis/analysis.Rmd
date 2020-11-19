@@ -12,6 +12,8 @@ library(RColorBrewer)
 library(haven)
 library(cowplot)
 library(srvyr)
+library(lmtest)
+library(sandwich)
 library(here)
 library(tidyverse)
 
@@ -22,7 +24,7 @@ theme_set(theme_classic() +
                   legend.background = element_rect(fill = "transparent")))
 ggplot <- function(...) ggplot2::ggplot(...) #+ scale_color_brewer(palette="Dark2")
 
-options(scipen=999)
+options(scipen=10)
 ```
 
 ```{r load}
@@ -36,8 +38,17 @@ acs_oneimm <- read_csv(here('data', 'acs_oneimm.csv'))
 acs_oneimm <- read_csv(here('data', 'acs_oneimm.csv'))
 acs_coupled_imms <- read_csv(here('data', 'acs_coupled_imms.csv'))
 
-# acs_wide2 <- acs_wide
-# acs_oneimm2 <- acs_oneimm
+acs_dyad <- read_csv(here('data', 'acs_dyad.csv')) %>%
+  mutate(mean_year_immig = ifelse(mean_year_immig >= 1991, 
+                                  round(mean_year_immig),
+                                  1991))
+
+
+lgbt_policy <- read_csv(here('data', 'LGBT Data w IPUMS Code.csv')) %>%
+  select(Country, year, Code, origin_score = total_score)
+state_policy <- read_csv(here('data', 'state_policy.csv'))
+
+
 ```
 
 
@@ -54,8 +65,54 @@ imm <- left_join(dyad,lgbt_ipums,by="bpld_id")
 
 
 ```{r}
-acs_prop_yrimmig
+acs_prop_yrimmig_policy <- acs_prop_yrimmig %>%
+  left_join(lgbt_policy, by = c('yrimmig' = 'year', 'bpldid' = 'Code')) %>%
+  filter(!is.na(origin_score))
 
+lm(prop_same_sex ~ origin_score + yrimmig + I(yrimmig^2), data = acs_prop_yrimmig_policy) %>%
+  summary()
+```
+
+```{r}
+# state policy as outcome, individual level
+
+
+state_policy <- read_csv(here('data', 'state_policy.csv'))
+
+state_policy[is.na(state_policy)] <- 0
+
+state_policy <- state_policy %>%
+  mutate(state_policy = -sodomy_illega + -marriage_ban + marriage_equality + civil_union + 
+           employment_discrim_so + hate_crime_so + joint_adoption + -adoption_religious_freedom +
+           conversion_therapy_ban + housing_discrim_so + state_ban_local_nondiscrimimation) %>%
+  select(State, Year, state_policy)
+
+hist(state_policy$state_policy)
+
+state_policy$cat <- cut(state_policy$state_policy, breaks = c(-2,0,2, Inf), labels = c("Repressive", "Neutral", "Progressive"))    
+
+## Getting this onto the ACS data now
+acs_coupled_imms <- read.csv(here("data", "acs_coupled_imms.csv")) %>%
+  mutate(yrimmig = ifelse(yrimmig >= 1991, 
+                                  round(yrimmig),
+                                  1991))
+
+lgbt_policy <- read_csv(here('data', 'LGBT Data w IPUMS Code.csv')) %>%
+  select(Country, year, Code, origin_score = total_score)
+
+acs_couple_policy <- acs_coupled_imms  %>%
+  left_join(lgbt_policy, by = c('yrimmig' = 'year', 'bpldid' = 'Code')) %>%
+  left_join(state_policy,by = c('year' = 'Year', 'state' = 'State')) %>%
+  mutate(log_income = ifelse(ftotinc >=0, log(ftotinc+1), 1),
+         no_income = (log_income == log(1)))
+
+lm(state_policy ~ age + factor(educ) + factor(same_sex)*origin_score + factor(nchild) + yrimmig,
+   data = acs_couple_policy) %>%
+  summary()
+
+lm(state_policy ~ age  + same_sex*(origin_score + log_income + no_income) + yrimmig,
+   data = acs_couple_policy) %>%
+  summary()
 
 
 ```
