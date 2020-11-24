@@ -16,7 +16,7 @@ hist(state_policy$state_policy)
 state_policy$cat <- cut(state_policy$state_policy, breaks = c(-2,0,2, Inf), labels = c("Repressive", "Neutral", "Progressive"))    
 
 ## Getting this onto the ACS data now
-acs_coupled_imms <- read.csv(here("data", "acs_coupled_imms.csv")) 
+acs_coupled_imms <- read.csv(here("data", "acs_coupled_imms.csv"))  %>%
   mutate(yrimmig = ifelse(yrimmig >= 1991, 
                                   round(yrimmig),
                                   1991))
