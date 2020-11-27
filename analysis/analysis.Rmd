@@ -48,8 +48,6 @@ lgbt_policy <- read_csv(here('data', 'LGBT Data w IPUMS Code.csv')) %>%
 state_policy <- read_csv(here('data', 'state_policy.csv'))
 
 
-<<<<<<< HEAD
-=======
 acs_dyad <- read_csv(here('data', 'acs_dyad.csv')) %>%
   mutate(mean_year_immig = ifelse(mean_year_immig >= 1991, 
                                   round(mean_year_immig),
@@ -61,7 +59,7 @@ lgbt_policy <- read_csv(here('data', 'LGBT Data w IPUMS Code.csv')) %>%
 state_policy <- read_csv(here('data', 'state_policy.csv'))
 
 
->>>>>>> bce15763855a0fb4336f63e3b0385722ad782b83
+
 ```
 
 
@@ -84,7 +82,7 @@ acs_prop_yrimmig_policy <- acs_prop_yrimmig %>%
 
 lm(prop_same_sex ~ origin_score + yrimmig + I(yrimmig^2), data = acs_prop_yrimmig_policy) %>%
   summary()
-<<<<<<< HEAD
+
 lm(prop_same_sex ~ origin_score, data = acs_prop_yrimmig_policy) %>%
   summary()
 
@@ -94,8 +92,7 @@ acs_prop_yrimmig_policy_std <- mutate(acs_prop_yrimmig_policy,
 lm(prop_std ~ origin_std + yrimmig + I(yrimmig^2), data = acs_prop_yrimmig_policy_std) %>%
   summary()
 
-=======
->>>>>>> bce15763855a0fb4336f63e3b0385722ad782b83
+
 ```
 
 ```{r}
