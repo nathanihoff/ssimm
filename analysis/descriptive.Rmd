@@ -231,7 +231,11 @@ acs_coupled_imms %>%
 
 acs_coupled_imms %>%
 <<<<<<< HEAD
+<<<<<<< HEAD
   filter(bpld %in% top_countries[1:10]) %>%
+=======
+  filter(bpld %in% top_countries[1:10,]) %>%
+>>>>>>> bce15763855a0fb4336f63e3b0385722ad782b83
 =======
   filter(bpld %in% top_countries[1:10,]) %>%
 >>>>>>> bce15763855a0fb4336f63e3b0385722ad782b83
