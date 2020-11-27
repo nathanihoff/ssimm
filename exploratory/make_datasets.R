@@ -7,17 +7,26 @@ library(tidyverse)
 
 
 acs <- read_dta('/Users/nathan/Data/ACS/acs_2008_2019.dta') %>%
-  mutate(position = case_when(
-    related == 101 ~ 'main',
-    related %in% c(201, 1114) ~ 'partner'),
+  mutate(
+    position = case_when(
+      related == 101 ~ 'main',
+      related %in% c(201, 1114) ~ 'partner'),
+    age = as.numeric(age),
+    yrimmig = ifelse(yrimmig == 0, NA, as.numeric(yrimmig)),
+    nchild = as.numeric(nchild),
     year = as.numeric(year),
     bpldid = as.numeric(bpld),
     state = stateicp,
-    stateicp = as.numeric(stateicp))
+    stateicp = as.numeric(stateicp),
+    ftotinc = ifelse(ftotinc == 9999999, NA, ftotinc),
+    inctot = ifelse(inctot == 9999999, NA, inctot))
 
 
 # Define immigrant as someone born abroad not to US parents
 acs_wide <- acs %>%
+  # Only  those who immigrated when 18+
+  filter(!is.na(position)) %>%
+  filter(age - (year - yrimmig) >= 18 | is.na(yrimmig)) %>%
   select(
     # household variables
     year, serial, nchild, hhwt, ssmc,
@@ -27,11 +36,6 @@ acs_wide <- acs %>%
     occ, inctot, occscore, hwsei, empstat, yrnatur, poverty, speakeng, age, perwt
     # state_stock_year, state_stock_avg
   ) %>%
-  filter(!is.na(position)) %>%
-  mutate(#related = as_factor(related),
-    #bpld = as_factor(bpld),
-    age = as.numeric(age),
-    yrimmig = ifelse(yrimmig == 0, NA, yrimmig)) %>%
   pivot_wider(#id_cols = serial,
     names_from = position,
     values_from = c(sex, related, related, yrimmig, bpld, bpldid, citizen, educ,
@@ -54,8 +58,8 @@ acs_oneimm <- acs_wide %>%
                   cluster, strata, metro, region, state, stateicp, ftotinc,
                   same_sex, imm_couple
   ),
-    names_to = c('.value', 'position'),
-    names_sep = '_') %>% 
+  names_to = c('.value', 'position'),
+  names_sep = '_') %>% 
   mutate(immigrant = case_when(citizen %in% c('N/A', 'Born abroad of American parents') ~ 'nonimmigrant',
                                citizen %in% c('Naturalized citizen', 'Not a citizen') ~ 'immigrant')) %>% 
   filter(!is.na(immigrant)) %>%
@@ -70,18 +74,18 @@ acs_oneimm <- acs_wide %>%
   ))
 
 
-# Keep only couples with one immigrant
+# Keep only couples with one immigrant, individual-level
 acs_coupled_imms <- acs_wide %>%
   filter(imm_couple == 'one' | imm_couple == 'two') %>%
   pivot_longer(-c(year, serial, nchild, hhwt, ssmc,
                   cluster, strata, metro, region, state, stateicp, ftotinc,
                   same_sex, imm_couple),
-    names_to = c('.value', 'position'),
-    names_sep = '_') %>% 
+               names_to = c('.value', 'position'),
+               names_sep = '_') %>% 
   mutate(immigrant = case_when(citizen %in% c('N/A', 'Born abroad of American parents') ~ 'nonimmigrant',
                                citizen %in% c('Naturalized citizen', 'Not a citizen') ~ 'immigrant')) %>% 
   filter(immigrant == 'immigrant') %>%
-  mutate(older18 = (as.numeric(age) - (year - yrimmig) >= 18))
+  mutate(years_in_us = year - yrimmig) 
 
 # Make country-of-origin variables
 # stock by year

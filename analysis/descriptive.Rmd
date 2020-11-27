@@ -5,7 +5,7 @@ output: html_document
 ---
 
 ```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = T, warning = F, message = F, cache = T,
+knitr::opts_chunk$set(echo = T, warning = F, message = F, cache = F,
                       cache.lazy = FALSE)
 
 library(RColorBrewer)
@@ -38,9 +38,7 @@ acs_coupled_imms <- read_csv(here('data', 'acs_coupled_imms.csv'))
 
 
 acs_coupled_imms <- acs_coupled_imms %>%
-  filter(older18 == T) %>%
-  mutate(same_sex = ifelse(same_sex == T, 'Same Sex', 'Different Sex')) %>%
-  mutate(years_in_us = year - yrimmig) 
+  mutate(same_sex = ifelse(same_sex == T, 'Same Sex', 'Different Sex')) 
 
 ```
 
