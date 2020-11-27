@@ -16,24 +16,129 @@ hist(state_policy$state_policy)
 state_policy$cat <- cut(state_policy$state_policy, breaks = c(-2,0,2, Inf), labels = c("Repressive", "Neutral", "Progressive"))    
 
 ## Getting this onto the ACS data now
-acs_dyad <- read_csv(here('data', 'acs_dyad.csv')) %>%
-  mutate(mean_year_immig = ifelse(mean_year_immig >= 1991, 
-                                  round(mean_year_immig),
-                                  1991))
-acs_dyad_policy <- acs_dyad %>%
-  left_join(state_policy,by = c('mean_year_immig' = 'Year', 'state' = 'State'))
+<<<<<<< HEAD
+acs_coupled_imms <- read.csv(here("data", "acs_coupled_imms.csv"))
 
-acs_dyad_policy_log <- acs_dyad_policy %>%
-  mutate(same_sex_stock = log(same_sex_stock +1),
-         opp_sex_stock = log(opp_sex_stock+1),
-         state_stock_year = log(state_stock_year+1))
+=======
+acs_coupled_imms <- read.csv(here("data", "acs_coupled_imms.csv"))  %>%
+  mutate(yrimmig = ifelse(yrimmig >= 1991, 
+                                  round(yrimmig),
+                                  1991))
+>>>>>>> bce15763855a0fb4336f63e3b0385722ad782b83
+
+lgbt_policy <- read_csv(here('data', 'LGBT Data w IPUMS Code.csv')) %>%
+  select(Country, year, Code, origin_score = total_score)
+
+acs_couple_policy <- acs_coupled_imms  %>%
+<<<<<<< HEAD
+  mutate(yrimmig = ifelse(yrimmig >= 1991, 
+                          round(yrimmig),
+                          1991)) %>%
+  left_join(lgbt_policy, by = c('yrimmig' = 'year', 'bpldid' = 'Code')) %>%
+  left_join(state_policy,by = c('year' = 'Year', 'state' = 'State'))
+
+set.seed(1859)
+acs_couple_policy_small <- bind_rows(
+  filter(acs_couple_policy, same_sex == T),
+  sample_n(filter(acs_couple_policy, same_sex == F), 5e4)
+)
 
 ## fit ordered logit model and store results 'ologit'
 library(MASS)
-ologit <- polr(cat ~ same_sex_stock +  factor(year) , data = acs_dyad_policy_log, Hess=TRUE)
+ologit <- polr(factor(state_policy) ~ age + factor(educ) + factor(same_sex)*origin_score + factor(nchild) + yrimmig,  
+               data = acs_couple_policy_small, Hess=TRUE)
+ologit_binned <- polr(factor(cat) ~ age + factor(educ) + factor(same_sex)*origin_score + factor(nchild) + yrimmig,  
+                      data = acs_couple_policy_small, Hess=TRUE)
+=======
+  left_join(lgbt_policy, by = c('yrimmig' = 'year', 'bpldid' = 'Code')) %>%
+  left_join(state_policy,by = c('year' = 'Year', 'state' = 'State'))
+
+
+## fit ordered logit model and store results 'ologit'
+library(MASS)
+ologit <- polr(factor(state_policy) ~ age + factor(educ) + factor(same_sex)*origin_score + factor(nchild) + yrimmig,  data = acs_couple_policy, Hess=TRUE)
+>>>>>>> bce15763855a0fb4336f63e3b0385722ad782b83
 
 ## view a summary of the model
 summary(ologit)
 
+## Plotting Predicted Probabilities
+<<<<<<< HEAD
+Mode <- function(x) {
+  ux <- unique(x)
+  ux[which.max(tabulate(match(x, ux)))]
+}
+
+acs.means <- acs_couple_policy_small %>% 
+  summarize(across(c(age, origin_score, yrimmig), mean, na.rm = T))
+acs.modes <- acs_couple_policy_small %>% 
+  summarize(across(c(educ, nchild), Mode))
+=======
+acs.means <- acs_couple_policy %>% 
+                    summarize_all(mean, na.rm=T)
+>>>>>>> bce15763855a0fb4336f63e3b0385722ad782b83
+
+#Make a dataframe that's the mode of the factor variables vs. mean - one row data frame
+#Two dataframes, one for same-sex and one for not. And then make two plots.
+
+<<<<<<< HEAD
+plot.dat <- bind_rows(rep(list(bind_cols(acs.means, acs.modes)),14)) %>%
+  mutate(origin_score = -3:10)
+
+plot.dat.same <- plot.dat %>%
+  mutate(same_sex = T)
+plot.dat.dif <- plot.dat %>%
+  mutate(same_sex = F)
 
 
+
+pprobs.same <- as.data.frame(predict(ologit, type="probs", newdata=plot.dat.same)) %>%
+  mutate(origin_score=plot.dat$origin_score) %>%
+  gather(state_policy, phat, -origin_score) 
+pprobs.dif <- as.data.frame(predict(ologit, type="probs", newdata=plot.dat.dif)) %>%
+  mutate(origin_score=plot.dat$origin_score)  %>%
+  gather(state_policy, phat, -origin_score) 
+
+ggplot(pprobs.same, aes(x=origin_score, y=phat, col=state_policy)) +
+  geom_line() + geom_point() + ggtitle('Same-sex')
+ggplot(pprobs.dif, aes(x=origin_score, y=phat, col=state_policy)) +
+  geom_line() + geom_point() + ggtitle('Different-sex')
+
+# now with binned
+pprobs.same2 <- as.data.frame(predict(ologit_binned, type="probs", newdata=plot.dat.same)) %>%
+  mutate(origin_score=plot.dat$origin_score) %>%
+  gather(cat, phat, -origin_score) 
+pprobs.dif2 <- as.data.frame(predict(ologit_binned, type="probs", newdata=plot.dat.dif)) %>%
+  mutate(origin_score=plot.dat$origin_score)  %>%
+  gather(cat, phat, -origin_score) 
+
+ggplot(pprobs.same2, aes(x=origin_score, y=phat, col=cat)) +
+  geom_line() + geom_point() + ggtitle('Same-sex')
+ggplot(pprobs.dif2, aes(x=origin_score, y=phat, col=cat)) +
+  geom_line() + geom_point() + ggtitle('Different-sex')
+
+# testing with english as outcome
+ologit_test <- polr(factor(speakeng) ~ age + factor(educ) + factor(same_sex)*origin_score + factor(nchild) + yrimmig,  
+               data = acs_couple_policy_small, Hess=TRUE)
+=======
+plot.dat <- bind_rows(rep(list(acs.means),14)) %>%
+  mutate(origin_score = -3:10)
+
+pprobs <- as.data.frame(predict(ologit, type="probs", newdata=plot.dat)) %>%
+  mutate(origin_score=plot.dat$origin_score) 
+
+
+ggplot(pprobs, aes(x=origin_score, y=phat, col=oblc))
+>>>>>>> bce15763855a0fb4336f63e3b0385722ad782b83
+
+pprobs.same3 <- as.data.frame(predict(ologit_test, type="probs", newdata=plot.dat.same)) %>%
+  mutate(origin_score=plot.dat$origin_score) %>%
+  gather(speakeng, phat, -origin_score) 
+pprobs.dif3 <- as.data.frame(predict(ologit_test, type="probs", newdata=plot.dat.dif)) %>%
+  mutate(origin_score=plot.dat$origin_score)  %>%
+  gather(speakeng, phat, -origin_score) 
+
+ggplot(pprobs.same3, aes(x=origin_score, y=phat, col=speakeng)) +
+  geom_line() + geom_point() + ggtitle('Same-sex')
+ggplot(pprobs.dif3, aes(x=origin_score, y=phat, col=speakeng)) +
+  geom_line() + geom_point() + ggtitle('Different-sex')
