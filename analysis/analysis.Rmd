@@ -1,11 +1,17 @@
 ---
 title: "Same-Sex Immigrant Couples"
-subtitle: "Fixed Effects Models"
-output: html_document
+subtitle: "Analyses"
+date: "`r format(Sys.time(), '%B %d, %Y')`"
+output: 
+  bookdown::pdf_document2:
+    toc: no
+    number_sections: no
+    pandoc_args: !expr rmdfiltr::add_wordcount_filter(rmdfiltr::add_citeproc_filter(args = NULL))
+    latex_engine: xelatex
 ---
 
 ```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = T, warning = F, message = F, cache = F,
+knitr::opts_chunk$set(echo = F, warning = F, message = F, cache = T, 
                       cache.lazy = FALSE)
 
 library(RColorBrewer)
@@ -15,6 +21,8 @@ library(srvyr)
 library(lmtest)
 library(sandwich)
 library(here)
+library(plm)
+library(stargazer)
 library(tidyverse)
 
 # theme_set(theme_cowplot(font_family = 'Palatino') + 
@@ -24,58 +32,125 @@ theme_set(theme_classic() +
                   legend.background = element_rect(fill = "transparent")))
 ggplot <- function(...) ggplot2::ggplot(...) #+ scale_color_brewer(palette="Dark2")
 
-options(scipen=10)
+# options(scipen=10)
 ```
 
-```{r load}
-top_countries <- read_csv(here('data', 'top_countries.csv')) %>%
-  pull(1)
+```{r load, include = F}
+# top_countries <- read_csv(here('data', 'top_countries.csv')) %>%
+#   pull(1)
 # top_countries <- c("Mexico", "India",  "Philippines", "China",              "El Salvador", "Vietnam",
 #                    "Cuba",               "Korea",              "Dominican Republic", "Guatemala" ) 
-acs_wide <- read_csv(here('data', 'acs_wide.csv'))
-acs_oneimm <- read_csv(here('data', 'acs_oneimm.csv'))
-acs_coupled_imms <- read_csv(here('data', 'acs_coupled_imms.csv'))
-acs_prop_yrimmig <- read_csv(here('data', 'acs_prop_yrimmig.csv'))
+# acs_wide <- read_csv(here('data', 'acs_wide.csv'))
+# acs_oneimm <- read_csv(here('data', 'acs_oneimm.csv'))
+# acs_coupled_imms <- read_csv(here('data', 'acs_coupled_imms.csv'))
+# acs_prop_yrimmig <- read_csv(here('data', 'acs_prop_yrimmig.csv'))
 
 acs_dyad <- read_csv(here('data', 'acs_dyad.csv')) %>%
   mutate(mean_year_immig = ifelse(mean_year_immig >= 1991, 
                                   round(mean_year_immig),
                                   1991))
 
-
 lgbt_policy <- read_csv(here('data', 'LGBT Data w IPUMS Code.csv')) %>%
   select(Country, year, Code, origin_score = total_score)
 state_policy <- read_csv(here('data', 'state_policy.csv'))
 
+state_policy[is.na(state_policy)] <- 0
 
-acs_dyad <- read_csv(here('data', 'acs_dyad.csv')) %>%
-  mutate(mean_year_immig = ifelse(mean_year_immig >= 1991, 
-                                  round(mean_year_immig),
-                                  1991))
+state_policy <- state_policy %>%
+  mutate(state_policy = -sodomy_illega + -marriage_ban + marriage_equality + civil_union + 
+           employment_discrim_so + hate_crime_so + joint_adoption + -adoption_religious_freedom +
+           conversion_therapy_ban + housing_discrim_so + state_ban_local_nondiscrimimation) %>%
+  select(State, Year, state_policy)
+
+acs_dyad_policy <- acs_dyad %>%
+  left_join(lgbt_policy, by = c('mean_year_immig' = 'year', 'bpldid' = 'Code')) %>%
+  left_join(state_policy,by = c('mean_year_immig' = 'Year', 'state' = 'State')) %>%
+  filter(!is.na(origin_score))
+```
+
+# Fixed effect analysis with dyadic data
+We reshape the data so that is yearly dyads: each observation is the proportion of immigrants that is in same-sex couples out of all those from country $x$ in state $y$ in survey year $z$. We multiply this proportion by 100 for interpretability as percentage points. We merge in the sending-country policy index for the average year of immigration for these immigrants.  
+```{r same-fixed, results = 'asis'}
+acs_dyad_policy$same_prop <- acs_dyad_policy$same_sex_stock/acs_dyad_policy$state_stock_year * 100
+acs_dyad_policy$dif_prop <- acs_dyad_policy$opp_sex_stock/acs_dyad_policy$state_stock_year * 100
+
+# Same-sex models
+same_dyad_origin <- lm(same_prop ~ origin_score, data = acs_dyad_policy)
+same_dyad_state <- lm(same_prop ~ state_policy, data = acs_dyad_policy)
+same_dyad_origin_state <- lm(same_prop ~ origin_score + state_policy, data = acs_dyad_policy)
+same_dyad_fixed_state <- lm(same_prop ~ origin_score + state_policy + state, data = acs_dyad_policy)
+same_dyad_fixed_state_year <- lm(same_prop ~ origin_score + state_policy + state + as.factor(year), data = acs_dyad_policy)
+same_dyad_stock <- lm(same_prop ~ origin_score + state_policy + state_stock_year + state + as.factor(year), data = acs_dyad_policy)
+
+stargazer(same_dyad_origin, same_dyad_state, same_dyad_origin_state, same_dyad_fixed_state,
+          same_dyad_fixed_state_year, same_dyad_stock,
+          header = F, 
+          keep = c('origin_score', 'state_policy', 'state_stock_year'),
+          add.lines = list(c('State FEs?', 'no', 'no', 'no', 'yes', 'yes', 'yes'),
+                           c('Year FEs?', 'no', 'no', 'no', 'no', 'yes', 'yes')),
+          keep.stat = c('n', 'rsq'),
+          label = 'tab:same-fixed',
+          title = '100*Proportion same-sex in a country-state-year')
+```
+
+```{r dif-fixed, results = 'asis', eval = T} 
+# Diff-sex "placebo" models
+dif_dyad_origin <- lm(dif_prop ~ origin_score, data = acs_dyad_policy)
+dif_dyad_state <- lm(dif_prop ~ state_policy, data = acs_dyad_policy)
+dif_dyad_origin_state <- lm(dif_prop ~ origin_score + state_policy, data = acs_dyad_policy)
+dif_dyad_fixed_state <- lm(dif_prop ~ origin_score + state_policy + state, data = acs_dyad_policy)
+dif_dyad_fixed_state_year <- lm(dif_prop ~ origin_score + state_policy + state + as.factor(year), data = acs_dyad_policy)
+dif_dyad_stock <- lm(dif_prop ~ origin_score + state_policy + state_stock_year + state + as.factor(year), data = acs_dyad_policy)
 
 
-lgbt_policy <- read_csv(here('data', 'LGBT Data w IPUMS Code.csv')) %>%
-  select(Country, year, Code, origin_score = total_score)
-state_policy <- read_csv(here('data', 'state_policy.csv'))
+stargazer(dif_dyad_origin, dif_dyad_state, dif_dyad_origin_state, dif_dyad_fixed_state,
+          dif_dyad_fixed_state_year, dif_dyad_stock,
+          header = F, 
+          keep = c('origin_score', 'state_policy', 'state_stock_year'),
+          add.lines = list(c('State FEs?', 'no', 'no', 'no', 'yes', 'yes', 'yes'),
+                           c('Year FEs?', 'no', 'no', 'no', 'no', 'yes', 'yes')),
+          keep.stat = c('n', 'rsq'), 
+          label = 'tab:dif-fixed',
+          title = '100*Proportion different-sex in a country-state-year')
+```
+
+```{r eval = F}
+summary(fixed)
 
 
+lm(same_sex_stock ~ origin_score + state_policy + origin_score, data = acs_dyad_policy) %>%
+  summary()
+
+lm(opp_sex_stock ~ origin_score + state_policy + origin_score, data = acs_dyad_policy) %>%
+  summary()
+
+mod_same <- lm(same_sex_stock ~ origin_score + state_policy + state_stock_year, data = acs_dyad_policy) %>%
+  summary()
+mod_opp <- lm(opp_sex_stock ~ origin_score + state_policy + state_stock_year, data = acs_dyad_policy) %>%
+  summary()
+
+stargazer(mod_same, mod_opp, header = F)
+
+# models with logged pop variables
+acs_dyad_policy_log <- acs_dyad_policy %>%
+  mutate(same_prop = log(same_prop +1),
+         opp_sex_stock = log(opp_sex_stock+1),
+         state_stock_year = log(state_stock_year+1))
+
+
+lm(same_sex_stock ~ origin_score + state_policy, data = acs_dyad_policy_log) %>%
+  summary()
+lm(opp_sex_stock ~ origin_score + state_policy, data = acs_dyad_policy_log) %>%
+  summary()
+lm(same_sex_stock ~ origin_score + state_policy + state_stock_year, data = acs_dyad_policy_log) %>%
+  summary()
+lm(opp_sex_stock ~ origin_score + state_policy + state_stock_year, data = acs_dyad_policy_log) %>%
+  summary()
 
 ```
 
 
-```{r dyadfixed}
-dyad <- read_csv(here('data', 'acs_dyad.csv'))
-
-lgbt_ipums <- read_csv(here('data', 'LGBT Data w IPUMS Code.csv'))
-
-lgbt_ipums$bpld_id <- lgbt_ipums$Code
-
-imm <- left_join(dyad,lgbt_ipums,by="bpld_id")
-
-```
-
-
-```{r}
+```{r, eval = F}
 acs_prop_yrimmig_policy <- acs_prop_yrimmig %>%
   left_join(lgbt_policy, by = c('yrimmig' = 'year', 'bpldid' = 'Code')) %>%
   filter(!is.na(origin_score))
@@ -95,7 +170,7 @@ lm(prop_std ~ origin_std + yrimmig + I(yrimmig^2), data = acs_prop_yrimmig_polic
 
 ```
 
-```{r}
+```{r, eval = F}
 # state policy as outcome, individual level
 
 

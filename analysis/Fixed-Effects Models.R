@@ -31,8 +31,6 @@ acs_dyad_policy <- acs_dyad %>%
   left_join(lgbt_policy, by = c('mean_year_immig' = 'year', 'bpldid' = 'Code')) %>%
   left_join(state_policy,by = c('mean_year_immig' = 'Year', 'state' = 'State'))
 
-acs_dyad %>% filter(bpldid == 52000)
-
 #Models: Fixed Effects
   #In these models, we are predicting the within-state change in immigrant stock 
 library(plm)

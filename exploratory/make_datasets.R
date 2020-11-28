@@ -19,7 +19,9 @@ acs <- read_dta('/Users/nathan/Data/ACS/acs_2008_2019.dta') %>%
     state = stateicp,
     stateicp = as.numeric(stateicp),
     ftotinc = ifelse(ftotinc == 9999999, NA, ftotinc),
-    inctot = ifelse(inctot == 9999999, NA, inctot))
+    inctot = ifelse(inctot == 9999999, NA, inctot),
+    hwsei = ifelse(hwsei == 0000, NA, hwsei),
+    occscore = ifelse(occscore == 00, NA, occscore))
 
 
 # Define immigrant as someone born abroad not to US parents

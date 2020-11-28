@@ -1,0 +1,512 @@
+lm(prop_same_sex ~ origin_score, data = acs_prop_yrimmig_policy) %>%
+summary()
+lm(I(prop_same_sex*100) ~ origin_score, data = acs_prop_yrimmig_policy) %>%
+summary()
+lm(prop_same_sex ~ origin_score, data = acs_prop_yrimmig_policy) %>%
+summary()
+lm(prop_same_sex ~ origin_score + yrimmig*yrimmig, data = acs_prop_yrimmig_policy) %>%
+summary()
+lm(prop_same_sex ~ origin_score + yrimmig I(yrimmig^2), data = acs_prop_yrimmig_policy) %>%
+summary()
+lm(prop_same_sex ~ origin_score + yrimmig + I(yrimmig^2), data = acs_prop_yrimmig_policy) %>%
+summary()
+options(scipen=2)
+lm(prop_same_sex ~ origin_score + yrimmig + I(yrimmig^2), data = acs_prop_yrimmig_policy) %>%
+summary()
+options(scipen=10)
+lm(prop_same_sex ~ origin_score + yrimmig + I(yrimmig^2), data = acs_prop_yrimmig_policy) %>%
+summary()
+acs_dyad_policy$state_policy
+acs_dyad <- read_csv(here('data', 'acs_dyad.csv')) %>%
+mutate(mean_year_immig = ifelse(mean_year_immig >= 1991,
+round(mean_year_immig),
+1991))
+state_policy <- read_csv(here('data', 'state_policy.csv'))
+state_policy[is.na(state_policy)] <- 0
+state_policy <- state_policy %>%
+mutate(state_policy = -sodomy_illega + -marriage_ban + marriage_equality + civil_union +
+employment_discrim_so + hate_crime_so + joint_adoption + -adoption_religious_freedom +
+conversion_therapy_ban + housing_discrim_so + state_ban_local_nondiscrimimation) %>%
+select(State, Year, state_policy)
+acs_dyad <- read_csv(here('data', 'acs_dyad.csv')) %>%
+mutate(mean_year_immig = ifelse(mean_year_immig >= 1991,
+round(mean_year_immig),
+1991))
+acs_dyad_policy <- acs_dyad %>%
+left_join(state_policy,by = c('mean_year_immig' = 'Year', 'state' = 'State'))
+lm(state_policy ~ same_sex_stock + same_sex*origin_score , data = acs_dyad_policy)
+state_policy <- read_csv(here('data', 'state_policy.csv'))
+state_policy[is.na(state_policy)] <- 0
+state_policy <- state_policy %>%
+mutate(state_policy = -sodomy_illega + -marriage_ban + marriage_equality + civil_union +
+employment_discrim_so + hate_crime_so + joint_adoption + -adoption_religious_freedom +
+conversion_therapy_ban + housing_discrim_so + state_ban_local_nondiscrimimation) %>%
+select(State, Year, state_policy)
+hist(state_policy$state_policy)
+state_policy$cat <- cut(state_policy$state_policy, breaks = c(-2,0,2, Inf), labels = c("Repressive", "Neutral", "Progressive"))
+## Getting this onto the ACS data now
+acs_coupled_imms <- read.csv(here("data", "acs_coupled_imms.csv")) %>%
+mutate(yrimmig = ifelse(yrimmig >= 1991,
+round(yrimmig),
+1991))
+lgbt_policy <- read_csv(here('data', 'LGBT Data w IPUMS Code.csv')) %>%
+select(Country, year, Code, origin_score = total_score)
+acs_couple_policy <- acs_coupled_imms  %>%
+left_join(lgbt_policy, by = c('yrimmig' = 'year', 'bpldid' = 'Code')) %>%
+left_join(state_policy,by = c('year' = 'Year', 'state' = 'State'))
+lm(state_policy ~ age + factor(educ) + factor(same_sex)*origin_score + factor(nchild) + yrimmig,
+data = acs_coupled_imms_policy) %>%
+summary()
+lm(state_policy ~ age + factor(educ) + factor(same_sex)*origin_score + factor(nchild) + yrimmig,
+data = acs_couple_policy) %>%
+summary()
+lm(state_policy ~ age + educ + same_sex*(origin_score + ftotinc) + yrimmig,
+data = acs_couple_policy) %>%
+summary()
+lm(state_policy ~ age + nchild + same_sex*(origin_score + ftotinc) + yrimmig,
+data = acs_couple_policy) %>%
+summary()
+range(acs_couple_policy$ftotinc)
+lm(state_policy ~ age + nchild + same_sex*(origin_score + I(log(ftotinc))) + yrimmig,
+data = acs_couple_policy) %>%
+summary()
+range(acs_couple_policy$inctot)
+acs_couple_policy <- acs_coupled_imms  %>%
+left_join(lgbt_policy, by = c('yrimmig' = 'year', 'bpldid' = 'Code')) %>%
+left_join(state_policy,by = c('year' = 'Year', 'state' = 'State')) %>%
+mutate(log_income = ifelse(ftotinc >=0, log(ftotinc+1), 1),
+no_income = (log_income == log(1)))
+ifelse(acs_couple_policy$ftotinc >=0, log(acs_couple_policy$ftotinc+1), 1)
+ifelse(acs_couple_policy$ftotinc >=0, log(acs_couple_policy$ftotinc+1), 1) %>%
+sum(is.na())
+ifelse(acs_couple_policy$ftotinc >=0, log(acs_couple_policy$ftotinc+1), 1) %>%
+is.na() %>% sum()
+ifelse(acs_couple_policy$ftotinc >=0, log(acs_couple_policy$ftotinc+1), 1) %>%
+is.nan() %>% sum()
+log(acs_couple_policy$ftotinc+1)
+acs_couple_policy
+is.nan(acs_couple_policy$log_income)
+is.nan(acs_couple_policy$log_income) %>% sum()
+lm(state_policy ~ age + nchild + same_sex*(origin_score + log_income + no_income) + yrimmig,
+data = acs_couple_policy) %>%
+summary()
+lm(state_policy ~ age  + same_sex*(origin_score + log_income + no_income) + yrimmig,
+data = acs_couple_policy) %>%
+summary()
+log(1)
+library(here)
+library(tidyverse)
+state_policy <- read_csv(here('data', 'state_policy.csv'))
+state_policy[is.na(state_policy)] <- 0
+state_policy <- state_policy %>%
+mutate(state_policy = -sodomy_illega + -marriage_ban + marriage_equality + civil_union +
+employment_discrim_so + hate_crime_so + joint_adoption + -adoption_religious_freedom +
+conversion_therapy_ban + housing_discrim_so + state_ban_local_nondiscrimimation) %>%
+select(State, Year, state_policy)
+hist(state_policy$state_policy)
+state_policy$cat <- cut(state_policy$state_policy, breaks = c(-2,0,2, Inf), labels = c("Repressive", "Neutral", "Progressive"))
+## Getting this onto the ACS data now
+acs_coupled_imms <- read.csv(here("data", "acs_coupled_imms.csv"))
+lgbt_policy <- read_csv(here('data', 'LGBT Data w IPUMS Code.csv')) %>%
+select(Country, year, Code, origin_score = total_score)
+acs_couple_policy <- acs_coupled_imms  %>%
+mutate(yrimmig = ifelse(yrimmig >= 1991,
+round(yrimmig),
+1991)) %>%
+left_join(lgbt_policy, by = c('yrimmig' = 'year', 'bpldid' = 'Code')) %>%
+left_join(state_policy,by = c('year' = 'Year', 'state' = 'State'))
+set.seed(1859)
+acs_couple_policy_small <- bind_rows(
+filter(acs_couple_policy, same_sex == T),
+sample_n(filter(acs_couple_policy, same_sex == F), 5e4)
+)
+## fit ordered logit model and store results 'ologit'
+library(MASS)
+ologit <- polr(factor(state_policy) ~ age + factor(educ) + factor(same_sex)*origin_score + factor(nchild) + yrimmig,
+data = acs_couple_policy_small, Hess=TRUE)
+ologit_binned <- polr(factor(cat) ~ age + factor(educ) + factor(same_sex)*origin_score + factor(nchild) + yrimmig,
+data = acs_couple_policy_small, Hess=TRUE)
+Mode <- function(x) {
+ux <- unique(x)
+ux[which.max(tabulate(match(x, ux)))]
+}
+logit_vars <- all.vars(formula(ologit)[-2])
+acs.means <- acs_couple_policy_small %>%
+summarize(across(where(is.numeric & . %in% logit_vars), mean, na.rm = T))
+acs.means <- acs_couple_policy_small %>%
+summarize(across(logit_vars, where(is.numeric), mean, na.rm = T))
+acs.means <- acs_couple_policy_small %>%
+summarize(across(vars(logit_vars), where(is.numeric), mean, na.rm = T))
+vars(logit_vars)
+acs_couple_policy_small %>%
+summarize(across(where(. %in% logit_vars), mean, na.rm = T))
+acs.means <- acs_couple_policy_small %>%
+summarize(across(where(. %in% logit_vars), mean, na.rm = T))
+Mode <- function(x) {
+ux <- unique(x)
+ux[which.max(tabulate(match(x, ux)))]
+}
+logit_vars <- all.vars(formula(ologit)[-2])
+acs.means <- acs_couple_policy_small %>%
+summarize(across(c(age, origin_score, yrimmig), mean, na.rm = T))
+acs.modes <- acs_couple_policy_small %>%
+summarize(across(c(educ, nchild), Mode))
+acs.means
+acs.modes
+plot.dat <- bind_rows(rep(list(bind_cols(acs.means, acs.modes)),14)) %>%
+mutate(origin_score = -3:10)
+plot.dat
+plot.dat.same <- plot.dat %>%
+mutate(same_sex = T)
+plot.dat.same <- plot.dat %>%
+mutate(same_sex = F)
+plot.dat.same
+plot.dat.same <- plot.dat %>%
+mutate(same_sex = T)
+plot.dat.same <- plot.dat %>%
+mutate(same_sex = T)
+plot.dat.dif <- plot.dat %>%
+mutate(same_sex = F)
+pprobs.same <- as.data.frame(predict(ologit, type="probs", newdata=plot.dat.same)) %>%
+mutate(origin_score=plot.dat$origin_score)
+pprobs.dif <- as.data.frame(predict(ologit, type="probs", newdata=plot.dat.dif)) %>%
+mutate(origin_score=plot.dat$origin_score)
+pprobs.dif
+plot.dat
+pprobs.same
+as.data.frame(predict(ologit, type="probs", newdata=plot.dat.same)) %>%
+mutate(origin_score=plot.dat$origin_score) %>%
+gather(state_policy, phat, -origin_score)
+pprobs.same <- as.data.frame(predict(ologit, type="probs", newdata=plot.dat.same)) %>%
+mutate(origin_score=plot.dat$origin_score) %>%
+gather(state_policy, phat, -origin_score)
+pprobs.dif <- as.data.frame(predict(ologit, type="probs", newdata=plot.dat.dif)) %>%
+mutate(origin_score=plot.dat$origin_score)  %>%
+gather(state_policy, phat, -origin_score)
+ggplot(pprobs.same, aes(x=origin_score, y=phat, col=state_policy)) +
+geom_line() + geom_point() + ggtitle('Same-sex')
+ggplot(pprobs.dif, aes(x=origin_score, y=phat, col=state_policy)) +
+geom_line() + geom_point() + ggtitle('Different-sex')
+pprobs.same2 <- as.data.frame(predict(ologit_binned, type="probs", newdata=plot.dat.same)) %>%
+mutate(origin_score=plot.dat$origin_score) %>%
+gather(cat, phat, -origin_score)
+pprobs.dif2 <- as.data.frame(predict(ologit_binned, type="probs", newdata=plot.dat.dif)) %>%
+mutate(origin_score=plot.dat$origin_score)  %>%
+gather(cat, phat, -origin_score)
+ggplot(pprobs.same2, aes(x=origin_score, y=phat, col=cat)) +
+geom_line() + geom_point() + ggtitle('Same-sex')
+ggplot(pprobs.dif2, aes(x=origin_score, y=phat, col=state_policy)) +
+geom_line() + geom_point() + ggtitle('Different-sex')
+pprobs.same2
+ggplot(pprobs.same2, aes(x=origin_score, y=phat, col=cat)) +
+geom_line() + geom_point() + ggtitle('Same-sex')
+ggplot(pprobs.dif2, aes(x=origin_score, y=phat, col=cat)) +
+geom_line() + geom_point() + ggtitle('Different-sex')
+acs_coupled_imms <- read.csv(here("data", "acs_coupled_imms.csv")) %>%
+mutate(yrimmig = ifelse(yrimmig >= 1991,
+round(yrimmig),
+1991))
+lgbt_policy <- read_csv(here('data', 'LGBT Data w IPUMS Code.csv')) %>%
+select(Country, year, Code, origin_score = total_score)
+acs_couple_policy <- acs_coupled_imms  %>%
+left_join(lgbt_policy, by = c('yrimmig' = 'year', 'bpldid' = 'Code')) %>%
+left_join(state_policy,by = c('year' = 'Year', 'state' = 'State')) %>%
+mutate(log_income = ifelse(ftotinc >=0, log(ftotinc+1), 1),
+no_income = (log_income == log(1)))
+lm(state_policy ~ age + factor(educ) + factor(same_sex)*origin_score + factor(nchild) + yrimmig,
+data = acs_couple_policy) %>%
+summary()
+lm(state_policy ~ age  + same_sex*(origin_score + log_income + no_income) + yrimmig,
+data = acs_couple_policy) %>%
+summary()
+?predict.polr
+?predict.poly
+?polr
+?polr.predict
+pprobs.same2 <- as.data.frame(predict(ologit_binned, type="response", newdata=plot.dat.same)) %>%
+mutate(origin_score=plot.dat$origin_score) %>%
+gather(cat, phat, -origin_score)
+pprobs.dif2 <- as.data.frame(predict(ologit_binned, type="response", newdata=plot.dat.dif)) %>%
+mutate(origin_score=plot.dat$origin_score)  %>%
+gather(cat, phat, -origin_score)
+ggplot(pprobs.same2, aes(x=origin_score, y=phat, col=cat)) +
+geom_line() + geom_point() + ggtitle('Same-sex')
+ggplot(pprobs.dif2, aes(x=origin_score, y=phat, col=cat)) +
+geom_line() + geom_point() + ggtitle('Different-sex')
+pprobs.same2 <- as.data.frame(predict(ologit_binned,  newdata=plot.dat.same)) %>%
+mutate(origin_score=plot.dat$origin_score) %>%
+gather(cat, phat, -origin_score)
+pprobs.dif2 <- as.data.frame(predict(ologit_binned,  newdata=plot.dat.dif)) %>%
+mutate(origin_score=plot.dat$origin_score)  %>%
+gather(cat, phat, -origin_score)
+ggplot(pprobs.same2, aes(x=origin_score, y=phat, col=cat)) +
+geom_line() + geom_point() + ggtitle('Same-sex')
+ggplot(pprobs.dif2, aes(x=origin_score, y=phat, col=cat)) +
+geom_line() + geom_point() + ggtitle('Different-sex')
+pprobs.same2 <- as.data.frame(predict(ologit_binned, type="probs", newdata=plot.dat.same)) %>%
+mutate(origin_score=plot.dat$origin_score) %>%
+gather(cat, phat, -origin_score)
+pprobs.dif2 <- as.data.frame(predict(ologit_binned, type="probs", newdata=plot.dat.dif)) %>%
+mutate(origin_score=plot.dat$origin_score)  %>%
+gather(cat, phat, -origin_score)
+ggplot(pprobs.same2, aes(x=origin_score, y=phat, col=cat)) +
+geom_line() + geom_point() + ggtitle('Same-sex')
+ggplot(pprobs.dif2, aes(x=origin_score, y=phat, col=cat)) +
+geom_line() + geom_point() + ggtitle('Different-sex')
+pprobs.same2 <- as.data.frame(predict(ologit_binned, type="class", newdata=plot.dat.same)) %>%
+mutate(origin_score=plot.dat$origin_score) %>%
+gather(cat, phat, -origin_score)
+pprobs.dif2 <- as.data.frame(predict(ologit_binned, type="class", newdata=plot.dat.dif)) %>%
+mutate(origin_score=plot.dat$origin_score)  %>%
+gather(cat, phat, -origin_score)
+ggplot(pprobs.same2, aes(x=origin_score, y=phat, col=cat)) +
+geom_line() + geom_point() + ggtitle('Same-sex')
+ggplot(pprobs.dif2, aes(x=origin_score, y=phat, col=cat)) +
+geom_line() + geom_point() + ggtitle('Different-sex')
+pprobs.same2 <- as.data.frame(predict(ologit_binned, type="probs", newdata=plot.dat.same)) %>%
+mutate(origin_score=plot.dat$origin_score) %>%
+gather(cat, phat, -origin_score)
+pprobs.dif2 <- as.data.frame(predict(ologit_binned, type="probs", newdata=plot.dat.dif)) %>%
+mutate(origin_score=plot.dat$origin_score)  %>%
+gather(cat, phat, -origin_score)
+ggplot(pprobs.same2, aes(x=origin_score, y=phat, col=cat)) +
+geom_line() + geom_point() + ggtitle('Same-sex')
+ggplot(pprobs.dif2, aes(x=origin_score, y=phat, col=cat)) +
+geom_line() + geom_point() + ggtitle('Different-sex')
+summary(ologit_binned)
+unique(acs_couple_policy_small$educ)
+unique(acs_couple_policy$speakeng)
+ologit_test <- polr(factor(speakeng) ~ age + factor(educ) + factor(same_sex)*origin_score + factor(nchild) + yrimmig,
+data = acs_couple_policy_small, Hess=TRUE)
+pprobs.same3 <- as.data.frame(predict(ologit_test, type="probs", newdata=plot.dat.same)) %>%
+mutate(origin_score=plot.dat$origin_score) %>%
+gather(speakeng, phat, -origin_score)
+pprobs.dif3 <- as.data.frame(predict(ologit_test, type="probs", newdata=plot.dat.dif)) %>%
+mutate(origin_score=plot.dat$origin_score)  %>%
+gather(speakeng, phat, -origin_score)
+ggplot(pprobs.same3, aes(x=origin_score, y=phat, col=speakeng)) +
+geom_line() + geom_point() + ggtitle('Same-sex')
+ggplot(pprobs.dif3, aes(x=origin_score, y=phat, col=speakeng)) +
+geom_line() + geom_point() + ggtitle('Different-sex')
+ggplot(pprobs.dif3, aes(x=origin_score, y=phat, col=speakeng)) +
+geom_line() + geom_point() + ggtitle('Different-sex')
+ologit_test <- polr(factor(speakeng) ~ age + factor(educ) + factor(same_sex) + origin_score + factor(nchild) + yrimmig,
+data = acs_couple_policy_small, Hess=TRUE)
+pprobs.same3 <- as.data.frame(predict(ologit_test, type="probs", newdata=plot.dat.same)) %>%
+mutate(origin_score=plot.dat$origin_score) %>%
+gather(speakeng, phat, -origin_score)
+pprobs.dif3 <- as.data.frame(predict(ologit_test, type="probs", newdata=plot.dat.dif)) %>%
+mutate(origin_score=plot.dat$origin_score)  %>%
+gather(speakeng, phat, -origin_score)
+ggplot(pprobs.same3, aes(x=origin_score, y=phat, col=speakeng)) +
+geom_line() + geom_point() + ggtitle('Same-sex')
+ggplot(pprobs.dif3, aes(x=origin_score, y=phat, col=speakeng)) +
+geom_line() + geom_point() + ggtitle('Different-sex')
+ologit_test <- polr(factor(speakeng) ~ age + factor(educ) + factor(same_sex)*origin_score + factor(nchild) + yrimmig,
+data = acs_couple_policy_small, Hess=TRUE)
+pprobs.same3 <- as.data.frame(predict(ologit_test, type="probs", newdata=plot.dat.same)) %>%
+mutate(origin_score=plot.dat$origin_score) %>%
+gather(speakeng, phat, -origin_score)
+pprobs.dif3 <- as.data.frame(predict(ologit_test, type="probs", newdata=plot.dat.dif)) %>%
+mutate(origin_score=plot.dat$origin_score)  %>%
+gather(speakeng, phat, -origin_score)
+ggplot(pprobs.same3, aes(x=origin_score, y=phat, col=speakeng)) +
+geom_line() + geom_point() + ggtitle('Same-sex')
+lm(state_policy ~ age  + same_sex*(origin_score + log_income + no_income) + yrimmig,
+data = acs_couple_policy) %>%
+summary()
+acs_prop_yrimmig_policy <- acs_prop_yrimmig %>%
+left_join(lgbt_policy, by = c('yrimmig' = 'year', 'bpldid' = 'Code')) %>%
+filter(!is.na(origin_score))
+lm(prop_same_sex ~ origin_score + yrimmig + I(yrimmig^2), data = acs_prop_yrimmig_policy) %>%
+summary()
+acs_prop_yrimmig
+acs_prop_yrimmig <- read_csv(here('data', 'acs_prop_yrimmig.csv'))
+acs_prop_yrimmig_policy <- acs_prop_yrimmig %>%
+left_join(lgbt_policy, by = c('yrimmig' = 'year', 'bpldid' = 'Code')) %>%
+filter(!is.na(origin_score))
+lm(prop_same_sex ~ origin_score + yrimmig + I(yrimmig^2), data = acs_prop_yrimmig_policy) %>%
+summary()
+lm(prop_same_sex ~ origin_score, data = acs_prop_yrimmig_policy) %>%
+summary()
+lm(prop_same_sex ~ origin_score + yrimmig + I(yrimmig^2), data = acs_prop_yrimmig_policy) %>%
+summary()
+acs_prop_yrimmig_policy_std <- mutate(acs_prop_yrimmig_policy,
+prop_std = (prop_same_sex - mean(prop_same_sex))/sd(prop_same_sex))
+lm(prop_std ~ origin_score + yrimmig + I(yrimmig^2), data = acs_prop_yrimmig_policy_std) %>%
+summary()
+?scale
+acs_prop_yrimmig_policy_std <- mutate(acs_prop_yrimmig_policy,
+prop_std = (prop_same_sex - mean(prop_same_sex))/sd(prop_same_sex),
+origin_std = (origin_score - mean(origin_score))/sd(origin_score))
+lm(prop_std ~ origin_std + yrimmig + I(yrimmig^2), data = acs_prop_yrimmig_policy_std) %>%
+summary()
+git rm -r --cached .
+git reset acs_prop_yrimmig.csv
+git reset ssimm/acs_prop_yrimmig.csv
+library(RColorBrewer)
+library(haven)
+library(cowplot)
+library(srvyr)
+library(here)
+library(tidyverse)
+acs <- read_dta('/Users/nathan/Data/ACS/acs_2008_2019.dta') %>%
+mutate(
+position = case_when(
+related == 101 ~ 'main',
+related %in% c(201, 1114) ~ 'partner'),
+age = as.numeric(age),
+yrimmig = ifelse(yrimmig == 0, NA, as.numeric(yrimmig)),
+nchild = as.numeric(nchild),
+year = as.numeric(year),
+bpldid = as.numeric(bpld),
+state = stateicp,
+stateicp = as.numeric(stateicp),
+ftotinc = ifelse(ftotinc == 9999999, NA, ftotinc),
+inctot = ifelse(inctot == 9999999, NA, inctot))
+with(acs, sum(is.na(yrimmig)))
+with(acs, (sum(age - (year - yrimmig) >= 18 | is.na(yrimmig))))
+nrow(acs)
+filter(acs, sum(age - (year - yrimmig) >= 18)) %>%
+select(age, year, yrimmig) %>%
+View()
+filter(acs, age - (year - yrimmig) >= 18) %>%
+select(age, year, yrimmig) %>%
+View()
+# Define immigrant as someone born abroad not to US parents
+acs_wide <- acs %>%
+# Only  those who immigrated when 18+
+filter(!is.na(position)) %>%
+filter(age - (year - yrimmig) >= 18 | is.na(yrimmig)) %>%
+select(
+# household variables
+year, serial, nchild, hhwt, ssmc,
+cluster, strata, metro, region, state, stateicp, ftotinc,
+# individual variables
+position, sex, related, yrimmig, bpld, bpldid, citizen, educ,
+occ, inctot, occscore, hwsei, empstat, yrnatur, poverty, speakeng, age, perwt
+# state_stock_year, state_stock_avg
+) %>%
+pivot_wider(#id_cols = serial,
+names_from = position,
+values_from = c(sex, related, related, yrimmig, bpld, bpldid, citizen, educ,
+occ, inctot, occscore, hwsei, empstat, yrnatur, poverty, speakeng, age, perwt
+#state_stock_year, state_stock_avg
+)) %>%
+filter(!is.na(sex_partner), !is.na(sex_main)) %>%
+mutate(same_sex = (sex_main == sex_partner),
+imm_couple = case_when(
+citizen_main %in% c(0,1) & citizen_partner %in% c(0,1) ~ 'none',
+citizen_main %in% c(2,3) & citizen_partner %in% c(2,3) ~ 'two',
+citizen_main %in% c(2,3) | citizen_partner %in% c(2,3) ~ 'one')) %>%
+# convert all labeled variables to factor
+as_factor()
+# Keep only couples with one immigrant
+acs_oneimm <- acs_wide %>%
+filter(imm_couple == 'one') %>%
+pivot_longer(-c(year, serial, nchild, hhwt, ssmc,
+cluster, strata, metro, region, state, stateicp, ftotinc,
+same_sex, imm_couple
+),
+names_to = c('.value', 'position'),
+names_sep = '_') %>%
+mutate(immigrant = case_when(citizen %in% c('N/A', 'Born abroad of American parents') ~ 'nonimmigrant',
+citizen %in% c('Naturalized citizen', 'Not a citizen') ~ 'immigrant')) %>%
+filter(!is.na(immigrant)) %>%
+pivot_wider(names_from = immigrant,
+values_from = c(position, sex, related, related, yrimmig, bpld, bpldid, citizen, educ,
+occ, inctot, occscore, hwsei, empstat, yrnatur, poverty, speakeng, age, perwt
+#state_stock_year, state_stock_avg
+)) %>%
+mutate(relation = case_when(
+related_nonimmigrant == "Head/Householder" ~ related_immigrant,
+related_immigrant == "Head/Householder" ~ related_nonimmigrant
+))
+# Keep only couples with one immigrant, individual-level
+acs_coupled_imms <- acs_wide %>%
+filter(imm_couple == 'one' | imm_couple == 'two') %>%
+pivot_longer(-c(year, serial, nchild, hhwt, ssmc,
+cluster, strata, metro, region, state, stateicp, ftotinc,
+same_sex, imm_couple),
+names_to = c('.value', 'position'),
+names_sep = '_') %>%
+mutate(immigrant = case_when(citizen %in% c('N/A', 'Born abroad of American parents') ~ 'nonimmigrant',
+citizen %in% c('Naturalized citizen', 'Not a citizen') ~ 'immigrant')) %>%
+filter(immigrant == 'immigrant') %>%
+mutate(years_in_us = year - yrimmig)
+# Make country-of-origin variables
+# stock by year
+acs_imm <- filter(acs, citizen %in% c(2,3))
+country_year_df <- acs_imm %>%
+group_by(bpld, state,  year) %>%
+count(wt = perwt) %>%
+rename(state_stock_year = n) %>%
+mutate(bpldid = as.numeric(bpld)) %>%
+as_factor()
+# sample_n(country_year_df, 10)
+# average stock
+# country_df <- acs_imm %>%
+#   group_by(bpld, state) %>%
+#   count(wt = perwt) %>%
+#   mutate(state_stock_avg = n/11) %>%
+#   select(-n)
+#
+# acs <- acs %>%
+#   left_join(country_year_df) %>%
+#   left_join(country_df)
+# select(acs, bpld, state, state_stock_year, state_stock_avg) %>% sample_n(10)
+# Macro dataset of dyadic stock by state by year
+acs_dyad <- acs_coupled_imms %>%
+group_by(bpld, state,  year, same_sex) %>%
+count(wt = perwt, .drop = F) %>%
+mutate(same_sex = ifelse(same_sex == T, 'same_sex_stock', 'opp_sex_stock')) %>%
+pivot_wider(names_from = 'same_sex', values_from = 'n') %>%
+mutate(same_sex_stock = ifelse(is.na(same_sex_stock), 0, same_sex_stock),
+opp_sex_stock = ifelse(is.na(opp_sex_stock), 0, opp_sex_stock)) %>%
+left_join(country_year_df)
+acs_dyad_yrimmig <- acs_coupled_imms %>%
+group_by(bpld,  year) %>%
+summarize(mean_year_immig = weighted.mean(yrimmig, w = perwt, na.rm = T))
+acs_dyad <- left_join(acs_dyad, acs_dyad_yrimmig)
+# proportion same sex by year of immigration and country
+# no weights
+country_yrimmig_df <- acs_imm %>%
+group_by(bpld, yrimmig) %>%
+count(.drop = F) %>%
+rename(n_total = n) %>%
+mutate(bpld = as_factor(bpld),
+yrimmig = as.numeric(yrimmig))
+acs_prop_yrimmig <- acs_coupled_imms %>%
+group_by(yrimmig, bpld, same_sex) %>%
+count(.drop = F) %>%
+mutate(same_sex = ifelse(same_sex == T, 'n_same_sex', 'n_dif_sex')) %>%
+pivot_wider(names_from = 'same_sex', values_from = 'n') %>%
+mutate(n_same_sex = ifelse(is.na(n_same_sex), 0, n_same_sex),
+n_dif_sex = ifelse(is.na(n_dif_sex), 0, n_dif_sex)) %>%
+left_join(country_yrimmig_df) %>%
+left_join(distinct(select(acs_dyad, bpld, bpldid))) %>%
+mutate(prop_same_sex = n_same_sex / n_total,
+se_same_sex = sqrt(prop_same_sex*(1-prop_same_sex)/n_total),
+prop_dif_sex = n_dif_sex / n_total,
+se_dif_sex = sqrt(prop_dif_sex*(1-prop_dif_sex)/n_total))
+# acs_prop_yrimmig %>%
+#   pivot_longer(c(prop_same_sex, prop_dif_sex)) %>%
+#   filter(value != 0) %>%
+#   ggplot(aes(x = value)) +
+#   geom_histogram() +
+#   facet_wrap(~name)
+# Top-10 immigrant countries
+top_countries <- acs %>%
+filter(citizen == 2 | citizen == 3) %>%
+group_by(bpld) %>%
+count(wt = perwt) %>%
+arrange(desc(n)) %>%
+pull(bpld) %>%
+as_factor() %>%
+as.data.frame()
+write_csv(top_countries, here('data', 'top_countries.csv'))
+write_csv(acs_wide, here('data', 'acs_wide.csv'))
+write_csv(acs_oneimm, here('data', 'acs_oneimm.csv'))
+write_csv(acs_coupled_imms, here('data', 'acs_coupled_imms.csv'))
+write_csv(acs_dyad, here('data', 'acs_dyad.csv'))
+write_csv(acs_prop_yrimmig, here('data', 'acs_prop_yrimmig.csv'))
