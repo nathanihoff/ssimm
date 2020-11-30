@@ -1,11 +1,15 @@
 ---
 title: "Same-Sex Immigrant Couples"
 subtitle: "Descriptive Statistics"
-output: html_document
+date: "`r format(Sys.time(), '%B %d, %Y')`"
+output: 
+  bookdown::pdf_document2:
+    toc: yes
+    number_sections: yes
 ---
 
 ```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = T, warning = F, message = F, cache = F,
+knitr::opts_chunk$set(echo = T, warning = F, message = F, cache = T,
                       cache.lazy = FALSE)
 
 library(RColorBrewer)
@@ -29,12 +33,10 @@ options(scipen=999)
 ```{r load}
 top_countries <- read_csv(here('data', 'top_countries.csv')) %>%
   pull(1)
-# top_countries <- c("Mexico", "India",  "Philippines", "China",              "El Salvador", "Vietnam",
-#                    "Cuba",               "Korea",              "Dominican Republic", "Guatemala" ) 
 acs_wide <- read_csv(here('data', 'acs_wide.csv'))
 # acs_oneimm <- read_csv(here('data', 'acs_oneimm.csv'))
 acs_coupled_imms <- read_csv(here('data', 'acs_coupled_imms.csv'))
-# dyad <- read_csv(here('data', 'acs_dyad.csv'))
+acs_dyad <- read_csv(here('data', 'acs_dyad.csv'))
 
 
 acs_coupled_imms <- acs_coupled_imms %>%
@@ -54,7 +56,7 @@ acs_wide %>%
          Year = year) %>%
   # summarize(n = survey_total())
   ggplot(aes(x = Year, y = `Total population (thousands)`, color = imm_couple)) +
-  geom_line() + geom_point() +
+  geom_line() +
   facet_wrap(~same_sex, scales = "free") +
   labs(color = 'Number of immigrants\nin couple') +
   xlim(2007, 2019) +
@@ -69,7 +71,7 @@ acs_wide %>%
   group_by(year, imm_couple, related_partner) %>%
   count(wt = hhwt) %>%
   ggplot(aes(x = year, y = n, color = imm_couple)) +
-  geom_line() + geom_point() + 
+  geom_line() + 
   facet_wrap(~related_partner) +
   xlim(2007, 2019)
 ```
@@ -87,7 +89,7 @@ acs_wide %>%
          Year = year) %>%
   # summarize(n = survey_total())
   ggplot(aes(x = Year, y = `Total population (thousands)`, color = imm_couple)) +
-  geom_line() + geom_point() +
+  geom_line() +
   facet_wrap(~same_sex, scales = "free") +
   labs(color = 'Number of immigrants\nin couple') +
   xlim(2007, 2019) +
@@ -106,7 +108,7 @@ acs_wide %>%
          Year = year) %>%
   # summarize(n = survey_total())
   ggplot(aes(x = Year, y = `Total population (thousands)`, color = imm_couple)) +
-  geom_line() + geom_point() +
+  geom_line() +
   facet_wrap(~same_sex, scales = "free") +
   labs(color = 'Number of immigrants\nin couple') +
   xlim(2007, 2019) +
@@ -125,6 +127,15 @@ acs_coupled_imms %>%
   geom_line() +
   facet_wrap(~same_sex) +
   ggtitle('Individual Total Income')
+
+acs_wide %>%
+  filter(imm_couple != 'none') %>%
+  group_by(year, same_sex) %>%
+  summarize(ftotinc = weighted.mean(ftotinc, w = hhwt, na.rm = T)) %>%
+  ggplot(aes(x = year, y = ftotinc)) +
+  geom_line() +
+  facet_wrap(~same_sex) +
+  ggtitle('Family Income')
 
 acs_coupled_imms %>%
   group_by(year, same_sex) %>%
@@ -153,11 +164,11 @@ acs_coupled_imms %>%
   facet_wrap(~same_sex, scales = 'free', nrow = 2) +
   ggtitle('Years in US')
 
-acs_coupled_imms %>%
-  ggplot(aes(x = years_in_us)) +
-  geom_histogram() +
-  facet_wrap(~same_sex + year, scales = 'free') +
-  ggtitle('Years in US')
+# acs_coupled_imms %>%
+#   ggplot(aes(x = years_in_us)) +
+#   geom_histogram() +
+#   facet_wrap(~same_sex + year, scales = 'free') +
+#   ggtitle('Years in US')
 
 acs_coupled_imms %>%
   group_by(year, same_sex) %>%
@@ -206,26 +217,36 @@ acs_coupled_imms %>%
   facet_wrap(~same_sex) +
   ggtitle('Region')
 
-# x <- segdata@data[ ,1:2]
-# DIDuncan(x)
-# 
-# dyad %>%
-#   select(same_sex_stock, opp_sex_stock, year) %>%
-#   group_by(year) %>%
-#   summarize(dissimilarity = DIDuncan(data.frame(same_sex_stock, opp_sex_stock))) %>%
-#   as.data.frame()
+
+acs_dyad %>%
+  select(same_sex_stock, opp_sex_stock, year) %>%
+  group_by(year) %>%
+  summarize(dissimilarity = 
+              DIDuncan(data.frame(same_sex_stock, opp_sex_stock))[1,2]) %>%
+  ggplot(aes(x = year, y = dissimilarity)) +
+  geom_line() +
+  ggtitle('Dissimilarity index for same- and different-sex immigrant couples by state and birthplace')
 
 ```
 
 ## Family
 ```{r}
-acs_coupled_imms %>%
+acs_wide %>%
+  filter(imm_couple != 'none') %>%
   group_by(year, same_sex, nchild) %>%
-  count(wt = perwt) %>%
+  count(wt = hhwt) %>%
   ggplot(aes(x = year, y = n, fill = as.factor(nchild))) +
   geom_bar(position="fill", stat="identity") +
   facet_wrap(~same_sex) +
   ggtitle('Number of children present')
+
+acs_wide %>%
+  filter(imm_couple != 'none') %>%
+  group_by(year, same_sex) %>%
+  summarize(nchild = weighted.mean(nchild, w = hhwt, na.rm = T)) %>%
+  ggplot(aes(x = year, y = nchild, col = same_sex)) +
+  geom_line() +
+  ggtitle('Average number of children')
 
 acs_coupled_imms %>%
   filter(bpld %in% top_countries[1:10]) %>%

@@ -5,7 +5,6 @@ library(srvyr)
 library(here)
 library(tidyverse)
 
-
 acs <- read_dta('/Users/nathan/Data/ACS/acs_2008_2019.dta') %>%
   mutate(
     position = case_when(
@@ -18,10 +17,15 @@ acs <- read_dta('/Users/nathan/Data/ACS/acs_2008_2019.dta') %>%
     bpldid = as.numeric(bpld),
     state = stateicp,
     stateicp = as.numeric(stateicp),
-    ftotinc = ifelse(ftotinc == 9999999, NA, ftotinc),
-    inctot = ifelse(inctot == 9999999, NA, inctot),
+    ftotinc = ifelse(ftotinc == 9999999, NA, ftotinc*cpi99),
+    inctot = ifelse(inctot == 9999999, NA, inctot*cpi99),
     hwsei = ifelse(hwsei == 0000, NA, hwsei),
-    occscore = ifelse(occscore == 00, NA, occscore))
+    occscore = ifelse(occscore == 00, NA, occscore),
+    educ = case_when(
+      educ %in% 0:5 ~ '< HS',
+      educ == 6 ~ 'HS',
+      educ %in% 7:9 ~ 'some col',
+      educ %in% 10:11 ~ 'college'))
 
 
 # Define immigrant as someone born abroad not to US parents
@@ -119,6 +123,7 @@ country_year_df <- acs_imm %>%
 acs_dyad <- acs_coupled_imms %>%
   group_by(bpld, state,  year, same_sex) %>%
   count(wt = perwt, .drop = F) %>%
+  ungroup() %>%
   mutate(same_sex = ifelse(same_sex == T, 'same_sex_stock', 'opp_sex_stock')) %>%
   pivot_wider(names_from = 'same_sex', values_from = 'n') %>%
   mutate(same_sex_stock = ifelse(is.na(same_sex_stock), 0, same_sex_stock),
@@ -144,6 +149,7 @@ country_yrimmig_df <- acs_imm %>%
 acs_prop_yrimmig <- acs_coupled_imms %>%
   group_by(yrimmig, bpld, same_sex) %>%
   count(.drop = F) %>%
+  ungroup() %>%
   mutate(same_sex = ifelse(same_sex == T, 'n_same_sex', 'n_dif_sex')) %>%
   pivot_wider(names_from = 'same_sex', values_from = 'n') %>%
   mutate(n_same_sex = ifelse(is.na(n_same_sex), 0, n_same_sex),
