@@ -305,27 +305,23 @@ ind_controls2 <- polr(state_policy_binned ~ same_sex + sex + age + educ + nchild
 ind_interact2 <- polr(state_policy_binned ~ same_sex*(origin_score + sex + age + educ + 
                    nchild + log_income + no_income + yrimmig),
                 data = acs_couple_policy_small, Hess = T)
-# ind_fe2 <- ind_origin <- polr(state_policy_binned ~ same_sex*origin_score + state + as.factor(year),
-#                 data = acs_couple_policy_small, Hess = T)
-# ind_fe_interact2 <- polr(state_policy_binned ~ same_sex*(origin_score + sex + age + educ + 
-#                    nchild + log_income + no_income) + state + as.factor(year),
-#                 data = acs_couple_policy_small, Hess = T)
-
+ind_fe2 <- ind_origin <- polr(state_policy_binned ~ same_sex*origin_score + state,
+                data = acs_couple_policy_small, Hess = T)
+ind_fe_interact2 <- polr(state_policy_binned ~ same_sex*(origin_score + sex + age + educ +
+                   nchild + log_income + no_income) + state,
+                data = acs_couple_policy_small, Hess = T)
 
 stargazer(ind_basic2, ind_controls2, ind_origin2, ind_interact2, 
-          # ind_fe2, ind_fe_interact2,
+          ind_fe2, ind_fe_interact2,
           header = F, 
           keep = all.vars(formula(ind_interact[-2])),
-          add.lines = list(c('State FEs?', 'no', 'no', 'no', 'no'),
-                           c('Year FEs?', 'no', 'no', 'no', 'no')),
+          add.lines = list(c('State FEs?', 'no', 'no', 'no', 'no', 'yes', 'yes'),
+                           c('Year FEs?', 'no', 'no', 'no', 'no', 'no', 'no')),
           keep.stat = c('n', 'll'), 
           label = 'tab:ind-ord',
           title = 'Individual ordered logit analysis of three-category state policy score',
           no.space = T)
 ```
-
-
-
 
 ```{r ord-fig, fig.cap = 'Predicted probability of residing in three LGBT state policy environments'}
 # Predicted probabilities
@@ -345,4 +341,4 @@ bind_rows(pprobs.same, pprobs.dif) %>%
 
 ```
 
-Table \ref{tab:ind-ord} conducts the same analysis as ordered logit models and reveals substantively the same results. For interpretability, Model 4 (fully interacted) is used to predict probabilities in residing in each of the three LGBT policy categories. The results support the conclusions from the OLS models: same-sex couples are more likely to live in LGBT-friendly states regardless of origin score, but this effect increases with origin score, and the opposite effect is found for different-sex couples.
+Table \ref{tab:ind-ord} conducts the same analysis as ordered logit models and reveals substantively the same results. (When I tried to include fixed effects for year the ordered logit models did not converge.) For interpretability, Model 4 (fully interacted) is used to predict probabilities in residing in each of the three LGBT policy categories (Figure \ref{fig:ord-fig}). The results support the conclusions from the OLS models: same-sex couples are more likely to live in LGBT-friendly states regardless of origin score, but this effect increases with origin score, and the opposite effect is found for different-sex couples.

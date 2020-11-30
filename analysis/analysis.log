@@ -1,4 +1,4 @@
-This is XeTeX, Version 3.14159265-2.6-0.999992 (TeX Live 2020) (preloaded format=xelatex 2020.11.1)  29 NOV 2020 18:37
+This is XeTeX, Version 3.14159265-2.6-0.999992 (TeX Live 2020) (preloaded format=xelatex 2020.11.1)  29 NOV 2020 21:23
 entering extended mode
  restricted \write18 enabled.
  %&-line parsing enabled.
@@ -828,19 +828,38 @@ Overfull \hbox (16.12508pt too wide) in paragraph at lines 243--302
 
 LaTeX Warning: Float too large for page by 4.96399pt on input line 302.
 
-File: analysis_files/figure-latex/ord-fig1-1.pdf Graphic file (type pdf)
-<use analysis_files/figure-latex/ord-fig1-1.pdf>
-[3] [4] [5] [6] (./analysis.aux)
+File: analysis_files/figure-latex/ind-fig-1.pdf Graphic file (type pdf)
+<use analysis_files/figure-latex/ind-fig-1.pdf>
+
+Underfull \hbox (badness 10000) in paragraph at lines 304--306
+[][]
+ []
+
+[3] [4]
+
+LaTeX Warning: Reference `fig:idn-fig' on page 5 undefined on input line 307.
+
+
+Overfull \hbox (3.56508pt too wide) in paragraph at lines 314--372
+ [][] 
+ []
+
+File: analysis_files/figure-latex/ord-fig-1.pdf Graphic file (type pdf)
+<use analysis_files/figure-latex/ord-fig-1.pdf>
+[5] [6] [7] (./analysis.aux)
 Package rerunfilecheck Info: File `analysis.out' has not changed.
 (rerunfilecheck)             Checksum: 4BA82B68AEF88618FFDCC5FA33BD92C6;865.
+
+LaTeX Warning: There were undefined references.
+
  ) 
 Here is how much of TeX's memory you used:
- 16731 strings out of 479426
- 293357 string characters out of 5880085
- 797684 words of memory out of 5000000
- 35866 multiletter control sequences out of 15000+600000
+ 16739 strings out of 479426
+ 293623 string characters out of 5880085
+ 785779 words of memory out of 5000000
+ 35873 multiletter control sequences out of 15000+600000
  541491 words of font info for 76 fonts, out of 8000000 for 9000
  14 hyphenation exceptions out of 8191
- 94i,10n,118p,663b,334s stack positions out of 5000i,500n,10000p,200000b,80000s
+ 94i,10n,118p,665b,332s stack positions out of 5000i,500n,10000p,200000b,80000s
 
-Output written on analysis.pdf (6 pages).
+Output written on analysis.pdf (7 pages).
