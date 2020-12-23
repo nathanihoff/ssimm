@@ -16,6 +16,7 @@ linkcolor: blue
 knitr::opts_chunk$set(echo = F, warning = F, message = F, cache = T, results = 'asis',
                       cache.lazy = FALSE)
 library(MASS)
+library(countrycode)
 library(knitr)
 library(RColorBrewer)
 library(haven)
@@ -56,8 +57,16 @@ acs_dyad <- read_csv(here('data', 'acs_dyad.csv')) %>%
                                   round(mean_year_immig),
                                   1991))
 
+lgbt_policy %>% filter(Country == "Côte d'Ivoire")
+
+dist_dat <- read_dta(here('Data', 'dist_cepii.dta')) %>%
+  filter(iso_d == 'USA')
+  
 lgbt_policy <- read_csv(here('data', 'LGBT Data w IPUMS Code.csv')) %>%
   select(Country, year, Code, origin_score = total_score)
+
+lgbt_policy$iso_o <- countrycode(lgbt_policy$Country, origin = 'country.name', destination = 'iso3c')
+
 state_policy <- read_csv(here('data', 'state_policy.csv'))
 
 state_policy[is.na(state_policy)] <- 0
@@ -71,7 +80,18 @@ state_policy <- state_policy %>%
 acs_dyad_policy <- acs_dyad %>%
   left_join(lgbt_policy, by = c('mean_year_immig' = 'year', 'bpldid' = 'Code')) %>%
   left_join(state_policy,by = c('mean_year_immig' = 'Year', 'state' = 'State')) %>%
-  filter(!is.na(origin_score))
+  filter(!is.na(origin_score)) %>%
+  
+
+acs_dyad_policy$iso_o <- countrycode(acs_dyad_policy$Country, origin = 'country.name', destination = 'iso3c')
+
+acs_dyad_policy
+
+
+  acs_dyad$bpldid
+  
+
+
 ```
 
 

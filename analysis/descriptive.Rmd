@@ -76,26 +76,6 @@ acs_wide %>%
   xlim(2007, 2019)
 ```
 
-## Only 18+ at time of immigration
-```{r}
-acs_wide %>%
-  filter(imm_couple != "none") %>%
-  filter(as.numeric(age_main) - (year - yrimmig_main) >= 18 |
-           as.numeric(age_partner) - (year - yrimmig_partner) >= 18) %>%
-  mutate(same_sex = ifelse(same_sex == T, 'Same-Sex', 'Different-Sex')) %>%
-  group_by(year, imm_couple, same_sex) %>%
-  count(wt = hhwt) %>%
-  mutate(`Total population (thousands)` = n/1000,
-         Year = year) %>%
-  # summarize(n = survey_total())
-  ggplot(aes(x = Year, y = `Total population (thousands)`, color = imm_couple)) +
-  geom_line() +
-  facet_wrap(~same_sex, scales = "free") +
-  labs(color = 'Number of immigrants\nin couple') +
-  xlim(2007, 2019) +
-  theme(legend.position=c(.15,.35))
-```
-
 ## Immigrants within last year
 ```{r}
 acs_wide %>%
@@ -118,6 +98,19 @@ acs_wide %>%
 
 
 # Differences in characteristics between immigrants in same- and opposite-sex couples
+## Citizenship
+```{r}
+acs_coupled_imms %>%
+  mutate(citizen = (citizen == 'Naturalized citizen')) %>%
+  group_by(year, same_sex) %>%
+  summarize(citizen = weighted.mean(citizen, w = perwt, na.rm = T)) %>%
+  ggplot(aes(x = year, y = citizen)) +
+  geom_line() +
+  facet_wrap(~same_sex) +
+  ggtitle('Proportion naturalized')
+
+```
+
 ## Employment
 ```{r}
 acs_coupled_imms %>%
@@ -226,6 +219,8 @@ acs_dyad %>%
   ggplot(aes(x = year, y = dissimilarity)) +
   geom_line() +
   ggtitle('Dissimilarity index for same- and different-sex immigrant couples by state and birthplace')
+
+
 
 ```
 

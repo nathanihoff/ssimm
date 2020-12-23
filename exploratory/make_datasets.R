@@ -27,7 +27,12 @@ acs <- read_dta('/Users/nathan/Data/ACS/acs_2008_2019.dta') %>%
       educ %in% 7:9 ~ 'some col',
       educ %in% 10:11 ~ 'college'))
 
+acs <- acs %>%
+  mutate(bpldid = case_when(as_factor(bpld) == 'England' ~ 41300,
+                            as_factor(bpld) == 'Korea' ~ 50220,
+                            T ~ bpldid))
 
+# filter(acs, as.character(bpld) == 'england')
 # Define immigrant as someone born abroad not to US parents
 acs_wide <- acs %>%
   # Only  those who immigrated when 18+
