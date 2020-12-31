@@ -13,8 +13,7 @@ linkcolor: blue
 ---
 
 ```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = F, warning = F, message = F, cache = T, results = 'asis',
-                      cache.lazy = FALSE)
+knitr::opts_chunk$set(echo = F, warning = F, message = F, cache = T, results = 'asis')
 library(lme4)
 library(MASS)
 library(countrycode)
@@ -29,6 +28,8 @@ library(here)
 library(plm)
 library(stargazer)
 library(tidyverse)
+
+
 
 # options("yaml.eval.expr" = TRUE)
 
@@ -294,7 +295,7 @@ stargazer(same_dyad_origin, same_dyad_state, same_dyad_origin_state, same_dyad_f
           title = '100*Proportion same-sex in a country-state-year')
 ```
 
-```{r dif-fixed, results = 'asis', eval = T} 
+```{r dif-fixed, results = 'asis'} 
 # Diff-sex "placebo" models
 dif_dyad_origin <- lm(dif_prop ~ origin_score, data = acs_dyad_policy)
 dif_dyad_state <- lm(dif_prop ~ state_policy, data = acs_dyad_policy)
