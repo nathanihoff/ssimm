@@ -1,4 +1,4 @@
-This is XeTeX, Version 3.14159265-2.6-0.999992 (TeX Live 2020) (preloaded format=xelatex 2020.11.1)  21 DEC 2020 11:07
+This is XeTeX, Version 3.14159265-2.6-0.999992 (TeX Live 2020) (preloaded format=xelatex 2020.11.1)  30 DEC 2020 19:29
 entering extended mode
  restricted \write18 enabled.
  %&-line parsing enabled.
@@ -813,40 +813,39 @@ LaTeX Font Info:    Font shape `TU/latinmodern-math.otf(3)/m/n' will be
 (Font)              scaled to size 6.99925pt on input line 98.
 LaTeX Font Info:    Font shape `TU/latinmodern-math.otf(3)/m/n' will be
 (Font)              scaled to size 4.99947pt on input line 98.
-
-Overfull \hbox (3.49507pt too wide) in paragraph at lines 134--160
- [][] 
- []
-
 [1
 
-] [2]
-Overfull \hbox (16.12508pt too wide) in paragraph at lines 243--302
+]
+Overfull \hbox (3.49507pt too wide) in paragraph at lines 169--195
+ [][] 
+ []
+
+[2] [3]
+Overfull \hbox (16.12508pt too wide) in paragraph at lines 276--335
  [][] 
  []
 
 
-LaTeX Warning: Float too large for page by 4.96399pt on input line 302.
+LaTeX Warning: Float too large for page by 4.96399pt on input line 335.
 
 File: analysis_files/figure-latex/ind-fig-1.pdf Graphic file (type pdf)
 <use analysis_files/figure-latex/ind-fig-1.pdf>
 
-Underfull \hbox (badness 10000) in paragraph at lines 304--306
+Underfull \hbox (badness 10000) in paragraph at lines 337--339
 [][]
  []
 
-[3] [4]
 
-LaTeX Warning: Reference `fig:idn-fig' on page 5 undefined on input line 307.
+LaTeX Warning: Reference `fig:idn-ord' on page 4 undefined on input line 340.
 
-
-Overfull \hbox (3.56508pt too wide) in paragraph at lines 314--372
+[4] [5]
+Overfull \hbox (3.56508pt too wide) in paragraph at lines 347--405
  [][] 
  []
 
 File: analysis_files/figure-latex/ord-fig-1.pdf Graphic file (type pdf)
 <use analysis_files/figure-latex/ord-fig-1.pdf>
-[5] [6] [7] (./analysis.aux)
+[6] [7] (./analysis.aux)
 Package rerunfilecheck Info: File `analysis.out' has not changed.
 (rerunfilecheck)             Checksum: 4BA82B68AEF88618FFDCC5FA33BD92C6;865.
 
@@ -854,10 +853,10 @@ LaTeX Warning: There were undefined references.
 
  ) 
 Here is how much of TeX's memory you used:
- 16739 strings out of 479426
- 293623 string characters out of 5880085
- 786779 words of memory out of 5000000
- 35873 multiletter control sequences out of 15000+600000
+ 16740 strings out of 479426
+ 293638 string characters out of 5880085
+ 781875 words of memory out of 5000000
+ 35874 multiletter control sequences out of 15000+600000
  541491 words of font info for 76 fonts, out of 8000000 for 9000
  14 hyphenation exceptions out of 8191
  94i,10n,118p,853b,332s stack positions out of 5000i,500n,10000p,200000b,80000s
