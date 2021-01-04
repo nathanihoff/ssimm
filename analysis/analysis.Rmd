@@ -352,7 +352,7 @@ In Table \ref{tab:same-fixed}, the coefficient for state policy is insignificant
 
 As a comparison, Table \ref{tab:dif-fixed} fits the same models, but with proportion immigrants in different-sex couples as an outcome. Interestingly, here origin score is in the opposite direction, and state policy is now significant, and highly positive when fixed effects are included. This implies that immigrants in different-sex couples are more likely to come from countries with more oppressive LGBT laws and tend to live in more accepting areas in the U.S. This may be due to family-friendly policies, since this outcome variable mostly captures coupled immigrants as a proportion of all immigrants from a given country.  
 
-We next control for state-level factors that could be confounders. We merge in state-level per capita income by year from the Bureau of Economic Analysis (SAINC1 - Personal Income Summary: Personal Income, Population, Per Capita Personal Income) and state-level annual unemployment rates from BLS. The results are shown in Table \ref{tab:same-fixed-state}.
+We next control for state-level factors that could be confounders. We merge in state-level per capita income by year from the Bureau of Economic Analysis (SAINC1 - Personal Income Summary: Personal Income, Population, Per Capita Personal Income) and state-level annual unemployment rates from BLS. The results are shown in Table \ref{tab:same-fixed-state}. Once we control for time-variant state-level factors, the coefficients on state policy become mostly insignificant.
 ```{r same-fixed-state}
 same_dyad_state1 <- lm(same_prop ~ state_unemploy + state_income, 
                        data = acs_dyad_policy)
@@ -383,21 +383,52 @@ stargazer(same_dyad_state1, same_dyad_state5, same_dyad_state6, same_dyad_state2
           label = 'tab:same-fixed-state',
           title = 'State controls: 100*Proportion same-sex in a country-state-year')
 
-acs_dyad_policy %>%
-  group_by(state) %>%
-  summarize(state_policy = mean(state_policy, na.rm = T),
-            state_income = mean(state_income, na.rm = T)) %>%
-  ggplot(aes(x = log(state_income), y = state_policy, label = state)) +
-  geom_text() + geom_smooth(method='lm', se = F)
+# acs_dyad_policy %>%
+#   group_by(state) %>%
+#   summarize(state_policy = mean(state_policy, na.rm = T),
+#             state_income = mean(state_income, na.rm = T)) %>%
+#   ggplot(aes(x = log(state_income), y = state_policy, label = state)) +
+#   geom_text() + geom_smooth(method='lm', se = F)
+# 
+# test <- acs_dyad_policy %>%
+#   group_by(state) %>%
+#   summarize(state_policy = mean(state_policy, na.rm = T),
+#             state_income = mean(state_income, na.rm = T)) 
+# lm(state_policy ~ state_income, test) %>% summary()
+# cor(test$state_policy, log(test$state_income), use = 'complete.obs') 
+# 
+# cor(acs_dyad_policy$state_policy, log(acs_dyad_policy$state_income), use = 'complete.obs')
+```
 
-test <- acs_dyad_policy %>%
-  group_by(state) %>%
-  summarize(state_policy = mean(state_policy, na.rm = T),
-            state_income = mean(state_income, na.rm = T)) 
-lm(state_policy ~ state_income, test) %>% summary()
-cor(test$state_policy, log(test$state_income), use = 'complete.obs') 
+Finally, we repeat some of the above analyses with multilevel models.
 
-cor(acs_dyad_policy$state_policy, log(acs_dyad_policy$state_income), use = 'complete.obs')
+```{r state-multi}
+same_dyad_m1 <- lmer(same_prop ~ state_policy + (1 | state), 
+                       data = acs_dyad_policy)
+same_dyad_m2 <- lmer(same_prop ~ state_policy + origin_score + (1 | state), 
+                       data = acs_dyad_policy)
+same_dyad_m3 <- lmer(same_prop ~ state_unemploy + state_income + (1 | state), 
+                       data = acs_dyad_policy)
+same_dyad_m4 <- lmer(same_prop ~ state_unemploy + state_income + state_policy + 
+                       (1 | state), 
+                       data = acs_dyad_policy)
+same_dyad_m5 <- lmer(same_prop ~ state_unemploy + state_income + state_policy + 
+                       origin_score + (1 | state), 
+                       data = acs_dyad_policy)
+same_dyad_m6 <- lmer(same_prop ~ state_unemploy + state_income + state_policy + 
+                       origin_score + state_stock_year + (1 | state), 
+                       data = acs_dyad_policy)
+
+
+
+stargazer(same_dyad_m1, same_dyad_m2, same_dyad_m3, same_dyad_m4, same_dyad_m5,
+          same_dyad_m6,
+          header = F, 
+          keep = c('origin_score', 'state_policy', 'state_stock_year', 'state_unemploy', 
+                   'state_income', 'state_stock_year'),
+          keep.stat = c('n', 'll'),
+          label = 'tab:state-multi',
+          title = 'Multilevel models: 100*Proportion same-sex in a country-state-year')
 ```
 
 
