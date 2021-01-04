@@ -367,13 +367,17 @@ same_dyad_state3 <- lm(same_prop ~ state_unemploy + state_income + state + origi
 same_dyad_state4 <- lm(same_prop ~ state_unemploy + state_income + state + 
                         origin_score + state_policy, 
                        data = acs_dyad_policy)
+same_dyad_state7 <- lm(same_prop ~ state_unemploy + state_income + state + 
+                        origin_score + state_policy + state_stock_year, 
+                       data = acs_dyad_policy)
+
 
 
 stargazer(same_dyad_state1, same_dyad_state5, same_dyad_state6, same_dyad_state2, 
-          same_dyad_state3, same_dyad_state4, same_dyad_state5,
+          same_dyad_state3, same_dyad_state4, same_dyad_state7,
           header = F, 
           keep = c('origin_score', 'state_policy', 'state_stock_year', 'state_unemploy', 
-                   'state_income'),
+                   'state_income', 'state_stock_year'),
           add.lines = list(c('State FEs?', 'no', 'no', rep('yes', 4))),
           keep.stat = c('n', 'rsq'),
           label = 'tab:same-fixed-state',
