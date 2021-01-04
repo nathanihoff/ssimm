@@ -14,6 +14,7 @@ linkcolor: blue
 
 ```{r setup, include=F}
 knitr::opts_chunk$set(echo = F, warning = F, message = F, cache = T, results = 'asis')
+library(ordinal)
 library(lme4)
 library(MASS)
 library(countrycode)
@@ -122,13 +123,7 @@ state_policy <- state_policy %>%
   select(State, Year, state_policy)
 
 
-acs_dyad_policy <- acs_dyad %>%
-  mutate(mean_year_immig = ifelse(mean_year_immig >= 1991, 
-                                  round(mean_year_immig),
-                                  1991)) %>%
-  left_join(lgbt_policy, by = c('mean_year_immig' = 'year', 'bpldid' = 'Code')) %>%
-  left_join(state_policy,by = c('mean_year_immig' = 'Year', 'state' = 'State')) %>%
-  filter(!is.na(origin_score))
+
 ```
 
 
@@ -276,10 +271,41 @@ stargazer(ag, ag_time, ag_time2, ag_fe, ag_time2_fe, ag_fe_2,
 
 # Dyadic data: by survey year (focus on state effects)
 We reshape the data so that is yearly dyads: each observation is the proportion of immigrants that is in same-sex couples out of all those from country $x$ in state $y$ in survey year $z$ (using survey weights). We multiply this proportion by 100 for interpretability as percentage points. We merge in the sending-country and state policy indices for the average year of immigration for these immigrants.  
-```{r same-fixed, results = 'asis'}
+```{r state-setup}
+acs_dyad_policy <- acs_dyad %>%
+  mutate(mean_year_immig = ifelse(mean_year_immig >= 1991, 
+                                  round(mean_year_immig),
+                                  1991)) %>%
+  left_join(lgbt_policy, by = c('mean_year_immig' = 'year', 'bpldid' = 'Code')) %>%
+  left_join(state_policy,by = c('mean_year_immig' = 'Year', 'state' = 'State')) %>%
+  filter(!is.na(origin_score))
+
 acs_dyad_policy$same_prop <- acs_dyad_policy$same_sex_stock/acs_dyad_policy$state_stock_year * 100
 acs_dyad_policy$dif_prop <- acs_dyad_policy$opp_sex_stock/acs_dyad_policy$state_stock_year * 100
 
+unemploy <- read.table(here('data', 'la.data.3.AllStatesS.txt'), header = T,
+                       fill = T) %>% 
+  filter(str_detect(series_id, '00003')) %>%
+  as_tibble() %>%
+  mutate(value = as.numeric(value),
+         state_num = as.numeric(str_extract(series_id, "\\d\\d"))) %>%
+  left_join(data.frame(state = c(state.name, 'District of Columbia', 'Puerto Rico'), 
+           state_num =c(1,2,4:6, 8:10, 12, 13, 15:42, 44:51, 53:56, 11, 72))) %>%
+  group_by(state, year) %>%
+  summarize(state_unemploy = mean(value))
+
+state_income <- read_csv(here('data', 'state_income.csv'), na = c('', '(NA)')) %>%
+  pivot_longer(!1:2, names_to = 'year', values_to = 'state_income') %>%
+  mutate(year = as.integer(year)) %>%
+  rename(state = GeoName) %>% 
+  select(-GeoFips)
+
+acs_dyad_policy <- acs_dyad_policy %>%
+  left_join(unemploy,  by = c('mean_year_immig' = 'year', 'state')) %>%
+  left_join(state_income,  by = c('mean_year_immig' = 'year', 'state')) 
+```
+
+```{r same-fixed, results = 'asis'}
 # Same-sex models
 same_dyad_origin <- lm(same_prop ~ origin_score, data = acs_dyad_policy)
 same_dyad_state <- lm(same_prop ~ state_policy, data = acs_dyad_policy)
@@ -326,9 +352,48 @@ In Table \ref{tab:same-fixed}, the coefficient for state policy is insignificant
 
 As a comparison, Table \ref{tab:dif-fixed} fits the same models, but with proportion immigrants in different-sex couples as an outcome. Interestingly, here origin score is in the opposite direction, and state policy is now significant, and highly positive when fixed effects are included. This implies that immigrants in different-sex couples are more likely to come from countries with more oppressive LGBT laws and tend to live in more accepting areas in the U.S. This may be due to family-friendly policies, since this outcome variable mostly captures coupled immigrants as a proportion of all immigrants from a given country.  
 
-We next control for state-level factors that could be confounders. We merge in state-level 
-```{r}
+We next control for state-level factors that could be confounders. We merge in state-level per capita income by year from the Bureau of Economic Analysis (SAINC1 - Personal Income Summary: Personal Income, Population, Per Capita Personal Income) and state-level annual unemployment rates from BLS. The results are shown in Table \ref{tab:same-fixed-state}.
+```{r same-fixed-state}
+same_dyad_state1 <- lm(same_prop ~ state_unemploy + state_income, 
+                       data = acs_dyad_policy)
+same_dyad_state5 <- lm(same_prop ~ state_unemploy + state_income + state_policy, 
+                       data = acs_dyad_policy)
+same_dyad_state6 <- lm(same_prop ~ state_unemploy + state_income + state, 
+                       data = acs_dyad_policy)
+same_dyad_state2 <- lm(same_prop ~ state_unemploy + state_income + state + state_policy, 
+                       data = acs_dyad_policy)
+same_dyad_state3 <- lm(same_prop ~ state_unemploy + state_income + state + origin_score, 
+                       data = acs_dyad_policy)
+same_dyad_state4 <- lm(same_prop ~ state_unemploy + state_income + state + 
+                        origin_score + state_policy, 
+                       data = acs_dyad_policy)
 
+
+stargazer(same_dyad_state1, same_dyad_state5, same_dyad_state6, same_dyad_state2, 
+          same_dyad_state3, same_dyad_state4, same_dyad_state5,
+          header = F, 
+          keep = c('origin_score', 'state_policy', 'state_stock_year', 'state_unemploy', 
+                   'state_income'),
+          add.lines = list(c('State FEs?', 'no', 'no', rep('yes', 4))),
+          keep.stat = c('n', 'rsq'),
+          label = 'tab:same-fixed-state',
+          title = 'State controls: 100*Proportion same-sex in a country-state-year')
+
+acs_dyad_policy %>%
+  group_by(state) %>%
+  summarize(state_policy = mean(state_policy, na.rm = T),
+            state_income = mean(state_income, na.rm = T)) %>%
+  ggplot(aes(x = log(state_income), y = state_policy, label = state)) +
+  geom_text() + geom_smooth(method='lm', se = F)
+
+test <- acs_dyad_policy %>%
+  group_by(state) %>%
+  summarize(state_policy = mean(state_policy, na.rm = T),
+            state_income = mean(state_income, na.rm = T)) 
+lm(state_policy ~ state_income, test) %>% summary()
+cor(test$state_policy, log(test$state_income), use = 'complete.obs') 
+
+cor(acs_dyad_policy$state_policy, log(acs_dyad_policy$state_income), use = 'complete.obs')
 ```
 
 
@@ -340,13 +405,14 @@ For the individual analysis, we focus on U.S. state policies: conditional on mig
 state_policy$state_policy_binned <- cut(state_policy$state_policy, breaks = c(-2,0,2, Inf), 
                                         labels = c("Repressive", "Neutral", "Progressive"))    
 
-## Getting this onto the ACS data now
 acs_couple_policy <- acs_coupled_imms  %>%
   mutate(yrimmig = ifelse(yrimmig >= 1991, 
                           round(yrimmig),
                           1991)) %>%
   left_join(lgbt_policy, by = c('yrimmig' = 'year', 'bpldid' = 'Code')) %>%
   left_join(state_policy,by = c('year' = 'Year', 'state' = 'State')) %>%
+  left_join(unemploy) %>%
+  left_join(state_income) %>%
   # adding (log) income variables
   mutate(pos_income = ifelse(inctot >= 0, inctot, 0),
          no_income = (inctot <= 0),
@@ -389,7 +455,7 @@ stargazer(ind_basic, ind_controls, ind_origin, ind_interact, ind_fe, ind_fe_inte
 
 ```
 
-```{r ind-fig, fig.cap = 'Predicted LGBT state policy environments (OLS interaction model)', eval = F}
+```{r ind-fig, fig.cap = 'Predicted LGBT state policy environments (OLS interaction model)'}
 Mode <- function(x) {
   ux <- unique(x)
   ux[which.max(tabulate(match(x, ux)))]
@@ -432,7 +498,7 @@ The interaction in Model 4 between same-sex couples and origin score is also pos
 Models 5 and 6 include state and year fixed effects. Here the coefficient for same-sex couples is insigificant (or nearly so).
 
 
-```{r ind-ord, eval = F}
+```{r ind-ord}
 ind_basic2 <- polr(state_policy_binned ~ same_sex,
                 data = acs_couple_policy_small, Hess = T)
 ind_origin2 <- polr(state_policy_binned ~ same_sex*origin_score,
@@ -462,7 +528,9 @@ stargazer(ind_basic2, ind_controls2, ind_origin2, ind_interact2,
           no.space = T)
 ```
 
-```{r ord-fig, fig.cap = 'Predicted probability of residing in three LGBT state policy environments', eval = F}
+
+
+```{r ord-fig, fig.cap = 'Predicted probability of residing in three LGBT state policy environments'}
 # Predicted probabilities
 pprobs.same <- as.data.frame(predict(ind_interact2, type="probs", newdata=plot.dat.same)) %>%
   mutate(origin_score=plot.dat$origin_score) %>%
@@ -481,3 +549,6 @@ bind_rows(pprobs.same, pprobs.dif) %>%
 ```
 
 Table \ref{tab:ind-ord} conducts the same analysis as ordered logit models and reveals substantively the same results. (When I tried to include fixed effects for year the ordered logit models did not converge.) For interpretability, Model 4 (fully interacted) is used to predict probabilities in residing in each of the three LGBT policy categories (Figure \ref{fig:ord-fig}). The results support the conclusions from the OLS models: same-sex couples are more likely to live in LGBT-friendly states regardless of origin score, but this effect increases with origin score, and the opposite effect is found for different-sex couples.
+
+
+

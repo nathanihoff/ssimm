@@ -1,0 +1,461 @@
+rmarkdown::render("/Users/nathan/Google Drive/Projects/2020 Same-Sex Immigrant Couples/ssimm/analysis/analysis.Rmd")
+install.packages('pandoc')
+---#
+title: "Same-Sex Immigrant Couples"#
+subtitle: "Analyses"#
+date: "`r format(Sys.time(), '%B %d, %Y')`"#
+output: #
+  bookdown::pdf_document2:#
+    toc: yes#
+    number_sections: yes#
+    pandoc_args: !expr rmdfiltr::add_wordcount_filter(rmdfiltr::add_citeproc_filter(args = NULL))#
+    latex_engine: xelatex#
+linkcolor: blue#
+---#
+#
+```{r setup, include=FALSE}#
+knitr::opts_chunk$set(echo = F, warning = F, message = F, cache = T, results = 'asis')#
+library(lme4)#
+library(MASS)#
+library(countrycode)#
+library(knitr)#
+library(RColorBrewer)#
+library(haven)#
+library(cowplot)#
+library(srvyr)#
+library(lmtest)#
+library(sandwich)#
+library(here)#
+library(plm)#
+library(stargazer)#
+library(tidyverse)#
+#
+# knitr::opts_chunk$set(error=TRUE) #
+#
+# options("yaml.eval.expr" = TRUE)#
+#
+# theme_set(theme_cowplot(font_family = 'Palatino') + #
+theme_set(theme_classic() + #
+            theme(#legend.title=element_blank(), #
+                  panel.grid.major.y = element_line('grey80'),#
+                  legend.background = element_rect(fill = "transparent")))#
+ggplot <- function(...) ggplot2::ggplot(...) #+ scale_color_brewer(palette="Dark2")#
+#
+options(scipen=1, digits=2)#
+knit_hooks$set(inline = function(x) {#
+  prettyNum(x, big.mark=",")#
+})#
+knitr::opts_chunk$set(error=TRUE) #
+```#
+#
+```{r load, include = F}#
+# top_countries <- read_csv(here('data', 'top_countries.csv')) %>%#
+#   pull(1)#
+# top_countries <- c("Mexico", "India",  "Philippines", "China",              "El Salvador", "Vietnam",#
+#                    "Cuba",               "Korea",              "Dominican Republic", "Guatemala" ) #
+# acs_wide <- read_csv(here('data', 'acs_wide.csv'))#
+# acs_oneimm <- read_csv(here('data', 'acs_oneimm.csv'))#
+acs_coupled_imms <- read_csv(here('data', 'acs_coupled_imms.csv'))#
+acs_prop_yrimmig <- read_csv(here('data', 'acs_prop_yrimmig.csv'))#
+acs_dyad <- read_csv(here('data', 'acs_dyad.csv'))#
+#
+## Gravity Variables#
+dist_dat <- read_dta(here('Data', 'dist_cepii.dta')) %>%#
+  filter(iso_d == 'USA') %>%#
+  select(-iso_d)#
+#
+# Wage difference = USA - country of origin#
+penn_wages <- read_csv(here('data', 'penn_wages.csv')) %>%#
+  select(iso_o = countrycode, country, year, rgdpe) %>%#
+  mutate(rgdpe = rgdpe/1000)#
+usa_wages <- filter(penn_wages, iso_o == 'USA')#
+penn_wages$wage_dif <- NA#
+for(year in usa_wages$year){#
+  for(country in unique(penn_wages$country)){#
+    penn_wages$wage_dif[penn_wages$year == year & penn_wages$country == country] <-#
+      usa_wages$rgdpe[usa_wages$year == year] -#
+      penn_wages$rgdpe[penn_wages$year == year & penn_wages$country == country]#
+  }#
+}#
+#
+wb_unemp <- read_csv(here('data', 'world_bank_unemployment.csv')) %>%#
+  pivot_longer(!1:4, names_to = 'year', values_to = 'unemployment') %>%#
+  select(-`Indicator Name`, -`Indicator Code`) %>%#
+  rename(country = `Country Name`, iso_o = `Country Code`) %>%#
+  mutate(year = as.numeric(year))#
+usa_unemp <- filter(wb_unemp, iso_o == 'USA')#
+wb_unemp$unemp_dif <- NA#
+for(year in usa_unemp$year){#
+  for(country in unique(wb_unemp$country)){#
+    wb_unemp$unemp_dif[wb_unemp$year == year & wb_unemp$country == country] <-#
+      usa_unemp$unemployment[usa_unemp$year == year] -#
+      wb_unemp$unemployment[wb_unemp$year == year & wb_unemp$country == country]#
+  }#
+}#
+#
+polity5 <- read_csv(here('data', 'polity5.csv')) %>%#
+  select(iso_o = scode, country, year, polity5 = polity2)#
+# Policy variables#
+lgbt_policy <- read_csv(here('data', 'LGBT Data w IPUMS Code.csv'), #
+                        locale = readr::locale(encoding = "latin1")) %>%#
+  select(Country, year, Code, origin_score = total_score) %>%#
+  mutate(iso_o = countrycode(Country, origin = 'country.name', destination = 'iso3c')) # %>%#
+  # left_join(select(penn_wages, -country)) %>%#
+  # left_join(select(wb_unemp, -country)) %>%#
+  # left_join(select(polity5, -country)) %>%#
+  # left_join(dist_dat) %>%#
+  # arrange(Country, year)#
+#
+state_policy <- read_csv(here('data', 'state_policy.csv'))#
+#
+state_policy[is.na(state_policy)] <- 0#
+#
+state_policy <- state_policy %>%#
+  mutate(state_policy = -sodomy_illega + -marriage_ban + marriage_equality + civil_union + #
+           employment_discrim_so + hate_crime_so + joint_adoption + -adoption_religious_freedom +#
+           conversion_therapy_ban + housing_discrim_so + state_ban_local_nondiscrimimation) %>%#
+  select(State, Year, state_policy)#
+acs_dyad_policy <- acs_dyad %>%#
+  mutate(mean_year_immig = ifelse(mean_year_immig >= 1991, #
+                                  round(mean_year_immig),#
+                                  1991)) %>%#
+  left_join(lgbt_policy, by = c('mean_year_immig' = 'year', 'bpldid' = 'Code')) %>%#
+  left_join(state_policy,by = c('mean_year_immig' = 'Year', 'state' = 'State')) %>%#
+  filter(!is.na(origin_score))#
+#
+```#
+# Aggregate data by year of immigration (focus on origin effects)#
+This analysis focuses on origin effects: how does the proportion of immigrants from country $x$ in year $y$ vary by origin-country LGBT policy? For this analysis we pool all available years of ACS data, so we are unable to use survey weights. The proportion is multiplied by 100 to be interpretable as percentage points. Standard errors are clustered at the country level.#
+#
+```{r same-agg-yrimmig}#
+acs_prop_yrimmig_policy <- acs_prop_yrimmig %>%#
+  left_join(lgbt_policy, by = c('yrimmig' = 'year', 'bpldid' = 'Code')) %>%#
+  filter(!is.na(origin_score)) %>%#
+  mutate(prop_same_sex = prop_same_sex*100,#
+         prop_dif_sex = prop_dif_sex*100,#
+         prop_same_std = (prop_same_sex - mean(prop_same_sex))/sd(prop_same_sex),#
+         prop_dif_std = (prop_dif_sex - mean(prop_dif_sex))/sd(prop_dif_sex),#
+         origin_std = (origin_score - mean(origin_score))/sd(origin_score),#
+         yr_fac = as.factor(yrimmig))#
+#
+ag <- lm(prop_same_sex ~ origin_score, #
+         data = acs_prop_yrimmig_policy) #
+ag_time <- lm(prop_same_sex ~ origin_score + yrimmig, #
+              data = acs_prop_yrimmig_policy) #
+ag_time2 <- lm(prop_same_sex ~ origin_score + yrimmig + I(yrimmig^2), #
+               data = acs_prop_yrimmig_policy) #
+ag_fe <- lm(prop_same_sex ~ origin_score + bpld, #
+            data = acs_prop_yrimmig_policy) #
+ag_time2_fe <- lm(prop_same_sex ~ origin_score + yrimmig + I(yrimmig^2) + bpld, #
+                  data = acs_prop_yrimmig_policy)#
+ag_fe_2 <- lm(prop_same_sex ~ origin_score + bpld + yr_fac, #
+                  data = acs_prop_yrimmig_policy)#
+#
+se_list <- list()#
+mod_list <- list(ag, ag_time, ag_time2, ag_fe, ag_time2_fe, ag_fe_2)#
+for(mod_num in 1:length(mod_list)){#
+  se_list[[mod_num]] <- diag(vcovCL(mod_list[[mod_num]], cluster = ~bpld))#
+}#
+#
+stargazer(mod_list,#
+          header = F, #
+          keep = c('origin_score', 'yrimmig', 'I(yrimmig^2)'),#
+          se = se_list,#
+          add.lines = list(c('Country FEs?', 'no', 'no', 'no', 'yes', 'yes', 'yes'),#
+                           c('Year of immigration FEs?', 'no', 'no', 'no', 'no', 'no', 'yes'),#
+                           c('Country clustered SEs?', rep('yes', 6))),#
+          keep.stat = c('n', 'rsq'),#
+          label = 'tab:same-agg-yrimmig',#
+          title = '100*Proportion same-sex in a country-year of immigration')#
+#
+```#
+#
+```{r agg-multi}#
+ag_mle <- lmer(prop_same_sex ~ origin_score + (1 | bpld), #
+         data = acs_prop_yrimmig_policy) #
+ag_time_mle <- lmer(prop_same_sex ~ origin_score + yrimmig + (1 | bpld), #
+              data = acs_prop_yrimmig_policy) #
+ag_time2_mle <- lmer(prop_same_sex ~ origin_score + yrimmig + I(yrimmig^2) + (1 | bpld), #
+               data = acs_prop_yrimmig_policy) #
+ag_yr_mle <- lmer(prop_same_sex ~ origin_score + (1 | bpld) + (1 | yr_fac), #
+         data = acs_prop_yrimmig_policy) #
+mod_list <- list(ag_mle, ag_time_mle, ag_time2_mle, ag_yr_mle)#
+stargazer(mod_list,#
+          header = F, #
+          keep = c('origin_score', 'yrimmig', 'I(yrimmig^2)'),#
+          add.lines = list(c('Country REs?', rep('yes', 4)),#
+                           c('Year of immigration REs?', rep('no', 3), 'yes')),#
+          keep.stat = c('n', 'aic', 'bic'),#
+          label = 'tab:agg-multi',#
+          title = 'Multilevel models: 100*Proportion same-sex in a country-year of immigration')#
+```#
+#
+Table \ref{tab:same-agg-yrimmig} shows that countries with more pro-LGBT policies tend to send more immigrants who end up in same-sex couples. A one-point increase in the sending country policy scale is associated with  a 0.04 to 0.08 percentage-point increase in proportion immigrants in same-sex couples who immigrated in that year. Table \ref{tab:agg-multi} shows estimates for multilevel models.  #
+#
+Table \ref{tab:same-agg-yrimmig-country} incorporates origin country-level variables from a classical gravity model. From CEPII's GeoDist dataset, it includes measures of a (population-weighted) distance, contiguous border, a common official language, a common ethnic language, and whether the country was a former US colony. We include a measure of difference in wages (in 1000s of 2011 US dollars) from the Penn World Table, and the difference in unemployment rate using World Bank data. Finally, we use Polity5 measures of democratization of the country of origin. All variables are matched to year of immigration and country of origin. #
+```{r same-agg-yrimmig-country, eval = F}#
+ag_country <- lm(prop_same_sex ~ distw + contig + comlang_off + comlang_ethno + colony +#
+                   wage_dif + unemp_dif + polity5, #
+         data = acs_prop_yrimmig_policy)#
+ag_country_org <- lm(prop_same_sex ~ distw + contig + comlang_off + comlang_ethno + colony +#
+                   wage_dif + unemp_dif + polity5 + origin_score, #
+         data = acs_prop_yrimmig_policy)#
+ag_country_fe <- lm(prop_same_sex ~ distw + contig + comlang_off + comlang_ethno + colony +#
+                   wage_dif + unemp_dif + polity5 + bpld, #
+         data = acs_prop_yrimmig_policy)#
+ag_country_org_fe <- lm(prop_same_sex ~ distw + contig + comlang_off + comlang_ethno + colony +#
+                   wage_dif + unemp_dif + polity5 + origin_score + bpld, #
+         data = acs_prop_yrimmig_policy)#
+ag_country_ml <- lmer(prop_same_sex ~ distw + contig + comlang_off + comlang_ethno + colony +#
+                   wage_dif + unemp_dif + polity5 + (1 | bpld), #
+         data = acs_prop_yrimmig_policy)#
+ag_country_org_ml <- lmer(prop_same_sex ~ distw + contig + comlang_off + comlang_ethno + colony +#
+                   wage_dif + unemp_dif + polity5 + origin_score + (1 | bpld), #
+         data = acs_prop_yrimmig_policy)#
+se_list <- list()#
+mod_list <- list(ag_country, ag_country_org, ag_country_fe, ag_country_org_fe)#
+for(mod_num in 1:length(mod_list)){#
+  se_list[[mod_num]] <- diag(vcovCL(mod_list[[mod_num]], cluster = ~bpld))#
+}#
+se_list[[5]] <- NULL#
+se_list[[6]] <- NULL#
+#
+stargazer(mod_list,#
+          header = F, #
+          keep = all.vars(formula(ag_country_org)[-2]),#
+          add.lines = list(c('Country REs?', rep('no', 4), 'yes', 'yes'),#
+                           c('Country FEs?', 'no', 'no', 'yes', 'yes', 'no', 'no')),#
+          se = se_list,#
+          keep.stat = c('n', 'rsq', 'aic', 'bic'),#
+          label = 'tab:same-agg-yrimmig-country',#
+          title = 'Gravity models: 100*Proportion same-sex in a country-year of immigration')#
+```#
+```{r dif-agg-yrimmig}#
+ag <- lm(prop_dif_sex ~ origin_score, data = acs_prop_yrimmig_policy)#
+ag_time <- lm(prop_dif_sex ~ origin_score + yrimmig, data = acs_prop_yrimmig_policy)#
+ag_time2 <- lm(prop_dif_sex ~ origin_score + yrimmig + I(yrimmig^2), data = acs_prop_yrimmig_policy)#
+ag_fe <- lm(prop_dif_sex ~ origin_score + bpld, #
+            data = acs_prop_yrimmig_policy)#
+ag_time2_fe <- lm(prop_dif_sex ~ origin_score + yrimmig + I(yrimmig^2) + bpld, #
+                  data = acs_prop_yrimmig_policy)#
+ag_fe_2 <- lm(prop_dif_sex ~ origin_score + bpld + yr_fac, #
+                  data = acs_prop_yrimmig_policy)#
+stargazer(ag, ag_time, ag_time2, ag_fe, ag_time2_fe, ag_fe_2,#
+          header = F, #
+          keep = c('origin_score', 'yrimmig', 'I(yrimmig^2)'),#
+          add.lines = list(c('Country FEs?', 'no', 'no', 'no', 'yes', 'yes', 'yes'),#
+                           c('Year of immigration FEs?', 'no', 'no', 'no', 'no', 'no', 'yes')),#
+          keep.stat = c('n', 'rsq'),#
+          label = 'tab:dif-agg-yrimmig',#
+          title = '100*Proportion different-sex in a country-year of immigration')#
+#
+```#
+# Dyadic data: by survey year (focus on state effects)#
+We reshape the data so that is yearly dyads: each observation is the proportion of immigrants that is in same-sex couples out of all those from country $x$ in state $y$ in survey year $z$ (using survey weights). We multiply this proportion by 100 for interpretability as percentage points. We merge in the sending-country policy index for the average year of immigration for these immigrants.  #
+```{r same-fixed, results = 'asis'}#
+acs_dyad_policy$same_prop <- acs_dyad_policy$same_sex_stock/acs_dyad_policy$state_stock_year * 100#
+acs_dyad_policy$dif_prop <- acs_dyad_policy$opp_sex_stock/acs_dyad_policy$state_stock_year * 100#
+#
+# Same-sex models#
+same_dyad_origin <- lm(same_prop ~ origin_score, data = acs_dyad_policy)#
+same_dyad_state <- lm(same_prop ~ state_policy, data = acs_dyad_policy)#
+same_dyad_origin_state <- lm(same_prop ~ origin_score + state_policy, data = acs_dyad_policy)#
+same_dyad_fixed_state <- lm(same_prop ~ origin_score + state_policy + state, data = acs_dyad_policy)#
+same_dyad_fixed_state_year <- lm(same_prop ~ origin_score + state_policy + state + as.factor(year), data = acs_dyad_policy)#
+same_dyad_stock <- lm(same_prop ~ origin_score + state_policy + state_stock_year + state + as.factor(year), data = acs_dyad_policy)#
+#
+stargazer(same_dyad_origin, same_dyad_state, same_dyad_origin_state, same_dyad_fixed_state,#
+          same_dyad_fixed_state_year, same_dyad_stock,#
+          header = F, #
+          keep = c('origin_score', 'state_policy', 'state_stock_year'),#
+          add.lines = list(c('State FEs?', 'no', 'no', 'no', 'yes', 'yes', 'yes'),#
+                           c('Year FEs?', 'no', 'no', 'no', 'no', 'yes', 'yes')),#
+          keep.stat = c('n', 'rsq'),#
+          label = 'tab:same-fixed',#
+          title = '100*Proportion same-sex in a country-state-year')#
+```#
+#
+```{r dif-fixed, results = 'asis'} #
+# Diff-sex "placebo" models#
+dif_dyad_origin <- lm(dif_prop ~ origin_score, data = acs_dyad_policy)#
+dif_dyad_state <- lm(dif_prop ~ state_policy, data = acs_dyad_policy)#
+dif_dyad_origin_state <- lm(dif_prop ~ origin_score + state_policy, data = acs_dyad_policy)#
+dif_dyad_fixed_state <- lm(dif_prop ~ origin_score + state_policy + state, data = acs_dyad_policy)#
+dif_dyad_fixed_state_year <- lm(dif_prop ~ origin_score + state_policy + state + as.factor(year), data = acs_dyad_policy)#
+dif_dyad_stock <- lm(dif_prop ~ origin_score + state_policy + state_stock_year + state + as.factor(year), data = acs_dyad_policy)#
+stargazer(dif_dyad_origin, dif_dyad_state, dif_dyad_origin_state, dif_dyad_fixed_state,#
+          dif_dyad_fixed_state_year, dif_dyad_stock,#
+          header = F, #
+          keep = c('origin_score', 'state_policy', 'state_stock_year'),#
+          add.lines = list(c('State FEs?', 'no', 'no', 'no', 'yes', 'yes', 'yes'),#
+                           c('Year FEs?', 'no', 'no', 'no', 'no', 'yes', 'yes')),#
+          keep.stat = c('n', 'rsq'), #
+          label = 'tab:dif-fixed',#
+          title = '100*Proportion different-sex in a country-state-year')#
+#
+percent_same_sex <- sum(acs_dyad$same_sex_stock)/sum(acs_dyad$state_stock_year) *100#
+#
+```#
+In Table \ref{tab:same-fixed}, the coefficient for state policy is insignificant in most models, although it is generally positive, implying that states with more LGBT-friendly policies have a somewhat higher proportion of immigrants in same-sex couples. We further investigate state policy effects below. Table \ref{tab:same-fixed} also  shows a significant, positive effect for LGBT policy score of the host country, implying that an increase in policy friendliness by 1 point in an origin country is associated with a 0.04 to 0.06 percentage point increase in proportion of immigrants from that country in same-sex couples. Since the proportion of immigrants in same-sex couples is only `r percent_same_sex` percent, this constitutes a substantive effect. LGB immigrants tend to come from countries with more queer-friendly policies.  #
+#
+As a comparison, Table \ref{tab:dif-fixed} fits the same models, but with proportion immigrants in different-sex couples as an outcome. Interestingly, here origin score is in the opposite direction, and state policy is now significant, and highly positive when fixed effects are included. This implies that immigrants in different-sex couples are more likely to come from countries with more oppressive LGBT laws and tend to live in more accepting areas in the U.S. This may be due to family-friendly policies, since this outcome variable mostly captures coupled immigrants as a proportion of all immigrants from a given country.#
+# Individual analysis #
+For the individual analysis, we focus on U.S. state policies: conditional on migrating to the U.S., do immigrants in same-sex couples live in areas with more LGBT-friendly policies, compared to those in different-sex couples? The outcome variable is state policy, which is treated as continuous in OLS models and as three binned, ordered categories for ordered logit models.#
+```{r ind-setup}#
+# Binning state policy into three categories#
+state_policy$state_policy_binned <- cut(state_policy$state_policy, breaks = c(-2,0,2, Inf), #
+                                        labels = c("Repressive", "Neutral", "Progressive"))    #
+#
+## Getting this onto the ACS data now#
+acs_couple_policy <- acs_coupled_imms  %>%#
+  mutate(yrimmig = ifelse(yrimmig >= 1991, #
+                          round(yrimmig),#
+                          1991)) %>%#
+  left_join(lgbt_policy, by = c('yrimmig' = 'year', 'bpldid' = 'Code')) %>%#
+  left_join(state_policy,by = c('year' = 'Year', 'state' = 'State')) %>%#
+  # adding (log) income variables#
+  mutate(pos_income = ifelse(inctot >= 0, inctot, 0),#
+         no_income = (inctot <= 0),#
+         log_income = log(pos_income+1))#
+# Smaller dataset for initial ordered logit analyses#
+set.seed(1859)#
+acs_couple_policy_small <- bind_rows(#
+  filter(acs_couple_policy, same_sex == T),#
+  sample_n(filter(acs_couple_policy, same_sex == F), 1e5)#
+)#
+```#
+#
+```{r ind-ols}#
+ind_basic <- lm(state_policy ~ same_sex,#
+                data = acs_couple_policy)#
+ind_origin <- lm(state_policy ~ same_sex*origin_score,#
+                data = acs_couple_policy)#
+ind_controls <- lm(state_policy ~ same_sex + sex + age + educ + nchild + log_income + no_income + yrimmig,#
+                data = acs_couple_policy)#
+ind_interact <- lm(state_policy ~ same_sex*(origin_score + sex + age + educ + #
+                   nchild + log_income + no_income + yrimmig),#
+                data = acs_couple_policy)#
+ind_fe <- ind_origin <- lm(state_policy ~ same_sex*origin_score + state + as.factor(year),#
+                data = acs_couple_policy)#
+ind_fe_interact <- lm(state_policy ~ same_sex*(origin_score + sex + age + educ + #
+                   nchild + log_income + no_income) + state + as.factor(year),#
+                data = acs_couple_policy)#
+#
+stargazer(ind_basic, ind_controls, ind_origin, ind_interact, ind_fe, ind_fe_interact,#
+          header = F, #
+          keep = all.vars(formula(ind_interact[-2])),#
+          add.lines = list(c('State FEs?', 'no', 'no', 'no', 'no', 'yes', 'yes'),#
+                           c('Year FEs?', 'no', 'no', 'no', 'no', 'yes', 'yes')),#
+          keep.stat = c('n', 'rsq'), #
+          label = 'tab:ind-ols',#
+          title = 'Individual OLS analysis of continuous state policy score',#
+          no.space = T)#
+#
+```#
+#
+```{r ind-fig, fig.cap = 'Predicted LGBT state policy environments (OLS interaction model)', eval = F}#
+Mode <- function(x) {#
+  ux <- unique(x)#
+  ux[which.max(tabulate(match(x, ux)))]#
+}#
+#
+acs.means <- acs_couple_policy %>% #
+  summarize(across(c(age, origin_score, yrimmig, nchild, log_income), mean, na.rm = T))#
+acs.modes <- acs_couple_policy %>% #
+  summarize(across(c(educ, no_income, sex), Mode))#
+#
+#Make a dataframe that's the mode of the factor variables vs. mean - one row data frame#
+#Two dataframes, one for same-sex and one for not. And then make two plots.#
+plot.dat <- bind_rows(rep(list(bind_cols(acs.means, acs.modes)),14)) %>%#
+  mutate(origin_score = -3:10)#
+#
+plot.dat.same <- plot.dat %>%#
+  mutate(same_sex = T)#
+plot.dat.dif <- plot.dat %>%#
+  mutate(same_sex = F)#
+#
+# Predicted probabilities#
+pred.same <- data.frame(predict(ind_interact, newdata=plot.dat.same, interval = "confidence"),#
+                        origin_score=plot.dat$origin_score,#
+                        same_sex = 'Same-Sex')#
+pred.dif <- data.frame(predict(ind_interact, newdata=plot.dat.dif, interval = "confidence"),#
+                        origin_score=plot.dat$origin_score,#
+                        same_sex = 'Different-Sex')#
+#
+bind_rows(pred.same, pred.dif) %>%#
+  rename(state_policy = fit) %>%#
+  ggplot(aes(x=origin_score, y=state_policy, fill=same_sex, col = same_sex)) +#
+  geom_line() +#
+  geom_ribbon(aes(ymin = lwr, ymax = upr), alpha = .3, col = 'transparent')#
+#
+```#
+Table \ref{tab:ind-ord} contains OLS estimates. Model 1, the simplest, shows that immigrants in same-sex couples live in states with on average 0.44 higher policy score (about half of one LGBT-friendly policy). This effect is basically unchanged in Model 2, which includes individual controls. Although including origin score in Model 3 renders the coefficient for state score to insignificant, including controls makes the effect significant and highly positive.  #
+#
+The interaction in Model 4 between same-sex couples and origin score is also positive: same-sex couples live in more LGBT-friendly states. The effect is difficult to interpret due to the interactions, so we plot the marginal effects in Figure \ref{fig:idn-ord}. We see that individuals in same-sex couples tend to live in more LGBT-friendly states regardless of origin score. But those who come from more LGBT-friendly countries tend to live in increasingly LGBT-friendly states. Immigrants in different-sex couples show the opposite relationship.  #
+#
+Models 5 and 6 include state and year fixed effects. Here the coefficient for same-sex couples is insigificant (or nearly so).#
+```{r ind-ord, eval = F}#
+ind_basic2 <- polr(state_policy_binned ~ same_sex,#
+                data = acs_couple_policy_small, Hess = T)#
+ind_origin2 <- polr(state_policy_binned ~ same_sex*origin_score,#
+                data = acs_couple_policy_small, Hess = T)#
+ind_controls2 <- polr(state_policy_binned ~ same_sex + sex + age + educ + nchild + log_income + no_income + yrimmig,#
+                data = acs_couple_policy_small, Hess = T)#
+ind_controls2 <- polr(state_policy_binned ~ same_sex + sex + age + educ + nchild + yrimmig,#
+                data = acs_couple_policy_small, Hess = T)#
+ind_interact2 <- polr(state_policy_binned ~ same_sex*(origin_score + sex + age + educ + #
+                   nchild + log_income + no_income + yrimmig),#
+                data = acs_couple_policy_small, Hess = T)#
+ind_fe2 <- ind_origin <- polr(state_policy_binned ~ same_sex*origin_score + state,#
+                data = acs_couple_policy_small, Hess = T)#
+ind_fe_interact2 <- polr(state_policy_binned ~ same_sex*(origin_score + sex + age + educ +#
+                   nchild + log_income + no_income) + state,#
+                data = acs_couple_policy_small, Hess = T)#
+#
+stargazer(ind_basic2, ind_controls2, ind_origin2, ind_interact2, #
+          ind_fe2, ind_fe_interact2,#
+          header = F, #
+          keep = all.vars(formula(ind_interact[-2])),#
+          add.lines = list(c('State FEs?', 'no', 'no', 'no', 'no', 'yes', 'yes'),#
+                           c('Year FEs?', 'no', 'no', 'no', 'no', 'no', 'no')),#
+          keep.stat = c('n', 'll'), #
+          label = 'tab:ind-ord',#
+          title = 'Individual ordered logit analysis of three-category state policy score',#
+          no.space = T)#
+```#
+#
+```{r ord-fig, fig.cap = 'Predicted probability of residing in three LGBT state policy environments', eval = F}#
+# Predicted probabilities#
+pprobs.same <- as.data.frame(predict(ind_interact2, type="probs", newdata=plot.dat.same)) %>%#
+  mutate(origin_score=plot.dat$origin_score) %>%#
+  gather(state_policy_binned, phat, -origin_score) %>%#
+  mutate(same_sex = 'Same-Sex')#
+pprobs.dif <- as.data.frame(predict(ind_interact2, type="probs", newdata=plot.dat.dif)) %>%#
+  mutate(origin_score=plot.dat$origin_score)  %>%#
+  gather(state_policy_binned, phat, -origin_score) %>%#
+  mutate(same_sex = 'Different-Sex')#
+#
+bind_rows(pprobs.same, pprobs.dif) %>%#
+  ggplot(aes(x=origin_score, y=phat, col=state_policy_binned)) +#
+  geom_line() + #
+  facet_wrap(~same_sex)#
+#
+```#
+#
+Table \ref{tab:ind-ord} conducts the same analysis as ordered logit models and reveals substantively the same results. (When I tried to include fixed effects for year the ordered logit models did not converge.) For interpretability, Model 4 (fully interacted) is used to predict probabilities in residing in each of the three LGBT policy categories (Figure \ref{fig:ord-fig}). The results support the conclusions from the OLS models: same-sex couples are more likely to live in LGBT-friendly states regardless of origin score, but this effect increases with origin score, and the opposite effect is found for different-sex couples.
+?rmarkdown::pandoc_available
+pandoc_available
+rmarkdown::pandoc_available()
+Sys.setenv(RSTUDIO_PANDOC="/Applications/RStudio.app/Contents/MacOS/pandoc")
+rmarkdown::render("/Users/nathan/Google Drive/Projects/2020 Same-Sex Immigrant Couples/ssimm/analysis/analysis.Rmd")
+here()
+setwd('/Users/nathan/Google Drive/Projects/2020 Same-Sex Immigrant Couples/ssimm/')
+rmarkdown::render("/Users/nathan/Google Drive/Projects/2020 Same-Sex Immigrant Couples/ssimm/analysis/analysis.Rmd")
+rmarkdown::render("/Users/nathan/Google Drive/Projects/2020 Same-Sex Immigrant Couples/ssimm/analysis/analysis.Rmd")
+rmarkdown::render("/Users/nathan/Google Drive/Projects/2020 Same-Sex Immigrant Couples/ssimm/analysis/analysis.Rmd")
+rmarkdown::render("/Users/nathan/Google Drive/Projects/2020 Same-Sex Immigrant Couples/ssimm/analysis/analysis.Rmd")
+rmarkdown::render("/Users/nathan/Google Drive/Projects/2020 Same-Sex Immigrant Couples/ssimm/analysis/analysis.Rmd")
+rmarkdown::render("/Users/nathan/Google Drive/Projects/2020 Same-Sex Immigrant Couples/ssimm/analysis/analysis.Rmd")
+rmarkdown::render("/Users/nathan/Google Drive/Projects/2020 Same-Sex Immigrant Couples/ssimm/analysis/analysis.Rmd")
+rmarkdown::render("/Users/nathan/Google Drive/Projects/2020 Same-Sex Immigrant Couples/ssimm/analysis/analysis.Rmd")
+rmarkdown::render("/Users/nathan/Google Drive/Projects/2020 Same-Sex Immigrant Couples/ssimm/analysis/analysis.Rmd")
