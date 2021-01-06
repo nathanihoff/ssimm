@@ -13,7 +13,9 @@ linkcolor: blue
 ---
 
 ```{r setup, include=F}
-knitr::opts_chunk$set(echo = F, warning = F, message = F, cache = T, results = 'asis')
+knitr::opts_chunk$set(echo = F, warning = F, message = F, cache = T, results = 'asis',
+                      cache.lazy = F)
+library(mvtnorm)
 library(ordinal)
 library(lme4)
 library(MASS)
@@ -120,7 +122,7 @@ state_policy <- state_policy %>%
   mutate(state_policy = -sodomy_illega + -marriage_ban + marriage_equality + civil_union + 
            employment_discrim_so + hate_crime_so + joint_adoption + -adoption_religious_freedom +
            conversion_therapy_ban + housing_discrim_so + state_ban_local_nondiscrimimation) %>%
-  select(State, Year, state_policy)
+  select(State, Year, state_policy, state_couple_laws)
 
 
 
@@ -400,7 +402,82 @@ stargazer(same_dyad_state1, same_dyad_state5, same_dyad_state6, same_dyad_state2
 # cor(acs_dyad_policy$state_policy, log(acs_dyad_policy$state_income), use = 'complete.obs')
 ```
 
-Finally, we repeat some of the above analyses with multilevel models.
+Table \ref{tab:tab:same-couple-laws} looks at the influence of LGBT laws related to couples rather than more generally.
+
+```{r same-couple-laws}
+same_dyad_couple1 <- lm(same_prop ~ state_couple_laws, 
+                       data = acs_dyad_policy)
+same_dyad_couple2 <- lm(same_prop ~ state_couple_laws + origin_score, 
+                       data = acs_dyad_policy)
+same_dyad_couple3 <- lm(same_prop ~ state_unemploy + state_income + state_couple_laws, 
+                       data = acs_dyad_policy)
+same_dyad_couple4 <- lm(same_prop ~ state_unemploy + state_income + state + state_couple_laws, 
+                       data = acs_dyad_policy)
+same_dyad_couple5 <- lm(same_prop ~ state_unemploy + state_income + state + state_couple_laws + origin_score, 
+                       data = acs_dyad_policy)
+
+
+
+
+stargazer(same_dyad_couple1, same_dyad_couple2, same_dyad_couple3, same_dyad_couple4,
+          same_dyad_couple5,
+          header = F, 
+          keep = c('origin_score', 'state_couple_laws', 'state_stock_year', 'state_unemploy', 
+                   'state_income', 'state_stock_year'),
+          add.lines = list(c('State FEs?', 'no', 'no', 'no', rep('yes', 2))),
+          keep.stat = c('n', 'rsq'),
+          label = 'tab:same-couple-laws',
+          title = 'Couple policies: 100*Proportion same-sex in a country-state-year')
+```
+
+Table \ref{tab:same-fixed-country} adds country-of-origin variables to test whether they are confounding the effect of LGBT policy score.
+
+```{r same-fixed-country}
+
+same_dyad_country1 <- lm(same_prop ~ state_policy + origin_score + distw + contig + 
+                          comlang_off + comlang_ethno + colony +
+                          wage_dif + unemp_dif + polity5, 
+                       data = acs_dyad_policy)
+same_dyad_country2 <- lm(same_prop ~ state_policy + origin_score + distw + contig + 
+                          comlang_off + comlang_ethno + colony +
+                          wage_dif + unemp_dif + polity5 + Country, 
+                       data = acs_dyad_policy)
+same_dyad_country3 <- lmer(same_prop ~ state_policy + origin_score + distw + contig + 
+                          comlang_off + comlang_ethno + colony +
+                          wage_dif + unemp_dif + polity5 + (1 | Country), 
+                       data = acs_dyad_policy)
+same_dyad_country4 <- lmer(same_prop ~ state_policy + origin_score + distw + contig + 
+                          comlang_off + comlang_ethno + colony +
+                          wage_dif + unemp_dif + polity5 + 
+                            (1 | Country) + (1| state), 
+                       data = acs_dyad_policy)
+same_dyad_country5 <- lm(same_prop ~ state_policy + origin_score + distw + contig + 
+                          comlang_off + comlang_ethno + colony +
+                          wage_dif + unemp_dif + polity5 + 
+                           state_unemploy + state_income, 
+                       data = acs_dyad_policy)
+same_dyad_country6<- lm(same_prop ~ state_policy + origin_score + distw + contig + 
+                          comlang_off + comlang_ethno + colony +
+                          wage_dif + unemp_dif + polity5 + 
+                           state_unemploy + state_income + Country + state, 
+                       data = acs_dyad_policy)
+
+stargazer(same_dyad_country1, same_dyad_country2, same_dyad_country3,
+          same_dyad_country4, same_dyad_country5, same_dyad_country6,
+          header = F, 
+          keep = all.vars(formula(same_dyad_country5)[-2]),
+          add.lines = list(c('State FEs?', rep('no', 5), 'yes'),
+                           c('Country FEs?', 'yes', rep('no', 4), 'yes'),
+                           c('State REs?', rep('no', 3), 'yes', 'no', 'no'),
+                           c('Country REs?', 'no', 'no', 'yes', rep('no', 3))),
+          keep.stat = c('n', 'rsq', 'll'),
+          label = 'tab:same-fixed-country',
+          title = 'Country controls: 100*Proportion same-sex in a country-state-year')
+
+
+```
+
+Finally, we repeat some of the above analyses with multilevel models in table \ref{tab:state-multi}.
 
 ```{r state-multi}
 same_dyad_m1 <- lmer(same_prop ~ state_policy + (1 | state), 
@@ -478,12 +555,20 @@ ind_fe_interact <- lm(state_policy ~ same_sex*(origin_score + sex + age + educ +
                    nchild + log_income + no_income) + state + as.factor(year),
                 data = acs_couple_policy)
 
-stargazer(ind_basic, ind_controls, ind_origin, ind_interact, ind_fe, ind_fe_interact,
+se_list <- list()
+mod_list <- list(ind_basic, ind_controls, ind_origin, ind_interact, ind_fe, ind_fe_interact)
+for(mod_num in 1:length(mod_list)){
+  se_list[[mod_num]] <- diag(vcovCL(mod_list[[mod_num]], cluster = ~bpld))
+}
+
+stargazer(mod_list,
           header = F, 
           keep = all.vars(formula(ind_interact[-2])),
           add.lines = list(c('State FEs?', 'no', 'no', 'no', 'no', 'yes', 'yes'),
-                           c('Year FEs?', 'no', 'no', 'no', 'no', 'yes', 'yes')),
+                           c('Year FEs?', 'no', 'no', 'no', 'no', 'yes', 'yes'),
+                           c('Origin clust-SEs?', rep('yes', 6))),
           keep.stat = c('n', 'rsq'), 
+          se = se_list,
           label = 'tab:ind-ols',
           title = 'Individual OLS analysis of continuous state policy score',
           no.space = T)
@@ -545,18 +630,25 @@ ind_controls2 <- polr(state_policy_binned ~ same_sex + sex + age + educ + nchild
 ind_interact2 <- polr(state_policy_binned ~ same_sex*(origin_score + sex + age + educ + 
                    nchild + log_income + no_income + yrimmig),
                 data = acs_couple_policy_small, Hess = T)
-ind_fe2 <- ind_origin <- polr(state_policy_binned ~ same_sex*origin_score + state,
+ind_fe2 <- ind_origin <- polr(state_policy_binned ~ same_sex*origin_score + Country,
                 data = acs_couple_policy_small, Hess = T)
 ind_fe_interact2 <- polr(state_policy_binned ~ same_sex*(origin_score + sex + age + educ +
-                   nchild + log_income + no_income) + state,
+                   nchild + log_income + no_income) + Country,
                 data = acs_couple_policy_small, Hess = T)
 
-stargazer(ind_basic2, ind_controls2, ind_origin2, ind_interact2, 
-          ind_fe2, ind_fe_interact2,
+se_list <- list()
+mod_list <- list(ind_basic2, ind_controls2, ind_origin2, ind_interact2, 
+          ind_fe2, ind_fe_interact2)
+for(mod_num in 1:length(mod_list)){
+  se_list[[mod_num]] <- diag(vcovCL(mod_list[[mod_num]], cluster = ~bpld))
+}
+
+stargazer(mod_list,
           header = F, 
           keep = all.vars(formula(ind_interact[-2])),
-          add.lines = list(c('State FEs?', 'no', 'no', 'no', 'no', 'yes', 'yes'),
-                           c('Year FEs?', 'no', 'no', 'no', 'no', 'no', 'no')),
+          se = se_list,
+          add.lines = list(c('Country FEs?', 'no', 'no', 'no', 'no', 'yes', 'yes'),
+                           c('Origin clust-SEs?', rep('yes', 6))),
           keep.stat = c('n', 'll'), 
           label = 'tab:ind-ord',
           title = 'Individual ordered logit analysis of three-category state policy score',
@@ -565,7 +657,7 @@ stargazer(ind_basic2, ind_controls2, ind_origin2, ind_interact2,
 
 
 
-```{r ord-fig, fig.cap = 'Predicted probability of residing in three LGBT state policy environments'}
+```{r ord-fig-noci, fig.cap = 'Predicted probability of residing in three LGBT state policy environments', eval = F}
 # Predicted probabilities
 pprobs.same <- as.data.frame(predict(ind_interact2, type="probs", newdata=plot.dat.same)) %>%
   mutate(origin_score=plot.dat$origin_score) %>%
@@ -576,14 +668,72 @@ pprobs.dif <- as.data.frame(predict(ind_interact2, type="probs", newdata=plot.da
   gather(state_policy_binned, phat, -origin_score) %>%
   mutate(same_sex = 'Different-Sex')
 
-bind_rows(pprobs.same, pprobs.dif) %>%
+# Plot
+ord_plot <- bind_rows(pprobs.same, pprobs.dif) %>%
   ggplot(aes(x=origin_score, y=phat, col=state_policy_binned)) +
   geom_line() + 
   facet_wrap(~same_sex)
+```
+
+```{r ord-fig, fig.cap = 'Predicted probability of residing in three LGBT state policy environments'}
+# Confidence intervals
+set.seed(1858)
+sims <- 250
+sim_mod <- list(sims)
+pseudeo_mod <- ind_interact2
+k <- length(coef(ind_interact2))
+
+for (i in 1:sims) {
+  theta <- as.numeric(rmvnorm(1, mean=c(coef(ind_interact2), ind_interact2$zeta),
+                              sigma=vcov(ind_interact2)))
+  pseudeo_mod$coefficients <- theta[1:k]
+  pseudeo_mod$zeta <- theta[(k+1):length(theta)]
+  sim_mod[[i]] <- as.data.frame(cbind(i,-3:10, predict(pseudeo_mod, 
+                                   newdata=plot.dat.same, type="probs")))
+  names(sim_mod[[i]]) <- c("iter","origin_score", names(sim_mod[[i]])[3:5]) 
+}
+sim_mod_same <- bind_rows(sim_mod) %>%
+              gather(state_policy_binned, phat, -iter, -origin_score) %>%
+              group_by(origin_score, state_policy_binned) %>%
+              dplyr::summarize(phat.se = sd(phat),
+                               phat.mean = mean(phat),
+                               phat.lo = phat.mean - 1.96*phat.se,
+                               phat.hi = phat.mean + 1.96*phat.se) %>%
+  mutate(same_sex = 'Same-Sex')
+
+
+sims <- 250
+sim_mod <- list(sims)
+pseudeo_mod <- ind_interact2
+k <- length(coef(ind_interact2))
+
+for (i in 1:sims) {
+  theta <- as.numeric(rmvnorm(1, mean=c(coef(ind_interact2), ind_interact2$zeta),
+                              sigma=vcov(ind_interact2)))
+  pseudeo_mod$coefficients <- theta[1:k]
+  pseudeo_mod$zeta <- theta[(k+1):length(theta)]
+  sim_mod[[i]] <- as.data.frame(cbind(i,-3:10, predict(pseudeo_mod, 
+                                   newdata=plot.dat.dif, type="probs")))
+  names(sim_mod[[i]]) <- c("iter","origin_score", names(sim_mod[[i]])[3:5]) 
+}
+sim_mod_dif<- bind_rows(sim_mod) %>%
+              gather(state_policy_binned, phat, -iter, -origin_score) %>%
+              group_by(origin_score, state_policy_binned) %>%
+              dplyr::summarize(phat.se = sd(phat),
+                               phat.mean = mean(phat),
+                               phat.lo = phat.mean - 1.96*phat.se,
+                               phat.hi = phat.mean + 1.96*phat.se) %>%
+  mutate(same_sex = 'Different-Sex')
+
+bind_rows(sim_mod_same, sim_mod_dif) %>%
+  ggplot(aes(x=origin_score, y=phat.mean, col=state_policy_binned)) +
+  geom_line() + 
+  geom_ribbon(aes(ymin=phat.lo, ymax=phat.hi, 
+                  fill = state_policy_binned, col = NULL), alpha = .2) +
+  facet_wrap(~same_sex) +
+  ggtitle('Predicted probability of state policy, with 95% CIs')
 
 ```
 
-Table \ref{tab:ind-ord} conducts the same analysis as ordered logit models and reveals substantively the same results. (When I tried to include fixed effects for year the ordered logit models did not converge.) For interpretability, Model 4 (fully interacted) is used to predict probabilities in residing in each of the three LGBT policy categories (Figure \ref{fig:ord-fig}). The results support the conclusions from the OLS models: same-sex couples are more likely to live in LGBT-friendly states regardless of origin score, but this effect increases with origin score, and the opposite effect is found for different-sex couples.
-
-
+Table \ref{tab:ind-ord} conducts the same analysis as ordered logit models and reveals substantively the same results. (When I tried to include fixed effects for year the ordered logit models did not converge.) For interpretability, Model 4 (fully interacted) is used to predict probabilities in residing in each of the three LGBT policy categories (Figure \ref{fig:ord-fig}). The results support the conclusions from the OLS models: same-sex couples are more likely to live in LGBT-friendly states regardless of origin score, but this effect increases with origin score, and the opposite effect is found for different-sex couples.  
 
