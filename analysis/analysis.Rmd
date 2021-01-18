@@ -735,6 +735,7 @@ sim_mod_same <- bind_rows(sim_mod) %>%
                                phat.hi = phat.mean + 1.96*phat.se) %>%
   mutate(same_sex = 'Same-Sex')
 
+<<<<<<< HEAD
 
 sims <- 250
 sim_mod <- list(sims)
@@ -767,6 +768,40 @@ bind_rows(sim_mod_same, sim_mod_dif) %>%
   facet_wrap(~same_sex) +
   ggtitle('Predicted probability of state policy, with 95% CIs')
 
+=======
+
+sims <- 250
+sim_mod <- list(sims)
+pseudeo_mod <- ind_interact2
+k <- length(coef(ind_interact2))
+
+for (i in 1:sims) {
+  theta <- as.numeric(rmvnorm(1, mean=c(coef(ind_interact2), ind_interact2$zeta),
+                              sigma=vcov(ind_interact2)))
+  pseudeo_mod$coefficients <- theta[1:k]
+  pseudeo_mod$zeta <- theta[(k+1):length(theta)]
+  sim_mod[[i]] <- as.data.frame(cbind(i,-3:10, predict(pseudeo_mod, 
+                                   newdata=plot.dat.dif, type="probs")))
+  names(sim_mod[[i]]) <- c("iter","origin_score", names(sim_mod[[i]])[3:5]) 
+}
+sim_mod_dif<- bind_rows(sim_mod) %>%
+              gather(state_policy_binned, phat, -iter, -origin_score) %>%
+              group_by(origin_score, state_policy_binned) %>%
+              dplyr::summarize(phat.se = sd(phat),
+                               phat.mean = mean(phat),
+                               phat.lo = phat.mean - 1.96*phat.se,
+                               phat.hi = phat.mean + 1.96*phat.se) %>%
+  mutate(same_sex = 'Different-Sex')
+
+bind_rows(sim_mod_same, sim_mod_dif) %>%
+  ggplot(aes(x=origin_score, y=phat.mean, col=state_policy_binned)) +
+  geom_line() + 
+  geom_ribbon(aes(ymin=phat.lo, ymax=phat.hi, 
+                  fill = state_policy_binned, col = NULL), alpha = .2) +
+  facet_wrap(~same_sex) +
+  ggtitle('Predicted probability of state policy, with 95% CIs')
+
+>>>>>>> 84954961048a0464fd2af4eac059f4c052442156
 ```
 
 Table \ref{tab:ind-ord} conducts the same analysis as ordered logit models and reveals substantively the same results. (When I tried to include fixed effects for year the ordered logit models did not converge.) For interpretability, Model 4 (fully interacted) is used to predict probabilities in residing in each of the three LGBT policy categories (Figure \ref{fig:ord-fig}). The results support the conclusions from the OLS models: same-sex couples are more likely to live in LGBT-friendly states regardless of origin score, but this effect increases with origin score, and the opposite effect is found for different-sex couples.  

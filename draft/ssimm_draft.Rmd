@@ -107,6 +107,31 @@ ggplot <- function(...) ggplot2::ggplot(...) + scale_color_brewer(palette="Dark2
 
 ```
 
+```{r load}
+acs_wide <- read.csv(here('data', 'acs_wide.csv'))
+acs_oneimm <- read.csv(here('data', 'acs_oneimm.csv'))
+acs_coupled_imms <- read.csv(here('data', 'acs_coupled_imms.csv'))
+acs_prop_yrimmig <- read.csv(here('data', 'acs_prop_yrimmig.csv'))
+acs_dyad <- read.csv(here('data', 'acs_dyad.csv'))
+acs_dyad_policy <- read.csv(here('data', 'acs_dyad_policy.csv'))
+```
+
+```{r intro}
+totals <- acs_wide %>%
+  filter(imm_couple != "none") %>%
+  group_by(same_sex,year) %>%
+  count(wt = hhwt) 
+
+filter(totals, same_sex == T)
+filter(totals, same_sex == F)
+
+length(unique(lgbt_policy$Country))
+```
+`r filter(totals, year == 2013, same_sex == F) %>% pull(n)/1e6` million  
+`r filter(totals, year == 2019, same_sex == F) %>% pull(n)/1e6` million  
+`r filter(totals, year == 2013, same_sex == T) %>% pull(n)/1e3` thousand  
+`r filter(totals, year == 2019, same_sex == T) %>% pull(n)/1e3` thousand  
+
 # Introduction
 Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Eget felis eget nunc lobortis mattis aliquam faucibus purus. Id semper risus in hendrerit. Adipiscing commodo elit at imperdiet dui accumsan. Penatibus et magnis dis parturient montes nascetur ridiculus. Sed viverra ipsum nunc aliquet bibendum enim facilisis. Cursus in hac habitasse platea dictumst quisque. Blandit turpis cursus in hac habitasse. Arcu dictum varius duis at consectetur lorem donec. Leo in vitae turpis massa sed elementum tempus. Suspendisse ultrices gravida dictum fusce ut placerat orci. Sed cras ornare arcu dui vivamus. Nulla malesuada pellentesque elit eget. Habitant morbi tristique senectus et. Fames ac turpis egestas sed tempus urna. Nibh mauris cursus mattis molestie. Scelerisque viverra mauris in aliquam sem. Ultrices in iaculis nunc sed augue lacus. Dui vivamus arcu felis bibendum ut tristique et egestas quis.
 
