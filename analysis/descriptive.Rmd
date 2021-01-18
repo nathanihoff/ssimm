@@ -62,6 +62,8 @@ acs_wide %>%
   xlim(2007, 2019) +
   theme(legend.position=c(.15,.35))
   # ggtitle('Total couples with immigrants')
+
+
 ```
 
 ## Married and unmarried same-sex couples over time

@@ -194,7 +194,7 @@ top_countries <- acs %>%
 
 
 write_csv(top_countries, here('data', 'top_countries.csv'))
-write_csv(acs_wide, here('data', 'acs_wide.csv'))
+write_csv(filter(acs_wide, imm_couple != 'none'), here('data', 'acs_wide.csv'))
 write_csv(acs_oneimm, here('data', 'acs_oneimm.csv'))
 write_csv(acs_coupled_imms, here('data', 'acs_coupled_imms.csv'))
 write_csv(acs_dyad, here('data', 'acs_dyad.csv'))
