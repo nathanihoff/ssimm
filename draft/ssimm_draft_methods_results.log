@@ -1,11 +1,11 @@
-This is XeTeX, Version 3.14159265-2.6-0.999992 (TeX Live 2020) (preloaded format=xelatex 2021.1.9)  17 JAN 2021 20:42
+This is XeTeX, Version 3.14159265-2.6-0.999992 (TeX Live 2020) (preloaded format=xelatex 2021.1.21)  22 JAN 2021 09:59
 entering extended mode
  restricted \write18 enabled.
  %&-line parsing enabled.
 **ssimm_draft_methods_results.tex
 (./ssimm_draft_methods_results.tex
 LaTeX2e <2020-10-01> patch level 4
-L3 programming layer <2020-12-07> xparse <2020-03-03> (/Users/nathan/Library/Ti
+L3 programming layer <2021-01-09> xparse <2020-03-03> (/Users/nathan/Library/Ti
 nyTeX/texmf-dist/tex/latex/base/article.cls
 Document Class: article 2020/04/10 v1.4m Standard LaTeX document class
 (/Users/nathan/Library/TinyTeX/texmf-dist/tex/latex/base/size11.clo
@@ -294,11 +294,15 @@ Package: placeins 2005/04/18  v 2.2
 )
 (/Users/nathan/Library/TinyTeX/texmf-dist/tex/latex/l3backend/l3backend-xetex.d
 ef
-File: l3backend-xetex.def 2020-09-24 L3 backend support: XeTeX
-\g__graphics_track_int=\count272
+File: l3backend-xetex.def 2021-01-09 L3 backend support: XeTeX
+(|extractbb --version)
+\c__kernel_sys_dvipdfmx_version_int=\count272
+\l__kernel_color_stack_int=\count273
+\g__graphics_track_int=\count274
 \l__pdf_internal_box=\box53
-\g__pdf_backend_object_int=\count273
-\g__pdf_backend_annotation_int=\count274
+\g__pdf_backend_object_int=\count275
+\g__pdf_backend_annotation_int=\count276
+\g__pdf_backend_link_int=\count277
 ) (./ssimm_draft_methods_results.aux)
 \openout1 = `ssimm_draft_methods_results.aux'.
 
@@ -372,7 +376,7 @@ Package: refcount 2019/12/15 v3.6 Data extraction from label references (HO)
 ring.sty
 Package: gettitlestring 2019/12/15 v1.6 Cleanup title references (HO)
 )
-\c@section@level=\count275
+\c@section@level=\count278
 )
 LaTeX Info: Redefining \ref on input line 136.
 LaTeX Info: Redefining \pageref on input line 136.
@@ -381,68 +385,77 @@ LaTeX Info: Redefining \nameref on input line 136.
 \@outlinefile=\write3
 \openout3 = `ssimm_draft_methods_results.out'.
 
-LaTeX Font Info:    Calculating math sizes for size <18> on input line 147.
-LaTeX Font Info:    Trying to load font information for OT1+ppl on input line 1
-47.
-(/Users/nathan/Library/TinyTeX/texmf-dist/tex/latex/psnfss/ot1ppl.fd
-File: ot1ppl.fd 2001/06/04 font definitions for OT1/ppl.
-)
-LaTeX Font Info:    Trying to load font information for OML+zplm on input line 
-147.
-(/Users/nathan/Library/TinyTeX/texmf-dist/tex/latex/psnfss/omlzplm.fd
-File: omlzplm.fd 2002/09/08 Fontinst v1.914 font definitions for OML/zplm.
-)
-LaTeX Font Info:    Trying to load font information for OMS+zplm on input line 
-147.
-(/Users/nathan/Library/TinyTeX/texmf-dist/tex/latex/psnfss/omszplm.fd
-File: omszplm.fd 2002/09/08 Fontinst v1.914 font definitions for OMS/zplm.
-)
-LaTeX Font Info:    Trying to load font information for OMX+zplm on input line 
-147.
-(/Users/nathan/Library/TinyTeX/texmf-dist/tex/latex/psnfss/omxzplm.fd
-File: omxzplm.fd 2002/09/08 Fontinst v1.914 font definitions for OMX/zplm.
-)
-LaTeX Font Info:    Trying to load font information for OT1+zplm on input line 
-147.
-(/Users/nathan/Library/TinyTeX/texmf-dist/tex/latex/psnfss/ot1zplm.fd
-File: ot1zplm.fd 2002/09/08 Fontinst v1.914 font definitions for OT1/zplm.
-)
-LaTeX Font Info:    Trying to load font information for TS1+ppl on input line 1
-47.
-(/Users/nathan/Library/TinyTeX/texmf-dist/tex/latex/psnfss/ts1ppl.fd
-File: ts1ppl.fd 2001/06/04 font definitions for TS1/ppl.
-)
 LaTeX Font Info:    Trying to load font information for T1+phv on input line 15
 2.
 (/Users/nathan/Library/TinyTeX/texmf-dist/tex/latex/psnfss/t1phv.fd
 File: t1phv.fd 2020/03/25 scalable font definitions for T1/phv.
+) [1
+
+]
+LaTeX Font Info:    Trying to load font information for OT1+ppl on input line 1
+90.
+(/Users/nathan/Library/TinyTeX/texmf-dist/tex/latex/psnfss/ot1ppl.fd
+File: ot1ppl.fd 2001/06/04 font definitions for OT1/ppl.
 )
+LaTeX Font Info:    Trying to load font information for OML+zplm on input line 
+190.
+(/Users/nathan/Library/TinyTeX/texmf-dist/tex/latex/psnfss/omlzplm.fd
+File: omlzplm.fd 2002/09/08 Fontinst v1.914 font definitions for OML/zplm.
+)
+LaTeX Font Info:    Trying to load font information for OMS+zplm on input line 
+190.
+(/Users/nathan/Library/TinyTeX/texmf-dist/tex/latex/psnfss/omszplm.fd
+File: omszplm.fd 2002/09/08 Fontinst v1.914 font definitions for OMS/zplm.
+)
+LaTeX Font Info:    Trying to load font information for OMX+zplm on input line 
+190.
+(/Users/nathan/Library/TinyTeX/texmf-dist/tex/latex/psnfss/omxzplm.fd
+File: omxzplm.fd 2002/09/08 Fontinst v1.914 font definitions for OMX/zplm.
+)
+LaTeX Font Info:    Trying to load font information for OT1+zplm on input line 
+190.
+(/Users/nathan/Library/TinyTeX/texmf-dist/tex/latex/psnfss/ot1zplm.fd
+File: ot1zplm.fd 2002/09/08 Fontinst v1.914 font definitions for OT1/zplm.
+)
+LaTeX Font Info:    Trying to load font information for T1+lmtt on input line 1
+92.
+(/Users/nathan/Library/TinyTeX/texmf-dist/tex/latex/lm/t1lmtt.fd
+File: t1lmtt.fd 2009/10/30 v1.6 Font defs for Latin Modern
+)
+
+LaTeX Warning: Reference `fig:toal-pop' on page 2 undefined on input line 200.
+
 File: ssimm_draft_methods_results_files/figure-latex/total-pop-1.pdf Graphic fi
 le (type pdf)
 <use ssimm_draft_methods_results_files/figure-latex/total-pop-1.pdf>
+File: ssimm_draft_methods_results_files/figure-latex/policy-desc-1.pdf Graphic 
+file (type pdf)
+<use ssimm_draft_methods_results_files/figure-latex/policy-desc-1.pdf>
+[2] [3] [4]
 
-LaTeX Warning: Float too large for page by 19.6724pt on input line 384.
+LaTeX Warning: Float too large for page by 19.6724pt on input line 374.
 
 
-LaTeX Warning: Float too large for page by 74.07236pt on input line 447.
+LaTeX Warning: Float too large for page by 74.07236pt on input line 437.
 
 File: ssimm_draft_methods_results_files/figure-latex/sim-1.pdf Graphic file (ty
 pe pdf)
 <use ssimm_draft_methods_results_files/figure-latex/sim-1.pdf>
-[1
+[5] [6] [7] [8] [9] (./ssimm_draft_methods_results.aux)
 
-] [2] [3] [4] [5] [6] [7] [8] (./ssimm_draft_methods_results.aux)
+LaTeX Warning: There were undefined references.
+
 Package rerunfilecheck Info: File `ssimm_draft_methods_results.out' has not cha
 nged.
-(rerunfilecheck)             Checksum: D9D6D03B3ED5D53DD6E75986D34CAE23;301.
+(rerunfilecheck)             Checksum: EE2050CD56F3602C1EE118D8D0674194;314.
  ) 
 Here is how much of TeX's memory you used:
- 9973 strings out of 479253
- 147377 string characters out of 5875639
- 472160 words of memory out of 5000000
- 29364 multiletter control sequences out of 15000+600000
- 433057 words of font info for 88 fonts, out of 8000000 for 9000
+ 9967 strings out of 479250
+ 147669 string characters out of 5875567
+ 471269 words of memory out of 5000000
+ 29357 multiletter control sequences out of 15000+600000
+ 418617 words of font info for 54 fonts, out of 8000000 for 9000
  14 hyphenation exceptions out of 8191
- 73i,11n,79p,1064b,339s stack positions out of 5000i,500n,10000p,200000b,80000s
+ 73i,11n,79p,1243b,337s stack positions out of 5000i,500n,10000p,200000b,80000s
 
-Output written on ssimm_draft_methods_results.pdf (8 pages).
+Output written on ssimm_draft_methods_results.pdf (9 pages).

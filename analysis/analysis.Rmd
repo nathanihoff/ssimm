@@ -735,7 +735,7 @@ sim_mod_same <- bind_rows(sim_mod) %>%
                                phat.hi = phat.mean + 1.96*phat.se) %>%
   mutate(same_sex = 'Same-Sex')
 
-<<<<<<< HEAD
+
 
 sims <- 250
 sim_mod <- list(sims)
@@ -768,7 +768,7 @@ bind_rows(sim_mod_same, sim_mod_dif) %>%
   facet_wrap(~same_sex) +
   ggtitle('Predicted probability of state policy, with 95% CIs')
 
-=======
+
 
 sims <- 250
 sim_mod <- list(sims)
@@ -801,7 +801,7 @@ bind_rows(sim_mod_same, sim_mod_dif) %>%
   facet_wrap(~same_sex) +
   ggtitle('Predicted probability of state policy, with 95% CIs')
 
->>>>>>> 84954961048a0464fd2af4eac059f4c052442156
+
 ```
 
 Table \ref{tab:ind-ord} conducts the same analysis as ordered logit models and reveals substantively the same results. (When I tried to include fixed effects for year the ordered logit models did not converge.) For interpretability, Model 4 (fully interacted) is used to predict probabilities in residing in each of the three LGBT policy categories (Figure \ref{fig:ord-fig}). The results support the conclusions from the OLS models: same-sex couples are more likely to live in LGBT-friendly states regardless of origin score, but this effect increases with origin score, and the opposite effect is found for different-sex couples.  
