@@ -50,7 +50,8 @@ acs_wide <- acs %>%
   pivot_wider(#id_cols = serial,
     names_from = position,
     values_from = c(sex, related, related, yrimmig, bpld, bpldid, citizen, educ,
-                    occ, inctot, occscore, hwsei, empstat, yrnatur, poverty, speakeng, age, perwt
+                    occ, inctot, occscore, hwsei, empstat, yrnatur, poverty, 
+                    speakeng, age, perwt
                     #state_stock_year, state_stock_avg
     )) %>%
   filter(!is.na(sex_partner), !is.na(sex_main)) %>%
@@ -141,6 +142,24 @@ acs_dyad_yrimmig <- acs_coupled_imms %>%
 
 acs_dyad <- left_join(acs_dyad, acs_dyad_yrimmig)
 
+acs_dyad2 <- acs_coupled_imms %>%
+  filter(year - yrimmig <= 1) %>%
+  group_by(bpld, state,  year, same_sex) %>%
+  count(wt = perwt, .drop = F) %>%
+  ungroup() %>%
+  mutate(same_sex = ifelse(same_sex == T, 'same_sex_stock', 'opp_sex_stock')) %>%
+  pivot_wider(names_from = 'same_sex', values_from = 'n') %>%
+  mutate(same_sex_stock = ifelse(is.na(same_sex_stock), 0, same_sex_stock),
+         opp_sex_stock = ifelse(is.na(opp_sex_stock), 0, opp_sex_stock)) %>%
+  left_join(country_year_df) 
+
+acs_dyad_yrimmig2 <- acs_coupled_imms %>%
+  filter(year - yrimmig <= 1) %>%
+  group_by(bpld,  year) %>%
+  summarize(mean_year_immig = weighted.mean(yrimmig, w = perwt, na.rm = T)) 
+
+acs_dyad2 <- left_join(acs_dyad2, acs_dyad_yrimmig2)
+
 
 # proportion same sex by year of immigration and country
 # no weights
@@ -198,3 +217,4 @@ write_csv(filter(acs_wide, imm_couple != 'none'), here('data', 'acs_wide.csv'))
 write_csv(acs_oneimm, here('data', 'acs_oneimm.csv'))
 write_csv(acs_coupled_imms, here('data', 'acs_coupled_imms.csv'))
 write_csv(acs_dyad, here('data', 'acs_dyad.csv'))
+write_csv(acs_dyad2, here('data', 'acs_dyad2.csv'))
