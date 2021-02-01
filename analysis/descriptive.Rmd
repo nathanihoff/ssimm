@@ -44,6 +44,37 @@ acs_coupled_imms <- acs_coupled_imms %>%
 
 ```
 
+```{r state-ranks, eval = F}
+same_tab <- acs_wide %>%
+  filter(same_sex == T) %>%
+  group_by(state) %>%
+  count(wt = hhwt) %>%
+  mutate(n = n/12) %>%
+  arrange(desc(n)) %>%
+  .[1:10,] %>%
+  rownames_to_column() %>%
+  select(`Same-sex rank` = rowname, State = state)
+
+dif_tab <- acs_wide %>%
+  filter(same_sex == F) %>%
+  group_by(state) %>%
+  count(wt = hhwt) %>%
+  mutate(n = n/12) %>%
+  arrange(desc(n)) %>%
+  .[1:10,] %>%
+  rownames_to_column() %>%
+  select(`Different-sex rank` = rowname, `State ` = state)
+
+bind_cols(dif_tab, ` ` = '', same_tab) %>%
+  kable(booktabs = T,
+        linesep = '',
+        caption = 'States ranked by average estimated number of couples containing one or two immigrants') %>%
+      footnote(general = "American Community Survey 2008-2019. Authors\' calculations.",
+           general_title = 'Source:',
+           footnote_as_chunk = T) 
+
+```
+
 # Scale of migration
 ## Different- and same-sex couples containing one or two immigrants
 ```{r}

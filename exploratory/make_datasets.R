@@ -1,3 +1,8 @@
+library(priceR)
+library(kableExtra)
+library(sjstats)
+library(imputeTS)
+library(countrycode)
 library(RColorBrewer)
 library(haven)
 library(cowplot)
@@ -17,8 +22,8 @@ acs <- read_dta('/Users/nathan/Data/ACS/acs_2008_2019.dta') %>%
     bpldid = as.numeric(bpld),
     state = stateicp,
     stateicp = as.numeric(stateicp),
-    ftotinc = ifelse(ftotinc == 9999999, NA, ftotinc*cpi99),
-    inctot = ifelse(inctot == 9999999, NA, inctot*cpi99),
+    ftotinc = ifelse(ftotinc == 9999999, NA, ftotinc*cpi99/1000),
+    inctot = ifelse(inctot == 9999999, NA, inctot*cpi99/1000),
     hwsei = ifelse(hwsei == 0000, NA, hwsei),
     occscore = ifelse(occscore == 00, NA, occscore),
     educ = case_when(
@@ -31,6 +36,7 @@ acs <- acs %>%
   mutate(bpldid = case_when(as_factor(bpld) == 'England' ~ 41300,
                             as_factor(bpld) == 'Korea' ~ 50220,
                             T ~ bpldid))
+
 
 # filter(acs, as.character(bpld) == 'england')
 # Define immigrant as someone born abroad not to US parents
@@ -209,8 +215,169 @@ top_countries <- acs %>%
 
 
 
+## Making final datasets ####
+dist_dat <- read_dta(here('data', 'dist_cepii.dta')) %>%
+  filter(iso_d == 'USA') %>%
+  select(-iso_d)
 
 
+
+# Wage difference = USA - country of origin
+penn_wages <- read.csv(here('data', 'penn_wages.csv')) %>%
+  mutate(pc_income = rgdpe /pop / 1000) %>%
+  select(iso_o = countrycode, country, year, pc_income, rgdpe, pop)
+usa_wages <- filter(penn_wages, iso_o == 'USA')
+penn_wages$wage_dif <- NA
+for(country_loop in unique(penn_wages$country)){
+  for(year in penn_wages$year[penn_wages$country == country_loop]){
+    penn_wages$wage_dif[penn_wages$year == year & penn_wages$country == country_loop] <-
+      usa_wages$pc_income[usa_wages$year == year] -
+      penn_wages$pc_income[penn_wages$year == year & penn_wages$country == country_loop]
+    # penn_wages$usa_pc_income[penn_wages$year == year & penn_wages$country == country_loop] <- 
+    #   usa_wages$pc_income[usa_wages$year == year]
+  }
+}
+penn_wages <- penn_wages %>%
+  mutate(wage_dif = adjust_for_inflation(wage_dif, 2017, "US", to_date = 1999))
+
+# filter(penn_wages, is.na(wage_dif) & !is.na(rgdpe)) %>%
+#   View()
+wb_unemp <- read_csv(here('data', 'world_bank_unemployment.csv')) %>%
+  pivot_longer(!1:4, names_to = 'year', values_to = 'unemployment') %>%
+  select(-`Indicator Name`, -`Indicator Code`) %>%
+  rename(country = `Country Name`, iso_o = `Country Code`) %>%
+  mutate(year = as.numeric(year))
+usa_unemp <- filter(wb_unemp, iso_o == 'USA')
+wb_unemp$unemp_dif <- NA
+for(year in usa_unemp$year){
+  for(country in unique(wb_unemp$country)){
+    wb_unemp$unemp_dif[wb_unemp$year == year & wb_unemp$country == country] <-
+      usa_unemp$unemployment[usa_unemp$year == year] -
+      wb_unemp$unemployment[wb_unemp$year == year & wb_unemp$country == country]
+  }
+}
+
+# vdem <- read.csv(here('data', 'V-Dem-CY-Core-v10.csv'))
+
+polity5 <- read.csv(here('data', 'polity5.csv')) %>%
+  mutate(iso_o1 = countrycode(scode, origin = 'cowc', destination = 'iso3c'),
+         iso_o2 = countrycode(country, origin = 'country.name', destination = 'iso3c'),
+         iso_o = ifelse(!is.na(iso_o1), iso_o1, iso_o2)) %>%
+  select(iso_o, country, year, polity5 = polity2) %>%
+  filter(!is.na(iso_o))
+
+# Linearly interpolate polity5 missing values during regime change
+polity5_list <- list()
+for(country_loop in unique(polity5$iso_o)){
+  polity5_loop <- with(filter(polity5, iso_o == country_loop), 
+                       zoo(polity5, min(year):2020)) %>%
+    na_interpolation(option = "linear") #%>%
+  #na_locf()
+  
+  polity5_list[[country_loop]] <- bind_cols(iso_o = country_loop,
+                                            year = index(polity5_loop), 
+                                            polity5 = as.data.frame(polity5_loop)[[1]])
+}
+polity5 <- bind_rows(polity5_list)
+
+# Policy variables
+lgbt_policy <- read.csv(here('data', 'LGBT Data w IPUMS Code.csv')) %>%
+  select(Country, year, Code, origin_score = total_score) %>%
+  mutate(iso_o = countrycode(Country, origin = 'country.name', destination = 'iso3c')) %>%
+  left_join(select(penn_wages, -country)) %>%
+  left_join(select(wb_unemp, -country)) %>%
+  left_join(polity5) %>%
+  left_join(dist_dat) %>%
+  arrange(Country, year)
+
+
+
+state_policy <- read.csv(here('data', 'state_policy.csv'))
+
+state_policy[is.na(state_policy)] <- 0
+
+state_policy <- state_policy %>%
+  mutate(state_policy = -sodomy_illega + -marriage_ban + marriage_equality + civil_union + 
+           employment_discrim_so + hate_crime_so + joint_adoption + -adoption_religious_freedom +
+           conversion_therapy_ban + housing_discrim_so + state_ban_local_nondiscrimimation) %>%
+  select(State, Year, state_policy, state_couple_laws)
+
+acs_prop_yrimmig_policy <- acs_prop_yrimmig %>%
+  left_join(lgbt_policy, by = c('yrimmig' = 'year', 'bpldid' = 'Code')) %>%
+  filter(!is.na(origin_score)) %>%
+  mutate(prop_same_sex = prop_same_sex*100,
+         prop_dif_sex = prop_dif_sex*100,
+         prop_same_std = (prop_same_sex - mean(prop_same_sex))/sd(prop_same_sex),
+         prop_dif_std = (prop_dif_sex - mean(prop_dif_sex))/sd(prop_dif_sex),
+         origin_std = (origin_score - mean(origin_score))/sd(origin_score),
+         yr_fac = as.factor(yrimmig)) %>%
+  # include only complete cases for regressions
+  drop_na(prop_same_sex, distw, contig, comlang_off, comlang_ethno, colony,
+          wage_dif, unemp_dif, polity5, origin_score, bpld)
+
+
+# State-level analysis
+acs_dyad_policy1 <- acs_dyad %>%
+  mutate(mean_year_immig = ifelse(mean_year_immig >= 1991, 
+                                  round(mean_year_immig),
+                                  1991)) %>%
+  left_join(lgbt_policy, by = c('mean_year_immig' = 'year', 'bpldid' = 'Code')) %>%
+  left_join(state_policy,by = c('mean_year_immig' = 'Year', 'state' = 'State')) %>%
+  filter(!is.na(origin_score))
+
+acs_dyad_policy1$same_prop <- acs_dyad_policy1$same_sex_stock/acs_dyad_policy1$state_stock_year * 100
+acs_dyad_policy1$dif_prop <- acs_dyad_policy1$opp_sex_stock/acs_dyad_policy1$state_stock_year * 100
+
+unemploy <- read.table(here('data', 'la.data.3.AllStatesS.txt'), header = T,
+                       fill = T) %>% 
+  filter(str_detect(series_id, '00003')) %>%
+  as_tibble() %>%
+  mutate(value = as.numeric(value),
+         state_num = as.numeric(str_extract(series_id, "\\d\\d"))) %>%
+  left_join(data.frame(state = c(state.name, 'District of Columbia', 'Puerto Rico'), 
+                       state_num =c(1,2,4:6, 8:10, 12, 13, 15:42, 44:51, 53:56, 11, 72))) %>%
+  group_by(state, year) %>%
+  summarize(state_unemploy = mean(value))
+
+state_income_df <- read_csv(here('data', 'state_income.csv'), na = c('', '(NA)')) %>%
+  pivot_longer(!1:2, names_to = 'year', values_to = 'state_income') %>%
+  mutate(year = as.integer(year)) %>%
+  rename(state = GeoName) %>% 
+  select(-GeoFips) %>%
+  mutate(state_income = adjust_for_inflation(state_income, year, "US", to_date = 1999)/1000)
+
+acs_dyad_policy <- acs_dyad_policy1 %>%
+  left_join(unemploy,  by = c('mean_year_immig' = 'year', 'state')) %>%
+  left_join(state_income_df,  by = c('mean_year_immig' = 'year', 'state'))  %>%
+  # include only complete cases for regressions
+  drop_na(state_policy, origin_score, distw, contig, comlang_off, comlang_ethno, colony,
+          wage_dif, unemp_dif, polity5, state_unemploy, state_income, Country, state)
+
+
+# Individual dataset
+# Binning state policy into three categories
+state_policy$state_policy_binned <- cut(state_policy$state_policy, breaks = c(-2,0,2, Inf), 
+                                        labels = c("Repressive", "Neutral", "Progressive"))    
+
+acs_couple_policy <- acs_coupled_imms  %>%
+  mutate(yrimmig = ifelse(yrimmig >= 1991, 
+                          round(yrimmig),
+                          1991)) %>%
+  left_join(lgbt_policy, by = c('yrimmig' = 'year', 'bpldid' = 'Code')) %>%
+  left_join(state_policy,by = c('year' = 'Year', 'state' = 'State')) %>%
+  left_join(unemploy) %>%
+  left_join(state_income_df) %>%
+  # adding (log) income variables
+  mutate(pos_income = ifelse(inctot >= 0, inctot, 0),
+         no_income = (inctot <= 0),
+         log_income = log(pos_income+1)) %>%
+  drop_na(state_policy_binned, same_sex, origin_score, sex, age, educ, 
+          nchild, log_income, no_income, yrimmig, year)
+
+
+write_csv(acs_couple_policy, here('data', 'acs_couple_policy.csv'))
+write_csv(acs_prop_yrimmig_policy, here('data', 'acs_prop_yrimmig_policy.csv'))
+write_csv(acs_dyad_policy, here('data', 'acs_dyad_policy.csv'))
 
 write_csv(top_countries, here('data', 'top_countries.csv'))
 write_csv(filter(acs_wide, imm_couple != 'none'), here('data', 'acs_wide.csv'))
