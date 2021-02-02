@@ -3,5 +3,4 @@ acs_wide.csv
 acs_coupled_imms.csv
 V-Dem-CY-Core-v10.csv
 acs_couple_policy.csv
-acs_dyad_policy.csv
-acs_prop_yrimmig_policy.csv
+acs_couple_policy.rds
