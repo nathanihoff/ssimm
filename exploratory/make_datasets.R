@@ -109,7 +109,8 @@ acs_coupled_imms <- acs_wide %>%
 
 # Make country-of-origin variables
 # stock by year
-acs_imm <- filter(acs, citizen %in% c(2,3))
+acs_imm <- filter(acs, citizen %in% c(2,3)) %>%
+  mutate(related = as_factor(related))
 
 country_year_df <- acs_imm %>%
   group_by(bpld, state,  year) %>%
@@ -150,6 +151,7 @@ acs_dyad_yrimmig <- acs_coupled_imms %>%
 
 acs_dyad <- left_join(acs_dyad, acs_dyad_yrimmig)
 
+# only immigrants in last year
 acs_dyad2 <- acs_coupled_imms %>%
   filter(year - yrimmig <= 1) %>%
   group_by(bpld, state,  year, same_sex) %>%
@@ -173,25 +175,27 @@ acs_dyad2 <- left_join(acs_dyad2, acs_dyad_yrimmig2)
 # no weights
 country_yrimmig_df <- acs_imm %>%
   group_by(bpld, yrimmig) %>%
-  count(.drop = F) %>%
-  rename(n_total = n) %>%
+  summarize(n_total = n(), n_spouse = sum(related == 'Spouse'), 
+            n_partner = sum(related == 'Unmarried Partner')) %>%
   mutate(bpld = as_factor(bpld),
          yrimmig = as.numeric(yrimmig))
 
 acs_prop_yrimmig <- acs_coupled_imms %>%
   group_by(yrimmig, bpld, same_sex) %>%
-  count(.drop = F) %>%
+  summarize(n = n(), n_spouse = sum(related == 'Spouse'), 
+            n_partner = sum(related == 'Unmarried Partner')) %>%
   ungroup() %>%
-  mutate(same_sex = ifelse(same_sex == T, 'n_same_sex', 'n_dif_sex')) %>%
-  pivot_wider(names_from = 'same_sex', values_from = 'n') %>%
-  mutate(n_same_sex = ifelse(is.na(n_same_sex), 0, n_same_sex),
-         n_dif_sex = ifelse(is.na(n_dif_sex), 0, n_dif_sex)) %>%
+  mutate(same_sex = ifelse(same_sex == T, 'same_sex', 'dif_sex')) %>%
+  pivot_wider(names_from = 'same_sex', values_from = 4:6) %>% 
+  replace(is.na(.), 0) %>%
   left_join(country_yrimmig_df) %>%
-  left_join(distinct(select(acs_dyad, bpld, bpldid))) %>%
-  mutate(prop_same_sex = n_same_sex / n_total,
-         se_same_sex = sqrt(prop_same_sex*(1-prop_same_sex)/n_total),
-         prop_dif_sex = n_dif_sex / n_total,
-         se_dif_sex = sqrt(prop_dif_sex*(1-prop_dif_sex)/n_total)) 
+  left_join(distinct(dplyr::select(acs_dyad, bpld, bpldid))) %>%
+  mutate(prop_same_sex = n_same_sex / n_total*100,
+         #se_same_sex = sqrt(prop_same_sex*(1-prop_same_sex)/n_total),
+         prop_dif_sex = n_dif_sex / n_total * 100,
+         #se_dif_sex = sqrt(prop_dif_sex*(1-prop_dif_sex)/n_total),
+         prop_spouse_same_sex = n_spouse_same_sex / n_total * 100,
+         prop_partner_same_sex = n_partner_same_sex / n_total * 100) 
 
 
 
@@ -216,6 +220,10 @@ top_countries <- acs %>%
   as.data.frame()
 
 
+write_csv(acs_prop_yrimmig, here('data', 'acs_prop_yrimmig.csv'))
+write_csv(acs_coupled_imms, here('data', 'acs_coupled_imms.csv'))
+write_csv(acs_dyad, here('data', 'acs_dyad.csv'))
+write_csv(acs_dyad2, here('data', 'acs_dyad2.csv'))
 
 ## Making final datasets ####
 acs_coupled_imms <- read.csv(here('data', 'acs_coupled_imms.csv'))
@@ -369,8 +377,8 @@ acs_prop_yrimmig_policy <- acs_prop_yrimmig %>%
   left_join(lgbt_policy, by = c('yrimmig' = 'year', 'bpldid' = 'Code')) %>%
   left_join(yearly_prop, by = c('yrimmig' = 'year', 'iso_o' = 'iso_o')) %>%
   filter(!is.na(origin_score)) %>%
-  mutate(prop_same_sex = prop_same_sex*100,
-         prop_dif_sex = prop_dif_sex*100,
+  mutate(prop_same_sex = prop_same_sex,
+         prop_dif_sex = prop_dif_sex,
          prop_same_std = (prop_same_sex - mean(prop_same_sex))/sd(prop_same_sex),
          prop_dif_std = (prop_dif_sex - mean(prop_dif_sex))/sd(prop_dif_sex),
          origin_std = (origin_score - mean(origin_score))/sd(origin_score),
@@ -449,6 +457,4 @@ write_csv(acs_dyad_policy, here('data', 'acs_dyad_policy.csv'))
 write_csv(top_countries, here('data', 'top_countries.csv'))
 write_csv(filter(acs_wide, imm_couple != 'none'), here('data', 'acs_wide.csv'))
 write_csv(acs_oneimm, here('data', 'acs_oneimm.csv'))
-write_csv(acs_coupled_imms, here('data', 'acs_coupled_imms.csv'))
-write_csv(acs_dyad, here('data', 'acs_dyad.csv'))
-write_csv(acs_dyad2, here('data', 'acs_dyad2.csv'))
+
