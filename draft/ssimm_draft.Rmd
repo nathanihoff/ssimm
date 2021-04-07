@@ -65,6 +65,7 @@ knitr::opts_chunk$set(echo = F, warning = F, message = F, cache = T, results = '
                       cache.lazy = F)
 
 
+library(janitor)
 library(priceR)
 library(kableExtra)
 library(huxtable)
@@ -74,7 +75,6 @@ library(imputeTS)
 library(mvtnorm)
 library(ordinal)
 library(lme4)
-library(MASS)
 library(countrycode)
 library(knitr)
 library(RColorBrewer)
@@ -671,11 +671,11 @@ We next turn to the effects of U.S. state LGBT policy. Table \ref{tab:state-prop
 According to the descriptive analysis above, immigrants in same-sex couples tend to have higher incomes and hold more prestigious occupations than immigrants in different-sex couples. This implies that immigrants in same-sex couples may be attracted to progressive states for their economic rather than political benefits, so Model 3 adds state-level controls and fixed effects. Indeed, in this model, the coefficient for state policy is reduced and rendered insignificant. Model 4 adds country-of-origin controls and fixed effects. The state policy effect remains imprecisely estimated, but country-of-origin policy has increased in strength. More progressive sending countries are represented by greater proportions of same-sex couples, while U.S. state policy appears to have little influence on their settlement patterns, at least in aggregate proportions.
 
 ```{r ord}
-ord_basic <- polr(state_policy_binned ~ same_sex + as.factor(year),
+ord_basic <- MASS::polr(state_policy_binned ~ same_sex + as.factor(year),
                 data = acs_couple_policy_small, Hess = T)
-ord_orig <- polr(state_policy_binned ~ same_sex*origin_score + as.factor(year),
+ord_orig <- MASS::polr(state_policy_binned ~ same_sex*origin_score + as.factor(year),
                 data = acs_couple_policy_small, Hess = T)
-ord_interact <- polr(state_policy_binned ~ same_sex*(origin_score + gender + age + educ + 
+ord_interact <- MASS::polr(state_policy_binned ~ same_sex*(origin_score + gender + age + educ + 
                    nchild + log_income + no_income + yrimmig) + as.factor(year),
                 data = rename(acs_couple_policy_small, gender = sex), Hess = T)
 
