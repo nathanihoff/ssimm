@@ -32,15 +32,13 @@ acs <- read_dta('/Users/nathan/Data/ACS/acs_2008_2019.dta') %>%
       educ %in% 0:5 ~ '< HS',
       educ == 6 ~ 'HS',
       educ %in% 7:9 ~ 'some col',
-      educ %in% 10:11 ~ 'college'))
-
-acs <- acs %>%
-  mutate(bpldid = case_when(as_factor(bpld) == 'England' ~ 41300,
+      educ %in% 10:11 ~ 'college'),
+    bpldid = case_when(as_factor(bpld) == 'England' ~ 41300,
                             as_factor(bpld) == 'Korea' ~ 50220,
                             T ~ bpldid))
 
 
-# filter(acs, as.character(bpld) == 'england')
+
 # Define immigrant as someone born abroad not to US parents
 acs_wide <- acs %>%
   # Only  those who immigrated when 18+
@@ -49,7 +47,7 @@ acs_wide <- acs %>%
   select(
     # household variables
     year, serial, nchild, hhwt, ssmc,
-    cluster, strata, metro, region, state, stateicp, ftotinc,
+    cluster, strata, metro, region, state, stateicp, ftotinc, respmode,
     # individual variables
     position, sex, related, yrimmig, bpld, bpldid, citizen, educ,
     occ, inctot, occscore, hwsei, empstat, yrnatur, poverty, speakeng, age, perwt
@@ -69,17 +67,18 @@ acs_wide <- acs %>%
            citizen_main %in% c(2,3) & citizen_partner %in% c(2,3) ~ 'two',
            citizen_main %in% c(2,3) | citizen_partner %in% c(2,3) ~ 'one')) %>%
   # convert all labeled variables to factor
-  as_factor()
+  as_factor() %>%
+  mutate(married = related_partner == 'Spouse')
+
 
 # Keep only couples with one immigrant
 acs_oneimm <- acs_wide %>%
   filter(imm_couple == 'one') %>%
   pivot_longer(-c(year, serial, nchild, hhwt, ssmc,
-                  cluster, strata, metro, region, state, stateicp, ftotinc,
-                  same_sex, imm_couple
-  ),
-  names_to = c('.value', 'position'),
-  names_sep = '_') %>% 
+                  cluster, strata, metro, region, state, stateicp, ftotinc, respmode,
+                  same_sex, imm_couple),
+    names_to = c('.value', 'position'),
+    names_sep = '_') %>% 
   mutate(immigrant = case_when(citizen %in% c('N/A', 'Born abroad of American parents') ~ 'nonimmigrant',
                                citizen %in% c('Naturalized citizen', 'Not a citizen') ~ 'immigrant')) %>% 
   filter(!is.na(immigrant)) %>%
@@ -98,8 +97,8 @@ acs_oneimm <- acs_wide %>%
 acs_coupled_imms <- acs_wide %>%
   filter(imm_couple == 'one' | imm_couple == 'two') %>%
   pivot_longer(-c(year, serial, nchild, hhwt, ssmc,
-                  cluster, strata, metro, region, state, stateicp, ftotinc,
-                  same_sex, imm_couple),
+                  cluster, strata, metro, region, state, stateicp, ftotinc, respmode,
+                  same_sex, imm_couple, married),
                names_to = c('.value', 'position'),
                names_sep = '_') %>% 
   mutate(immigrant = case_when(citizen %in% c('N/A', 'Born abroad of American parents') ~ 'nonimmigrant',
@@ -171,7 +170,7 @@ acs_dyad_yrimmig2 <- acs_coupled_imms %>%
 acs_dyad2 <- left_join(acs_dyad2, acs_dyad_yrimmig2)
 
 
-# proportion same sex by year of immigration and country
+# Proportion same sex by year of immigration and country ####
 # no weights
 country_yrimmig_df <- acs_imm %>%
   group_by(bpld, yrimmig) %>%
@@ -180,10 +179,16 @@ country_yrimmig_df <- acs_imm %>%
   mutate(bpld = as_factor(bpld),
          yrimmig = as.numeric(yrimmig))
 
-acs_prop_yrimmig <- acs_coupled_imms %>%
+acs_prop_yrimmig <- acs_wide %>%
+  filter(imm_couple != 'none') %>%
+  pivot_longer(-c(year, serial, nchild, hhwt, ssmc,
+                  cluster, strata, metro, region, state, stateicp, ftotinc, respmode,
+                  same_sex, imm_couple, married),
+               names_to = c('.value', 'position'),
+               names_sep = '_') %>%
   group_by(yrimmig, bpld, same_sex) %>%
-  summarize(n = n(), n_spouse = sum(related == 'Spouse'), 
-            n_partner = sum(related == 'Unmarried Partner')) %>%
+  summarize(n = n(), n_spouse = sum(married == T), 
+            n_partner = sum(married == F)) %>%
   ungroup() %>%
   mutate(same_sex = ifelse(same_sex == T, 'same_sex', 'dif_sex')) %>%
   pivot_wider(names_from = 'same_sex', values_from = 4:6) %>% 
@@ -196,6 +201,9 @@ acs_prop_yrimmig <- acs_coupled_imms %>%
          #se_dif_sex = sqrt(prop_dif_sex*(1-prop_dif_sex)/n_total),
          prop_spouse_same_sex = n_spouse_same_sex / n_total * 100,
          prop_partner_same_sex = n_partner_same_sex / n_total * 100) 
+
+#acs_prop_yrimmig <- acs_coupled_imms %>%
+  
 
 
 
@@ -224,6 +232,7 @@ write_csv(acs_prop_yrimmig, here('data', 'acs_prop_yrimmig.csv'))
 write_csv(acs_coupled_imms, here('data', 'acs_coupled_imms.csv'))
 write_csv(acs_dyad, here('data', 'acs_dyad.csv'))
 write_csv(acs_dyad2, here('data', 'acs_dyad2.csv'))
+
 
 ## Making final datasets ####
 acs_coupled_imms <- read.csv(here('data', 'acs_coupled_imms.csv'))
