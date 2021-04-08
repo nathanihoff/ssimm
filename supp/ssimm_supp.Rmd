@@ -37,7 +37,7 @@ bibliography: zotero.bib
 csl: apa.csl
 
 title: "Supplementary Material"
-subtitle: "Making Migration Sexy: Immigrants in Same-Sex Couples in the United States"
+subtitle: "Making Migration Sexy"
 date: "`r format(Sys.time(), '%B %e, %Y')`"
 # author:
 # - name: Nathan I. Hoffmann
@@ -212,295 +212,18 @@ stargazer(mod_list,
           title = 'OLS regressions of percent of immigrants in same-sex couples by year of immigration and country of origin. Country-clustered standard errors shown in parentheses. Country controls include population-weighted distance, contiguous border, common official language, common ethnic language, colonial relationship, wage differential, unemployment differential, proportion same-country stock, and Polity 5 measure of democratization.')
 ```
 
-Our first set of models predicts the percent of immigrants in same-sex couples by country of origin and year of immigration (Table \ref{tab:country-props}). Model 1 regresses this proportion on only our variable of interest: LGBT policy score in country of origin. We see that countries with more progressive LGBT policy tend to send more immigrants to the U.S. who end up in same-sex couples. The average country-level proportion of immigrants in same-sex couples is only `r mean(acs_prop_yrimmig_policy$prop_same_sex, na.rm = T)` percent, so an increase of `r coef(ag)[[2]]` per point increase in LGBT policy score represents a substantive effect.  
 
-The other models in Table \ref{tab:country-props} assess the robustness of this finding. Model 2 includes traditional controls from gravity models of immigration along with a measure of democratization and one of immigrant networks. The coefficient for country-of-origin score reduces slightly but remains highly significant. Notably, it is estimated to be more than twice the effect size of democratization score; the LGBT policy environment matters much more than the overall progressiveness of government policy. Model 3 includes country-of-origin fixed effects. Although in the fixed effects model coefficient for origin score is reduced by half compared to Model 1, it remains statistically significant.
+# Accounting for mismatch
 
-```{r state-props}
-state_prop <- lm(same_prop ~ state_policy, data = acs_dyad_policy)
-
-state_prop2 <- lm(same_prop ~ origin_score + state_policy, data = acs_dyad_policy)
-
-state_prop_fe <- lm(same_prop ~ state_unemploy + state_income + state + 
-                        origin_score + state_policy, 
-                       data = acs_dyad_policy)
-
-state_prop_fe2 <- lm(same_prop ~ state_policy + origin_score + distw + contig + 
-                          comlang_off + comlang_ethno + colony +
-                          wage_dif + unemp_dif + polity5 + stock_prop +
-                           state_unemploy + state_income + Country + state, 
-                       data = acs_dyad_policy)
-
-# state_prop_2013 <- lm(same_prop ~ post_2013*(state_policy + origin_score), 
-#                        data = mutate(acs_dyad_policy, post_2013 = (year > 2013)))
-# state_prop_2013_2 <- lm(same_prop ~ post_2013*(state_policy + origin_score) + distw + contig + 
-#                           comlang_off + comlang_ethno + colony +
-#                           wage_dif + unemp_dif + polity5 + 
-#                            state_unemploy + state_income + Country + state, 
-#                        data = mutate(acs_dyad_policy, post_2013 = (year > 2013)))
-
-se_list <- list()
-mod_list <- list(state_prop, state_prop2, state_prop_fe, state_prop_fe2)
-
-for(mod_num in 1:length(mod_list)){
-  se_list[[mod_num]] <- coef(summary(mod_list[[mod_num]], cluster = c("state")))[, 2]
-}
-
-
-stargazer(mod_list,
-          header = F, 
-          keep = c('origin_score', 'state_policy'),
-          # omit = c('Country', 'state'),
-          order = c('state_policy', 'origin_score'),
-          covariate.labels = c('State LGBT policy score', 'Country LGBT policy score'),
-          dep.var.labels = "Percent in same-sex couples",
-          add.lines = list(c('State controls and FEs?', 'no', 'no', 'yes', 'yes'),
-                           c('Country controls and FEs?', rep('no', 3), 'yes')),
-          se = se_list,
-          keep.stat = c('n'),
-          star.cutoffs = c(0.1, 0.05, 0.01, 0.001),
-          star.char = c('†', '*', '**', '***'),
-          notes = c("Note: †p<0.1; *p<0.05; **p<0.01; ***p<0.001", 
-                    "Source: American Community Survey 2008-2019"), 
-          notes.label = '',
-          notes.align = 'l',
-          notes.append = F,
-          label = 'tab:state-props',
-          title = 'Percent same-sex in by country of origin, U.S. state, and survey year. Country-clustered standard errors are shown in parentheses. State controls include unemployment rate and per-capita income. Country controls include population-weighted distance, contiguous border, common official language, common ethnic language, colonial relationship, wage differential, unemployment differential, proportion same-country stock, and Polity 5 measure of democratization.')
-
-origin_effect <- sd(acs_couple_policy$origin_score, na.rm = T)*coef(state_prop2)[['origin_score']]
-state_effect <- sd(acs_couple_policy$state_policy, na.rm = T)*coef(state_prop2)[['state_policy']]
-
-```
-
-We next turn to the effects of U.S. state LGBT policy. Table \ref{tab:state-props} presents models of U.S. state-level proportion of immigrants in same-sex couples, from a given country of origin in a given survey year. Model 1 contains only one predictor: U.S. state policy score in the survey year. We see that, on average, states with more friendly LGBT policies have somewhat higher proportions of immigrants in same-sex couples. Model 2 adds a predictor for country-of-origin policy score at the mean year of immigration. Although the coefficient for country of origin score is more precisely estimated, the two variables have effects of roughly equal size. A `r sd(acs_couple_policy$origin_score, na.rm = T)`-point (one-standard deviation) increase origin score is associated with a `r origin_effect` percentage-point increase of immigrants in same-sex couples, whereas the corresponding state policy standard deviation increase of `r sd(acs_couple_policy$state_policy, na.rm = T)` points is `r state_effect` percentage points.   
-
-<!-- Although more LGBT-friendly policies in both locations are associated with higher numbers of immigrants in same-sex couples, country-of-origin LGBT policy is a stronger predictor than U.S. state policy, even considering the somewhat different scale of these variables.    -->
-
-According to the descriptive analysis above, immigrants in same-sex couples tend to have higher incomes and hold more prestigious occupations than immigrants in different-sex couples. This implies that immigrants in same-sex couples may be attracted to progressive states for their economic rather than political benefits, so Model 3 adds state-level controls and fixed effects. Indeed, in this model, the coefficient for state policy is reduced and rendered insignificant. Model 4 adds country-of-origin controls and fixed effects. The state policy effect remains imprecisely estimated, but country-of-origin policy has increased in strength. More progressive sending countries are represented by greater proportions of same-sex couples, while U.S. state policy appears to have little influence on their settlement patterns, at least in aggregate proportions.
-
-```{r ord}
-ord_basic <- polr(state_policy_binned ~ same_sex + as.factor(year),
-                data = acs_couple_policy_small, Hess = T)
-ord_orig <- polr(state_policy_binned ~ same_sex*origin_score + as.factor(year),
-                data = acs_couple_policy_small, Hess = T)
-ord_interact <- polr(state_policy_binned ~ same_sex*(origin_score + gender + age + educ + 
-                   nchild + log_income + no_income + yrimmig) + as.factor(year),
-                data = rename(acs_couple_policy_small, gender = sex), Hess = T)
-
-se_list <- list()
-mod_list <- list(ord_basic, ord_orig, ord_interact)
-for(mod_num in 1:length(mod_list)){
-  se_list[[mod_num]] <- coef(summary(mod_list[[mod_num]], cluster = c("bpld")))[, 2]
-}
-
-stargazer(mod_list,
-          header = F, 
-          add.lines = list(c('Country-clustered SEs?', rep('yes', 3)),
-                           c('Survey year FEs?', rep('yes', 3)),
-                           c('Individual controls?', 'no', 'no', 'yes')),
-          se = se_list,
-          omit = c('gender', 'age', 'educ', 'nchild', 'log_income', 'no_income', 'yrimmig',
-                   'Constant', 'year'),
-          dep.var.labels   = "Binned state LGBT policy score",
-          covariate.labels = c('Same-sex', 'Country LGBT policy score', 'Same-sex × country score'),
-          keep.stat = 'n',
-          star.cutoffs = c(0.1, 0.05, 0.01, 0.001),
-          star.char = c('†', '*', '**', '***'),
-          notes = c("Note: †p<0.1; *p<0.05; **p<0.01; ***p<0.001", 
-                    "Source: American Community Survey 2008-2019"), 
-          notes.label = '',
-          notes.align = 'l',
-          notes.append = F,
-          #no.space = T,
-          label = 'tab:ord',
-          title = 'Individual ordered logit analysis of three-category state policy score. Country-clustered standard errors are shown in parentheses. Individual controls include sex, age, education, number of children, log(income), indicator for no income, and year of immigration, which are all interacted with the indicator for same-sex couple.')
-
-newdat <- data.frame(same_sex = rep(c(F, T), 12), year = rep(2008:2019, each = 2))
-ord_probs <- cbind(newdat,
-      predict(ord_basic, 
-        newdat,
-        type = 'probs')) %>%
-  group_by(same_sex) %>%
-  summarize(Repressive = mean(Repressive),
-            Neutral = mean(Neutral),
-            Progressive = mean(Progressive)) 
-
-#table(acs_couple_policy$state_policy_binned) 
-
-```
-
-Our final set of models focuses on the individual. Conditional on migrating to the U.S., do immigrants in same-sex couples choose to live in more progressive states than their heterosexual counterparts? Table \ref{tab:ord} presents ordered logit models predicting whether an individual partnered immigrant lives in a U.S. state with repressive, neutral, or progressive LGBT policies, pooling data across survey years. Model 1 includes only one regressor: an indicator for whether the immigrant is in a same-sex couple. The positive coefficient indicates that immigrants in same-sex couples indeed tend to live in states with more LGBT-friendly policies. The predicted probability for an immigrant in a different-sex couple to live in a state with progressive LGBT policies is `r ord_probs[[1, 'Progressive']]`, whereas the corresponding probability for those in same-sex couples is `r ord_probs[[2, 'Progressive']]`. At the repressive end of the policy spectrum, the predicted probabilities are `r ord_probs[[1, 'Repressive']]` and `r ord_probs[[2, 'Repressive']]` for different- and same-sex couples, respectively.  
-
-How does country-of-origin context mediate this results? Model 2 adds sending-country LGBT policy score at the time of immigration to the regression, interacting it with the same-sex indicator. The coefficient for the same-sex indicator remains positive and significant, but we see opposite effects of the origin-score coefficient for immigrants in different- and same-sex couples. For different-sex couples, hailing from a more progressive country is associated with living in a more repressive U.S. state. For same-sex couples, the result is in the opposite direction: those from progressive countries tend to live in more progressive U.S. states.  
-
-Model 3 controls for possible individual confounders, interacting them with the same-sex indicator. If immigrants in same-sex couples also tend to have more education, higher income, different family structures, or less years of age, they may be choosing more progressive states due to other policies or economic conditions. As shown in Table \ref{tab:ord}, our variables of interest remain strong and in the same directions in this final model.  
-
-```{r sim, fig.cap = 'Predicted probabilities of U.S. state LGBT policy progressiveness for individual immigrants in different- and same-sex couples, based on policy score of sending country, with 95% confidence intervals.'}
-Mode <- function(x) {
-  ux <- unique(x)
-  ux[which.max(tabulate(match(x, ux)))]
-}
-
-acs.means <- acs_couple_policy %>% 
-  summarize(across(c(age, origin_score, yrimmig, nchild, log_income), mean, na.rm = T))
-acs.modes <- acs_couple_policy %>% 
-  rename(gender = sex) %>%
-  summarize(across(c(educ, no_income, gender), Mode))
-
-#Make a dataframe that's the mode of the factor variables vs. mean - one row data frame
-#Two dataframes, one for same-sex and one for not. And then make two plots.
-plot.dat <- bind_rows(rep(list(bind_cols(acs.means, acs.modes)),14)) %>%
-  mutate(origin_score = -3:10, year = 2014)
-
-plot.dat.same <- plot.dat %>%
-  mutate(same_sex = T)
-plot.dat.dif <- plot.dat %>%
-  mutate(same_sex = F)
-
-# Confidence intervals
-set.seed(1858)
-sims <- 500
-sim_mod <- list(sims)
-pseudeo_mod <- ord_interact
-k <- length(coef(ord_interact))
-theta_mat <- rmvnorm(sims, mean=c(coef(ord_interact), ord_interact$zeta),
-                              sigma=vcovCL(ord_interact, cluster = ~ bpld))
-
-for (i in 1:sims) {
-  theta <- as.numeric(theta_mat[i,])
-  pseudeo_mod$coefficients <- theta[1:k]
-  pseudeo_mod$zeta <- theta[(k+1):length(theta)]
-  sim_mod[[i]] <- as.data.frame(cbind(i,-3:10, predict(pseudeo_mod, 
-                                   newdata=plot.dat.same, type="probs")))
-  names(sim_mod[[i]]) <- c("iter","origin_score", names(sim_mod[[i]])[3:5]) 
-}
-sim_mod_same <- bind_rows(sim_mod) %>%
-  pivot_longer(3:5, names_to = 'state_policy_binned', values_to = 'phat') %>%
-  #gather(state_policy_binned, phat, -iter, -origin_score) %>%
-  group_by(origin_score, state_policy_binned) %>%
-  dplyr::summarize(phat.se = sd(phat),
-                   phat.mean = mean(phat),
-                   phat.lo = phat.mean - 1.96*phat.se,
-                   phat.hi = phat.mean + 1.96*phat.se) %>%
-  mutate(same_sex = 'Same-Sex')
-
-
-sims <- 250
-sim_mod <- list(sims)
-pseudeo_mod <- ord_interact
-k <- length(coef(ord_interact))
-theta_mat <- rmvnorm(sims, mean=c(coef(ord_interact), ord_interact$zeta),
-                              sigma=vcovCL(ord_interact, cluster = ~ bpld))
-
-for (i in 1:sims) {
-  theta <- as.numeric(theta_mat[i,])
-  pseudeo_mod$coefficients <- theta[1:k]
-  pseudeo_mod$zeta <- theta[(k+1):length(theta)]
-  sim_mod[[i]] <- as.data.frame(cbind(i,-3:10, predict(pseudeo_mod, 
-                                   newdata=plot.dat.dif, type="probs")))
-  names(sim_mod[[i]]) <- c("iter","origin_score", names(sim_mod[[i]])[3:5]) 
-}
-sim_mod_dif<- bind_rows(sim_mod) %>%
-  pivot_longer(3:5, names_to = 'state_policy_binned', values_to = 'phat') %>%
-  #gather(state_policy_binned, phat, -iter, -origin_score) %>%
-  group_by(origin_score, state_policy_binned) %>%
-  dplyr::summarize(phat.se = sd(phat),
-                   phat.mean = mean(phat),
-                   phat.lo = phat.mean - 1.96*phat.se,
-                   phat.hi = phat.mean + 1.96*phat.se) %>%
-  mutate(same_sex = 'Different-Sex')
-
-sim_df <- bind_rows(sim_mod_same, sim_mod_dif)
-sim_df %>%
-  ggplot(aes(x=origin_score, y=phat.mean, col=state_policy_binned)) +
-  geom_line() + 
-  geom_ribbon(aes(ymin=phat.lo, ymax=phat.hi, 
-                  fill = state_policy_binned, col = NULL), alpha = .2) +
-  facet_wrap(~same_sex) +
-  xlab('LGBT policy score for country of origin') +
-  ylab('Predicted probability of U.S. state residence') +
-  theme(legend.justification=c(1,0),
-        legend.position=c(.95,.38))
-
-same_pred <- filter(sim_df, same_sex == 'Same-Sex', origin_score == 10, 
-       state_policy_binned == 'Progressive') %>% 
-  pull(phat.mean)
-
-dif_pred <- filter(sim_df, same_sex == 'Different-Sex', origin_score == 10, 
-       state_policy_binned == 'Progressive') %>% 
-  pull(phat.mean)
-
-same_pred2 <- filter(sim_df, same_sex == 'Same-Sex', origin_score == 10, 
-       state_policy_binned == 'Repressive') %>% 
-  pull(phat.mean)
-
-dif_pred2 <- filter(sim_df, same_sex == 'Different-Sex', origin_score == 10, 
-       state_policy_binned == 'Repressive') %>% 
-  pull(phat.mean)
-```
-
-To help interpret these results, Figure \ref{fig:sim} contains predicted probabilities of residing in progressive, neutral, or repressive U.S. states. Each panel predicts these probabilities for a typical immigrant in the dataset, based on means (for continuous variables) and modes (for categorical variables) while varying sending-country policy score. The only difference between the two panels is the value for the same-sex indicator.  
-
-The figure shows opposite trends for same- and different-sex couples. Overall, immigrants tend to live in more progressive states, but the moderating effect of origin score is quite different for the two groups. The panel for same-sex couples shows that these immigrants tend to live in U.S. states with similar LGBT policy contexts to those of their countries of origin. Immigrants in same-sex couples from repressive countries are less likely to live in progressive U.S. states, but as the origin-country score increases, so does the probability of living in a progressive state. For immigrants in different-sex couples, on the other hand, increasingly progressive country-of-origin policies are associated with a *lower* probability of residing in a progressive U.S. state, accompanied by a *higher* probability of living in a repressive U.S. state. At the high end of the origin-score policy range, the difference in predicted probabilities is significant: typical immigrants in same-sex couples are `r 100*(same_pred - dif_pred)` percentage points more likely to live in progressive states and  `r 100*(dif_pred2 - same_pred2)` percentage points less likely to live in repressive states than similar immigrants in different-sex couples.
-
-## Sensitivity Analysis
-We first assess how much our results would change in the presence of significant measurement error. @kreider_2015 found that in the 2010 ACS, 57 percent of married and 7 percent of unmarried same-sex couples may have been different-sex couples that made an error in responding to the sex question. Table \ref{tab:sens} replicates the results of Table \ref{tab:country-props}, but with the proportion of same-sex married and unmarried couples reduced by 57 and 7 percent, respectively.
-
-```{r sens}
-
-acs_prop_yrimmig_policy <- acs_prop_yrimmig_policy %>%
-  mutate(prop_same_sex_adj = 100*(prop_spouse_same_sex*(1-.573) + prop_partner_same_sex*(1-.07)))
-
-# sample_n(dplyr::select(acs_prop_yrimmig_policy,prop_same_sex, prop_same_sex_adj, prop_spouse_same_sex,
-#                     prop_partner_same_sex),
-#          10)
-
-sens1 <- lm(prop_same_sex_adj ~ origin_score,
-         data = acs_prop_yrimmig_policy)
-
-
-sens2 <- lm(prop_same_sex_adj ~ distw + contig + comlang_off + comlang_ethno + colony +
-                   wage_dif + unemp_dif + polity5 + origin_score + stock_prop,
-         data = acs_prop_yrimmig_policy)
-
-sens3 <- lm(prop_same_sex_adj ~ distw + contig + comlang_off + comlang_ethno + colony +
-                   wage_dif + unemp_dif + polity5 + origin_score + stock_prop + bpld,
-         data = acs_prop_yrimmig_policy)
-
-se_list <- list()
-mod_list <- list(sens1, sens2, sens3)
-for(mod_num in 1:length(mod_list)){
-  se_list[[mod_num]] <- coef(summary(mod_list[[mod_num]], cluster = c("bpld")))[, 2]
-}
-
-
-stargazer(mod_list,
-          header = F, 
-          model.names = F,
-          keep = c('origin_score', 'polity5', 'post_2013'),
-          # omit = 'bpld',
-          order = c('origin_score', 'polity5', 'post_2013', 'post_2013TRUE:origin_score'),
-          # covariate.labels = c('Country LGBT policy score', 'Polity5 democratization',
-          #                      'Post-2013', 'Country score × Post-2013'),
-          dep.var.labels   = c("Percent in same-sex couples", "Married"),
-          add.lines = list(c('Country controls?', 'no', rep('yes', 2)),
-                           c('Country FEs?', 'no', 'no', rep('yes', 1))),
-          se = se_list,
-          keep.stat = c('n'),
-          star.cutoffs = c(0.1, 0.05, 0.01, 0.001),
-          star.char = c('†', '*', '**', '***'),
-          notes = c("Note: †p<0.1; *p<0.05; **p<0.01; ***p<0.001", 
-                    "Source: American Community Survey 2008-2019"), 
-          notes.label = '',
-          notes.align = 'l',
-          notes.append = F,
-          label = 'tab:country-props',
-          title = 'OLS regressions of percent of immigrants in same-sex couples by year of immigration and country of origin. Country-clustered standard errors shown in parentheses. Country controls include population-weighted distance, contiguous border, common official language, common ethnic language, colonial relationship, wage differential, unemployment differential, proportion same-country stock, and Polity 5 measure of democratization.')
+```{r mismatch}
+tibble(`Study Year` = c(2010, 2010, 2016, 2016),
+           Relationship = c('Married', 'Unmarried Partner', 'Married', 'Unmarried Partner'),
+           `Mail` = c('59%', '7%', '47.4%', '5.6%'), 
+           `Internet` = c('NA', 'NA', '22.5%', '2.4%'), 
+           `CAPI/CATI` = c('46%', '13%', 'Unknown', 'Unknown'))
 ```
 
 
-# Reponse Modes
 ```{r respmode}
 tabyl(acs_couple_policy, respmode, year) %>%
   adorn_percentages('col')
@@ -509,6 +232,7 @@ tabyl(acs_couple_policy, respmode, year) %>%
 tabyl(filter(acs_couple_policy, same_sex == T), respmode, year) %>%
   adorn_percentages('col')
 ```
+
 
 
 

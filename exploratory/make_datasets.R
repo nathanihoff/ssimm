@@ -187,22 +187,31 @@ acs_prop_yrimmig <- acs_wide %>%
                names_to = c('.value', 'position'),
                names_sep = '_') %>%
   group_by(yrimmig, bpld, same_sex) %>%
-  summarize(n = n(), n_spouse = sum(married == T), 
-            n_partner = sum(married == F)) %>%
+  summarize(n = n(), 
+            n_spouse_mail = sum(married == T & respmode == 'Mail'), 
+            n_spouse_cati = sum(married == T & respmode == 'CATI/CAPI'), 
+            n_spouse_internet = sum(married == T & respmode == 'Internet'), 
+            n_partner_mail = sum(married == F & respmode == 'Mail'), 
+            n_partner_cati = sum(married == F & respmode == 'CATI/CAPI'), 
+            n_partner_internet = sum(married == F & respmode == 'Internet')) %>%
   ungroup() %>%
   mutate(same_sex = ifelse(same_sex == T, 'same_sex', 'dif_sex')) %>%
-  pivot_wider(names_from = 'same_sex', values_from = 4:6) %>% 
+  pivot_wider(names_from = 'same_sex', values_from = 4:10) %>% 
   replace(is.na(.), 0) %>%
   left_join(country_yrimmig_df) %>%
   left_join(distinct(dplyr::select(acs_dyad, bpld, bpldid))) %>%
-  mutate(prop_same_sex = n_same_sex / n_total*100,
-         #se_same_sex = sqrt(prop_same_sex*(1-prop_same_sex)/n_total),
-         prop_dif_sex = n_dif_sex / n_total * 100,
-         #se_dif_sex = sqrt(prop_dif_sex*(1-prop_dif_sex)/n_total),
-         prop_spouse_same_sex = n_spouse_same_sex / n_total * 100,
-         prop_partner_same_sex = n_partner_same_sex / n_total * 100) 
+  mutate(prop_spouse_same_sex = (n_spouse_mail_same_sex*(1-(.59+.474)/2) +
+           n_spouse_cati_same_sex*(1-.46) +
+             n_spouse_internet_same_sex*(1-.225)) / n_total * 100,
+         prop_partner_same_sex = (n_partner_mail_same_sex*(1-(.07+.056)/2) +
+                                    n_partner_cati_same_sex*(1-.13) +
+                                    n_partner_internet_same_sex*(1-.024))
+           / n_total * 100,
+         #prop_same_sex = n_same_sex / n_total*100,
+         prop_same_sex = prop_spouse_same_sex + prop_partner_same_sex,
+         prop_dif_sex = n_dif_sex / n_total * 100) 
 
-#acs_prop_yrimmig <- acs_coupled_imms %>%
+
   
 
 

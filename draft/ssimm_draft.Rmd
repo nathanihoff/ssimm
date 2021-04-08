@@ -37,7 +37,7 @@ bibliography: zotero.bib
 csl: apa.csl
 
 
-title: "Making Migration Sexy: Immigrants in Same-Sex Couples in the United States"
+title: "Making Migration Sexy: How State and National Policies Influence Migration of Same-Sex Couples"
 date: "`r format(Sys.time(), '%B %e, %Y')`"
 # author:
 # - name: Nathan I. Hoffmann
@@ -259,7 +259,7 @@ Note from Kris: I'm wondering if we should actually incorporate the "labor marke
 ## Identifying Same-Sex Couples in the ACS
 We merge individual-level data on immigrants in the U.S. with state- and country-level variables from a variety of datasets. The individual data come from the 2008 to 2019 ACS [@ruggles_2021]. Each year, the ACS surveys a 1% sample of the U.S. population about their education, occupation, income, family structure, immigration status, country of origin, location, and a variety of other individual and household attributes. We define a same-sex couple as two individuals of the same sex in the same household who report their relationship as "spouse" or "unmarried partner." We limit the sample to individuals who immigrated at the age of 18 or older. The 11 years of survey data contain `r nrow(filter (acs_wide, same_sex == T))` same-sex couples that include at least one immigrant, for a total of `r nrow(filter(acs_couple_policy, same_sex == T))` immigrants in same-sex couples with complete data. These immigrants are compared to `r nrow(filter (acs_wide, same_sex == F))` corresponding different-sex couples (containing `r nrow(filter(acs_couple_policy, same_sex == F))` individual immigrants). Using these data, we construct different dependent variables, corresponding to the analysis of interest. Below, we outline how we utilize these data to construct dependent variables based on each analysis.
 
-Measuring the prevalence of same-sex couples in the U.S. is difficult [@michaels_2013]. For one, identification of LGB individuals in data sources such as the ACS is only possible for those who self-identity as living with a same-sex spouse or unmarried partner [@baumle_2009, p. 6]. Since the surveys lack questions about sexual orientation, LGB individuals who do not live with a same-sex romantic partner or who do not feel comfortable with the partner labels of the ACS are not part of the analysis. In addition, some measurement error may result when different-sex couples accidentally misspecify the gender of one of the partners [@gates_2009a]; beginning in 2008 the Census Bureau made changes to ACS gender and partnership questions in order to prevent such errors [@u.s.censusbureau_2013], so we rely on data only from 2008 onward.  
+Measuring the prevalence of same-sex couples in the U.S. is difficult [@michaels_2013]. For one, identification of LGB individuals in data sources such as the ACS is only possible for those who self-identity as living with a same-sex spouse or unmarried partner [@baumle_2009, p. 6]. Since the surveys lack questions about sexual orientation, LGB individuals who do not live with a same-sex romantic partner or who do not feel comfortable with the partner labels of the ACS are not part of the analysis. In addition, some measurement error may result when different-sex couples accidentally misspecify the gender of one of the partners [@gates_2009a]; beginning in 2008 the Census Bureau made changes to ACS gender and partnership questions in order to prevent such errors [@u.s.censusbureau_2013], so we rely on data only from 2008 onward, but pitfalls remain.  
 
 In a Census Bureau working paper, @kreider_2015 use personal information such as names and addresses match same-sex couples from the 2010 ACS to Social Security administrative data. They find that 58 percent of married couples coded as same-sex in the ACS are coded as different-sex in the administrative data. The corresponding sex mismatch rate for unmarried same-sex couples is 7 percent. (Our data include `r sum(acs_wide$related_partner == 'Spouse' & acs_wide$same_sex == T)` married and `r sum(acs_wide$related_partner == 'Unmarried Partner' & acs_wide$same_sex == T)` unmarried same-sex immigrant couples.) A follow-up study [@kreider_2017] shows that these mismatch rates appear to have fallen: In a 2016 ACS test module that included explicit categories for different- and same-sex spouses and partners, 31 percent of married and 3 percent of unmarried same-sex couples had inconsistent sex responses. This decreasing mismatch rate may be due to the greater numbers of same-sex couples openly identifying themselves as well as the growing popularity of responding to the ACS via Internet (see Supplementary Material), a response mode introduced in 2013 which is now the default [@u.s.censusbureau_2017]. In the 2016 test of the ACS, the mismatch rate for mail-in responses was 47 and 6 percent for married and unmarried same-sex couples, respectively, whereas for Internet responses they were only 22 and 2.4 percent [@kreider_2017].^[An interview-based CATI/CAPI response mode is sometimes administered as well (to `r with(filter(acs_couple_policy, same_sex == T), round(sum(respmode == 'CATI/CAPI')/nrow(filter(acs_couple_policy, same_sex == T)),2)*100)` percent of our sample of immigrants in same-sex couples), but the 2016 study did not assess its error rate. In the 2010 ACS, Kreider and Lofquist (2015) find CATI/CAPI sex reporting mismatch for 46 and 13 percent for married and unmarried same-sex couples, respectively.] In our sample of immigrants in same-sex couples, `r sum(acs_couple_policy$respmode == 'Mail' & acs_couple_policy$same_sex == T)` responded by mail and `r sum(acs_couple_policy$respmode == 'Internet' & acs_couple_policy$same_sex == T)` responded by Internet survey.  
 
@@ -502,6 +502,8 @@ Table \ref{tab:country-tab} ranks the proportion of U.S. immigrants in same-sex 
 #                    wage_dif + unemp_dif + polity5 + origin_score + stock_prop + bpld+ I(log(n_total+1)), 
 #          data = acs_prop_yrimmig_policy)
 
+
+
 ag <- lm(prop_same_sex ~ origin_score,
          data = acs_prop_yrimmig_policy)
 
@@ -511,6 +513,10 @@ ag_country_orig <- lm(prop_same_sex ~ distw + contig + comlang_off + comlang_eth
          data = acs_prop_yrimmig_policy)
 
 ag_country_orig_fe <- lm(prop_same_sex ~ distw + contig + comlang_off + comlang_ethno + colony +
+                   wage_dif + unemp_dif + polity5 + origin_score + stock_prop + bpld,
+         data = acs_prop_yrimmig_policy)
+
+ag_oneimm <- lm(prop_same_sex ~ distw + contig + comlang_off + comlang_ethno + colony +
                    wage_dif + unemp_dif + polity5 + origin_score + stock_prop + bpld,
          data = acs_prop_yrimmig_policy)
 
@@ -671,11 +677,12 @@ We next turn to the effects of U.S. state LGBT policy. Table \ref{tab:state-prop
 According to the descriptive analysis above, immigrants in same-sex couples tend to have higher incomes and hold more prestigious occupations than immigrants in different-sex couples. This implies that immigrants in same-sex couples may be attracted to progressive states for their economic rather than political benefits, so Model 3 adds state-level controls and fixed effects. Indeed, in this model, the coefficient for state policy is reduced and rendered insignificant. Model 4 adds country-of-origin controls and fixed effects. The state policy effect remains imprecisely estimated, but country-of-origin policy has increased in strength. More progressive sending countries are represented by greater proportions of same-sex couples, while U.S. state policy appears to have little influence on their settlement patterns, at least in aggregate proportions.
 
 ```{r ord}
-ord_basic <- MASS::polr(state_policy_binned ~ same_sex + as.factor(year),
+library(MASS)
+ord_basic <- polr(state_policy_binned ~ same_sex + as.factor(year),
                 data = acs_couple_policy_small, Hess = T)
-ord_orig <- MASS::polr(state_policy_binned ~ same_sex*origin_score + as.factor(year),
+ord_orig <- polr(state_policy_binned ~ same_sex*origin_score + as.factor(year),
                 data = acs_couple_policy_small, Hess = T)
-ord_interact <- MASS::polr(state_policy_binned ~ same_sex*(origin_score + gender + age + educ + 
+ord_interact <- polr(state_policy_binned ~ same_sex*(origin_score + gender + age + educ + 
                    nchild + log_income + no_income + yrimmig) + as.factor(year),
                 data = rename(acs_couple_policy_small, gender = sex), Hess = T)
 
@@ -907,7 +914,7 @@ We first assess how much our results would change in the presence of significant
 
 Figure \ref{fig:sens} takes Model 3 form Table \ref{tab:country-props} and reduces the proportions of same-sex couples in the data. It varies the percentage of misreported same-sex married couples from 0 to 90 percent and of unmarried couples from 0 to 30 percent. Highlighted in blue bars are the empirical mismatch rates found in the two studies by Kreider et al. [-@kreider_2015; -@kreider_2017]. We see that extremely high rates of misreporting are necessary to reduce this effect to 0. 
 
-```{r sens, fig.cap = 'Coefficient for sending-country LGBT policy context, adjusted for possible misreporting of same-sex couples. Ribbon shows 95 percent confidence intervals and blue bars show estimated misreporting from the 2010 and 2016 U.S. Census Bureau tests on the ACS.'}
+```{r sens, eval = F, fig.cap = 'Coefficient for sending-country LGBT policy context, adjusted for possible misreporting of same-sex couples. Ribbon shows 95 percent confidence intervals and blue bars show estimated misreporting from the 2010 and 2016 U.S. Census Bureau tests on the ACS.'}
 
 acs_prop_yrimmig_policy <- acs_prop_yrimmig_policy %>%
   mutate(prop_same_sex_adj = (prop_spouse_same_sex*(1-.573) + prop_partner_same_sex*(1-.07)))
