@@ -64,7 +64,7 @@ thanks: "The authors contributed equally to this project."
 knitr::opts_chunk$set(echo = F, warning = F, message = F, cache = T, results = 'asis',
                       cache.lazy = F)
 
-
+library(MASS)
 library(janitor)
 library(priceR)
 library(kableExtra)
@@ -516,9 +516,7 @@ ag_country_orig_fe <- lm(prop_same_sex ~ distw + contig + comlang_off + comlang_
                    wage_dif + unemp_dif + polity5 + origin_score + stock_prop + bpld,
          data = acs_prop_yrimmig_policy)
 
-ag_oneimm <- lm(prop_same_sex ~ distw + contig + comlang_off + comlang_ethno + colony +
-                   wage_dif + unemp_dif + polity5 + origin_score + stock_prop + bpld,
-         data = acs_prop_yrimmig_policy)
+
 
 # Add binary indicator for post-2013
 # ag_country_orig_2013 <- lm(prop_same_sex ~ distw + contig + comlang_off + comlang_ethno + colony +
@@ -552,7 +550,8 @@ Models 2 and 3 in Table \ref{tab:country-props} assess the robustness of this fi
 ```{r country-props}
 se_list <- list()
 mod_list <- list(ag, ag_country_orig, ag_country_orig_fe,
-                 ag_country_orig_fe_2013, ag_2013_int_fe, ag_2013_spouse_int)
+                 ag_country_orig_fe_2013, ag_2013_int_fe, 
+                 ag_2013_spouse_int)
 for(mod_num in 1:length(mod_list)){
   se_list[[mod_num]] <- coef(summary(mod_list[[mod_num]], cluster = c("bpld")))[, 2]
 }
@@ -607,6 +606,7 @@ stargazer(mod_list,
 #            after = nrow(.) - 1)
 
 ```
+
 
 Models 4, 5, and 6 in Table \ref{tab:country-props} assess how the 2013 Supreme Court decision striking down DOMA figures into these processes. Model 4 is the same as Model 3, but with a dichotomous "Post-2013" variable added. The influence of sending-country policy loses its significance in this model: 2013 was a significant turning point for LGB immigrants to the U.S., with the average representation from a given country growing by a quarter of a percent. Model 5 adds an interaction between sending-country LGBT policy score and the post-2013 dichotomous variable. This variable is significant and positive, while the other variables of interest lose significance. Sending-country policy and the post-2013 era both matter, but only in tandem: Only LGB immigrants from progressive countries see a boost in representation after the DOMA decision.  
 
@@ -677,7 +677,7 @@ We next turn to the effects of U.S. state LGBT policy. Table \ref{tab:state-prop
 According to the descriptive analysis above, immigrants in same-sex couples tend to have higher incomes and hold more prestigious occupations than immigrants in different-sex couples. This implies that immigrants in same-sex couples may be attracted to progressive states for their economic rather than political benefits, so Model 3 adds state-level controls and fixed effects. Indeed, in this model, the coefficient for state policy is reduced and rendered insignificant. Model 4 adds country-of-origin controls and fixed effects. The state policy effect remains imprecisely estimated, but country-of-origin policy has increased in strength. More progressive sending countries are represented by greater proportions of same-sex couples, while U.S. state policy appears to have little influence on their settlement patterns, at least in aggregate proportions.
 
 ```{r ord}
-library(MASS)
+
 ord_basic <- polr(state_policy_binned ~ same_sex + as.factor(year),
                 data = acs_couple_policy_small, Hess = T)
 ord_orig <- polr(state_policy_binned ~ same_sex*origin_score + as.factor(year),

@@ -130,7 +130,7 @@ acs_couple_policy_small <- bind_rows(
 
 ```
 
-
+# Alternate country proportion specifications
 ```{r country-props}
 # acs_prop_yrimmig_policy <- acs_prop_yrimmig_policy %>%
 #   filter(yrimmig >= 1992)
@@ -210,8 +210,133 @@ stargazer(mod_list,
           notes.append = F,
           label = 'tab:country-props',
           title = 'OLS regressions of percent of immigrants in same-sex couples by year of immigration and country of origin. Country-clustered standard errors shown in parentheses. Country controls include population-weighted distance, contiguous border, common official language, common ethnic language, colonial relationship, wage differential, unemployment differential, proportion same-country stock, and Polity 5 measure of democratization.')
+
+# One immigrant
+ag_oneimm <- lm(prop_same_sex_oneimm ~ distw + contig + comlang_off + comlang_ethno + colony +
+                   wage_dif + unemp_dif + polity5 + origin_score + stock_prop + bpld,
+         data = acs_prop_yrimmig_policy)
+
+ag_oneimm_2013 <- lm(prop_same_sex_oneimm ~ distw + contig + comlang_off + comlang_ethno + colony +
+                   wage_dif + unemp_dif + polity5 + origin_score + stock_prop + bpld + post_2013*origin_score,
+         data = mutate(acs_prop_yrimmig_policy, post_2013 = (yrimmig > 2013)))
 ```
 
+# Adjusting proportions based on empirical mismatch rates
+```{r country-props-2}
+# acs_prop_yrimmig_policy <- acs_prop_yrimmig_policy %>%
+#   filter(yrimmig >= 1992)
+
+# ag <- lm(I(log(n_same_sex+1)) ~ origin_score + I(log(n_total+1)), 
+#          data = acs_prop_yrimmig_policy) 
+# 
+# 
+# ag_country_orig <- lm(I(log(n_same_sex+1))  ~ distw + contig + comlang_off + comlang_ethno + colony +
+#                    wage_dif + unemp_dif + polity5 + origin_score + stock_prop+ I(log(n_total+1)), 
+#          data = acs_prop_yrimmig_policy)
+# 
+# ag_country_orig_fe <- lm(I(log(n_same_sex+1))  ~ distw + contig + comlang_off + comlang_ethno + colony +
+#                    wage_dif + unemp_dif + polity5 + origin_score + stock_prop + bpld+ I(log(n_total+1)), 
+#          data = acs_prop_yrimmig_policy)
+
+
+
+ag <- lm(prop_same_sex_adj ~ origin_score,
+         data = acs_prop_yrimmig_policy)
+
+
+ag_country_orig <- lm(prop_same_sex_adj ~ distw + contig + comlang_off + comlang_ethno + colony +
+                   wage_dif + unemp_dif + polity5 + origin_score + stock_prop,
+         data = acs_prop_yrimmig_policy)
+
+ag_country_orig_fe <- lm(prop_same_sex_adj ~ distw + contig + comlang_off + comlang_ethno + colony +
+                   wage_dif + unemp_dif + polity5 + origin_score + stock_prop + bpld,
+         data = acs_prop_yrimmig_policy)
+
+ag_oneimm <- lm(prop_same_sex_adj ~ distw + contig + comlang_off + comlang_ethno + colony +
+                   wage_dif + unemp_dif + polity5 + origin_score + stock_prop + bpld,
+         data = acs_prop_yrimmig_policy)
+
+# Add binary indicator for post-2013
+# ag_country_orig_2013 <- lm(prop_same_sex_adj ~ distw + contig + comlang_off + comlang_ethno + colony +
+#                    wage_dif + unemp_dif + polity5 + origin_score + stock_prop +
+#                      post_2013,
+#          data = mutate(acs_prop_yrimmig_policy, post_2013 = (yrimmig > 2013)))
+
+ag_country_orig_fe_2013 <- lm(prop_same_sex_adj ~ distw + contig + comlang_off + comlang_ethno + colony +
+                   wage_dif + unemp_dif + polity5 + origin_score + stock_prop + bpld +
+                     post_2013,
+         data = mutate(acs_prop_yrimmig_policy, post_2013 = (yrimmig > 2013)))
+
+
+ag_2013_int_fe <- lm(prop_same_sex_adj ~ distw + contig + comlang_off + comlang_ethno + colony +
+                   wage_dif + unemp_dif + polity5  + stock_prop + bpld +
+                     post_2013*origin_score,
+         data = mutate(acs_prop_yrimmig_policy, post_2013 = (yrimmig > 2013)))
+
+
+ag_2013_spouse_int <- lm(prop_spouse_same_sex_adj ~ distw + contig + comlang_off + 
+                           comlang_ethno + colony + bpld +
+                   wage_dif + unemp_dif + polity5  + stock_prop +
+                     post_2013*origin_score,
+         data = mutate(acs_prop_yrimmig_policy, post_2013 = (yrimmig > 2013)))
+
+se_list <- list()
+mod_list <- list(ag, ag_country_orig, ag_country_orig_fe,
+                 ag_country_orig_fe_2013, ag_2013_int_fe, ag_2013_spouse_int)
+for(mod_num in 1:length(mod_list)){
+  se_list[[mod_num]] <- coef(summary(mod_list[[mod_num]], cluster = c("bpld")))[, 2]
+}
+
+
+stargazer(mod_list,
+          header = F,
+          model.names = F,
+          keep = c('origin_score', 'polity5', 'post_2013'),
+          order = paste0("^", c('origin_score', 'polity5', 'post_2013TRUE', 
+                                'post_2013TRUE:origin_score') , "$"),
+          covariate.labels = c('Country LGBT policy score', 'Polity5 democratization',
+                                'Post-2013', 'Country score × Post-2013'),
+          dep.var.labels   = c("Percent in same-sex couples", "Married"),
+          add.lines = list(c('Country controls?', 'no', rep('yes', 5)),
+                           c('Country FEs?', 'no', 'no', rep('yes', 4))),
+          se = se_list,
+          keep.stat = c('n'),
+          star.cutoffs = c(0.1, 0.05, 0.01, 0.001),
+          star.char = c('†', '*', '**', '***'),
+          notes = c("Note: †p<0.1; *p<0.05; **p<0.01; ***p<0.001",
+                    "Source: American Community Survey 2008-2019"),
+          notes.label = '',
+          notes.align = 'l',
+          notes.append = F,
+          label = 'tab:country-props',
+          title = 'ADJUSTED: OLS regressions of percent of immigrants in same-sex couples by year of immigration and country of origin. Country-clustered standard errors shown in parentheses. Country controls include population-weighted distance, contiguous border, common official language, common ethnic language, colonial relationship, wage differential, unemployment differential, proportion same-country stock, and Polity 5 measure of democratization.')
+
+
+# mod_list <- list(ag, ag_country_orig, ag_country_orig_fe, 
+#                  ag_country_orig_fe_2013, ag_2013_int_fe, ag_2013_spouse_int)
+# for(mod_num in 1:length(mod_list)){
+#   mod_list[[mod_num]] <- coef(summary(mod_list[[mod_num]], cluster = c("bpld")))
+# }
+# 
+# keep_coefs <- c('Country LGBT policy score' = 'origin_score', 
+#                 'Polity5 democratization' = 'polity5', 
+#                 'Post-2013' = 'post_2013TRUE', 
+#                 'Country score × Post-2013' = 'post_2013TRUE:origin_score')
+#    
+# 
+# export_summs(mod_list,
+#        coefs = keep_coefs,
+#        statistics = c('N' = 'nobs'),
+#        stars = c(`†`= 0.1, `*`= 0.05, `**` = 0.01, `***` = 0.001),
+#        note = '{stars}. 
+#                Source: American Community Survey 2008-2019') %>%
+#   set_caption('OLS regressions of percent of immigrants in same-sex couples by year of immigration and country of origin. Country-clustered standard errors shown in parentheses. Country controls include population-weighted distance, contiguous border, common official language, common ethnic language, colonial relationship, wage differential, unemployment differential, proportion same-country stock, and Polity 5 measure of democratization.') %>%
+#   add_rows(matrix(c('Country controls?', 'no', rep('yes', 5),
+#                 'Country FEs?', 'no', 'no', rep('yes', 4)),
+#            byrow = T, nrow = 2) , 
+#            after = nrow(.) - 1)
+
+```
 
 # Accounting for mismatch
 

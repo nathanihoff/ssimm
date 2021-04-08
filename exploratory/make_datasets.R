@@ -38,7 +38,6 @@ acs <- read_dta('/Users/nathan/Data/ACS/acs_2008_2019.dta') %>%
                             T ~ bpldid))
 
 
-
 # Define immigrant as someone born abroad not to US parents
 acs_wide <- acs %>%
   # Only  those who immigrated when 18+
@@ -49,7 +48,7 @@ acs_wide <- acs %>%
     year, serial, nchild, hhwt, ssmc,
     cluster, strata, metro, region, state, stateicp, ftotinc, respmode,
     # individual variables
-    position, sex, related, yrimmig, bpld, bpldid, citizen, educ,
+    position, sex, related, yrimmig, bpld, bpldid, citizen, educ, qrelate,
     occ, inctot, occscore, hwsei, empstat, yrnatur, poverty, speakeng, age, perwt
     # state_stock_year, state_stock_avg
   ) %>%
@@ -57,7 +56,7 @@ acs_wide <- acs %>%
     names_from = position,
     values_from = c(sex, related, related, yrimmig, bpld, bpldid, citizen, educ,
                     occ, inctot, occscore, hwsei, empstat, yrnatur, poverty, 
-                    speakeng, age, perwt
+                    speakeng, age, perwt, qrelate
                     #state_stock_year, state_stock_avg
     )) %>%
   filter(!is.na(sex_partner), !is.na(sex_main)) %>%
@@ -83,8 +82,10 @@ acs_oneimm <- acs_wide %>%
                                citizen %in% c('Naturalized citizen', 'Not a citizen') ~ 'immigrant')) %>% 
   filter(!is.na(immigrant)) %>%
   pivot_wider(names_from = immigrant,
-              values_from = c(position, sex, related, related, yrimmig, bpld, bpldid, citizen, educ,
-                              occ, inctot, occscore, hwsei, empstat, yrnatur, poverty, speakeng, age, perwt
+              values_from = c(position, sex, related, related, yrimmig, bpld, 
+                              bpldid, citizen, educ, qrelate,
+                              occ, inctot, occscore, hwsei, empstat, yrnatur, 
+                              poverty, speakeng, age, perwt
                               #state_stock_year, state_stock_avg
               )) %>%
   mutate(relation = case_when(
@@ -188,28 +189,41 @@ acs_prop_yrimmig <- acs_wide %>%
                names_sep = '_') %>%
   group_by(yrimmig, bpld, same_sex) %>%
   summarize(n = n(), 
-            n_spouse_mail = sum(married == T & respmode == 'Mail'), 
-            n_spouse_cati = sum(married == T & respmode == 'CATI/CAPI'), 
-            n_spouse_internet = sum(married == T & respmode == 'Internet'), 
+            n_partner = sum(married == F & qrelate == 'Not edited'),
+            n_spouse = sum((married == T & qrelate == 'Not edited') |
+                             (married == F & qrelate == 'Same sex spouse changed to unmarried partner')),
+            n_spouse_oneimm = sum(imm_couple == 'one' & ((married == T & qrelate == 'Not edited') |
+                                                       (married == F & qrelate == 'Same sex spouse changed to unmarried partner'))),
+            n_partner_oneimm = sum(imm_couple == 'one' & married == F & qrelate == 'Not edited'),
+            n_spouse_mail = sum(respmode == 'Mail' & (married == T |
+                                  (married == F & qrelate == 'Same sex spouse changed to unmarried partner'))), 
+            n_spouse_cati = sum(respmode == 'CATI/CAPI' & (married == T |
+                                  (married == F & qrelate == 'Same sex spouse changed to unmarried partner'))), 
+            n_spouse_internet = sum(respmode == 'Internet' & (married == T |
+                                  (married == F & qrelate == 'Same sex spouse changed to unmarried partner'))), 
             n_partner_mail = sum(married == F & respmode == 'Mail'), 
             n_partner_cati = sum(married == F & respmode == 'CATI/CAPI'), 
             n_partner_internet = sum(married == F & respmode == 'Internet')) %>%
   ungroup() %>%
   mutate(same_sex = ifelse(same_sex == T, 'same_sex', 'dif_sex')) %>%
-  pivot_wider(names_from = 'same_sex', values_from = 4:10) %>% 
+  pivot_wider(names_from = 'same_sex', values_from = 4:ncol(.)) %>% 
   replace(is.na(.), 0) %>%
   left_join(country_yrimmig_df) %>%
   left_join(distinct(dplyr::select(acs_dyad, bpld, bpldid))) %>%
-  mutate(prop_spouse_same_sex = (n_spouse_mail_same_sex*(1-(.59+.474)/2) +
+  mutate(prop_spouse_same_sex_adj = (n_spouse_mail_same_sex*(1-(.59+.474)/2) +
            n_spouse_cati_same_sex*(1-.46) +
              n_spouse_internet_same_sex*(1-.225)) / n_total * 100,
-         prop_partner_same_sex = (n_partner_mail_same_sex*(1-(.07+.056)/2) +
+         prop_partner_same_sex_adj = (n_partner_mail_same_sex*(1-(.07+.056)/2) +
                                     n_partner_cati_same_sex*(1-.13) +
                                     n_partner_internet_same_sex*(1-.024))
            / n_total * 100,
          #prop_same_sex = n_same_sex / n_total*100,
+         prop_same_sex_adj = prop_spouse_same_sex_adj + prop_partner_same_sex_adj,
+         prop_dif_sex = n_dif_sex / n_total * 100,
+         prop_spouse_same_sex = n_spouse_same_sex / n_total * 100,
+         prop_partner_same_sex = n_partner_same_sex / n_total * 100,
          prop_same_sex = prop_spouse_same_sex + prop_partner_same_sex,
-         prop_dif_sex = n_dif_sex / n_total * 100) 
+         prop_same_sex_oneimm = (n_spouse_oneimm_same_sex + n_partner_oneimm_same_sex) / n_total * 100)
 
 
   
@@ -464,7 +478,7 @@ acs_couple_policy <- acs_coupled_imms %>%
   mutate(pos_income = ifelse(inctot >= 0, inctot, 0),
          no_income = (inctot <= 0),
          log_income = log(pos_income+1)) %>%
-  drop_na(state_policy_binned, same_sex, origin_score, sex, age, educ, 
+  drop_na(state_policy_binned, same_sex, origin_score, sex, age, educ, qrelate,
           nchild, log_income, no_income, yrimmig, year)
 
 
