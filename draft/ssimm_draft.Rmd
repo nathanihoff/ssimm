@@ -111,14 +111,8 @@ knitr::opts_chunk$set(error=TRUE)
 
 ```{r load, include = F}
 
-acs_wide <- read.csv(here('data', 'acs_wide.csv')) %>%
-  filter((qrelate_main == 'Not edited' |            
-           (married == F & qrelate_main == 'Same sex spouse changed to unmarried partner')) &
-         (qrelate_partner == 'Not edited' |            
-           (married == F & qrelate_partner == 'Same sex spouse changed to unmarried partner')))
-acs_couple_policy <- readRDS(here('data', 'acs_couple_policy.rds')) %>%
-  filter(qrelate == 'Not edited' |            
-           (married == F & qrelate == 'Same sex spouse changed to unmarried partner'))
+acs_wide <- read.csv(here('data', 'acs_wide.csv'))
+acs_couple_policy <- readRDS(here('data', 'acs_couple_policy.rds'))
 acs_prop_yrimmig_policy <- read.csv(here('data', 'acs_prop_yrimmig_policy.csv'))
 acs_dyad_policy <- read.csv(here('data', 'acs_dyad_policy.csv'))
 
@@ -633,6 +627,18 @@ state_prop_fe2 <- lm(same_prop ~ state_policy + origin_score + distw + contig +
                            state_unemploy + state_income + Country + state, 
                        data = acs_dyad_policy)
 
+state_prop_2013 <- lm(same_prop ~ post_2013 + state_policy + origin_score + distw + contig + 
+                          comlang_off + comlang_ethno + colony +
+                          wage_dif + unemp_dif + polity5 + stock_prop +
+                           state_unemploy + state_income + Country + state, 
+                       data = mutate(acs_dyad_policy, post_2013 = (year > 2013)))
+
+state_prop_2013_int <- lm(same_prop ~ post_2013*(state_policy + origin_score) + distw + contig + 
+                          comlang_off + comlang_ethno + colony +
+                          wage_dif + unemp_dif + polity5 + stock_prop +
+                           state_unemploy + state_income + Country + state, 
+                       data = mutate(acs_dyad_policy, post_2013 = (year > 2013)))
+
 # state_prop_2013 <- lm(same_prop ~ post_2013*(state_policy + origin_score), 
 #                        data = mutate(acs_dyad_policy, post_2013 = (year > 2013)))
 # state_prop_2013_2 <- lm(same_prop ~ post_2013*(state_policy + origin_score) + distw + contig + 
@@ -642,7 +648,8 @@ state_prop_fe2 <- lm(same_prop ~ state_policy + origin_score + distw + contig +
 #                        data = mutate(acs_dyad_policy, post_2013 = (year > 2013)))
 
 se_list <- list()
-mod_list <- list(state_prop, state_prop2, state_prop_fe, state_prop_fe2)
+mod_list <- list(state_prop, state_prop2, state_prop_fe, state_prop_fe2, 
+                 state_prop_2013, state_prop_2013_int)
 
 for(mod_num in 1:length(mod_list)){
   se_list[[mod_num]] <- coef(summary(mod_list[[mod_num]], cluster = c("state")))[, 2]
@@ -651,13 +658,13 @@ for(mod_num in 1:length(mod_list)){
 
 stargazer(mod_list,
           header = F, 
-          keep = c('origin_score', 'state_policy'),
+          keep = c('origin_score', 'state_policy', 'post_2013'),
           # omit = c('Country', 'state'),
-          order = c('state_policy', 'origin_score'),
-          covariate.labels = c('State LGBT policy score', 'Country LGBT policy score'),
+          order = c('state_policy', 'origin_score', 'post_2013'),
+          #covariate.labels = c('State LGBT policy score', 'Country LGBT policy score'),
           dep.var.labels = "Percent in same-sex couples",
-          add.lines = list(c('State controls and FEs?', 'no', 'no', 'yes', 'yes'),
-                           c('Country controls and FEs?', rep('no', 3), 'yes')),
+          add.lines = list(c('State controls and FEs?', 'no', 'no', rep('yes', 4)),
+                           c('Country controls and FEs?', rep('no', 3), rep('yes', 3))),
           se = se_list,
           keep.stat = c('n'),
           star.cutoffs = c(0.1, 0.05, 0.01, 0.001),
@@ -675,7 +682,7 @@ state_effect <- sd(acs_couple_policy$state_policy, na.rm = T)*coef(state_prop2)[
 
 ```
 
-We next turn to the effects of U.S. state LGBT policy. Table \ref{tab:state-props} presents models of U.S. state-level proportion of immigrants in same-sex couples, from a given country of origin in a given survey year. Model 1 contains only one predictor: U.S. state policy score in the survey year. We see that, on average, states with more friendly LGBT policies have somewhat higher proportions of immigrants in same-sex couples. Model 2 adds a predictor for country-of-origin policy score at the mean year of immigration. Although the coefficient for country of origin score is more precisely estimated, the two variables have effects of roughly equal size. A `r sd(acs_couple_policy$origin_score, na.rm = T)`-point (one-standard deviation) increase origin score is associated with a `r origin_effect` percentage-point increase of immigrants in same-sex couples, whereas the corresponding state policy standard deviation increase of `r sd(acs_couple_policy$state_policy, na.rm = T)` points is `r state_effect` percentage points.   
+We next turn to the effects of U.S. state LGBT policy. Table \ref{tab:state-props} presents models of U.S. state-level proportion of immigrants in same-sex couples, from a given country of origin in a given survey year. Model 1 contains only one predictor: U.S. state policy score in the survey year. We see that, on average, states with more friendly LGBT policies have somewhat higher proportions of immigrants in same-sex couples. Model 2 adds a predictor for country-of-origin policy score at the mean year of immigration. Although the coefficient for country of origin score is more precisely estimated, the two variables have effects of roughly equal size. A one-standard deviation (`r sd(acs_couple_policy$origin_score, na.rm = T)`-point) increase origin score is associated with a `r origin_effect` percentage-point increase of immigrants in same-sex couples, whereas the corresponding state policy standard deviation increase of `r sd(acs_couple_policy$state_policy, na.rm = T)` points is `r state_effect` percentage points.   
 
 <!-- Although more LGBT-friendly policies in both locations are associated with higher numbers of immigrants in same-sex couples, country-of-origin LGBT policy is a stronger predictor than U.S. state policy, even considering the somewhat different scale of these variables.    -->
 
@@ -750,6 +757,8 @@ k <- length(coef(ord_interact))
 theta_mat <- rmvnorm(sims, mean=c(coef(ord_interact), ord_interact$zeta),
                               sigma=vcovCL(ord_interact, cluster = ~ bpld))
 
+var <- 'origin_score'
+
 for (i in 1:sims) {
   if(i %% 10 == 0) print(i)
   theta <- as.numeric(theta_mat[i,])
@@ -762,6 +771,7 @@ for (i in 1:sims) {
                       length.out = 10)
       for(val in var_vals){
           sim_dat <- acs_couple_policy_small %>%
+            rename(gender = sex) %>%
             select(all.vars(formula(ord_interact)))
           sim_dat[, 'same_sex'] <- same_loop
           sim_dat[, var] <- val
