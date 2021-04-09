@@ -359,7 +359,61 @@ tabyl(filter(acs_couple_policy, same_sex == T), respmode, year) %>%
 ```
 
 
+In a Census Bureau working paper, @kreider_2015 use personal information such as names and addresses match same-sex couples from the 2010 ACS to Social Security administrative data. They find that 58 percent of married couples coded as same-sex in the ACS are coded as different-sex in the administrative data. The corresponding sex mismatch rate for unmarried same-sex couples is 7 percent. (Our data include `r sum(acs_wide$related_partner == 'Spouse' & acs_wide$same_sex == T)` married and `r sum(acs_wide$related_partner == 'Unmarried Partner' & acs_wide$same_sex == T)` unmarried same-sex immigrant couples.) A follow-up study [@kreider_2017] shows that these mismatch rates appear to have fallen: In a 2016 ACS test module that included explicit categories for different- and same-sex spouses and partners, 31 percent of married and 3 percent of unmarried same-sex couples had inconsistent sex responses. This decreasing mismatch rate may be due to the greater numbers of same-sex couples openly identifying themselves as well as the growing popularity of responding to the ACS via Internet (see Supplementary Material), a response mode introduced in 2013 which is now the default [@u.s.censusbureau_2017]. In the 2016 test of the ACS, the mismatch rate for mail-in responses was 47 and 6 percent for married and unmarried same-sex couples, respectively, whereas for Internet responses they were only 22 and 2.4 percent [@kreider_2017].^[An interview-based CATI/CAPI response mode is sometimes administered as well (to `r with(filter(acs_couple_policy, same_sex == T), round(sum(respmode == 'CATI/CAPI')/nrow(filter(acs_couple_policy, same_sex == T)),2)*100)` percent of our sample of immigrants in same-sex couples), but the 2016 study did not assess its error rate. In the 2010 ACS, Kreider and Lofquist (2015) find CATI/CAPI sex reporting mismatch for 46 and 13 percent for married and unmarried same-sex couples, respectively.] In our sample of immigrants in same-sex couples, `r sum(acs_couple_policy$respmode == 'Mail' & acs_couple_policy$same_sex == T)` responded by mail and `r sum(acs_couple_policy$respmode == 'Internet' & acs_couple_policy$same_sex == T)` responded by Internet survey.   
 
+Despite these difficulties, many researchers have relied on ACS data to draw demographic conclusions about same-sex couples in the U.S., usually without making accommodations for measurement error . In several ways, we test the sensitivity of our results, especially to the possibility that a large proportion of apparently same-sex couples misreported a partner's sex. However, such adjustments assume that sex response error occurs randomly throughout the immigrant population. Beginning in 2019, the ACS added explicit "opposite-sex" and "same-sex" categories to the relationship questions, so future work on same-sex couples in the ACS will be more reliable [@goodnature_2021].
+
+## Sensitivity Analysis
+We first assess how much our results would change in the presence of significant measurement error. @kreider_2015 found that in the 2010 ACS, 57 percent of married and 7 percent of unmarried same-sex couples may have been different-sex couples that misreported a partner's sex. By 2016 the mismatch rate had declined to 31 percent of married and 3 percent of unmarried same-sex couples [@kreider_2017]. 
+
+Figure \ref{fig:sens} takes Model 3 form Table \ref{tab:country-props} and reduces the proportions of same-sex couples in the data. It varies the percentage of misreported same-sex married couples from 0 to 90 percent and of unmarried couples from 0 to 30 percent. Highlighted in blue bars are the empirical mismatch rates found in the two studies by Kreider et al. [-@kreider_2015; -@kreider_2017]. We see that extremely high rates of misreporting are necessary to reduce this effect to 0. 
+
+```{r sens, eval = F, fig.cap = 'Coefficient for sending-country LGBT policy context, adjusted for possible misreporting of same-sex couples. Ribbon shows 95 percent confidence intervals and blue bars show estimated misreporting from the 2010 and 2016 U.S. Census Bureau tests on the ACS.'}
+
+acs_prop_yrimmig_policy <- acs_prop_yrimmig_policy %>%
+  mutate(prop_same_sex_adj = (prop_spouse_same_sex*(1-.573) + prop_partner_same_sex*(1-.07)))
+
+lm(prop_same_sex_adj ~ distw + contig + comlang_off + comlang_ethno + colony +
+                   wage_dif + unemp_dif + polity5 + origin_score + stock_prop + bpld,
+         data = acs_prop_yrimmig_policy) %>%
+  summary()
+#.35 .034
+
+
+sens_df <- list()
+mis_df <- data.frame(spouse = sort(c(.573, .35, seq(from = 0, to = .9, length.out = 8))),
+           partner = sort(c(.07, .034, seq(from = 0, to = .3, length.out = 8))))
+
+for(i in 1:nrow(mis_df)){
+  sens_mod <- lm(prop_same_sex_adj ~ distw + contig + comlang_off + comlang_ethno + colony +
+                   wage_dif + unemp_dif + polity5 + origin_score + stock_prop + bpld,
+         data = acs_prop_yrimmig_policy %>%
+           mutate(prop_same_sex_adj = (prop_spouse_same_sex*(1-mis_df[i,1]) + 
+                                         prop_partner_same_sex*(1-mis_df[i,2])))
+         )
+  
+  coef_os <- coef(summary(sens_mod, cluster = c("bpld")))['origin_score',]
+  sens_df[[i]] <- data.frame(est = coef_os[[1]],
+                             se = coef_os[[2]],
+                             mis_spouse = mis_df[i,1],
+                             mis_partner = mis_df[i,2])
+}
+sens_df <- bind_rows(sens_df) %>%
+  mutate(lower = est - 1.96*se, 
+         upper = est + 1.96*se,
+         highlight = mis_spouse %in% c(.573, .35))
+
+ggplot(sens_df, aes(x = (mis_spouse+mis_partner)/2, y = est)) +
+  geom_line() +
+  geom_ribbon(aes(ymin = lower, ymax = upper), alpha = .2)  +
+  geom_hline(yintercept = 0, linetype = 'dashed') +
+  geom_errorbar(aes(ymin = lower, ymax = upper, width = .02, color = highlight)) +
+  theme(legend.position = "none") +
+  scale_color_manual(values = c('transparent', RColorBrewer::brewer.pal(3, 'Dark2')[3])) +
+  labs(y = 'Coefficient for LGBT policy context')
+```
+
+We next text the robustness of our results to omitted variable bias.
 
 # References
 \setlength{\parindent}{-0.2in}

@@ -201,11 +201,7 @@ Note from Kris: I'm wondering if we should actually incorporate the ``labor mark
 
 We merge individual-level data on immigrants in the U.S. with state- and country-level variables from a variety of datasets. The individual data come from the 2008 to 2019 ACS (\protect\hyperlink{ref-ruggles_2021}{Ruggles et al., 2021}). Each year, the ACS surveys a 1\% sample of the U.S. population about their education, occupation, income, family structure, immigration status, country of origin, location, and a variety of other individual and household attributes. We define a same-sex couple as two individuals of the same sex in the same household who report their relationship as ``spouse'' or ``unmarried partner.'' We limit the sample to individuals who immigrated at the age of 18 or older. The 11 years of survey data contain 9,060 same-sex couples that include at least one immigrant, for a total of 11,501 immigrants in same-sex couples with complete data. These immigrants are compared to 982,801 corresponding different-sex couples (containing 1,548,691 individual immigrants). Using these data, we construct different dependent variables, corresponding to the analysis of interest. Below, we outline how we utilize these data to construct dependent variables based on each analysis.
 
-Measuring the prevalence of same-sex couples in the U.S. is difficult (\protect\hyperlink{ref-michaels_2013}{Michaels, 2013}). For one, identification of LGB individuals in data sources such as the ACS is only possible for those who self-identity as living with a same-sex spouse or unmarried partner (\protect\hyperlink{ref-baumle_2009}{Baumle et al., 2009, p. 6}). Since the surveys lack questions about sexual orientation, LGB individuals who do not live with a same-sex romantic partner or who do not feel comfortable with the partner labels of the ACS are not part of the analysis. In addition, some measurement error may result when different-sex couples accidentally misspecify the gender of one of the partners (\protect\hyperlink{ref-gates_2009a}{Gates, 2009}); beginning in 2008 the Census Bureau made changes to ACS gender and partnership questions in order to prevent such errors (\protect\hyperlink{ref-u.s.censusbureau_2013}{U.S. Census Bureau, 2013}), so we rely on data only from 2008 onward, but pitfalls remain.
-
-In a Census Bureau working paper, \protect\hyperlink{ref-kreider_2015}{Kreider \& Lofquist} (\protect\hyperlink{ref-kreider_2015}{2015}) use personal information such as names and addresses match same-sex couples from the 2010 ACS to Social Security administrative data. They find that 58 percent of married couples coded as same-sex in the ACS are coded as different-sex in the administrative data. The corresponding sex mismatch rate for unmarried same-sex couples is 7 percent. (Our data include 4,632 married and 4,428 unmarried same-sex immigrant couples.) A follow-up study (\protect\hyperlink{ref-kreider_2017}{Kreider et al., 2017}) shows that these mismatch rates appear to have fallen: In a 2016 ACS test module that included explicit categories for different- and same-sex spouses and partners, 31 percent of married and 3 percent of unmarried same-sex couples had inconsistent sex responses. This decreasing mismatch rate may be due to the greater numbers of same-sex couples openly identifying themselves as well as the growing popularity of responding to the ACS via Internet (see Supplementary Material), a response mode introduced in 2013 which is now the default (\protect\hyperlink{ref-u.s.censusbureau_2017}{U.S. Census Bureau, 2017}). In the 2016 test of the ACS, the mismatch rate for mail-in responses was 47 and 6 percent for married and unmarried same-sex couples, respectively, whereas for Internet responses they were only 22 and 2.4 percent (\protect\hyperlink{ref-kreider_2017}{Kreider et al., 2017}).\footnote{An interview-based CATI/CAPI response mode is sometimes administered as well (to 15 percent of our sample of immigrants in same-sex couples), but the 2016 study did not assess its error rate. In the 2010 ACS, Kreider and Lofquist (2015) find CATI/CAPI sex reporting mismatch for 46 and 13 percent for married and unmarried same-sex couples, respectively.} In our sample of immigrants in same-sex couples, 4,582 responded by mail and 5,174 responded by Internet survey.
-
-Despite these difficulties, many researchers have relied on ACS data to draw demographic conclusions about same-sex couples in the U.S., usually without making accommodations for measurement error (\protect\hyperlink{ref-boertien_2019}{Boertien \& Vignoli, 2019}; \protect\hyperlink{ref-gates_2013}{Gates, 2013a}; \protect\hyperlink{ref-giddings_2014}{Giddings et al., 2014}; \protect\hyperlink{ref-goldberg_2021}{Goldberg \& Conron, 2021}; e.g. \protect\hyperlink{ref-poston_2017}{Poston et al., 2017}). In several ways, we test the sensitivity of our results, especially to the possibility that a large proportion of apparently same-sex couples misreported a partner's sex. However, such adjustments assume that sex response error occurs randomly throughout the immigrant population. Beginning in 2019, the ACS added explicit ``opposite-sex'' and ``same-sex'' categories to the relationship questions, so future work on same-sex couples in the ACS will be more reliable (\protect\hyperlink{ref-goodnature_2021}{Goodnature \& Neto, 2021}).
+Measuring the prevalence of same-sex couples in the U.S. is difficult (\protect\hyperlink{ref-michaels_2013}{Michaels, 2013}). For one, identification of LGB individuals in data sources such as the ACS is only possible for those who self-identity as living with a same-sex spouse or unmarried partner (\protect\hyperlink{ref-baumle_2009}{Baumle et al., 2009, p. 6}). Since the surveys lack questions about sexual orientation, LGB individuals who do not live with a same-sex romantic partner or who do not feel comfortable with the partner labels of the ACS are not part of the analysis. In addition, some measurement error may result when different-sex couples accidentally misspecify the gender of one of the partners (\protect\hyperlink{ref-gates_2009a}{Gates, 2009}); beginning in 2008 the Census Bureau made changes to ACS gender and partnership questions in order to prevent such errors (\protect\hyperlink{ref-u.s.censusbureau_2013}{U.S. Census Bureau, 2013}), so we rely on data only from 2008 onward, but pitfalls remain. If even a small number of different-sex couples misreport one partner's sex, the counts of same-sex couples will be inflated. Following \protect\hyperlink{ref-gates_2009}{Gates \& Steinberger} (\protect\hyperlink{ref-gates_2009}{2009}), we remove all respondents had either their relationship or sex variable allocated by the Census Bureau. This is the strategy used by most studies of same-sex couples in the ACS (\protect\hyperlink{ref-boertien_2019}{Boertien \& Vignoli, 2019}; \protect\hyperlink{ref-christafore_2019}{Christafore \& Leguizamon, 2019}; e.g. \protect\hyperlink{ref-gates_2013}{Gates, 2013a}; \protect\hyperlink{ref-goldberg_2021}{Goldberg \& Conron, 2021}; \protect\hyperlink{ref-martell_2020}{Martell \& Nash, 2020}). We also test the robustness of our results to differential misreporting rates by response mode.
 
 \hypertarget{explanatory-variables}{%
 \subsection{Explanatory Variables}\label{explanatory-variables}}
@@ -441,15 +437,6 @@ To help interpret these results, Figure \ref{fig:sim} contains predicted probabi
 
 The figure shows opposite trends for same- and different-sex couples. Overall, immigrants tend to live in more progressive states, but the moderating effect of origin score is quite different for the two groups. The panel for same-sex couples shows that these immigrants tend to live in U.S. states with similar LGBT policy contexts to those of their countries of origin. Immigrants in same-sex couples from repressive countries are less likely to live in progressive U.S. states, but as the origin-country score increases, so does the probability of living in a progressive state. For immigrants in different-sex couples, on the other hand, increasingly progressive country-of-origin policies are associated with a \emph{lower} probability of residing in a progressive U.S. state, accompanied by a \emph{higher} probability of living in a repressive U.S. state. At the high end of the origin-score policy range, the difference in predicted probabilities is significant: typical immigrants in same-sex couples are percentage points more likely to live in progressive states and percentage points less likely to live in repressive states than similar immigrants in different-sex couples.
 
-\hypertarget{sensitivity-analysis}{%
-\subsection{Sensitivity Analysis}\label{sensitivity-analysis}}
-
-We first assess how much our results would change in the presence of significant measurement error. \protect\hyperlink{ref-kreider_2015}{Kreider \& Lofquist} (\protect\hyperlink{ref-kreider_2015}{2015}) found that in the 2010 ACS, 57 percent of married and 7 percent of unmarried same-sex couples may have been different-sex couples that misreported a partner's sex. By 2016 the mismatch rate had declined to 31 percent of married and 3 percent of unmarried same-sex couples (\protect\hyperlink{ref-kreider_2017}{Kreider et al., 2017}).
-
-Figure \ref{fig:sens} takes Model 3 form Table \ref{tab:country-props} and reduces the proportions of same-sex couples in the data. It varies the percentage of misreported same-sex married couples from 0 to 90 percent and of unmarried couples from 0 to 30 percent. Highlighted in blue bars are the empirical mismatch rates found in the two studies by Kreider et al. (\protect\hyperlink{ref-kreider_2017}{2017}; \protect\hyperlink{ref-kreider_2015}{2015}). We see that extremely high rates of misreporting are necessary to reduce this effect to 0.
-
-We next text the robustness of our results to omitted variable bias.
-
 \hypertarget{discussion}{%
 \section{Discussion}\label{discussion}}
 
@@ -523,6 +510,9 @@ Carpenter, C. S. (2020). The {Direct} {Effects} of {Legal} {Same}-{Sex} {Marriag
 \leavevmode\hypertarget{ref-carrillo_2018}{}%
 Carrillo, H. (2018). \emph{Pathways of {Desire}: {The} {Sexual} {Migration} of {Mexican} {Gay} {Men}}. University of Chicago Press.
 
+\leavevmode\hypertarget{ref-christafore_2019}{}%
+Christafore, D., \& Leguizamon, S. (2019). Taste-{Based} {Discrimination}, {Tolerance} and the {Wage} {Gap}: {When} {Does} {Economic} {Freedom} {Help} {Gay} {Men}? \emph{Kyklos}, \emph{72}(3), 426--445. https://doi.org/\url{https://doi.org/10.1111/kykl.12206}
+
 \leavevmode\hypertarget{ref-corey-boulet_2019}{}%
 Corey-Boulet, R. (2019). \emph{Love {Falls} on {Us}: A story of {American} ideas and {African} {LGBT} lives}. Zed Books Ltd.
 
@@ -550,11 +540,11 @@ Gates, G. J. (2009). \emph{{FAQ}: {Same}-{Sex} {Couples} in the 2008 {American} 
 \leavevmode\hypertarget{ref-gates_2013a}{}%
 Gates, G. J. (2013b). Geography of the {LGBT} population. In \emph{International handbook on the demography of sexuality} (pp. 229--242). Springer.
 
+\leavevmode\hypertarget{ref-gates_2009}{}%
+Gates, G. J., \& Steinberger, M. D. (2009). Same-sex unmarried partner couples in the {American} {Community} {Survey}: {The} role of misreporting, miscoding and misallocation. \emph{Annual Meetings of the Population Association of America, Detroit, {MI}}.
+
 \leavevmode\hypertarget{ref-giametta_2020}{}%
 Giametta, C. (2020). New asylum protection categories and elusive filtering devices: The case of {`{Queer} asylum'} in {France} and the {UK}. \emph{Journal of Ethnic and Migration Studies}, \emph{46}(1), 142--157.
-
-\leavevmode\hypertarget{ref-giddings_2014}{}%
-Giddings, L., Nunley, J. M., Schneebaum, A., \& Zietz, J. (2014). Birth {Cohort} and the {Specialization} {Gap} {Between} {Same}-{Sex} and {Different}-{Sex} {Couples}. \emph{Demography}, \emph{51}(2), 509--534. \url{https://doi.org/10.1007/s13524-013-0267-4}
 
 \leavevmode\hypertarget{ref-goldberg_2021}{}%
 Goldberg, S. K., \& Conron, K. J. (2021). \emph{{LGBT} {Adult} {Immigrants} in the {United} {States}}. The Williams Institute. \url{https://escholarship.org/uc/item/2cj0k29c}
@@ -592,12 +582,6 @@ Kazyak, E., Burke, K., \& Strange, M. (2018). Logics of {Freedom}: {Debating} {R
 \leavevmode\hypertarget{ref-klawitter_2015}{}%
 Klawitter, M. (2015). Meta-{Analysis} of the {Effects} of {Sexual} {Orientation} on {Earnings}. \emph{Industrial Relations: A Journal of Economy and Society}, \emph{54}(1), 4--32. \url{https://doi.org/10.1111/irel.12075}
 
-\leavevmode\hypertarget{ref-kreider_2017}{}%
-Kreider, R. M., Bates, N., \& Mayol-García, Y. (2017). Improving measurement of same-sex couple households in {Census} {Bureau} surveys: {Results} from recent tests. \emph{{PAA} 2017 Annual Meeting}.
-
-\leavevmode\hypertarget{ref-kreider_2015}{}%
-Kreider, R. M., \& Lofquist, D. A. (2015). Matching survey data with administrative records to evaluate reports of same-sex married couple households. \emph{Washington, DC: US Census Bureau}.
-
 \leavevmode\hypertarget{ref-lax_2009}{}%
 Lax, J. R., \& Phillips, J. H. (2009). Gay rights in the states: {Public} opinion and policy responsiveness. \emph{American Political Science Review}, \emph{103}(3), 367--386.
 
@@ -618,6 +602,9 @@ Manning, W. D., Brown, S. L., \& Stykes, J. B. (2016). Same-{Sex} and {Different
 
 \leavevmode\hypertarget{ref-marshall_2018}{}%
 Marshall, M. G. (2018). \emph{Polity5: {Dataset} {Users}' {Manual}}. Center for Systemic Peace; Societal-Systems Research Inc.
+
+\leavevmode\hypertarget{ref-martell_2020}{}%
+Martell, M. E., \& Nash, P. (2020). For {Love} and {Money}? {Earnings} and {Marriage} {Among} {Same}-{Sex} {Couples}. \emph{Journal of Labor Research}, \emph{41}(3), 260--294. \url{https://doi.org/10.1007/s12122-020-09305-4}
 
 \leavevmode\hypertarget{ref-massey_1987}{}%
 Massey, D. S., Alarcon, R., Durand, J., \& González, H. (1987). \emph{Return to {Aztlan}: {The} {Social} {Process} of {International} {Migration} from {Western} {Mexico}}. University of California Press.
@@ -672,9 +659,6 @@ Todaro, M. (1980). Internal migration in developing countries: A survey. In \emp
 
 \leavevmode\hypertarget{ref-u.s.censusbureau_2013}{}%
 U.S. Census Bureau. (2013). \emph{Frequently {Asked} {Questions} {About} {Same}-{Sex} {Couple} {Households}}. U.S. Census Bureau Fertility; Family Statistics Branch.
-
-\leavevmode\hypertarget{ref-u.s.censusbureau_2017}{}%
-U.S. Census Bureau. (2017). \emph{American {Community} {Survey} {Information} {Guide}}. U.S. Census Bureau. \url{https://www.census.gov/programs-surveys/acs/about/information-guide.html}
 
 \leavevmode\hypertarget{ref-unhcr_2008}{}%
 UNHCR. (2008). \emph{Claims to {Refugee} {Status} based on {Sexual} {Orientation} and/or {Gender} {Identity} within the context of {Article} {1A}(2) of the 1951 {Convention} and/or its 1967 {Protocol} relating to the {Status} of {Refugees}}. United Nations High Commissioner for Refugees. \url{https://www.unhcr.org/509136ca9.pdf}
