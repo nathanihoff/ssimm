@@ -54,7 +54,7 @@ abstract: "As same-sex couples gain greater social acceptance and new rights, th
   
 keywords: "immigration, same-sex couples, LGBTQ policy, sexuality"   
 
-thanks: "The authors contributed equally to this project."
+thanks: "The authors contributed equally to this paper."
 ---
 
 <!-- Turn off hyphenation -->
@@ -603,7 +603,7 @@ stargazer(mod_list,
 ```
 
 
-Models 4 and 5 assess how the 2013 Supreme Court decision striking down DOMA figures into these processes. Model 4 is the same as Model 3, but with a dichotomous "Post-2013" variable added. The influence of sending-country policy loses its significance in this model: 2013 was a significant turning point for LGB immigrants to the U.S., with the average representation from a given country growing by a quarter of a percent. Model 5 adds an interaction between sending-country LGBT policy score and the post-2013 dichotomous variable. This variable is significant and positive, while the other variables of interest lose significance. Sending-country policy and the post-2013 era both matter, but solely in tandem: Only LGB immigrants from progressive countries see a boost in representation after the DOMA decision.  
+Models 4 and 5 assess how the 2013 Supreme Court decision striking down DOMA figures into these processes. Model 4 is the same as Model 3, but with a dichotomous "Post-2013" variable added. The influence of sending-country policy loses its significance in this model: 2013 was a significant turning point for LGB immigrants to the U.S., with the average representation from a given country growing by a quarter of a percent. Model 5 adds an interaction between sending-country LGBT policy score and the post-2013 dichotomous variable. This variable is significant and positive, while the other variables of interest lose significance. Sending-country policy and the post-2013 era both matter, but solely in tandem: Only LGB immigrants from progressive countries see a boost in representation after the DOMA decision.^[The Supplementary Material also includes a model with only married couples and one with only couples that include one immigrant and one U.S.-born citizen. Results are nearly identical to models fit to the full sample.]  
 
 <!-- Finally, Model 6 restricts the sample to only married same-sex couples. Since the DOMA decision permitted visa sponsorship for same-sex spouses, we would expect to see the greatest discontinuity pre- and post-2013 for this sub-population. Indeed, for immigrants married to same-sex spouses the post-2013 variable, and its interaction with sending-country policy score, are both significant and positive. Although before 2013 progressive countries did not send more same-sex married couples, after 2013 these numbers grew sharply, and more progressive countries received an extra boost.  -->
 
