@@ -395,31 +395,31 @@ Model 5 includes a dichotomous variable for the post-2013 DOMA decision era, and
 \begin{table}[!htbp] \centering 
   \caption{Individual ordered logit analysis of three-category state policy score. Country-clustered standard errors are shown in parentheses. Individual controls include sex, age, education, number of children, log(income), indicator for no income, and year of immigration, which are all interacted with the indicator for same-sex couple.} 
   \label{tab:ord} 
-\begin{tabular}{@{\extracolsep{5pt}}lccccc} 
+\begin{tabular}{@{\extracolsep{5pt}}lccc} 
 \\[-1.8ex]\hline 
 \hline \\[-1.8ex] 
- & \multicolumn{5}{c}{\textit{Dependent variable:}} \\ 
-\cline{2-6} 
-\\[-1.8ex] & \multicolumn{4}{c}{Binned state LGBT policy score} & Continuous \\ 
-\\[-1.8ex] & \multicolumn{4}{c}{\textit{ordered}} & \textit{OLS} \\ 
- & \multicolumn{4}{c}{\textit{logistic}} & \textit{} \\ 
-\\[-1.8ex] & (1) & (2) & (3) & (4) & (5)\\ 
+ & \multicolumn{3}{c}{\textit{Dependent variable:}} \\ 
+\cline{2-4} 
+\\[-1.8ex] & \multicolumn{3}{c}{Binned state LGBT policy score} \\ 
+\\[-1.8ex] & (1) & (2) & (3)\\ 
 \hline \\[-1.8ex] 
- same\_sex & 0.170$^{***}$ & 0.120$^{***}$ & 16.000$^{***}$ & 1.600$^{***}$ & 1.200 \\ 
-  & (0.021) & (0.028) & (0.0004) & (0.00001) & (4.900) \\ 
-  & & & & & \\ 
- origin\_score &  & $-$0.047$^{***}$ & $-$0.016$^{***}$ & 0.004 & 0.016$^{***}$ \\ 
-  &  & (0.003) & (0.003) & (0.005) & (0.003) \\ 
-  & & & & & \\ 
- same\_sexTRUE:origin\_score &  & 0.033$^{***}$ & 0.044$^{***}$ & $-$0.004 & $-$0.009 \\ 
-  &  & (0.008) & (0.009) & (0.011) & (0.006) \\ 
-  & & & & & \\ 
+ Same-sex & 0.170$^{***}$ & 0.120$^{***}$ & 16.000$^{***}$ \\ 
+  & (0.021) & (0.028) & (0.0004) \\ 
+  & & & \\ 
+ Country LGBT policy score &  & $-$0.047$^{***}$ & $-$0.016$^{***}$ \\ 
+  &  & (0.003) & (0.003) \\ 
+  & & & \\ 
+ Same-sex × country score &  & 0.033$^{***}$ & 0.044$^{***}$ \\ 
+  &  & (0.008) & (0.009) \\ 
+  & & & \\ 
 \hline \\[-1.8ex] 
-Observations & 111,347 & 111,347 & 111,347 & 102,971 & 102,971 \\ 
+Survey year FEs? & yes & yes & yes \\ 
+Individual controls? & no & no & yes \\ 
+Observations & 111,347 & 111,347 & 111,347 \\ 
 \hline 
 \hline \\[-1.8ex] 
-\multicolumn{6}{l}{Note: †p<0.1; *p<0.05; **p<0.01; ***p<0.001} \\ 
-\multicolumn{6}{l}{Source: American Community Survey 2008-2019} \\ 
+\multicolumn{4}{l}{Note: †p<0.1; *p<0.05; **p<0.01; ***p<0.001} \\ 
+\multicolumn{4}{l}{Source: American Community Survey 2008-2019} \\ 
 \end{tabular} 
 \end{table}
 
