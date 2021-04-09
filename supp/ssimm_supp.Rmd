@@ -130,6 +130,69 @@ acs_couple_policy_small <- bind_rows(
 
 ```
 
+# Additional descriptive
+```{r}
+acs_couple_policy %>%
+  filter(same_sex == T)%>%
+  group_by(bpld) %>%
+  count() %>%
+  arrange(desc(n))
+
+acs_couple_policy %>%
+  filter(same_sex == F)%>%
+  group_by(bpld) %>%
+  count() %>%
+  arrange(desc(n))
+```
+
+```{r}
+hwsei <- acs_ind_survey %>%
+  mutate(same_sex = ifelse(same_sex == T, 'Same-Sex', 'Different-Sex')) %>%
+  group_by(year, same_sex) %>%
+  summarize(var = survey_mean(hwsei, vartype = "ci", na.rm = T)) %>%
+  mutate(var_name = 'Hauser and Warren Socioeconomic Index')
+
+nchild <- acs_ind_survey %>%
+  mutate(same_sex = ifelse(same_sex == T, 'Same-Sex', 'Different-Sex')) %>%
+  group_by(year, same_sex) %>%
+  summarize(var = survey_mean(nchild, vartype = "ci", na.rm = T)) %>%
+  mutate(var_name = 'Number of Children')
+
+years <- acs_ind_survey %>%
+  mutate(same_sex = ifelse(same_sex == T, 'Same-Sex', 'Different-Sex')) %>%
+  group_by(year, same_sex) %>%
+  summarize(var = survey_mean(years_in_us, vartype = "ci", na.rm = T)) %>%
+  mutate(var_name = 'Years in U.S.')
+distance <- acs_ind_survey %>%
+  mutate(same_sex = ifelse(same_sex == T, 'Same-Sex', 'Different-Sex')) %>%
+  group_by(year, same_sex) %>%
+  summarize(var = survey_mean(distw, vartype = "ci", na.rm = T)) %>%
+  mutate(var_name = 'Distance to Country of Origin (KM)')
+
+unemp <- acs_ind_survey %>%
+  mutate(same_sex = ifelse(same_sex == T, 'Same-Sex', 'Different-Sex')) %>%
+  group_by(year, same_sex) %>%
+  summarize(var = survey_mean(unemp_dif, vartype = "ci", na.rm = T)) %>%
+  mutate(var_name = 'Difference in Unemployment Rates')
+state_income <- acs_ind_survey %>%
+  mutate(same_sex = ifelse(same_sex == T, 'Same-Sex', 'Different-Sex')) %>%
+  group_by(year, same_sex) %>%
+  summarize(var = survey_mean(state_income, vartype = "ci", na.rm = T)) %>%
+  mutate(var_name = 'U.S. State of Residence Per Capita Income')
+
+
+bind_rows(hwsei, nchild, years, distance, unemp, state_income) %>%
+  rename(Year = year) %>%
+  ggplot(aes(x = Year, y = var, color = same_sex)) +
+  geom_line() +
+  geom_ribbon(aes(ymin = var_low, ymax = var_upp, fill = same_sex, col = NULL), alpha = .2) +
+  facet_wrap(~var_name, scales = "free") +
+  ylab('') +
+  theme(legend.justification=c(1,0),
+      legend.position=c(.22,.83))
+```
+
+
 # Alternate country proportion specifications
 ```{r country-props}
 # acs_prop_yrimmig_policy <- acs_prop_yrimmig_policy %>%
@@ -177,6 +240,12 @@ ag_2013_spouse2 <- lm(prop_spouse_same_sex ~ distw + contig + comlang_off + coml
                      post_2013,
          data = mutate(acs_prop_yrimmig_policy, post_2013 = (yrimmig > 2013)))
 
+# Spouse + interaction
+ag_2013_spouse_int <- lm(prop_spouse_same_sex ~ distw + contig + comlang_off + 
+                           comlang_ethno + colony + bpld +
+                   wage_dif + unemp_dif + polity5  + stock_prop +
+                     post_2013*origin_score,
+         data = mutate(acs_prop_yrimmig_policy, post_2013 = (yrimmig > 2013)))
 
 
 se_list <- list()

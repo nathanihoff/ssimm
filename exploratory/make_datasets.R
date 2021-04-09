@@ -470,7 +470,8 @@ state_policy$state_policy_binned <- cut(state_policy$state_policy, breaks = c(-2
 
 acs_couple_policy <- acs_coupled_imms %>%
   left_join(yearly_prop, by = c('yrimmig' = 'year', 'bpldid')) %>%
-  mutate(yrimmig = ifelse(yrimmig >= 1991, 
+  mutate(pre_1991 = yrimmig < 1991,
+    yrimmig = ifelse(yrimmig >= 1991, 
                           round(yrimmig),
                           1991)) %>%
   left_join(lgbt_policy, by = c('yrimmig' = 'year', 'bpldid' = 'Code')) %>%
@@ -496,4 +497,5 @@ acs_wide %>%
   filter(imm_couple != 'none', allocated == F)
 
 write_csv(acs_oneimm, here('data', 'acs_oneimm.csv'))
+
 
