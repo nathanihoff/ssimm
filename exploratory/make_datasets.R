@@ -67,7 +67,10 @@ acs_wide <- acs %>%
            citizen_main %in% c(2,3) | citizen_partner %in% c(2,3) ~ 'one')) %>%
   # convert all labeled variables to factor
   as_factor() %>%
-  mutate(married = related_partner == 'Spouse')
+  mutate(married = related_partner == 'Spouse' | 
+           qrelate_partner == 'Same sex spouse changed to unmarried partner',
+         allocated = (qrelate_main == 'Allocated' | qrelate_partner == 'Allocated' |
+           qsex_main == 'Allocated' | qsex_partner == 'Allocated'))
 
 
 # Keep only couples with one immigrant
@@ -75,7 +78,7 @@ acs_oneimm <- acs_wide %>%
   filter(imm_couple == 'one') %>%
   pivot_longer(-c(year, serial, nchild, hhwt, ssmc,
                   cluster, strata, metro, region, state, stateicp, ftotinc, respmode,
-                  same_sex, imm_couple),
+                  same_sex, imm_couple, allocated),
     names_to = c('.value', 'position'),
     names_sep = '_') %>% 
   mutate(immigrant = case_when(citizen %in% c('N/A', 'Born abroad of American parents') ~ 'nonimmigrant',
@@ -99,7 +102,7 @@ acs_coupled_imms <- acs_wide %>%
   filter(imm_couple == 'one' | imm_couple == 'two') %>%
   pivot_longer(-c(year, serial, nchild, hhwt, ssmc,
                   cluster, strata, metro, region, state, stateicp, ftotinc, respmode,
-                  same_sex, imm_couple, married),
+                  same_sex, imm_couple, married, allocated),
                names_to = c('.value', 'position'),
                names_sep = '_') %>% 
   mutate(immigrant = case_when(citizen %in% c('N/A', 'Born abroad of American parents') ~ 'nonimmigrant',
@@ -136,8 +139,7 @@ country_year_df <- acs_imm %>%
 
 # State proportions: Macro dataset of dyadic stock by state by year ####
 acs_dyad <- acs_coupled_imms %>%
-  filter(qsex == 'Entered as written' & (qrelate == 'Not edited' |            
-           (married == F & qrelate == 'Same sex spouse changed to unmarried partner'))) %>%
+  filter(allocated == F) %>%
   group_by(bpld, state,  year, same_sex) %>%
   count(wt = perwt, .drop = F) %>%
   ungroup() %>%
@@ -155,8 +157,7 @@ acs_dyad <- left_join(acs_dyad, acs_dyad_yrimmig)
 
 # only immigrants in last year
 acs_dyad2 <- acs_coupled_imms %>%
-  filter(qsex == 'Entered as written' & (qrelate == 'Not edited' |            
-           (married == F & qrelate == 'Same sex spouse changed to unmarried partner'))) %>%
+  filter(allocated == F) %>%
   filter(year - yrimmig <= 1) %>%
   group_by(bpld, state,  year, same_sex) %>%
   count(wt = perwt, .drop = F) %>%
@@ -168,8 +169,7 @@ acs_dyad2 <- acs_coupled_imms %>%
   left_join(country_year_df) 
 
 acs_dyad_yrimmig2 <- acs_coupled_imms %>%
-  filter(qsex == 'Entered as written' & (qrelate == 'Not edited' |            
-          (married == F & qrelate == 'Same sex spouse changed to unmarried partner'))) %>%
+  filter(allocated == F) %>%
   filter(year - yrimmig <= 1) %>%
   group_by(bpld,  year) %>%
   summarize(mean_year_immig = weighted.mean(yrimmig, w = perwt, na.rm = T)) 
@@ -187,30 +187,22 @@ country_yrimmig_df <- acs_imm %>%
          yrimmig = as.numeric(yrimmig))
 
 acs_prop_yrimmig <- acs_wide %>%
-  filter(imm_couple != 'none') %>%
+  filter(imm_couple != 'none',
+         allocated == F) %>%
   pivot_longer(-c(year, serial, nchild, hhwt, ssmc,
                   cluster, strata, metro, region, state, stateicp, ftotinc, respmode,
-                  same_sex, imm_couple, married),
+                  same_sex, imm_couple, married, allocated),
                names_to = c('.value', 'position'),
                names_sep = '_') %>%
   group_by(yrimmig, bpld, same_sex) %>%
   summarize(n = n(), 
-            n_partner = sum(married == F & qrelate == 'Not edited' & qsex == 'Entered as written' &
-                              qrelate != 'Same sex spouse changed to unmarried partner'),
-            n_spouse = sum(qsex == 'Entered as written' & 
-                             ((married == T & qrelate == 'Not edited') |
-                             (married == F & qrelate == 'Same sex spouse changed to unmarried partner'))),
-            n_spouse_oneimm = sum(imm_couple == 'one' &  qsex == 'Entered as written' &
-                                    ((married == T & qrelate == 'Not edited') |
-                                    (married == F & qrelate == 'Same sex spouse changed to unmarried partner'))),
-            n_partner_oneimm = sum(imm_couple == 'one' & married == F & qrelate == 'Not edited'  
-                                   & qsex == 'Entered as written'),
-            n_spouse_mail = sum(respmode == 'Mail' & (married == T |
-                                  (married == F & qrelate == 'Same sex spouse changed to unmarried partner'))), 
-            n_spouse_cati = sum(respmode == 'CATI/CAPI' & (married == T |
-                                  (married == F & qrelate == 'Same sex spouse changed to unmarried partner'))), 
-            n_spouse_internet = sum(respmode == 'Internet' & (married == T |
-                                  (married == F & qrelate == 'Same sex spouse changed to unmarried partner'))), 
+            n_partner = sum(married == F),
+            n_spouse = sum(married = T),
+            n_spouse_oneimm = sum(imm_couple == 'one' & married == T),
+            n_partner_oneimm = sum(imm_couple == 'one' & married == F),
+            n_spouse_mail = sum(respmode == 'Mail' & married = T), 
+            n_spouse_cati = sum(respmode == 'CATI/CAPI' & married == T), 
+            n_spouse_internet = sum(respmode == 'Internet' & married == T), 
             n_partner_mail = sum(married == F & respmode == 'Mail'), 
             n_partner_cati = sum(married == F & respmode == 'CATI/CAPI'), 
             n_partner_internet = sum(married == F & respmode == 'Internet')) %>%
@@ -491,8 +483,7 @@ acs_couple_policy <- acs_coupled_imms %>%
          log_income = log(pos_income+1)) %>%
   drop_na(state_policy_binned, same_sex, origin_score, sex, age, educ, qrelate, qsex,
           nchild, log_income, no_income, yrimmig, year) %>%
-  filter(qsex == 'Entered as written' & (qrelate == 'Not edited' |            
-         (married == F & qrelate == 'Same sex spouse changed to unmarried partner')))
+  filter(allocated == F)
 
 
 write_rds(acs_couple_policy, here('data', 'acs_couple_policy.rds'))
@@ -502,14 +493,7 @@ write_csv(acs_dyad_policy, here('data', 'acs_dyad_policy.csv'))
 write_csv(top_countries, here('data', 'top_countries.csv'))
 
 acs_wide %>%
-  filter(imm_couple != 'none',
-    qsex_main == 'Entered as written' &
-     (qrelate_main == 'Not edited' |            
-        (married == F & qrelate_main == 'Same sex spouse changed to unmarried partner')) &
-     qsex_partner == 'Entered as written' &
-     (qrelate_partner == 'Not edited' |            
-        (married == F & qrelate_partner == 'Same sex spouse changed to unmarried partner'))) %>%
-  write_csv(here('data', 'acs_wide.csv'))
+  filter(imm_couple != 'none', allocated == F)
 
 write_csv(acs_oneimm, here('data', 'acs_oneimm.csv'))
 
