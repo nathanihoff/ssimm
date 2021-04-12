@@ -419,7 +419,7 @@ tibble(`Study Year` = c(2010, 2010, 2016, 2016),
 
 
 ```{r respmode}
-tabyl(acs_couple_policy, respmode, year) %>%
+tabyl(acs_couple_policy, respmode, year, same_sex) %>%
   adorn_percentages('col')
   
 
