@@ -23,7 +23,8 @@ header-includes:
   - \pagestyle{fancy}
   - \setlength{\headheight}{13.6pt}
   - \rhead{\textit{Hoffmann and Velasco}}
-  - \lhead{\textit{`r format(Sys.time(), '%B %e, %Y')`}}
+  - \lhead{\textit{PAA 2021 Annual Meeting}}
+  #- \lhead{\textit{`r format(Sys.time(), '%B %e, %Y')`}}
 editor_options: 
   chunk_output_type: console
   
@@ -39,6 +40,7 @@ csl: apa.csl
 
 
 title: "Making Migration Sexy: How State and National Policies Influence Migration of Same-Sex Couples"
+subtitle: "PAA 2021 Annual Meeting"
 date: "`r format(Sys.time(), '%B %e, %Y')`"
 # author:
 # - name: Nathan I. Hoffmann
@@ -420,7 +422,10 @@ country_tab <- acs_couple_policy %>%
   mutate(prop_samesex = round(100*`TRUE` / `FALSE`, 2)) %>%
   arrange(desc(prop_samesex)) %>%
   .[1:10,] %>%
-  mutate(prop_samesex = paste0(prop_samesex, ' %')) %>%
+  mutate(prop_samesex = case_when(
+    nchar(prop_samesex) == 4 ~ paste0(prop_samesex, ' %'),
+    nchar(prop_samesex) == 3 ~ paste0(prop_samesex, '0 %'),
+    nchar(prop_samesex) == 1 ~ paste0(prop_samesex, '.00 %'))) %>%
   rownames_to_column() %>%
   left_join(acs_couple_policy %>%
               group_by(bpld) %>%

@@ -71,7 +71,7 @@
 \pagestyle{fancy}
 \setlength{\headheight}{13.6pt}
 \rhead{\textit{Hoffmann and Velasco}}
-\lhead{\textit{April 11, 2021}}
+\lhead{\textit{PAA 2021 Annual Meeting}}
 \usepackage{booktabs}
 \usepackage{longtable}
 \usepackage{array}
@@ -111,8 +111,15 @@
 \newcommand{\CSLIndent}[1]{\hspace{\cslhangindent}#1}
 
 \title{Making Migration Sexy: How State and National Policies Influence Migration of Same-Sex Couples\thanks{The authors contributed equally to this paper.}}
+\usepackage{etoolbox}
+\makeatletter
+\providecommand{\subtitle}[1]{% add subtitle to \maketitle
+  \apptocmd{\@title}{\par {\large #1 \par}}{}{}
+}
+\makeatother
+\subtitle{PAA 2021 Annual Meeting}
 \author{Nathan I. Hoffmann, Department of Sociology, University of California, Los Angeles \and Kristopher Velasco, Department of Sociology, University of Texas at Austin}
-\date{April 11, 2021}
+\date{April 15, 2021}
 
 \begin{document}
 \maketitle

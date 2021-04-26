@@ -1,0 +1,838 @@
+---
+output:
+  beamer_presentation:
+    keep_tex: yes
+    incremental: no
+    toc: no
+    latex_engine: pdflatex
+    slide_level: 2
+    include:
+      in_header: ucla_beamer.tex
+    fig_width: 12.5
+  
+# header-includes:
+#   - \AtBeginDocument{\title[Making Migration Sexy]{Making Migration Sexy: How State and National Policies Influence Migration of Same-Sex Couples}}
+
+
+title: "Making Migration Sexy: How State and National Policies Influence Migration of Same-Sex Couples"
+subtitle: "PAA 2021 Annual Meeting"
+
+
+author: |
+  | Nathan I. Hoffmann, Department of Sociology, UCLA
+  | Kristopher Velasco, Depatment of Sociology, UT Austin
+
+---
+
+```{r setup, include=F}
+knitr::opts_chunk$set(echo = F, warning = F, message = F, cache = T, results = 'asis',
+                      cache.lazy = F)
+
+library(MASS)
+library(janitor)
+library(priceR)
+library(kableExtra)
+library(huxtable)
+library(jtools)
+library(sjstats)
+library(imputeTS)
+library(mvtnorm)
+library(ordinal)
+library(lme4)
+library(countrycode)
+library(knitr)
+library(RColorBrewer)
+library(haven)
+library(cowplot)
+library(srvyr)
+library(lmtest)
+library(sandwich)
+library(here)
+library(plm)
+library(stargazer)
+library(tidyverse)
+
+# knitr::opts_chunk$set(error=TRUE) 
+
+options("yaml.eval.expr" = TRUE)
+
+options(scipen=1, digits=2)
+knit_hooks$set(inline = function(x) {
+  prettyNum(x, big.mark=",")
+})
+knitr::opts_chunk$set(error=TRUE) 
+
+uclablue = '#2774AE'
+uclagold = '#FFB81C'
+ucladarkblue = '#003B5C'
+uclalightblue = '#8BB8E8'
+gray = '#808080'
+black = '#000000'
+ucla_palette = c(black, gray, uclalightblue)
+
+theme_set(theme_classic(base_size = 21) + 
+            theme(legend.title=element_blank(), 
+                  panel.grid.major.y = element_line('grey80'),
+                  legend.background = element_rect(fill = "transparent")))
+# ggplot <- function(...) ggplot2::ggplot(...) + scale_color_manual(values = ucla_palette)
+ggplot <- function(...) ggplot2::ggplot(...) + scale_color_brewer(palette="Dark2") + 
+  scale_fill_brewer(palette="Dark2")
+
+
+## Load data
+
+acs_wide <- read.csv(here('data', 'acs_wide.csv'))
+acs_couple_policy <- readRDS(here('data', 'acs_couple_policy.rds'))
+acs_prop_yrimmig_policy <- read.csv(here('data', 'acs_prop_yrimmig_policy.csv'))
+acs_dyad_policy <- read.csv(here('data', 'acs_dyad_policy.csv'))
+
+# acs_oneimm <- read.csv(here('data', 'acs_oneimm.csv'))
+# acs_coupled_imms <- read.csv(here('data', 'acs_coupled_imms.csv'))
+# acs_prop_yrimmig <- read.csv(here('data', 'acs_prop_yrimmig.csv'))
+# acs_dyad <- read.csv(here('data', 'acs_dyad.csv'))
+
+
+acs_wide_survey <- acs_wide %>% as_survey_design(ids = cluster, weights = hhwt)
+acs_ind_survey <- acs_couple_policy %>% as_survey_design(ids = cluster, weights = perwt)
+
+# Smaller dataset for initial ordered logit analyses
+set.seed(1859)
+acs_couple_policy_small <- bind_rows(
+  filter(acs_couple_policy, same_sex == T, yrimmig >= 1991),
+  sample_n(filter(acs_couple_policy, same_sex == F), 1e5)
+)
+
+
+```
+
+# Introduction
+## Introduction
+```{r intro}
+total_df <- acs_wide_survey %>%
+  mutate(same_sex = ifelse(same_sex == T, 'Same-Sex', 'Different-Sex')) %>%
+  group_by(year, imm_couple, same_sex) %>%
+  summarize(n = survey_total(vartype = "ci")) 
+
+same_2013 <- total_df %>%
+  filter(year == 2013, same_sex == 'Same-Sex') %>%
+  pull(n) %>% 
+  sum()
+
+same_2019 <- total_df %>%
+  filter(year == 2019, same_sex == 'Same-Sex') %>%
+  pull(n) %>% 
+  sum()
+
+dif_2013 <- total_df %>%
+  filter(year == 2013, same_sex == 'Different-Sex') %>%
+  pull(n) %>% 
+  sum()
+
+dif_2019 <- total_df %>%
+  filter(year == 2019, same_sex == 'Different-Sex') %>%
+  pull(n) %>% 
+  sum()
+```
+
+
+
+
+
+
+# Background
+## Background: Changing Policy Landscape for Same-Sex Immigrant Couples
+```{r total-pop}
+
+total_df %>%
+  mutate(`Total population (thousands)` = n/1000,
+         n_low = n_low/1000, n_upp = n_upp/1000,
+         Year = year) %>%
+  ggplot(aes(x = Year, y = `Total population (thousands)`, 
+             color = imm_couple)) +
+  geom_line() +
+  geom_ribbon(aes(ymin = n_low, ymax = n_upp, fill = imm_couple, col = NULL), alpha = .2) +
+  geom_vline(xintercept = 2013, linetype = 'dashed') +
+  facet_wrap(~same_sex, scales = "free") +
+  xlim(2007, 2019) +
+  theme(legend.justification=c(1,0),
+        legend.position=c(.15,.35)) + 
+  scale_color_brewer(palette="Dark2") + scale_fill_brewer(palette="Dark2")
+
+```
+
+
+## Conventional Explanations
+
+
+## Our Intervention
+
+
+# Data
+## Identifying Same-Sex Couples in the ACS
+
+
+
+## Explanatory Variables
+
+
+
+## Control Variables
+
+
+
+
+# Methods
+## Methods
+
+
+
+# Results
+## Descriptive statistics
+
+
+```{r desc}
+income <- acs_ind_survey %>%
+  mutate(same_sex = ifelse(same_sex == T, 'Same-Sex', 'Different-Sex')) %>%
+  group_by(year, same_sex) %>%
+  summarize(var = survey_mean(inctot, vartype = "ci", na.rm = T)) %>%
+  mutate(var_name = 'Individual Income')
+
+# hwsei <- acs_ind_survey %>%
+#   mutate(same_sex = ifelse(same_sex == T, 'Same-Sex', 'Different-Sex')) %>%
+#   group_by(year, same_sex) %>%
+#   summarize(var = survey_mean(hwsei, vartype = "ci", na.rm = T)) %>%
+#   mutate(var_name = 'Hauser and Warren Socioeconomic Index')
+# 
+# nchild <- acs_ind_survey %>%
+#   mutate(same_sex = ifelse(same_sex == T, 'Same-Sex', 'Different-Sex')) %>%
+#   group_by(year, same_sex) %>%
+#   summarize(var = survey_mean(nchild, vartype = "ci", na.rm = T)) %>%
+#   mutate(var_name = 'Number of Children')
+# 
+# years <- acs_ind_survey %>%
+#   mutate(same_sex = ifelse(same_sex == T, 'Same-Sex', 'Different-Sex')) %>%
+#   group_by(year, same_sex) %>%
+#   summarize(var = survey_mean(years_in_us, vartype = "ci", na.rm = T)) %>%
+#   mutate(var_name = 'Years in U.S.')
+
+# distance <- acs_ind_survey %>%
+#   mutate(same_sex = ifelse(same_sex == T, 'Same-Sex', 'Different-Sex')) %>%
+#   group_by(year, same_sex) %>%
+#   summarize(var = survey_mean(distw, vartype = "ci", na.rm = T)) %>%
+#   mutate(var_name = 'Distance to Country of Origin (KM)')
+# 
+# unemp <- acs_ind_survey %>%
+#   mutate(same_sex = ifelse(same_sex == T, 'Same-Sex', 'Different-Sex')) %>%
+#   group_by(year, same_sex) %>%
+#   summarize(var = survey_mean(unemp_dif, vartype = "ci", na.rm = T)) %>%
+#   mutate(var_name = 'Difference in Unemployment Rates')
+
+prop_stock <- acs_ind_survey %>%
+  mutate(same_sex = ifelse(same_sex == T, 'Same-Sex', 'Different-Sex')) %>%
+  group_by(year, same_sex) %>%
+  summarize(var = survey_mean(stock_prop, vartype = "ci", na.rm = T)) %>%
+  mutate(var_name = 'Proportion Immigrant Stock in Year of Migration')
+
+wage_dif <- acs_ind_survey %>%
+  mutate(same_sex = ifelse(same_sex == T, 'Same-Sex', 'Different-Sex')) %>%
+  group_by(year, same_sex) %>%
+  summarize(var = survey_mean(wage_dif, vartype = "ci", na.rm = T)) %>%
+  mutate(var_name = 'Bilateral Wage Differential in Year of Migration')
+
+polity5 <- acs_ind_survey %>%
+  mutate(same_sex = ifelse(same_sex == T, 'Same-Sex', 'Different-Sex')) %>%
+  group_by(year, same_sex) %>%
+  summarize(var = survey_mean(polity5, vartype = "ci", na.rm = T)) %>%
+  mutate(var_name = 'Polity5 Score in Year of Migration')
+
+# state_income <- acs_ind_survey %>%
+#   mutate(same_sex = ifelse(same_sex == T, 'Same-Sex', 'Different-Sex')) %>%
+#   group_by(year, same_sex) %>%
+#   summarize(var = survey_mean(state_income, vartype = "ci", na.rm = T)) %>%
+#   mutate(var_name = 'U.S. State of Residence Per Capita Income')
+
+
+
+bind_rows(income, wage_dif, polity5, prop_stock) %>%
+  rename(Year = year) %>%
+  ggplot(aes(x = Year, y = var, color = same_sex)) +
+  geom_line() +
+  geom_ribbon(aes(ymin = var_low, ymax = var_upp, fill = same_sex, col = NULL), alpha = .2) +
+  facet_wrap(~var_name, scales = "free") +
+  ylab('') +
+  theme(legend.justification=c(1,0),
+      legend.position=c(.22,.82),
+      legend.background = element_rect(fill = alpha("white", 0.5))) + 
+  scale_color_brewer(palette="Dark2") + scale_fill_brewer(palette="Dark2")
+ 
+```
+
+## Descriptive statistics
+```{r policy-desc}
+
+
+origin_df <- acs_ind_survey %>%
+  mutate(same_sex = ifelse(same_sex == T, 'Same-Sex', 'Different-Sex')) %>%
+  group_by(year, same_sex) %>%
+  summarize(`Policy Score` = survey_mean(origin_score, vartype = "ci", na.rm = T)) %>%
+  mutate(var = 'Country-of-Origin Index')
+
+state_df <- acs_ind_survey %>%
+  mutate(same_sex = ifelse(same_sex == T, 'Same-Sex', 'Different-Sex')) %>%
+  group_by(year, same_sex) %>%
+  summarize(`Policy Score` = survey_mean(state_policy, vartype = "ci", na.rm = T)) %>%
+  mutate(var = 'U.S. State Index')
+
+bind_rows(origin_df, state_df) %>%
+  rename(Year = year) %>%
+  ggplot(aes(x = Year, y = `Policy Score`, 
+             color = same_sex)) +
+  geom_line() +
+  geom_ribbon(aes(ymin = `Policy Score_low`, ymax = `Policy Score_upp`, 
+                  fill = same_sex, col = NULL), alpha = .2) +
+  facet_wrap(~var, scales = "free") +
+  theme(legend.justification=c(1,0),
+        legend.position=c(.25,.65)) + 
+  scale_color_brewer(palette="Dark2") + scale_fill_brewer(palette="Dark2")
+```
+
+
+## Descriptive statistics
+```{r country-tab}
+country_tab <- acs_couple_policy %>%
+  group_by(bpld, same_sex) %>%
+  count(wt = perwt) %>%
+  pivot_wider(names_from = 'same_sex', values_from = 'n') %>%
+  mutate(prop_samesex = round(100*`TRUE` / `FALSE`, 2)) %>%
+  arrange(desc(prop_samesex)) %>%
+  .[1:10,] %>%
+   mutate(prop_samesex = case_when(
+    nchar(prop_samesex) == 4 ~ paste0(prop_samesex, ' %'),
+    nchar(prop_samesex) == 3 ~ paste0(prop_samesex, '0 %'),
+    nchar(prop_samesex) == 1 ~ paste0(prop_samesex, '.00 %'))) %>%
+  rownames_to_column() %>%
+  left_join(acs_couple_policy %>%
+              group_by(bpld) %>%
+              summarize(`Mean policy score` = 
+                          weighted.mean(origin_score, na.rm = T, w = perwt))) %>%
+  select(Rank = rowname, `Country of origin` = bpld, `Proportion same-sex` = prop_samesex,
+         `Mean policy score`)
+
+country_tab %>%
+  kable(booktabs = T, 
+        linesep = '',
+        caption = 'Sending countries ranked by proportion immigrant couples with same-sex partners') %>%
+      footnote(general = "American Community Survey 2008-2019. Authors\' calculations.",
+           general_title = 'Source:',
+           footnote_as_chunk = T) %>%
+  kable_styling(font_size = 9)
+
+
+country_vec <- country_tab$`Mean policy score`
+names(country_vec) <- country_tab$`Country of origin`
+
+
+# acs_couple_policy %>%
+#   filter(year == 2008) %>%
+#   group_by(bpld, same_sex) %>%
+#   count(wt = perwt) %>%
+#   pivot_wider(names_from = 'same_sex', values_from = 'n') %>%
+#   arrange(desc(`TRUE`)) %>%
+#   .[1:10,] %>%
+#   rownames_to_column() %>%
+#   left_join(acs_couple_policy %>%
+#               filter(year == 2008) %>%
+#               group_by(bpld) %>%
+#               summarize(origin_score = mean(origin_score)) %>%
+#               select(bpld , origin_score))
+
+```
+
+## Descriptive statistics
+```{r state-tab}
+state_tab <- acs_wide %>%
+  filter(state != 'District of Columbia') %>%
+  group_by(state, same_sex) %>%
+  count(wt = hhwt) %>%
+  pivot_wider(names_from = 'same_sex', values_from = 'n') %>%
+  mutate(prop_samesex = round(100*`TRUE` / `FALSE`, 2)) %>%
+  arrange(desc(prop_samesex)) %>%
+  .[1:10,] %>%
+  mutate(prop_samesex = case_when(
+    nchar(prop_samesex) == 4 ~ paste0(prop_samesex, ' %'),
+    nchar(prop_samesex) == 3 ~ paste0(prop_samesex, '0 %'),
+    nchar(prop_samesex) == 1 ~ paste0(prop_samesex, '.00 %'))) %>%
+  left_join(acs_couple_policy %>%
+              group_by(state) %>%
+              summarize(`Mean policy score` = 
+                          weighted.mean(state_policy, na.rm = T, w = perwt))) %>%
+  rownames_to_column() %>%
+  select(Rank = rowname, `State` = state, `Proportion same-sex` = prop_samesex,
+         `Mean policy score`)
+
+state_tab %>%
+  kable(booktabs = T, 
+        linesep = '',
+        caption = 'States ranked by proportion immigrant couples with same-sex partners') %>%
+      footnote(general = "American Community Survey 2008-2019. Authors\' calculations.",
+           general_title = 'Source:',
+           footnote_as_chunk = T)  %>%
+  kable_styling(font_size = 9)
+
+state_vec <- state_tab$`Mean policy score`
+names(state_vec) <- state_tab$`State`
+```
+
+
+
+## Model Results: Country-of-Origin Effects
+```{r country-props-mods}
+# acs_prop_yrimmig_policy <- acs_prop_yrimmig_policy %>%
+#   filter(yrimmig >= 1992)
+
+# ag <- lm(I(log(n_same_sex+1)) ~ origin_score + I(log(n_total+1)), 
+#          data = acs_prop_yrimmig_policy) 
+# 
+# 
+# ag_country_orig <- lm(I(log(n_same_sex+1))  ~ distw + contig + comlang_off + comlang_ethno + colony +
+#                    wage_dif + unemp_dif + polity5 + origin_score + stock_prop+ I(log(n_total+1)), 
+#          data = acs_prop_yrimmig_policy)
+# 
+# ag_country_orig_fe <- lm(I(log(n_same_sex+1))  ~ distw + contig + comlang_off + comlang_ethno + colony +
+#                    wage_dif + unemp_dif + polity5 + origin_score + stock_prop + bpld+ I(log(n_total+1)), 
+#          data = acs_prop_yrimmig_policy)
+
+
+
+ag <- lm(prop_same_sex ~ origin_score,
+         data = acs_prop_yrimmig_policy)
+
+
+ag_country_orig <- lm(prop_same_sex ~ distw + contig + comlang_off + comlang_ethno + colony +
+                   wage_dif + unemp_dif + polity5 + origin_score + stock_prop,
+         data = acs_prop_yrimmig_policy)
+
+ag_country_orig_fe <- lm(prop_same_sex ~ distw + contig + comlang_off + comlang_ethno + colony +
+                   wage_dif + unemp_dif + polity5 + origin_score + stock_prop + bpld,
+         data = acs_prop_yrimmig_policy)
+
+
+
+# Add binary indicator for post-2013
+# ag_country_orig_2013 <- lm(prop_same_sex ~ distw + contig + comlang_off + comlang_ethno + colony +
+#                    wage_dif + unemp_dif + polity5 + origin_score + stock_prop +
+#                      post_2013,
+#          data = mutate(acs_prop_yrimmig_policy, post_2013 = (yrimmig > 2013)))
+
+ag_country_orig_fe_2013 <- lm(prop_same_sex ~ distw + contig + comlang_off + comlang_ethno + colony +
+                   wage_dif + unemp_dif + polity5 + origin_score + stock_prop + bpld +
+                     post_2013,
+         data = mutate(acs_prop_yrimmig_policy, post_2013 = (yrimmig > 2013)))
+
+
+ag_2013_int_fe <- lm(prop_same_sex ~ distw + contig + comlang_off + comlang_ethno + colony +
+                   wage_dif + unemp_dif + polity5  + stock_prop + bpld +
+                     post_2013*origin_score,
+         data = mutate(acs_prop_yrimmig_policy, post_2013 = (yrimmig > 2013)))
+
+
+
+```
+
+
+
+```{r country-props}
+se_list <- list()
+mod_list <- list(ag, ag_country_orig, ag_country_orig_fe,
+                 ag_country_orig_fe_2013, ag_2013_int_fe)
+for(mod_num in 1:length(mod_list)){
+  se_list[[mod_num]] <- coef(summary(mod_list[[mod_num]], cluster = c("bpld")))[, 2]
+}
+
+
+stargazer(mod_list,
+          header = F,
+          model.names = F,
+          keep = c('origin_score', 'polity5', 'post_2013'),
+          order = paste0("^", c('origin_score', 'polity5', 'post_2013TRUE', 
+                                'post_2013TRUE:origin_score') , "$"),
+          covariate.labels = c('Country LGBT policy score', 'Polity5 democracy score',
+                                'Post-2013', 'Country score × Post-2013'),
+          dep.var.labels   = "Percent in same-sex couples by country-year",
+          add.lines = list(c('Country controls?', 'no', rep('yes', 4)),
+                           c('Country FEs?', 'no', 'no', rep('yes', 3))),
+          se = se_list,
+          keep.stat = c('n'),
+          star.cutoffs = c(0.1, 0.05, 0.01, 0.001),
+          star.char = c('†', '*', '**', '***'),
+          notes = c("Note: †p<0.1; *p<0.05; **p<0.01; ***p<0.001"),
+          notes.label = '',
+          notes.align = 'l',
+          notes.append = F,
+          label = 'tab:country-props',
+          title = 'Percent of immigrants in same-sex couples by year of immigration and country of origin.',
+          font.size = 'tiny',
+          column.sep.width = '3pt')
+
+
+# mod_list <- list(ag, ag_country_orig, ag_country_orig_fe, 
+#                  ag_country_orig_fe_2013, ag_2013_int_fe, ag_2013_spouse_int)
+# for(mod_num in 1:length(mod_list)){
+#   mod_list[[mod_num]] <- coef(summary(mod_list[[mod_num]], cluster = c("bpld")))
+# }
+# 
+# keep_coefs <- c('Country LGBT policy score' = 'origin_score', 
+#                 'Polity5 democratization' = 'polity5', 
+#                 'Post-2013' = 'post_2013TRUE', 
+#                 'Country score × Post-2013' = 'post_2013TRUE:origin_score')
+#    
+# 
+# export_summs(mod_list,
+#        coefs = keep_coefs,
+#        statistics = c('N' = 'nobs'),
+#        stars = c(`†`= 0.1, `*`= 0.05, `**` = 0.01, `***` = 0.001),
+#        note = '{stars}. 
+#                Source: American Community Survey 2008-2019') %>%
+#   set_caption('OLS regressions of percent of immigrants in same-sex couples by year of immigration and country of origin. Country-clustered standard errors shown in parentheses. Country controls include population-weighted distance, contiguous border, common official language, common ethnic language, colonial relationship, wage differential, unemployment differential, proportion same-country stock, and democracy.') %>%
+#   add_rows(matrix(c('Country controls?', 'no', rep('yes', 5),
+#                 'Country FEs?', 'no', 'no', rep('yes', 4)),
+#            byrow = T, nrow = 2) , 
+#            after = nrow(.) - 1)
+
+```
+
+## Model Results: State Effects
+```{r state-props}
+state_prop <- lm(same_prop ~ state_policy, data = acs_dyad_policy)
+
+state_prop2 <- lm(same_prop ~ origin_score + state_policy, data = acs_dyad_policy)
+
+state_prop_fe <- lm(same_prop ~ state_unemploy + state_income + state + 
+                        origin_score + state_policy, 
+                       data = acs_dyad_policy)
+
+state_prop_fe2 <- lm(same_prop ~ state_policy + origin_score + distw + contig + 
+                          comlang_off + comlang_ethno + colony +
+                          wage_dif + unemp_dif + polity5 + stock_prop +
+                           state_unemploy + state_income + Country + state, 
+                       data = acs_dyad_policy)
+
+state_prop_2013 <- lm(same_prop ~ post_2013 + state_policy + origin_score + distw + contig + 
+                          comlang_off + comlang_ethno + colony +
+                          wage_dif + unemp_dif + polity5 + stock_prop +
+                           state_unemploy + state_income + Country + state, 
+                       data = mutate(acs_dyad_policy, post_2013 = (year > 2013)))
+
+state_prop_2013_int <- lm(same_prop ~ post_2013*origin_score + state_policy + distw + contig + 
+                          comlang_off + comlang_ethno + colony +
+                          wage_dif + unemp_dif + polity5 + stock_prop +
+                           state_unemploy + state_income + Country + state, 
+                       data = mutate(acs_dyad_policy, post_2013 = (year > 2013)))
+
+# state_prop_2013 <- lm(same_prop ~ post_2013*(state_policy + origin_score), 
+#                        data = mutate(acs_dyad_policy, post_2013 = (year > 2013)))
+# state_prop_2013_2 <- lm(same_prop ~ post_2013*(state_policy + origin_score) + distw + contig + 
+#                           comlang_off + comlang_ethno + colony +
+#                           wage_dif + unemp_dif + polity5 + 
+#                            state_unemploy + state_income + Country + state, 
+#                        data = mutate(acs_dyad_policy, post_2013 = (year > 2013)))
+
+se_list <- list()
+mod_list <- list(state_prop, state_prop2, state_prop_fe, state_prop_fe2, 
+                 state_prop_2013, state_prop_2013_int)
+
+for(mod_num in 1:length(mod_list)){
+  se_list[[mod_num]] <- coef(summary(mod_list[[mod_num]], cluster = c("state")))[, 2]
+}
+
+
+stargazer(mod_list,
+          header = F, 
+          keep = c('origin_score', 'state_policy', 'post_2013'),
+          # omit = c('Country', 'state'),
+          order = paste0("^", c('state_policy', 'origin_score', 'post_2013TRUE', 
+                                'post_2013TRUE:origin_score') , "$"),
+          covariate.labels = c('State LGBT policy score', 'Country LGBT policy score',
+                                'Post-2013', 'Country score × Post-2013'),
+          dep.var.labels = "Percent in same-sex couples by state-country-year",
+          add.lines = list(c('State controls and FEs?', 'no', 'no', rep('yes', 4)),
+                           c('Country controls and FEs?', rep('no', 3), rep('yes', 3))),
+          se = se_list,
+          keep.stat = c('n'),
+          star.cutoffs = c(0.1, 0.05, 0.01, 0.001),
+          star.char = c('†', '*', '**', '***'),
+          notes = c("Note: †p<0.1; *p<0.05; **p<0.01; ***p<0.001"), 
+          notes.label = '',
+          notes.align = 'l',
+          notes.append = F,
+          label = 'tab:state-props',
+          title = 'Percent same-sex in by country of origin, U.S. state, and survey year.',
+          font.size = 'tiny',
+          column.sep.width = '3pt')
+
+origin_effect <- sd(acs_couple_policy$origin_score, na.rm = T)*coef(state_prop2)[['origin_score']]
+state_effect <- sd(acs_couple_policy$state_policy, na.rm = T)*coef(state_prop2)[['state_policy']]
+
+```
+
+
+
+
+## Model Results: Individual Analysis
+```{r ord-1}
+
+ord_basic <- polr(state_policy_binned ~ same_sex + as.factor(year),
+                data = acs_couple_policy_small, Hess = T)
+ord_orig <- polr(state_policy_binned ~ same_sex*origin_score + as.factor(year),
+                data = acs_couple_policy_small, Hess = T)
+ord_interact <- polr(state_policy_binned ~ 
+                       same_sex*(origin_score + gender + age + educ + 
+                   nchild + log_income + no_income + yrimmig) + as.factor(year),
+                data = rename(acs_couple_policy_small, gender = sex), Hess = T)
+
+# ord_interact_controls <- polr(state_policy_binned ~ same_sex*origin_score + gender + age + educ +
+#                      nchild + log_income + no_income + yrimmig + as.factor(year) +
+#                      # distw + contig + comlang_off + comlang_ethno +
+#                      # wage_dif + unemp_dif + polity5 + stock_prop + bpld +
+#                      state_unemploy + state_income +state,
+#                 data = rename(acs_couple_policy_small, gender = sex), Hess = T)
+#
+# ols_interact_controls <- lm(state_policy ~ same_sex*origin_score + gender + age + educ +
+#                      nchild + log_income + no_income + yrimmig + as.factor(year) +
+#                      # distw + contig + comlang_off + comlang_ethno +
+#                      # wage_dif + unemp_dif + polity5 + stock_prop +
+#                      state_unemploy + state_income + state,
+#                 data = rename(acs_couple_policy, gender = sex))
+
+se_list <- list()
+mod_list <- list(ord_basic, ord_orig, ord_interact)
+for(mod_num in 1:length(mod_list)){
+  se_list[[mod_num]] <- coef(summary(mod_list[[mod_num]], 
+                                     cluster = c('bpld', 'state')))[, 2]
+}
+
+
+newdat <- data.frame(same_sex = rep(c(F, T), 12), year = rep(2008:2019, each = 2))
+ord_probs <- cbind(newdat,
+      predict(ord_basic, 
+        newdat,
+        type = 'probs')) %>%
+  group_by(same_sex) %>%
+  summarize(Repressive = mean(Repressive),
+            Neutral = mean(Neutral),
+            Progressive = mean(Progressive)) 
+
+```
+
+```{r ord, results = 'asis'}
+
+stargazer(mod_list,
+          header = F, 
+          add.lines = list(c('Survey year FEs?', rep('yes', 3)),
+                           c('Individual controls?', 'no', 'no', 'yes')),
+          se = se_list,
+          omit = c('gender', 'age', 'educ', 'nchild', 'log_income', 'no_income', 
+                   'yrimmig', 'Constant', 'year'),
+                   # 'distw', 'contig', 'comlang_off', 'comlang_ethno', 
+                   #  'wage_dif', 'unemp_dif', 'polity5', 'stock_prop', 
+                   #   'state_unemploy', 'state_income', 'state'),
+          dep.var.labels = c("Binned state LGBT policy score"),
+          covariate.labels = c('Same-sex', 'Country LGBT policy score', 
+                               'Same-sex × country score'),
+          keep.stat = 'n',
+          star.cutoffs = c(0.1, 0.05, 0.01, 0.001),
+          star.char = c('†', '*', '**', '***'),
+          notes = c("Note: †p<0.1; *p<0.05; **p<0.01; ***p<0.001"), 
+          notes.label = '',
+          notes.align = 'l',
+          notes.append = F,
+          #no.space = T,
+          label = 'tab:ord',
+          title = 'Individual ordered logit analysis of three-category state policy score.', 
+          font.size = 'tiny',
+          column.sep.width = '3pt')
+```
+
+
+```{r sim1, eval = F}
+
+## Simulation
+set.seed(185)
+sims <- 250
+sim <- list()
+sim_mod <- list(sims)
+pseudeo_mod <- ord_interact
+k <- length(coef(ord_interact))
+theta_mat <- rmvnorm(sims, mean=c(coef(ord_interact), ord_interact$zeta),
+                              sigma=vcovCL(ord_interact, cluster = ~ bpld))
+
+var <- 'origin_score'
+
+for (i in 1:sims) {
+  if(i %% 10 == 0) print(i)
+  theta <- as.numeric(theta_mat[i,])
+  pseudeo_mod$coefficients <- theta[1:k]
+  pseudeo_mod$zeta <- theta[(k+1):length(theta)]
+
+  for(same_loop in unique(acs_couple_policy_small$same_sex)){
+      var_vals <- seq(min(acs_couple_policy_small[,var]), 
+                      max(acs_couple_policy_small[,var]), 
+                      length.out = 10)
+      for(val in var_vals){
+          sim_dat <- acs_couple_policy_small %>%
+            rename(gender = sex) %>%
+            select(all.vars(formula(ord_interact)))
+          sim_dat[, 'same_sex'] <- same_loop
+          sim_dat[, var] <- val
+
+          pred_dat <- predict(pseudeo_mod, newdata = sim_dat, type = 'probs')
+          # pred_dat <- data.frame(t(apply(pred_dat, 2, mean))) %>%
+          #   pivot_longer(cols = everything(), names_to = 'state_policy', values_to = 'fit')
+          
+         sim[[paste0(var,same_loop, val, i)]] <-
+          data.frame(t(apply(pred_dat, 2, mean)),
+                            same_sex = same_loop,
+                            # variable = var,
+                            origin_score = val)
+      }
+  }
+}
+
+sim_df <- bind_rows(sim) %>%
+  pivot_longer(1:3, names_to = 'state_policy', values_to = 'fit') %>%
+  group_by(same_sex, origin_score, state_policy) %>%
+  summarize(fit.low = quantile(fit, .025), fit.high = quantile(fit, .975), fit = mean(fit))
+
+write_csv(sim_df, here('draft', 'sim_df.csv'))
+```
+
+## Model Results: Individual Analysis
+```{r sim}
+# Mode <- function(x) {
+#   ux <- unique(x)
+#   ux[which.max(tabulate(match(x, ux)))]
+# }
+# 
+# acs.means <- acs_couple_policy %>% 
+#   summarize(across(c(age, origin_score, yrimmig, nchild, log_income), mean, na.rm = T))
+# acs.modes <- acs_couple_policy %>% 
+#   rename(gender = sex) %>%
+#   summarize(across(c(educ, no_income, gender), Mode))
+# 
+# #Make a dataframe that's the mode of the factor variables vs. mean - one row data frame
+# #Two dataframes, one for same-sex and one for not. And then make two plots.
+# plot.dat <- bind_rows(rep(list(bind_cols(acs.means, acs.modes)),14)) %>%
+#   mutate(origin_score = -3:10, year = 2014)
+# 
+# plot.dat.same <- plot.dat %>%
+#   mutate(same_sex = T)
+# plot.dat.dif <- plot.dat %>%
+#   mutate(same_sex = F)
+# 
+# # Confidence intervals
+# set.seed(1858)
+# sims <- 500
+# sim_mod <- list(sims)
+# pseudeo_mod <- ord_interact
+# k <- length(coef(ord_interact))
+# theta_mat <- rmvnorm(sims, mean=c(coef(ord_interact), ord_interact$zeta),
+#                               sigma=vcovCL(ord_interact, cluster = ~ bpld))
+# 
+# for (i in 1:sims) {
+#   theta <- as.numeric(theta_mat[i,])
+#   pseudeo_mod$coefficients <- theta[1:k]
+#   pseudeo_mod$zeta <- theta[(k+1):length(theta)]
+#   sim_mod[[i]] <- as.data.frame(cbind(i,-3:10, predict(pseudeo_mod, 
+#                                    newdata=plot.dat.same, type="probs")))
+#   names(sim_mod[[i]]) <- c("iter","origin_score", names(sim_mod[[i]])[3:5]) 
+# }
+# sim_mod_same <- bind_rows(sim_mod) %>%
+#   pivot_longer(3:5, names_to = 'state_policy_binned', values_to = 'phat') %>%
+#   #gather(state_policy_binned, phat, -iter, -origin_score) %>%
+#   group_by(origin_score, state_policy_binned) %>%
+#   dplyr::summarize(phat.se = sd(phat),
+#                    phat.mean = mean(phat),
+#                    phat.lo = phat.mean - 1.96*phat.se,
+#                    phat.hi = phat.mean + 1.96*phat.se) %>%
+#   mutate(same_sex = 'Same-Sex')
+# 
+# 
+# sims <- 250
+# sim_mod <- list(sims)
+# pseudeo_mod <- ord_interact
+# k <- length(coef(ord_interact))
+# theta_mat <- rmvnorm(sims, mean=c(coef(ord_interact), ord_interact$zeta),
+#                               sigma=vcovCL(ord_interact, cluster = ~ bpld))
+# 
+# for (i in 1:sims) {
+#   theta <- as.numeric(theta_mat[i,])
+#   pseudeo_mod$coefficients <- theta[1:k]
+#   pseudeo_mod$zeta <- theta[(k+1):length(theta)]
+#   sim_mod[[i]] <- as.data.frame(cbind(i,-3:10, predict(pseudeo_mod, 
+#                                    newdata=plot.dat.dif, type="probs")))
+#   names(sim_mod[[i]]) <- c("iter","origin_score", names(sim_mod[[i]])[3:5]) 
+# }
+# sim_mod_dif<- bind_rows(sim_mod) %>%
+#   pivot_longer(3:5, names_to = 'state_policy_binned', values_to = 'phat') %>%
+#   #gather(state_policy_binned, phat, -iter, -origin_score) %>%
+#   group_by(origin_score, state_policy_binned) %>%
+#   dplyr::summarize(phat.se = sd(phat),
+#                    phat.mean = mean(phat),
+#                    phat.lo = phat.mean - 1.96*phat.se,
+#                    phat.hi = phat.mean + 1.96*phat.se) %>%
+#   mutate(same_sex = 'Different-Sex')
+# 
+# sim_df <- bind_rows(sim_mod_same, sim_mod_dif)
+# 
+# sim_df %>%
+#   ggplot(aes(x=origin_score, y=phat.mean, col=state_policy_binned)) +
+#   geom_line() + 
+#   geom_ribbon(aes(ymin=phat.lo, ymax=phat.hi, 
+#                   fill = state_policy_binned, col = NULL), alpha = .2) +
+#   facet_wrap(~same_sex) +
+#   xlab('LGBT policy score for country of origin') +
+#   ylab('Predicted probability of U.S. state residence') +
+#   theme(legend.justification=c(1,0),
+#         legend.position=c(.95,.38))
+
+
+sim_df <- read_csv(here('draft', 'sim_df.csv')) %>%
+    mutate(same_sex = case_when(same_sex == T ~ 'Same-sex',
+                                same_sex == F ~ 'Different-sex'))
+
+
+sim_df %>%
+  ggplot(aes(x=origin_score, y=fit, col=state_policy)) +
+  geom_line() + 
+  geom_ribbon(aes(ymin=fit.low, ymax=fit.high, 
+                  fill = state_policy, col = NULL), alpha = .2) +
+  facet_wrap(~same_sex) +
+  xlab('LGBT policy score for country of origin') +
+  ylab('Predicted probability of U.S. state residence') +
+  theme(legend.justification=c(1,0),
+        legend.position=c(.95,.38)) + 
+  scale_color_brewer(palette="Dark2") + scale_fill_brewer(palette="Dark2")
+
+orig_max <- max(sim_df$origin_score)
+same_pred <- filter(sim_df, same_sex == 'Same-sex', origin_score == orig_max, 
+       state_policy == 'Progressive') %>% 
+  pull(fit)
+
+dif_pred <- filter(sim_df, same_sex == 'Different-sex', origin_score == orig_max, 
+       state_policy == 'Progressive') %>% 
+  pull(fit)
+
+same_pred2 <- filter(sim_df, same_sex == 'Same-sex', origin_score == orig_max, 
+       state_policy == 'Repressive') %>% 
+  pull(fit)
+
+dif_pred2 <- filter(sim_df, same_sex == 'Different-sex', origin_score == orig_max, 
+       state_policy == 'Repressive') %>% 
+  pull(fit)
+```
+
+
+
+# Discussion
+## Discussion
+
