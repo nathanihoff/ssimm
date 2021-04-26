@@ -12,6 +12,8 @@ output:
   
 # header-includes:
 #   - \AtBeginDocument{\title[Making Migration Sexy]{Making Migration Sexy: How State and National Policies Influence Migration of Same-Sex Couples}}
+#   -\AtBeginDocument{\author[Hoffmann \& Velasco]{ Nathan I. Hoffmann, Sociology, UCLA
+#  \\ Kristopher Velasco, Sociology, UT Austin}}
 
 
 title: "Making Migration Sexy: How State and National Policies Influence Migration of Same-Sex Couples"
@@ -107,41 +109,17 @@ acs_couple_policy_small <- bind_rows(
 
 # Introduction
 ## Introduction
-```{r intro}
+- In 2013, the U.S. Supreme Court struck down the Defense of Marriage Act
+- From 2013 to 2019, 76% increase in immigrant same-sex couples, compared to 13% for different-sex
+- How has changing policy environment, both at country of origin and in U.S. states, contributed toward growth in immigrants in same-sex couples?
+- How can understanding LGB migration help us better understand the links between migration, policy, and identity more broadly?
+
+## Introduction
+```{r total-pop}
 total_df <- acs_wide_survey %>%
   mutate(same_sex = ifelse(same_sex == T, 'Same-Sex', 'Different-Sex')) %>%
   group_by(year, imm_couple, same_sex) %>%
   summarize(n = survey_total(vartype = "ci")) 
-
-same_2013 <- total_df %>%
-  filter(year == 2013, same_sex == 'Same-Sex') %>%
-  pull(n) %>% 
-  sum()
-
-same_2019 <- total_df %>%
-  filter(year == 2019, same_sex == 'Same-Sex') %>%
-  pull(n) %>% 
-  sum()
-
-dif_2013 <- total_df %>%
-  filter(year == 2013, same_sex == 'Different-Sex') %>%
-  pull(n) %>% 
-  sum()
-
-dif_2019 <- total_df %>%
-  filter(year == 2019, same_sex == 'Different-Sex') %>%
-  pull(n) %>% 
-  sum()
-```
-
-
-
-
-
-
-# Background
-## Background: Changing Policy Landscape for Same-Sex Immigrant Couples
-```{r total-pop}
 
 total_df %>%
   mutate(`Total population (thousands)` = n/1000,
@@ -160,36 +138,60 @@ total_df %>%
 
 ```
 
-
+# Background
 ## Conventional Explanations
+- Migration theory relies heavily on economic and network theories
+- Recently, culture and social policy considered
+- Little previous research applying migration theories to same-sex couples. Do they hold up?
 
 
 ## Our Intervention
+- We argue that it is imperative to take sexuality, and the state’s role in governing sexuality, into account for understanding migratory patterns
+- This population is particularly sensitive to changing policy
+    + Same-sex relationships were not recognized by the U.S. government before the 2013 DOMA decision
+    + Policy may overpower traditional migration theories
+
+
+## Our Intervention
+- We consider policy at both country of origin and U.S. state
+- Country of origin
+    + Do LGB people choose to flee repressive policy contexts?
+    + Or does progressive policy create the capacity for migration?
+- U.S. state
+    + Do immigrants in same-sex couples, like their U.S.-born counterparts, choose to live in more progressive states?
 
 
 # Data
 ## Identifying Same-Sex Couples in the ACS
+- 2008 to 2019 American Community Survey (ACS)
+    + immigrated at age 18 or older post-1990
+- Immigrants in same-sex couples are identified as foreign-born respondents who live with a same-sex married or unmarried partner
+    + This necessarily excludes single and non-cohabiting LGB individuals
+- Sample of 7,500 immigrants in same-sex couples compared to 947,227 immigrants in different-sex couples
 
 
-
-## Explanatory Variables
-
-
-
-## Control Variables
-
+## Variables
+- Explanatory variables
+    + Country of origin LGBT policy index (sum of 14 policies)
+    + U.S. state LGBT policy index (sum of 8 policies)
+- Controls
+    + Factors from standard migration models, including country- and state-level economic, political, and demographic variables from the UN, U.S. government, and other sources
+    + Individual sociodemographic variables from ACS
 
 
 
 # Methods
 ## Methods
-
+- **Analysis 1**: Country-level percentage of immigrants in same-sex couples, by country and year of immigration
+    + OLS regression with country fixed effects
+- **Analysis 2**: State-level percentage of immigrants in same-sex couples, by country and year of immigration
+    + OLS regression with state and country fixed effects
+- **Analysis 3**: Individual-level models predicting state policy environment
+    + Ordered logistic regression with survey-year fixed effects
 
 
 # Results
 ## Descriptive statistics
-
-
 ```{r desc}
 income <- acs_ind_survey %>%
   mutate(same_sex = ifelse(same_sex == T, 'Same-Sex', 'Different-Sex')) %>%
@@ -835,4 +837,23 @@ dif_pred2 <- filter(sim_df, same_sex == 'Different-sex', origin_score == orig_ma
 
 # Discussion
 ## Discussion
+- Immigrants in same-sex couples have higher income, occupational prestige, and education than those in different-sex couples
+- Progressive countries send higher proportions of immigrants in same-sex couples
+    + Counter to existing, mostly qualitative scholarship of queer migration 
+- Mixed evidence that immigrants in same-sex couples reside in more progressive U.S. states
+- Policies not explicitly related to migration may shape migration flows
+    + Importance of migration scholars studying the state's governance of identity
+    + Need to move beyond the traditional economic and network explanations of migration
+
+
+# 
+\begin{center}
+  \huge{\textcolor{uclablue}{Thank You}}
+\end{center}
+
+- Nathan I. Hoffmann (\textcolor{uclablue}{nathanihoff\@ucla.edu})
+- Kristopher Velasco (\textcolor{uclablue}{krisvelasco\@utexas.edu})
+
+
+
 

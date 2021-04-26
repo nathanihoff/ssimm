@@ -125,9 +125,10 @@
 \AtBeginDocument{\title[Making Migration Sexy]{Making Migration Sexy: How State and National Policies Influence Migration of Same-Sex Couples}}
 \AtBeginDocument{\author[Hoffmann \& Velasco]{ Nathan I. Hoffmann, Sociology, UCLA
   \\ Kristopher Velasco, Sociology, UT Austin}}
+  
 
 % Defines the graphic but does not place it. See below for that
-\titlegraphic{\includegraphics[width=0.4\paperwidth]{ucla.png}}
+\titlegraphic{\includegraphics[width=0.4\paperwidth]{ucla.png}\includegraphics[width=0.4\paperwidth]{Horizontal-PRC-Logo.png}}
 
 % Creates background bruin bear
 \usebackgroundtemplate{%
@@ -191,23 +192,93 @@ Kristopher Velasco, Depatment of Sociology, UT Austin}
 
 \begin{frame}{Introduction}
 \protect\hypertarget{introduction-1}{}
+\begin{itemize}
+\tightlist
+\item
+  2013 Supreme Court struck down DOMA
+\item
+  From 2013 to 2019, 76\% increase in immigrant same-sex couples,
+  compared to 13\% for different-sex
+\item
+  How has changing policy environment, both at country of origin and in
+  U.S. states, contributed toward growth in immigrants in same-sex
+  couples?
+\item
+  How can understanding LGB migration help us better understand the
+  links between migration, policy, and identity more broadly?
+\end{itemize}
+\end{frame}
+
+\begin{frame}{Introduction}
+\protect\hypertarget{introduction-2}{}
+\includegraphics{ssimm_pres_files/figure-beamer/total-pop-1.pdf}
 \end{frame}
 
 \hypertarget{background}{%
 \section{Background}\label{background}}
 
-\begin{frame}{Background: Changing Policy Landscape for Same-Sex
-Immigrant Couples}
-\protect\hypertarget{background-changing-policy-landscape-for-same-sex-immigrant-couples}{}
-\includegraphics{ssimm_pres_files/figure-beamer/total-pop-1.pdf}
-\end{frame}
-
 \begin{frame}{Conventional Explanations}
 \protect\hypertarget{conventional-explanations}{}
+\begin{itemize}
+\tightlist
+\item
+  Migration theory relies heavily on economic and network theories
+\item
+  Recently, culture and social policy considered
+\item
+  Little previous research applying migration theories to same-sex
+  couples. Do they hold up?
+\end{itemize}
 \end{frame}
 
 \begin{frame}{Our Intervention}
 \protect\hypertarget{our-intervention}{}
+\begin{itemize}
+\tightlist
+\item
+  We argue that it is imperative to take sexuality, and the state's role
+  in governing sexuality, into account for understanding migratory
+  patterns
+\item
+  This population is particularly sensitive to changing policy
+
+  \begin{itemize}
+  \tightlist
+  \item
+    Same-sex relationships were not recognized by the U.S. government
+    before the 2013 DOMA decision
+  \item
+    Policy may overpower traditional migration theories
+  \end{itemize}
+\end{itemize}
+\end{frame}
+
+\begin{frame}{Our Intervention}
+\protect\hypertarget{our-intervention-1}{}
+\begin{itemize}
+\tightlist
+\item
+  We consider policy at both country of origin and U.S. state
+\item
+  Country of origin
+
+  \begin{itemize}
+  \tightlist
+  \item
+    Do LGB people choose to flee repressive policy contexts?
+  \item
+    Or does progressive policy create the capacity for migration?
+  \end{itemize}
+\item
+  U.S. state
+
+  \begin{itemize}
+  \tightlist
+  \item
+    Do immigrants in same-sex couples, like their U.S.-born
+    counterparts, choose to live in more progressive states?
+  \end{itemize}
+\end{itemize}
 \end{frame}
 
 \hypertarget{data}{%
@@ -215,14 +286,58 @@ Immigrant Couples}
 
 \begin{frame}{Identifying Same-Sex Couples in the ACS}
 \protect\hypertarget{identifying-same-sex-couples-in-the-acs}{}
+\begin{itemize}
+\tightlist
+\item
+  2008 to 2019 American Community Survey (ACS)
+
+  \begin{itemize}
+  \tightlist
+  \item
+    immigrated at age 18 or older post-1990
+  \end{itemize}
+\item
+  Immigrants in same-sex couples are identified as foreign-born
+  respondents who live with a same-sex married or unmarried partner
+
+  \begin{itemize}
+  \tightlist
+  \item
+    This necessarily excludes single and non-cohabiting LGB individuals
+  \end{itemize}
+\item
+  Sample of 7,500 immigrants in same-sex couples compared to 947,227
+  immigrants in different-sex couples
+\end{itemize}
 \end{frame}
 
-\begin{frame}{Explanatory Variables}
-\protect\hypertarget{explanatory-variables}{}
-\end{frame}
+\begin{frame}{Variables}
+\protect\hypertarget{variables}{}
+\begin{itemize}
+\tightlist
+\item
+  Explanatory variables
 
-\begin{frame}{Control Variables}
-\protect\hypertarget{control-variables}{}
+  \begin{itemize}
+  \tightlist
+  \item
+    Country of origin LGBT policy index (sum of 14 policies)
+  \item
+    U.S. state LGBT policy index (sum of 8 policies)
+  \end{itemize}
+\item
+  Controls
+
+  \begin{itemize}
+  \tightlist
+  \item
+    Factors from standard migration models, including country- and
+    state-level economic, political, and demographic variables from the
+    UN, U.S. government, and other sources
+  \item
+    Individual sociodemographic variables from ACS
+  \end{itemize}
+\end{itemize}
 \end{frame}
 
 \hypertarget{methods}{%
@@ -230,6 +345,36 @@ Immigrant Couples}
 
 \begin{frame}{Methods}
 \protect\hypertarget{methods-1}{}
+\begin{itemize}
+\tightlist
+\item
+  \textbf{Analysis 1}: Country-level percentage of immigrants in
+  same-sex couples, by country and year of immigration
+
+  \begin{itemize}
+  \tightlist
+  \item
+    OLS regression with country fixed effects
+  \end{itemize}
+\item
+  \textbf{Analysis 2}: State-level percentage of immigrants in same-sex
+  couples, by country and year of immigration
+
+  \begin{itemize}
+  \tightlist
+  \item
+    OLS regression with state and country fixed effects
+  \end{itemize}
+\item
+  \textbf{Analysis 3}: Individual-level models predicting state policy
+  environment
+
+  \begin{itemize}
+  \tightlist
+  \item
+    Ordered logistic regression with survey-year fixed effects
+  \end{itemize}
+\end{itemize}
 \end{frame}
 
 \hypertarget{results}{%
@@ -417,6 +562,54 @@ Observations & 107,500 & 107,500 & 107,500 \\
 
 \begin{frame}{Discussion}
 \protect\hypertarget{discussion-1}{}
+\begin{itemize}
+\tightlist
+\item
+  Immigrants in same-sex couples have higher income, occupational
+  prestige, and education than those in different-sex couples
+\item
+  Progressive countries send higher proportions of immigrants in
+  same-sex couples
+
+  \begin{itemize}
+  \tightlist
+  \item
+    Counter to existing, mostly qualitative scholarship of queer
+    migration
+  \end{itemize}
+\item
+  Mixed evidence that immigrants in same-sex couples reside in more
+  progressive U.S. states
+\item
+  Policies not explicitly related to migration may shape migration flows
+
+  \begin{itemize}
+  \tightlist
+  \item
+    Importance of migration scholars studying the state's governance of
+    identity
+  \item
+    Need to move beyond the traditional economic and network
+    explanations of migration
+  \end{itemize}
+\end{itemize}
+\end{frame}
+
+\hypertarget{section}{%
+\section{}\label{section}}
+
+\begin{frame}{}
+\begin{center}
+  \huge{\textcolor{uclablue}{Thank You}}
+\end{center}
+
+\begin{itemize}
+\tightlist
+\item
+  Nathan I. Hoffmann (\textcolor{uclablue}{nathanihoff\@ucla.edu})
+\item
+  Kristopher Velasco (\textcolor{uclablue}{krisvelasco\@utexas.edu})
+\end{itemize}
 \end{frame}
 
 \end{document}
