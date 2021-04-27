@@ -24,6 +24,7 @@ author: |
   | Nathan I. Hoffmann, Department of Sociology, UCLA
   | Kristopher Velasco, Depatment of Sociology, UT Austin
 
+date: "May 5, 2021"
 ---
 
 ```{r setup, include=F}
