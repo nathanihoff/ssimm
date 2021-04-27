@@ -9,7 +9,8 @@ output:
     include:
       in_header: ucla_beamer.tex
     fig_width: 12.5
-  
+    
+
 # header-includes:
 #   - \AtBeginDocument{\title[Making Migration Sexy]{Making Migration Sexy: How State and National Policies Influence Migration of Same-Sex Couples}}
 #   -\AtBeginDocument{\author[Hoffmann \& Velasco]{ Nathan I. Hoffmann, Sociology, UCLA
@@ -24,7 +25,7 @@ author: |
   | Nathan I. Hoffmann, Department of Sociology, UCLA
   | Kristopher Velasco, Depatment of Sociology, UT Austin
 
-date: "May 5, 2021"
+date: "UCLA & UT Austin"
 ---
 
 ```{r setup, include=F}
@@ -852,8 +853,9 @@ dif_pred2 <- filter(sim_df, same_sex == 'Different-sex', origin_score == orig_ma
   \huge{\textcolor{uclablue}{Thank You}}
 \end{center}
 
-- Nathan I. Hoffmann (\textcolor{uclablue}{nathanihoff\@ucla.edu})
-- Kristopher Velasco (\textcolor{uclablue}{krisvelasco\@utexas.edu})
+- Nathan I. Hoffmann ([nathanihoff\@ucla.edu](mailto:nathanihoff@ucla.edu))
+- Kristopher Velasco ([krisvelasco\@utexas.edu](mailto:krisvelasco\@utexas.edu))
+- Full paper on SocArXiv: https://osf.io/preprints/socarxiv/hxjkt/
 
 
 
