@@ -178,6 +178,7 @@ total_df %>%
     + U.S. state LGBT policy index (sum of 8 policies)
 - Controls
     + Factors from standard migration models, including country- and state-level economic, political, and demographic variables from the UN, U.S. government, and other sources
+    + The relative size of the co-national immigrant population as a proxy for immigrant networks
     + Individual sociodemographic variables from ACS
 
 
@@ -193,7 +194,13 @@ total_df %>%
 
 
 # Results
-## Descriptive statistics
+## Results
+\begin{center}
+  \huge{\textcolor{uclablue}{Results}}
+\end{center}
+  
+
+## Descriptive Statistics
 ```{r desc}
 income <- acs_ind_survey %>%
   mutate(same_sex = ifelse(same_sex == T, 'Same-Sex', 'Different-Sex')) %>%
@@ -271,7 +278,7 @@ bind_rows(income, wage_dif, polity5, prop_stock) %>%
  
 ```
 
-## Descriptive statistics
+## Descriptive Statistics
 ```{r policy-desc}
 
 
@@ -301,7 +308,7 @@ bind_rows(origin_df, state_df) %>%
 ```
 
 
-## Descriptive statistics
+## Descriptive Statistics
 ```{r country-tab}
 country_tab <- acs_couple_policy %>%
   group_by(bpld, same_sex) %>%
@@ -352,7 +359,7 @@ names(country_vec) <- country_tab$`Country of origin`
 
 ```
 
-## Descriptive statistics
+## Descriptive Statistics
 ```{r state-tab}
 state_tab <- acs_wide %>%
   filter(state != 'District of Columbia') %>%
@@ -839,16 +846,17 @@ dif_pred2 <- filter(sim_df, same_sex == 'Different-sex', origin_score == orig_ma
 
 # Discussion
 ## Discussion
-- Immigrants in same-sex couples have higher income, occupational prestige, and education than those in different-sex couples
+- Immigrants in same-sex couples have higher income, occupational prestige, and education than those in different-sex couples, and they come from countries with smaller wage and unemployment gaps with the U.S.
 - Progressive countries send higher proportions of immigrants in same-sex couples
-    + Counter to existing, mostly qualitative scholarship of queer migration 
+    + Contrary to existing, mostly qualitative scholarship on queer migration 
 - Mixed evidence that immigrants in same-sex couples reside in more progressive U.S. states
 - Policies not explicitly related to migration may shape migration flows
     + Importance of migration scholars studying the state's governance of identity
     + Need to move beyond the traditional economic and network explanations of migration
 
 
-# 
+
+## 
 \begin{center}
   \huge{\textcolor{uclablue}{Thank You}}
 \end{center}

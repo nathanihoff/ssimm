@@ -300,7 +300,7 @@ Our final set of models turns toward the individual: Conditional on immigrating 
 
 
 # Results
-## Descriptive statistics
+## Descriptive Statistics
 We first estimate total numbers of immigrants in same- and different-sex couples, applying survey weights to obtain population-level estimates from the ACS. Figure \ref{fig:total-pop} shows that whereas numbers of different-sex immigrant couples have steadily increased over the period of study, numbers of same-sex immigrant couples have increased much more rapidly, especially since the the 2013 Supreme Court decision overturning DOMA.  
 
 ```{r desc, fig.cap = 'Descriptive statistics for immigrants in couples 2008-2019, with survey weights and 95% confidence intervals. All currency in thousands of 1999 dollars.'}
