@@ -212,36 +212,36 @@ bind_rows(hwsei, nchild, years, distance, unemp, state_income) %>%
 # Spouse
 ag_2013_spouse1 <- lm(prop_spouse_same_sex ~ distw + contig + comlang_off + 
                         comlang_ethno + colony +
-                   wage_dif + unemp_dif + polity5 + origin_score + stock_prop + bpld,
+                   wage_dif + unemp_dif + vdem + origin_score + stock_prop + bpld,
          data = mutate(acs_prop_yrimmig_policy, post_2013 = (yrimmig > 2013)))
 
 # Spouse, + 2013
 ag_2013_spouse2 <- lm(prop_spouse_same_sex ~ distw + contig + comlang_off + 
                         comlang_ethno + colony +
-                   wage_dif + unemp_dif + polity5 + origin_score + stock_prop + bpld +
+                   wage_dif + unemp_dif + vdem + origin_score + stock_prop + bpld +
                      post_2013,
          data = mutate(acs_prop_yrimmig_policy, post_2013 = (yrimmig > 2013)))
 
 # Spouse + interaction
 ag_2013_spouse_int <- lm(prop_spouse_same_sex ~ distw + contig + comlang_off + 
                            comlang_ethno + colony + bpld +
-                   wage_dif + unemp_dif + polity5  + stock_prop +
+                   wage_dif + unemp_dif + vdem  + stock_prop +
                      post_2013*origin_score,
          data = mutate(acs_prop_yrimmig_policy, post_2013 = (yrimmig > 2013)))
 
 # One immigrant
 ag_oneimm <- lm(prop_same_sex_oneimm ~ distw + contig + comlang_off + comlang_ethno + colony +
-                   wage_dif + unemp_dif + polity5 + origin_score + stock_prop + bpld,
+                   wage_dif + unemp_dif + vdem + origin_score + stock_prop + bpld,
          data = acs_prop_yrimmig_policy)
 
 ag_oneimm_2013 <- lm(prop_same_sex_oneimm ~ distw + contig + comlang_off + comlang_ethno + colony +
-                   wage_dif + unemp_dif + polity5 + stock_prop + bpld + 
+                   wage_dif + unemp_dif + vdem + stock_prop + bpld + 
                      post_2013 + origin_score,
          data = mutate(acs_prop_yrimmig_policy, post_2013 = (yrimmig > 2013)))
 
 ag_oneimm_2013_int <- lm(prop_same_sex_oneimm ~ distw + contig + comlang_off + 
                            comlang_ethno + colony +
-                   wage_dif + unemp_dif + polity5 + stock_prop + bpld + 
+                   wage_dif + unemp_dif + vdem + stock_prop + bpld + 
                      post_2013*origin_score,
          data = mutate(acs_prop_yrimmig_policy, post_2013 = (yrimmig > 2013)))
 
@@ -257,10 +257,10 @@ for(mod_num in 1:length(mod_list)){
 stargazer(mod_list,
           header = F, 
           model.names = F,
-          keep = c('origin_score', 'polity5', 'post_2013'),
-          order = paste0("^", c('origin_score', 'polity5', 'post_2013TRUE', 
+          keep = c('origin_score', 'post_2013'),
+          order = paste0("^", c('origin_score', 'post_2013TRUE', 
                                 'post_2013TRUE:origin_score') , "$"),
-          covariate.labels = c('Country LGBT policy score', 'Polity5 democracy score',
+          covariate.labels = c('Country LGBT policy score', 
                                 'Post-2013', 'Country score × Post-2013'),
           dep.var.labels   = c("Married", "One Immigrant"),
           add.lines = list(c('Country controls?', rep('yes', 6)),
@@ -277,6 +277,188 @@ stargazer(mod_list,
           label = 'tab:country-props-alt',
           title = 'Alternate Specifications of OLS regressions of percent of immigrants in same-sex couples by year of immigration and country of origin, using only proportions of married couples or couples with one immigrant and one U.S.-born citizen. Country-clustered standard errors shown in parentheses. Country controls include population-weighted distance, contiguous border, common official language, common ethnic language, colonial relationship, wage differential, unemployment differential, proportion same-country stock, and Polity 5 measure of democracy.')
 ```
+
+\newpage
+
+# Relative immmigrant population-weighted regressions
+We perform the same regressions with proportion in same-sex couples by country or state, but weighted by the relative size of the immigrant stock.
+```{r country-weights}
+ag <- lm(prop_same_sex ~ origin_score,
+         data = acs_prop_yrimmig_policy, weights = stock_prop)
+
+ag_country_orig <- lm(prop_same_sex ~ distw + contig + comlang_off + comlang_ethno + colony +
+                   wage_dif + unemp_dif + vdem + origin_score + stock_prop,
+         data = acs_prop_yrimmig_policy, weights = stock_prop)
+
+ag_country_orig_fe <- lm(prop_same_sex ~ distw + contig + comlang_off + comlang_ethno + colony +
+                   wage_dif + unemp_dif + vdem + origin_score + stock_prop + bpld,
+         data = acs_prop_yrimmig_policy, weights = stock_prop)
+
+
+
+ag_country_orig_fe_2013 <- lm(prop_same_sex ~ distw + contig + comlang_off + comlang_ethno + colony +
+                   wage_dif + unemp_dif + vdem + origin_score + stock_prop + bpld +
+                     post_2013,
+         data = mutate(acs_prop_yrimmig_policy, post_2013 = (yrimmig > 2013)), weights = stock_prop)
+
+
+ag_2013_int_fe <- lm(prop_same_sex ~ distw + contig + comlang_off + comlang_ethno + colony +
+                   wage_dif + unemp_dif + vdem  + stock_prop + bpld +
+                     post_2013*origin_score,
+         data = mutate(acs_prop_yrimmig_policy, post_2013 = (yrimmig > 2013)), weights = stock_prop)
+
+
+se_list <- list()
+mod_list <- list(ag, ag_country_orig, ag_country_orig_fe,
+                 ag_country_orig_fe_2013, ag_2013_int_fe)
+for(mod_num in 1:length(mod_list)){
+  se_list[[mod_num]] <- coef(summary(mod_list[[mod_num]], cluster = c("bpld")))[, 2]
+}
+
+
+stargazer(mod_list,
+          header = F,
+          model.names = F,
+          keep = c('origin_score',  'post_2013'),
+          order = paste0("^", c('origin_score', 'post_2013TRUE', 
+                                'post_2013TRUE:origin_score') , "$"),
+          covariate.labels = c('Country LGB policy score',
+                                'Post-2013', 'Country score × Post-2013'),
+          dep.var.labels   = "Percent in same-sex couples by country-year",
+          add.lines = list(c('Country controls?', 'no', rep('yes', 4)),
+                           c('Country FEs?', 'no', 'no', rep('yes', 3))),
+          se = se_list,
+          keep.stat = c('n'),
+          star.cutoffs = c(0.1, 0.05, 0.01, 0.001),
+          star.char = c('†', '*', '**', '***'),
+          notes = c("Note: †p<0.1; *p<0.05; **p<0.01; ***p<0.001",
+                    "Source: American Community Survey 2008-2019"),
+          notes.label = '',
+          notes.align = 'l',
+          notes.append = F,
+          label = 'tab:country-props',
+          title = 'Weighted OLS regressions of percent of immigrants in same-sex couples by year of immigration and country of origin. Country-clustered standard errors shown in parentheses.')
+
+```
+
+```{r state-props}
+state_prop <- lm(same_prop ~ state_policy, data = acs_dyad_policy, weights = stock_prop)
+
+state_prop2 <- lm(same_prop ~ origin_score + state_policy, data = acs_dyad_policy, weights = stock_prop)
+
+state_prop_fe <- lm(same_prop ~ state_unemploy + state_income + state + 
+                        origin_score + state_policy, 
+                       data = acs_dyad_policy, weights = stock_prop)
+
+state_prop_fe2 <- lm(same_prop ~ state_policy + origin_score + distw + contig + 
+                          comlang_off + comlang_ethno + colony +
+                          wage_dif + unemp_dif + vdem + stock_prop +
+                           state_unemploy + state_income + Country + state, 
+                       data = acs_dyad_policy, weights = stock_prop)
+
+state_prop_2013 <- lm(same_prop ~ post_2013 + state_policy + origin_score + distw + contig + 
+                          comlang_off + comlang_ethno + colony +
+                          wage_dif + unemp_dif + vdem + stock_prop +
+                           state_unemploy + state_income + Country + state, 
+                       data = mutate(acs_dyad_policy, post_2013 = (year > 2013)), weights = stock_prop)
+
+state_prop_2013_int <- lm(same_prop ~ post_2013*origin_score + state_policy + distw + contig + 
+                          comlang_off + comlang_ethno + colony +
+                          wage_dif + unemp_dif + vdem + stock_prop +
+                           state_unemploy + state_income + Country + state, 
+                       data = mutate(acs_dyad_policy, post_2013 = (year > 2013)), weights = stock_prop)
+
+
+se_list <- list()
+mod_list <- list(state_prop, state_prop2, state_prop_fe, state_prop_fe2, 
+                 state_prop_2013, state_prop_2013_int)
+
+for(mod_num in 1:length(mod_list)){
+  se_list[[mod_num]] <- coef(summary(mod_list[[mod_num]], cluster = c("state")))[, 2]
+}
+
+
+stargazer(mod_list,
+          header = F, 
+          keep = c('origin_score', 'state_policy', 'post_2013'),
+          # omit = c('Country', 'state'),
+          order = paste0("^", c('state_policy', 'origin_score', 'post_2013TRUE', 
+                                'post_2013TRUE:origin_score') , "$"),
+          covariate.labels = c('State LGB policy score', 'Country LGB policy score',
+                                'Post-2013', 'Country score × Post-2013'),
+          dep.var.labels = "Percent in same-sex couples by state-country-year",
+          add.lines = list(c('State controls and FEs?', 'no', 'no', rep('yes', 4)),
+                           c('Country controls and FEs?', rep('no', 3), rep('yes', 3))),
+          se = se_list,
+          keep.stat = c('n'),
+          star.cutoffs = c(0.1, 0.05, 0.01, 0.001),
+          star.char = c('†', '*', '**', '***'),
+          notes = c("Note: †p<0.1; *p<0.05; **p<0.01; ***p<0.001", 
+                    "Source: American Community Survey 2008-2019"), 
+          notes.label = '',
+          notes.align = 'l',
+          notes.append = F,
+          label = 'tab:state-props',
+          title = 'Weighted regression of percent same-sex in by country of origin, U.S. state, and survey year. Country-clustered standard errors are shown in parentheses.')
+```
+
+\newpage
+
+# OLS models of individual state of residence
+```{r}
+
+ols_basic <- lm(state_policy ~ same_sex,
+                data = acs_couple_policy_small)
+ols_orig <- lm(state_policy ~ same_sex*origin_score,
+                data = acs_couple_policy_small)
+ols_interact <- lm(state_policy ~ 
+                       same_sex*(origin_score + gender + age + educ + 
+                   nchild + log_income + no_income + yrimmig),
+                data = rename(acs_couple_policy_small, gender = sex))
+
+ols_interact_controls <- lm(state_policy ~ same_sex*(origin_score + gender + age + educ +
+                     nchild + log_income + no_income + yrimmig) +
+                     distw + contig + comlang_off + comlang_ethno +
+                     wage_dif + unemp_dif + vdem + stock_prop +  bpld + state +
+                     state_unemploy + state_income ,
+                data = rename(acs_couple_policy_small, gender = sex))
+
+se_list <- list()
+mod_list <- list(ols_basic, ols_orig, ols_interact, ols_interact_controls)
+for(mod_num in 1:length(mod_list)){
+  se_list[[mod_num]] <- coef(summary(mod_list[[mod_num]], 
+                                     cluster = c('bpld', 'state')))[, 2]
+}
+
+
+stargazer(mod_list,
+          header = F, 
+          add.lines = list(#c('Survey year FEs?', rep('yes', 3)),
+                           c('Individual controls?', 'no', 'no', 'yes', 'yes'),
+                           c('State controls and FEs?', 'no', 'no', 'no', 'yes'),
+                           c('Country controls and FEs?', 'no', 'no', 'no', 'yes')),
+          se = se_list,
+          omit = c('gender', 'age', 'educ', 'nchild', 'log_income', 'no_income', 
+                   'yrimmig', 'Constant', 
+                   'distw', 'contig', 'comlang_off', 'comlang_ethno',
+                    'wage_dif', 'unemp_dif', 'vdem', 'stock_prop',
+                     'state_unemploy', 'state_income', 'state', 'bpld'),
+          dep.var.labels = c("Binned state LGB policy score"),
+          covariate.labels = c('Same-sex', 'Country LGB policy score', 
+                               'Same-sex × country score'),
+          keep.stat = 'n',
+          star.cutoffs = c(0.1, 0.05, 0.01, 0.001),
+          star.char = c('†', '*', '**', '***'),
+          notes = c("Note: †p<0.1; *p<0.05; **p<0.01; ***p<0.001", 
+                    "Source: American Community Survey 2008-2019"), 
+          notes.label = '',
+          notes.align = 'l',
+          notes.append = F,
+          #no.space = T,
+          label = 'tab:ols',
+          title = 'Individual OLS analysis of state policy score. Country-clustered standard errors are shown in parentheses. Individual controls include sex, age, education, number of children, log(income), indicator for no income, and year of immigration, which are all interacted with the indicator for same-sex couple.')
+```
+
 
 \newpage
 
@@ -314,23 +496,23 @@ ag <- lm(prop_same_sex_adj ~ origin_score,
 
 
 ag_country_orig <- lm(prop_same_sex_adj ~ distw + contig + comlang_off + comlang_ethno + colony +
-                   wage_dif + unemp_dif + polity5 + origin_score + stock_prop,
+                   wage_dif + unemp_dif + vdem + origin_score + stock_prop,
          data = acs_prop_yrimmig_policy)
 
 ag_country_orig_fe <- lm(prop_same_sex_adj ~ distw + contig + comlang_off + comlang_ethno + colony +
-                   wage_dif + unemp_dif + polity5 + origin_score + stock_prop + bpld,
+                   wage_dif + unemp_dif + vdem + origin_score + stock_prop + bpld,
          data = acs_prop_yrimmig_policy)
 
 
 
 ag_country_orig_fe_2013 <- lm(prop_same_sex_adj ~ distw + contig + comlang_off + comlang_ethno + colony +
-                   wage_dif + unemp_dif + polity5 + origin_score + stock_prop + bpld +
+                   wage_dif + unemp_dif + vdem + origin_score + stock_prop + bpld +
                      post_2013,
          data = mutate(acs_prop_yrimmig_policy, post_2013 = (yrimmig > 2013)))
 
 
 ag_2013_int_fe <- lm(prop_same_sex_adj ~ distw + contig + comlang_off + comlang_ethno + colony +
-                   wage_dif + unemp_dif + polity5  + stock_prop + bpld +
+                   wage_dif + unemp_dif + vdem  + stock_prop + bpld +
                      post_2013*origin_score,
          data = mutate(acs_prop_yrimmig_policy, post_2013 = (yrimmig > 2013)))
 
@@ -345,10 +527,10 @@ for(mod_num in 1:length(mod_list)){
 stargazer(mod_list,
           header = F,
           model.names = F,
-          keep = c('origin_score', 'polity5', 'post_2013'),
-          order = paste0("^", c('origin_score', 'polity5', 'post_2013TRUE', 
+          keep = c('origin_score',  'post_2013'),
+          order = paste0("^", c('origin_score', 'post_2013TRUE', 
                                 'post_2013TRUE:origin_score') , "$"),
-          covariate.labels = c('Country LGBT policy score', 'Polity5 democracy score',
+          covariate.labels = c('Country LGBT policy score', 
                                 'Post-2013', 'Country score × Post-2013'),
           dep.var.labels   = "Percent in same-sex couples by country-year",
           add.lines = list(c('Country controls?', 'no', rep('yes', 4)),
@@ -391,7 +573,7 @@ sens_df <- list()
 
 for(i in 1:nrow(mis_df)){
   sens_mod <- lm(prop_same_sex_adj2 ~ distw + contig + comlang_off + comlang_ethno + colony +
-                   wage_dif + unemp_dif + polity5 + origin_score + stock_prop + bpld,
+                   wage_dif + unemp_dif + vdem + origin_score + stock_prop + bpld,
          data = acs_prop_yrimmig_policy %>%
                       # mutate(prop_same_sex_adj2 = (prop_spouse_same_sex*(1-mis_df[i,1]) +
                       #                    prop_partner_same_sex*(1-mis_df[i,2])))
@@ -415,7 +597,7 @@ sens_df <- bind_rows(sens_df) %>%
 # sens_df <- list()
 # for(i in 1:nrow(mis_df)){
 #   sens_mod <- lm(prop_same_sex_adj2 ~ distw + contig + comlang_off + comlang_ethno + colony +
-#                    wage_dif + unemp_dif + polity5 + origin_score + stock_prop + bpld,
+#                    wage_dif + unemp_dif + vdem + origin_score + stock_prop + bpld,
 #          data = acs_prop_yrimmig_policy %>%
 #                       mutate(prop_same_sex_adj2 = (prop_spouse_same_sex*(1-mis_df[i,1]) +
 #                                          prop_partner_same_sex*(1-mis_df[i,2]))))

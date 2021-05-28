@@ -117,7 +117,7 @@
 \makeatother
 \subtitle{Making Migration Sexy}
 \author{Nathan I. Hoffmann, Department of Sociology, University of California, Los Angeles \and Kristopher Velasco, Department of Sociology, University of Texas at Austin}
-\date{April 11, 2021}
+\date{May 27, 2021}
 
 \begin{document}
 \maketitle
@@ -198,26 +198,132 @@ Colombia & 17341\\
 \\[-1.8ex] & \multicolumn{3}{c}{Married} & \multicolumn{3}{c}{One Immigrant} \\ 
 \\[-1.8ex] & (1) & (2) & (3) & (4) & (5) & (6)\\ 
 \hline \\[-1.8ex] 
- Country LGBT policy score & 0.070$^{***}$ & 0.044$^{**}$ & 0.010 & 0.017$^{*}$ & 0.011 & $-$0.003 \\ 
-  & (0.014) & (0.015) & (0.017) & (0.007) & (0.007) & (0.009) \\ 
+ Country LGBT policy score & 0.040$^{***}$ & 0.012$^{*}$ & 0.008 & 0.010$^{**}$ & $-$0.002 & $-$0.007 \\ 
+  & (0.005) & (0.005) & (0.006) & (0.004) & (0.004) & (0.005) \\ 
   & & & & & & \\ 
- Polity5 democracy score & 0.008 & 0.004 & 0.008 & $-$0.004 & $-$0.005 & $-$0.003 \\ 
-  & (0.009) & (0.009) & (0.009) & (0.004) & (0.004) & (0.004) \\ 
+ Post-2013 &  & 0.340$^{***}$ & 0.320$^{***}$ &  & 0.150$^{***}$ & 0.130$^{***}$ \\ 
+  &  & (0.019) & (0.027) &  & (0.015) & (0.020) \\ 
   & & & & & & \\ 
- Post-2013 &  & 0.290$^{***}$ & 0.130$^{†}$ &  & 0.074$^{*}$ & 0.009 \\ 
-  &  & (0.060) & (0.072) &  & (0.031) & (0.037) \\ 
-  & & & & & & \\ 
- Country score × Post-2013 &  &  & 0.060$^{***}$ &  &  & 0.025$^{**}$ \\ 
-  &  &  & (0.015) &  &  & (0.008) \\ 
+ Country score × Post-2013 &  &  & 0.012 &  &  & 0.012 \\ 
+  &  &  & (0.010) &  &  & (0.007) \\ 
   & & & & & & \\ 
 \hline \\[-1.8ex] 
 Country controls? & yes & yes & yes & yes & yes & yes \\ 
 Country FEs? & yes & yes & yes & yes & yes & yes \\ 
-Observations & 3,222 & 3,222 & 3,222 & 3,222 & 3,222 & 3,222 \\ 
+Observations & 30,137 & 30,137 & 30,137 & 30,137 & 30,137 & 30,137 \\ 
 \hline 
 \hline \\[-1.8ex] 
 \multicolumn{7}{l}{Note: †p<0.1; *p<0.05; **p<0.01; ***p<0.001} \\ 
 \multicolumn{7}{l}{Source: American Community Survey 2008-2019} \\ 
+\end{tabular} 
+\end{table}
+
+\newpage
+
+\hypertarget{relative-immmigrant-population-weighted-regressions}{%
+\section{Relative immmigrant population-weighted regressions}\label{relative-immmigrant-population-weighted-regressions}}
+
+We perform the same regressions with proportion in same-sex couples by country or state, but weighted by the relative size of the immigrant stock.
+
+\begin{table}[!htbp] \centering 
+  \caption{Weighted OLS regressions of percent of immigrants in same-sex couples by year of immigration and country of origin. Country-clustered standard errors shown in parentheses.} 
+  \label{tab:country-props} 
+\begin{tabular}{@{\extracolsep{5pt}}lccccc} 
+\\[-1.8ex]\hline 
+\hline \\[-1.8ex] 
+ & \multicolumn{5}{c}{\textit{Dependent variable:}} \\ 
+\cline{2-6} 
+\\[-1.8ex] & \multicolumn{5}{c}{Percent in same-sex couples by country-year} \\ 
+\\[-1.8ex] & (1) & (2) & (3) & (4) & (5)\\ 
+\hline \\[-1.8ex] 
+ Country LGB policy score & 0.023$^{***}$ & 0.030$^{***}$ & 0.009$^{†}$ & $-$0.008 & $-$0.012$^{*}$ \\ 
+  & (0.004) & (0.005) & (0.005) & (0.005) & (0.006) \\ 
+  & & & & & \\ 
+ Post-2013 &  &  &  & 0.280$^{***}$ & 0.240$^{***}$ \\ 
+  &  &  &  & (0.020) & (0.030) \\ 
+  & & & & & \\ 
+ Country score × Post-2013 &  &  &  &  & 0.018$^{†}$ \\ 
+  &  &  &  &  & (0.010) \\ 
+  & & & & & \\ 
+\hline \\[-1.8ex] 
+Country controls? & no & yes & yes & yes & yes \\ 
+Country FEs? & no & no & yes & yes & yes \\ 
+Observations & 30,137 & 30,137 & 30,137 & 30,137 & 30,137 \\ 
+\hline 
+\hline \\[-1.8ex] 
+\multicolumn{6}{l}{Note: †p<0.1; *p<0.05; **p<0.01; ***p<0.001} \\ 
+\multicolumn{6}{l}{Source: American Community Survey 2008-2019} \\ 
+\end{tabular} 
+\end{table}
+
+\begin{table}[!htbp] \centering 
+  \caption{Weighted regression of percent same-sex in by country of origin, U.S. state, and survey year. Country-clustered standard errors are shown in parentheses.} 
+  \label{tab:state-props} 
+\begin{tabular}{@{\extracolsep{5pt}}lcccccc} 
+\\[-1.8ex]\hline 
+\hline \\[-1.8ex] 
+ & \multicolumn{6}{c}{\textit{Dependent variable:}} \\ 
+\cline{2-7} 
+\\[-1.8ex] & \multicolumn{6}{c}{Percent in same-sex couples by state-country-year} \\ 
+\\[-1.8ex] & (1) & (2) & (3) & (4) & (5) & (6)\\ 
+\hline \\[-1.8ex] 
+ State LGB policy score & 0.050$^{***}$ & 0.048$^{***}$ & 0.027 & 0.018 & 0.005 & 0.006 \\ 
+  & (0.006) & (0.006) & (0.020) & (0.021) & (0.023) & (0.024) \\ 
+  & & & & & & \\ 
+ Country LGB policy score &  & 0.082$^{***}$ & 0.078$^{***}$ & 0.078$^{*}$ & 0.073$^{*}$ & 0.023 \\ 
+  &  & (0.009) & (0.009) & (0.031) & (0.032) & (0.043) \\ 
+  & & & & & & \\ 
+ Post-2013 &  &  &  &  & 0.079 & 0.007 \\ 
+  &  &  &  &  & (0.060) & (0.073) \\ 
+  & & & & & & \\ 
+ Country score × Post-2013 &  &  &  &  &  & 0.040$^{†}$ \\ 
+  &  &  &  &  &  & (0.023) \\ 
+  & & & & & & \\ 
+\hline \\[-1.8ex] 
+State controls and FEs? & no & no & yes & yes & yes & yes \\ 
+Country controls and FEs? & no & no & no & yes & yes & yes \\ 
+Observations & 35,868 & 35,868 & 35,868 & 35,868 & 35,868 & 35,868 \\ 
+\hline 
+\hline \\[-1.8ex] 
+\multicolumn{7}{l}{Note: †p<0.1; *p<0.05; **p<0.01; ***p<0.001} \\ 
+\multicolumn{7}{l}{Source: American Community Survey 2008-2019} \\ 
+\end{tabular} 
+\end{table}
+
+\newpage
+
+\hypertarget{ols-models-of-individual-state-of-residence}{%
+\section{OLS models of individual state of residence}\label{ols-models-of-individual-state-of-residence}}
+
+\begin{table}[!htbp] \centering 
+  \caption{Individual OLS analysis of state policy score. Country-clustered standard errors are shown in parentheses. Individual controls include sex, age, education, number of children, log(income), indicator for no income, and year of immigration, which are all interacted with the indicator for same-sex couple.} 
+  \label{tab:ols} 
+\begin{tabular}{@{\extracolsep{5pt}}lcccc} 
+\\[-1.8ex]\hline 
+\hline \\[-1.8ex] 
+ & \multicolumn{4}{c}{\textit{Dependent variable:}} \\ 
+\cline{2-5} 
+\\[-1.8ex] & \multicolumn{4}{c}{Binned state LGB policy score} \\ 
+\\[-1.8ex] & (1) & (2) & (3) & (4)\\ 
+\hline \\[-1.8ex] 
+ Same-sex & 0.530$^{***}$ & 0.380$^{***}$ & 25.000$^{**}$ & 13.000$^{***}$ \\ 
+  & (0.029) & (0.041) & (9.600) & (3.000) \\ 
+  & & & & \\ 
+ Country LGB policy score &  & $-$0.036$^{***}$ & $-$0.058$^{***}$ & $-$0.003 \\ 
+  &  & (0.004) & (0.004) & (0.002) \\ 
+  & & & & \\ 
+ Same-sex × country score &  & 0.070$^{***}$ & 0.056$^{***}$ & $-$0.005 \\ 
+  &  & (0.012) & (0.013) & (0.004) \\ 
+  & & & & \\ 
+\hline \\[-1.8ex] 
+Individual controls? & no & no & yes & yes \\ 
+State controls and FEs? & no & no & no & yes \\ 
+Country controls and FEs? & no & no & no & yes \\ 
+Observations & 107,500 & 107,500 & 107,500 & 101,849 \\ 
+\hline 
+\hline \\[-1.8ex] 
+\multicolumn{5}{l}{Note: †p<0.1; *p<0.05; **p<0.01; ***p<0.001} \\ 
+\multicolumn{5}{l}{Source: American Community Survey 2008-2019} \\ 
 \end{tabular} 
 \end{table}
 
@@ -274,22 +380,19 @@ Study Year & Relationship & Mail & Internet & CAPI/CATI & Overall\\
 \\[-1.8ex] & \multicolumn{5}{c}{Percent in same-sex couples by country-year} \\ 
 \\[-1.8ex] & (1) & (2) & (3) & (4) & (5)\\ 
 \hline \\[-1.8ex] 
- Country LGBT policy score & 0.068$^{***}$ & 0.040$^{***}$ & 0.039$^{**}$ & 0.018 & $-$0.014 \\ 
-  & (0.006) & (0.008) & (0.013) & (0.014) & (0.016) \\ 
+ Country LGBT policy score & 0.033$^{***}$ & 0.029$^{***}$ & 0.016$^{**}$ & $-$0.008$^{†}$ & $-$0.018$^{**}$ \\ 
+  & (0.005) & (0.005) & (0.005) & (0.005) & (0.006) \\ 
   & & & & & \\ 
- Polity5 democracy score &  & 0.020$^{***}$ & 0.004 & 0.001 & 0.004 \\ 
-  &  & (0.004) & (0.008) & (0.008) & (0.008) \\ 
+ Post-2013 &  &  &  & 0.300$^{***}$ & 0.250$^{***}$ \\ 
+  &  &  &  & (0.019) & (0.026) \\ 
   & & & & & \\ 
- Post-2013 &  &  &  & 0.230$^{***}$ & 0.081 \\ 
-  &  &  &  & (0.056) & (0.067) \\ 
-  & & & & & \\ 
- Country score × Post-2013 &  &  &  &  & 0.057$^{***}$ \\ 
-  &  &  &  &  & (0.014) \\ 
+ Country score × Post-2013 &  &  &  &  & 0.027$^{**}$ \\ 
+  &  &  &  &  & (0.010) \\ 
   & & & & & \\ 
 \hline \\[-1.8ex] 
 Country controls? & no & yes & yes & yes & yes \\ 
 Country FEs? & no & no & yes & yes & yes \\ 
-Observations & 3,222 & 3,222 & 3,222 & 3,222 & 3,222 \\ 
+Observations & 30,137 & 30,137 & 30,137 & 30,137 & 30,137 \\ 
 \hline 
 \hline \\[-1.8ex] 
 \multicolumn{6}{l}{Note: †p<0.1; *p<0.05; **p<0.01; ***p<0.001} \\ 
