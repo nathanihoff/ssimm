@@ -414,11 +414,11 @@ ols_orig <- lm(state_policy ~ same_sex*origin_score,
                 data = acs_couple_policy_small)
 ols_interact <- lm(state_policy ~ 
                        same_sex*(origin_score + gender + age + educ + 
-                   nchild + log_income + no_income + yrimmig),
+                   nchild + ihs_income + no_income + yrimmig),
                 data = rename(acs_couple_policy_small, gender = sex))
 
 ols_interact_controls <- lm(state_policy ~ same_sex*(origin_score + gender + age + educ +
-                     nchild + log_income + no_income + yrimmig) +
+                     nchild + ihs_income + no_income + yrimmig) +
                      distw + contig + comlang_off + comlang_ethno +
                      wage_dif + unemp_dif + vdem + stock_prop +  #bpld + state +
                      state_unemploy + state_income ,
@@ -439,7 +439,7 @@ stargazer(mod_list,
                            c('State controls and FEs?', 'no', 'no', 'no', 'yes'),
                            c('Country controls and FEs?', 'no', 'no', 'no', 'yes')),
           se = se_list,
-          omit = c('gender', 'age', 'educ', 'nchild', 'log_income', 'no_income', 
+          omit = c('gender', 'age', 'educ', 'nchild', 'ihs_income', 'no_income', 
                    'yrimmig', 'Constant', 
                    'distw', 'contig', 'comlang_off', 'comlang_ethno',
                     'wage_dif', 'unemp_dif', 'vdem', 'stock_prop',

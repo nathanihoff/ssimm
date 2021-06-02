@@ -592,11 +592,13 @@ acs_couple_policy <- acs_coupled_imms %>%
   # adding (log) income variables
   mutate(pos_income = ifelse(inctot >= 0, inctot, 0),
          no_income = (inctot <= 0),
-         log_income = log(pos_income+1)) %>%
+         ihs_income = log(pos_income + sqrt(pos_income^2 + 1))) %>%
   drop_na(state_policy_binned, same_sex, origin_score, sex, age, educ, qrelate, qsex,
-          nchild, log_income, no_income, yrimmig, year) %>%
+          nchild, ihs_income, no_income, yrimmig, 
+          distw, contig, comlang_off, comlang_ethno,
+          wage_dif, unemp_dif, vdem, stock_prop,
+          state_unemploy, state_income)
   filter(allocated == F)
-
 
 write_rds(acs_couple_policy, here('data', 'acs_couple_policy.rds'))
 write_csv(acs_prop_yrimmig_policy, here('data', 'acs_prop_yrimmig_policy.csv'))
