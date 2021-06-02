@@ -727,7 +727,7 @@ read_csv(here('draft', 'sim_country.csv')) %>%
   geom_ribbon(aes(ymin=fit.low, ymax=fit.high, 
                   fill = post_2013, col = NULL), alpha = .2) +
   xlab('LGB policy score for country of origin') +
-  ylab('Predicted U.S. state LGBT policy score') +
+  ylab('Percentage of immigrants in same-sex couples') +
   theme(legend.justification=c(1,0),
         legend.position=c(.45,.6))
 ```
