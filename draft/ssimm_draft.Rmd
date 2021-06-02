@@ -120,7 +120,8 @@ knitr::opts_chunk$set(error=TRUE)
 
 acs_wide <- read.csv(here('data', 'acs_wide.csv'))
 acs_couple_policy <- readRDS(here('data', 'acs_couple_policy.rds')) 
-acs_prop_yrimmig_policy <- read.csv(here('data', 'acs_prop_yrimmig_policy.csv'))
+acs_prop_yrimmig_policy <- read.csv(here('data', 'acs_prop_yrimmig_policy.csv')) %>%
+  mutate(post_2013 = (yrimmig > 2013))
 acs_dyad_policy <- read.csv(here('data', 'acs_dyad_policy.csv'))
 
 # acs_oneimm <- read.csv(here('data', 'acs_oneimm.csv'))
@@ -552,13 +553,13 @@ ag_country_orig_fe <- lm(prop_same_sex ~ distw + contig + comlang_off + comlang_
 ag_country_orig_fe_2013 <- lm(prop_same_sex ~ distw + contig + comlang_off + comlang_ethno + colony +
                    wage_dif + unemp_dif + vdem + origin_score + stock_prop + bpld +
                      post_2013,
-         data = mutate(acs_prop_yrimmig_policy, post_2013 = (yrimmig > 2013)))
+         data = acs_prop_yrimmig_policy)
 
 
 ag_2013_int_fe <- lm(prop_same_sex ~ distw + contig + comlang_off + comlang_ethno + colony +
                    wage_dif + unemp_dif + vdem  + stock_prop + bpld +
                      post_2013*origin_score,
-         data = mutate(acs_prop_yrimmig_policy, post_2013 = (yrimmig > 2013)))
+         data = acs_prop_yrimmig_policy)
 
 
 
@@ -631,6 +632,108 @@ Models 4 and 5 assess how the 2013 Supreme Court decision striking down DOMA fig
 
 <!-- Finally, Model 6 restricts the sample to only married same-sex couples. Since the DOMA decision permitted visa sponsorship for same-sex spouses, we would expect to see the greatest discontinuity pre- and post-2013 for this sub-population. Indeed, for immigrants married to same-sex spouses the post-2013 variable, and its interaction with sending-country policy score, are both significant and positive. Although before 2013 progressive countries did not send more same-sex married couples, after 2013 these numbers grew sharply, and more progressive countries received an extra boost.  -->
 
+```{r country-sim, eval = F}
+# using fixed effects in predictions is hard
+ag_2013_int <- lm(prop_same_sex ~ distw + contig + comlang_off + comlang_ethno + colony +
+                   wage_dif + unemp_dif + vdem  + stock_prop +
+                     post_2013*origin_score,
+         data = acs_prop_yrimmig_policy)
+
+## Simulation
+set.seed(185)
+sims <- 250
+sim <- list()
+sim_mod <- list(sims)
+pseudo_mod <- ag_2013_int
+sigma <- vcovCL(ag_2013_int, cluster = ~bpld)
+coefs <- ag_2013_int$coefficients
+k <- length(coefs)
+theta_mat <- rmvnorm(sims, mean = coefs, sigma = sigma)
+
+var <- 'origin_score'
+
+for (i in 1:sims) {
+  if(i %% 10 == 0) print(i)
+  # print(i)
+  theta <- as.numeric(theta_mat[i,])
+  pseudo_mod$coefficients <- theta[1:k]
+  pseudo_mod$zeta <- theta[(k+1):length(theta)]
+
+  for(cat_loop in unique(acs_prop_yrimmig_policy$post_2013)){
+      var_vals <- seq(min(acs_prop_yrimmig_policy[,var]), 
+                      max(acs_prop_yrimmig_policy[,var]), 
+                      length.out = 50)
+      for(val in var_vals){
+          sim_dat <- acs_prop_yrimmig_policy %>%
+            select(all.vars(formula(ag_2013_int)))
+          sim_dat[, 'post_2013'] <- cat_loop
+          sim_dat[, var] <- val
+
+          pred_dat <- predict(pseudo_mod, newdata = sim_dat)
+          # pred_dat <- data.frame(t(apply(pred_dat, 2, mean))) %>%
+          #   pivot_longer(cols = everything(), names_to = 'state_policy', values_to = 'fit')
+          
+         sim[[paste0(var,cat_loop, val, i)]] <-
+          data.frame(fit = mean(pred_dat, na.rm = T),
+                            post_2013 = cat_loop,
+                            # variable = var,
+                            origin_score = val)
+      }
+  }
+}
+
+sim_df <- bind_rows(sim) %>%
+  group_by(post_2013, origin_score) %>%
+  summarize(fit.low = quantile(fit, .025), fit.high = quantile(fit, .975), fit = mean(fit)) %>%
+    mutate(post_2013 = case_when(post_2013 == T ~ 'Post-2013',
+                                post_2013 == F ~ '2013 and before'))
+
+write_csv(sim_df, here('draft', 'sim_country.csv'))
+
+
+# sim <- list()
+# 
+# for(cat_loop in unique(acs_prop_yrimmig_policy$post_2013)){
+#     var_vals <- seq(min(acs_prop_yrimmig_policy[,var]), 
+#                     max(acs_prop_yrimmig_policy[,var]), 
+#                     length.out = 50)
+#     for(val in var_vals){
+#         sim_dat <- acs_prop_yrimmig_policy
+#         sim_dat[, 'post_2013'] <- cat_loop
+#         sim_dat[, var] <- val
+# 
+#         pred_dat <- predict(ag_2013_int_fe, newdata = sim_dat, interval = 'confidence') %>%
+#           as.data.frame()
+#         
+#        sim[[paste0(var,cat_loop, val, i)]] <- pred_dat %>%
+#          summarize(fit = mean(fit, na.rm = T),
+#                    fit.low = mean(lwr, na.rm = T),
+#                    fit.high = mean(upr, na.rm = T),
+#                           post_2013 = cat_loop,
+#                           # variable = var,
+#                           origin_score = val)
+#     }
+# }
+# 
+# sim_df <- bind_rows(sim) %>%
+#     mutate(post_2013 = case_when(post_2013 == T ~ 'Post-2013',
+#                                 post_2013 == F ~ '2013 and before'))
+```
+
+```{r country-sim2, eval = F}
+read_csv(here('draft', 'sim_country.csv')) %>%
+  ggplot(aes(x=origin_score, y=fit, col=post_2013)) +
+  geom_line() + 
+  geom_ribbon(aes(ymin=fit.low, ymax=fit.high, 
+                  fill = post_2013, col = NULL), alpha = .2) +
+  xlab('LGB policy score for country of origin') +
+  ylab('Percentage of immigrants in same-sex couples') +
+  theme(legend.justification=c(1,0),
+        legend.position=c(.45,.6))
+```
+
+
+
 
 ```{r state-props}
 state_prop <- lm(same_prop ~ state_policy, data = acs_dyad_policy)
@@ -684,7 +787,7 @@ mod_list <- list(state_prop, state_prop2, state_prop_fe, state_prop_fe2,
                  state_prop_2013, state_prop_2013_int2, state_prop_2013_int)
 
 for(mod_num in 1:length(mod_list)){
-  se_list[[mod_num]] <- coef(summary(mod_list[[mod_num]], cluster = c("state", "bpld")))[, 2]
+  se_list[[mod_num]] <- coef(summary(mod_list[[mod_num]], cluster = c("state", "Country")))[, 2]
 }
 
 
@@ -815,12 +918,14 @@ stargazer(mod_list,
 
 ```{r sim1, eval = F}
 
+
+
 ## Simulation
 set.seed(185)
 sims <- 250
 sim <- list()
 sim_mod <- list(sims)
-pseudeo_mod <- ord_interact_controls
+pseudo_mod <- ord_interact_controls
 k <- length(coef(ord_interact_controls))
 sigma_twoway <- vcovCL(ord_interact_controls, cluster = ~ state + bpld)
 theta_mat <- rmvnorm(sims, mean=c(coef(ord_interact_controls), ord_interact_controls$zeta),
@@ -832,8 +937,8 @@ for (i in 1:sims) {
   # if(i %% 10 == 0) print(i)
   print(i)
   theta <- as.numeric(theta_mat[i,])
-  pseudeo_mod$coefficients <- theta[1:k]
-  pseudeo_mod$zeta <- theta[(k+1):length(theta)]
+  pseudo_mod$coefficients <- theta[1:k]
+  pseudo_mod$zeta <- theta[(k+1):length(theta)]
 
   for(same_loop in unique(acs_couple_policy_small$same_sex)){
       var_vals <- seq(min(acs_couple_policy_small[,var]), 
@@ -846,7 +951,7 @@ for (i in 1:sims) {
           sim_dat[, 'same_sex'] <- same_loop
           sim_dat[, var] <- val
 
-          pred_dat <- predict(pseudeo_mod, newdata = sim_dat, type = 'probs')
+          pred_dat <- predict(pseudo_mod, newdata = sim_dat, type = 'probs')
           # pred_dat <- data.frame(t(apply(pred_dat, 2, mean))) %>%
           #   pivot_longer(cols = everything(), names_to = 'state_policy', values_to = 'fit')
           
@@ -893,16 +998,16 @@ write_csv(sim_df, here('draft', 'sim_df.csv'))
 # set.seed(1858)
 # sims <- 500
 # sim_mod <- list(sims)
-# pseudeo_mod <- ord_interact
+# pseudo_mod <- ord_interact
 # k <- length(coef(ord_interact))
 # theta_mat <- rmvnorm(sims, mean=c(coef(ord_interact), ord_interact$zeta),
 #                               sigma=vcovCL(ord_interact, cluster = ~ bpld))
 # 
 # for (i in 1:sims) {
 #   theta <- as.numeric(theta_mat[i,])
-#   pseudeo_mod$coefficients <- theta[1:k]
-#   pseudeo_mod$zeta <- theta[(k+1):length(theta)]
-#   sim_mod[[i]] <- as.data.frame(cbind(i,-3:10, predict(pseudeo_mod, 
+#   pseudo_mod$coefficients <- theta[1:k]
+#   pseudo_mod$zeta <- theta[(k+1):length(theta)]
+#   sim_mod[[i]] <- as.data.frame(cbind(i,-3:10, predict(pseudo_mod, 
 #                                    newdata=plot.dat.same, type="probs")))
 #   names(sim_mod[[i]]) <- c("iter","origin_score", names(sim_mod[[i]])[3:5]) 
 # }
@@ -919,16 +1024,16 @@ write_csv(sim_df, here('draft', 'sim_df.csv'))
 # 
 # sims <- 250
 # sim_mod <- list(sims)
-# pseudeo_mod <- ord_interact
+# pseudo_mod <- ord_interact
 # k <- length(coef(ord_interact))
 # theta_mat <- rmvnorm(sims, mean=c(coef(ord_interact), ord_interact$zeta),
 #                               sigma=vcovCL(ord_interact, cluster = ~ bpld))
 # 
 # for (i in 1:sims) {
 #   theta <- as.numeric(theta_mat[i,])
-#   pseudeo_mod$coefficients <- theta[1:k]
-#   pseudeo_mod$zeta <- theta[(k+1):length(theta)]
-#   sim_mod[[i]] <- as.data.frame(cbind(i,-3:10, predict(pseudeo_mod, 
+#   pseudo_mod$coefficients <- theta[1:k]
+#   pseudo_mod$zeta <- theta[(k+1):length(theta)]
+#   sim_mod[[i]] <- as.data.frame(cbind(i,-3:10, predict(pseudo_mod, 
 #                                    newdata=plot.dat.dif, type="probs")))
 #   names(sim_mod[[i]]) <- c("iter","origin_score", names(sim_mod[[i]])[3:5]) 
 # }

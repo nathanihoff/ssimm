@@ -1,24 +1,24 @@
-This is XeTeX, Version 3.141592653-2.6-0.999993 (TeX Live 2021) (preloaded format=xelatex 2021.5.27)  31 MAY 2021 17:37
+This is XeTeX, Version 3.141592653-2.6-0.999993 (TeX Live 2021) (preloaded format=xelatex 2021.6.2)  2 JUN 2021 11:35
 entering extended mode
  restricted \write18 enabled.
  %&-line parsing enabled.
 **ssimm_supp_small.tex
 (./ssimm_supp_small.tex
-LaTeX2e <2020-10-01> patch level 4
-L3 programming layer <2021-05-25> (/Users/nathan/Library/TinyTeX/texmf-dist/tex
+LaTeX2e <2021-06-01> pre-release-0 (develop 2021-6-2 branch)
+L3 programming layer <2021-06-01> (/Users/nathan/Library/TinyTeX/texmf-dist/tex
 /latex/base/article.cls
-Document Class: article 2020/04/10 v1.4m Standard LaTeX document class
+Document Class: article 2021/02/12 v1.4n Standard LaTeX document class
 (/Users/nathan/Library/TinyTeX/texmf-dist/tex/latex/base/size11.clo
-File: size11.clo 2020/04/10 v1.4m Standard LaTeX file (size option)
+File: size11.clo 2021/02/12 v1.4n Standard LaTeX file (size option)
 )
-\c@part=\count177
-\c@section=\count178
-\c@subsection=\count179
-\c@subsubsection=\count180
-\c@paragraph=\count181
-\c@subparagraph=\count182
-\c@figure=\count183
-\c@table=\count184
+\c@part=\count178
+\c@section=\count179
+\c@subsection=\count180
+\c@subsubsection=\count181
+\c@paragraph=\count182
+\c@subparagraph=\count183
+\c@figure=\count184
+\c@table=\count185
 \abovecaptionskip=\skip47
 \belowcaptionskip=\skip48
 \bibindent=\dimen138
@@ -33,7 +33,7 @@ For additional information on amsmath, use the `?' option.
 Package: amstext 2000/06/29 v2.01 AMS text
 (/Users/nathan/Library/TinyTeX/texmf-dist/tex/latex/amsmath/amsgen.sty
 File: amsgen.sty 1999/11/30 v2.0 generic functions
-\@emptytoks=\toks15
+\@emptytoks=\toks16
 \ex@=\dimen139
 )) (/Users/nathan/Library/TinyTeX/texmf-dist/tex/latex/amsmath/amsbsy.sty
 Package: amsbsy 1999/11/29 v1.2d Bold Symbols
@@ -41,41 +41,41 @@ Package: amsbsy 1999/11/29 v1.2d Bold Symbols
 ) (/Users/nathan/Library/TinyTeX/texmf-dist/tex/latex/amsmath/amsopn.sty
 Package: amsopn 2016/03/08 v2.02 operator names
 )
-\inf@bad=\count185
+\inf@bad=\count186
 LaTeX Info: Redefining \frac on input line 234.
-\uproot@=\count186
-\leftroot@=\count187
+\uproot@=\count187
+\leftroot@=\count188
 LaTeX Info: Redefining \overline on input line 399.
-\classnum@=\count188
-\DOTSCASE@=\count189
+\classnum@=\count189
+\DOTSCASE@=\count190
 LaTeX Info: Redefining \ldots on input line 496.
 LaTeX Info: Redefining \dots on input line 499.
 LaTeX Info: Redefining \cdots on input line 620.
-\Mathstrutbox@=\box47
-\strutbox@=\box48
+\Mathstrutbox@=\box50
+\strutbox@=\box51
 \big@size=\dimen141
 LaTeX Font Info:    Redeclaring font encoding OML on input line 743.
 LaTeX Font Info:    Redeclaring font encoding OMS on input line 744.
-\macc@depth=\count190
-\c@MaxMatrixCols=\count191
+\macc@depth=\count191
+\c@MaxMatrixCols=\count192
 \dotsspace@=\muskip16
-\c@parentequation=\count192
-\dspbrk@lvl=\count193
-\tag@help=\toks16
-\row@=\count194
-\column@=\count195
-\maxfields@=\count196
-\andhelp@=\toks17
+\c@parentequation=\count193
+\dspbrk@lvl=\count194
+\tag@help=\toks17
+\row@=\count195
+\column@=\count196
+\maxfields@=\count197
+\andhelp@=\toks18
 \eqnshift@=\dimen142
 \alignsep@=\dimen143
 \tagshift@=\dimen144
 \tagwidth@=\dimen145
 \totwidth@=\dimen146
 \lineht@=\dimen147
-\@envbody=\toks18
+\@envbody=\toks19
 \multlinegap=\skip50
 \multlinetaggap=\skip51
-\mathdisplay@stack=\toks19
+\mathdisplay@stack=\toks20
 LaTeX Info: Redefining \[ on input line 2923.
 LaTeX Info: Redefining \] on input line 2924.
 ) (/Users/nathan/Library/TinyTeX/texmf-dist/tex/generic/iftex/ifxetex.sty
@@ -87,20 +87,20 @@ Package: ifluatex 2019/10/25 v1.5 ifluatex legacy package. Use iftex instead.
 )
 (/Users/nathan/Library/TinyTeX/texmf-dist/tex/latex/unicode-math/unicode-math.s
 ty (/Users/nathan/Library/TinyTeX/texmf-dist/tex/latex/l3kernel/expl3.sty
-Package: expl3 2021-05-25 L3 programming layer (loader) 
+Package: expl3 2021-06-01 L3 programming layer (loader) 
 
 (/Users/nathan/Library/TinyTeX/texmf-dist/tex/latex/l3backend/l3backend-xetex.d
 ef
 File: l3backend-xetex.def 2021-05-07 L3 backend support: XeTeX
 (|extractbb --version)
-\c__kernel_sys_dvipdfmx_version_int=\count197
-\l__color_backend_stack_int=\count198
-\g__color_backend_stack_int=\count199
-\g__graphics_track_int=\count266
-\l__pdf_internal_box=\box49
-\g__pdf_backend_object_int=\count267
-\g__pdf_backend_annotation_int=\count268
-\g__pdf_backend_link_int=\count269
+\c__kernel_sys_dvipdfmx_version_int=\count198
+\l__color_backend_stack_int=\count199
+\g__color_backend_stack_int=\count266
+\g__graphics_track_int=\count267
+\l__pdf_internal_box=\box52
+\g__pdf_backend_object_int=\count268
+\g__pdf_backend_annotation_int=\count269
+\g__pdf_backend_link_int=\count270
 ))
 Package: unicode-math 2020/01/31 v0.8q Unicode maths in XeLaTeX and LuaLaTeX
 
@@ -111,45 +111,43 @@ TeX
 
 (/Users/nathan/Library/TinyTeX/texmf-dist/tex/latex/l3packages/xparse/xparse.st
 y
-(/Users/nathan/Library/TinyTeX/texmf-dist/tex/latex/l3packages/xparse/xparse-20
-20-10-01.sty
-(/Users/nathan/Library/TinyTeX/texmf-dist/tex/latex/l3packages/xparse/xparse-ge
-neric.tex)))
+Package: xparse 2021-06-01 L3 Experimental document command parser
+)
 (/Users/nathan/Library/TinyTeX/texmf-dist/tex/latex/l3packages/l3keys2e/l3keys2
 e.sty
-Package: l3keys2e 2021-05-07 LaTeX2e option processing using LaTeX3 keys
+Package: l3keys2e 2021-06-01 LaTeX2e option processing using LaTeX3 keys
 ) (/Users/nathan/Library/TinyTeX/texmf-dist/tex/latex/fontspec/fontspec.sty
 Package: fontspec 2020/02/21 v2.7i Font selection for XeLaTeX and LuaLaTeX
 
 (/Users/nathan/Library/TinyTeX/texmf-dist/tex/latex/fontspec/fontspec-xetex.sty
 Package: fontspec-xetex 2020/02/21 v2.7i Font selection for XeLaTeX and LuaLaTe
 X
-\l__fontspec_script_int=\count270
-\l__fontspec_language_int=\count271
-\l__fontspec_strnum_int=\count272
-\l__fontspec_tmp_int=\count273
-\l__fontspec_tmpa_int=\count274
-\l__fontspec_tmpb_int=\count275
-\l__fontspec_tmpc_int=\count276
-\l__fontspec_em_int=\count277
-\l__fontspec_emdef_int=\count278
-\l__fontspec_strong_int=\count279
-\l__fontspec_strongdef_int=\count280
+\l__fontspec_script_int=\count271
+\l__fontspec_language_int=\count272
+\l__fontspec_strnum_int=\count273
+\l__fontspec_tmp_int=\count274
+\l__fontspec_tmpa_int=\count275
+\l__fontspec_tmpb_int=\count276
+\l__fontspec_tmpc_int=\count277
+\l__fontspec_em_int=\count278
+\l__fontspec_emdef_int=\count279
+\l__fontspec_strong_int=\count280
+\l__fontspec_strongdef_int=\count281
 \l__fontspec_tmpa_dim=\dimen148
 \l__fontspec_tmpb_dim=\dimen149
 \l__fontspec_tmpc_dim=\dimen150
 (/Users/nathan/Library/TinyTeX/texmf-dist/tex/latex/base/fontenc.sty
-Package: fontenc 2020/08/10 v2.0s Standard LaTeX package
+Package: fontenc 2021/04/29 v2.0v Standard LaTeX package
 ) (/Users/nathan/Library/TinyTeX/texmf-dist/tex/latex/fontspec/fontspec.cfg))) 
 (/Users/nathan/Library/TinyTeX/texmf-dist/tex/latex/base/fix-cm.sty
-Package: fix-cm 2015/01/14 v1.1t fixes to LaTeX
+Package: fix-cm 2020/11/24 v1.1t fixes to LaTeX
 (/Users/nathan/Library/TinyTeX/texmf-dist/tex/latex/base/ts1enc.def
 File: ts1enc.def 2001/06/05 v3.0e (jk/car/fm) Standard LaTeX file
 LaTeX Font Info:    Redeclaring font encoding TS1 on input line 47.
 ))
-\g__um_fam_int=\count281
-\g__um_fonts_used_int=\count282
-\l__um_primecount_int=\count283
+\g__um_fam_int=\count282
+\g__um_fonts_used_int=\count283
+\l__um_primecount_int=\count284
 \g__um_primekern_muskip=\muskip17
 
 (/Users/nathan/Library/TinyTeX/texmf-dist/tex/latex/unicode-math/unicode-math-t
@@ -198,7 +196,7 @@ Package pdftexcmds Info: \pdf@ifprimitive is available.
 Package pdftexcmds Info: \pdfdraftmode not found.
 ) (/Users/nathan/Library/TinyTeX/texmf-dist/tex/latex/graphics/keyval.sty
 Package: keyval 2014/10/28 v1.15 key=value parser (DPC)
-\KV@toks@=\toks20
+\KV@toks@=\toks21
 ) (/Users/nathan/Library/TinyTeX/texmf-dist/tex/generic/kvsetkeys/kvsetkeys.sty
 Package: kvsetkeys 2019/12/15 v1.18 Key value parser (HO)
 )
@@ -218,8 +216,8 @@ Package: auxhook 2019-12-17 v1.6 Hooks for auxiliary files (HO)
 Package: kvoptions 2020-10-07 v3.14 Key value format for package options (HO)
 )
 \@linkdim=\dimen151
-\Hy@linkcounter=\count284
-\Hy@pagecounter=\count285
+\Hy@linkcounter=\count285
+\Hy@pagecounter=\count286
 (/Users/nathan/Library/TinyTeX/texmf-dist/tex/latex/hyperref/pd1enc.def
 File: pd1enc.def 2021-02-27 v7.00k Hyperref: PDFDocEncoding definition (HO)
 )
@@ -232,7 +230,7 @@ Package: intcalc 2019/12/15 v1.3 Expandable calculations with integers (HO)
 ) (/Users/nathan/Library/TinyTeX/texmf-dist/tex/generic/etexcmds/etexcmds.sty
 Package: etexcmds 2019/12/15 v1.7 Avoid name clashes with e-TeX commands (HO)
 )
-\Hy@SavedSpaceFactor=\count286
+\Hy@SavedSpaceFactor=\count287
 (/Users/nathan/Library/TinyTeX/texmf-dist/tex/latex/hyperref/puenc.def
 File: puenc.def 2021-02-27 v7.00k Hyperref: PDF Unicode definition (HO)
 )
@@ -244,7 +242,7 @@ Package hyperref Info: Plain pages OFF on input line 4207.
 Package hyperref Info: Backreferencing OFF on input line 4212.
 Package hyperref Info: Implicit mode ON; LaTeX internals redefined.
 Package hyperref Info: Bookmarks ON on input line 4445.
-\c@Hy@tempcnt=\count287
+\c@Hy@tempcnt=\count288
 (/Users/nathan/Library/TinyTeX/texmf-dist/tex/latex/url/url.sty
 \Urlmuskip=\muskip18
 Package: url 2013/09/16  ver 3.4  Verb mode for urls, etc.
@@ -258,7 +256,7 @@ Package: bitset 2019/12/09 v1.3 Handle bit-vector datatype (HO)
 Package: bigintcalc 2019/12/15 v1.5 Expandable calculations on big integers (HO
 )
 ))
-\Fld@menulength=\count288
+\Fld@menulength=\count289
 \Field@Width=\dimen153
 \Fld@charsize=\dimen154
 Package hyperref Info: Hyper figures OFF on input line 6075.
@@ -271,13 +269,12 @@ Package hyperref Info: PDF/A mode OFF on input line 6105.
 LaTeX Info: Redefining \ref on input line 6145.
 LaTeX Info: Redefining \pageref on input line 6149.
 (/Users/nathan/Library/TinyTeX/texmf-dist/tex/latex/base/atbegshi-ltx.sty
-Package: atbegshi-ltx 2020/08/17 v1.0a Emulation of the original atbegshi packa
-ge
-with kernel methods
+Package: atbegshi-ltx 2021/01/10 v1.0c Emulation of the original atbegshi
+package with kernel methods
 )
-\Hy@abspage=\count289
-\c@Item=\count290
-\c@Hfootnote=\count291
+\Hy@abspage=\count290
+\c@Item=\count291
+\c@Hfootnote=\count292
 )
 Package hyperref Info: Driver (autodetected): hxetex.
 (/Users/nathan/Library/TinyTeX/texmf-dist/tex/latex/hyperref/hxetex.def
@@ -286,11 +283,11 @@ File: hxetex.def 2021-02-27 v7.00k Hyperref driver for XeTeX
 Package: stringenc 2019/11/29 v1.12 Convert strings between diff. encodings (HO
 )
 )
-\pdfm@box=\box50
-\c@Hy@AnnotLevel=\count292
-\HyField@AnnotCount=\count293
-\Fld@listcount=\count294
-\c@bookmark@seq@number=\count295
+\pdfm@box=\box53
+\c@Hy@AnnotLevel=\count293
+\HyField@AnnotCount=\count294
+\Fld@listcount=\count295
+\c@bookmark@seq@number=\count296
 
 (/Users/nathan/Library/TinyTeX/texmf-dist/tex/latex/rerunfilecheck/rerunfileche
 ck.sty
@@ -315,9 +312,9 @@ Package: geometry 2020/01/02 v5.9 Page Geometry
 (/Users/nathan/Library/TinyTeX/texmf-dist/tex/generic/iftex/ifvtex.sty
 Package: ifvtex 2019/10/25 v1.7 ifvtex legacy package. Use iftex instead.
 )
-\Gm@cnth=\count296
-\Gm@cntv=\count297
-\c@Gm@tempcnt=\count298
+\Gm@cnth=\count297
+\Gm@cntv=\count298
+\c@Gm@tempcnt=\count299
 \Gm@bindingoffset=\dimen155
 \Gm@wd@mp=\dimen156
 \Gm@odd@mp=\dimen157
@@ -326,24 +323,25 @@ Package: ifvtex 2019/10/25 v1.7 ifvtex legacy package. Use iftex instead.
 \Gm@layoutheight=\dimen160
 \Gm@layouthoffset=\dimen161
 \Gm@layoutvoffset=\dimen162
-\Gm@dimlist=\toks21
+\Gm@dimlist=\toks22
 ) (/Users/nathan/Library/TinyTeX/texmf-dist/tex/latex/tools/longtable.sty
-Package: longtable 2020/01/07 v4.13 Multi-page Table package (DPC)
+Package: longtable 2021-05-07 v4.16 Multi-page Table package (DPC)
 \LTleft=\skip53
 \LTright=\skip54
 \LTpre=\skip55
 \LTpost=\skip56
-\LTchunksize=\count299
+\LTchunksize=\count300
 \LTcapwidth=\dimen163
-\LT@head=\box51
-\LT@firsthead=\box52
-\LT@foot=\box53
-\LT@lastfoot=\box54
-\LT@cols=\count300
-\LT@rows=\count301
-\c@LT@tables=\count302
-\c@LT@chunks=\count303
-\LT@p@ftn=\toks22
+\LT@head=\box54
+\LT@firsthead=\box55
+\LT@foot=\box56
+\LT@lastfoot=\box57
+\LT@gbox=\box58
+\LT@cols=\count301
+\LT@rows=\count302
+\c@LT@tables=\count303
+\c@LT@chunks=\count304
+\LT@p@ftn=\toks23
 ) (/Users/nathan/Library/TinyTeX/texmf-dist/tex/latex/booktabs/booktabs.sty
 Package: booktabs 2020/01/12 v1.61803398 Publication quality tables
 \heavyrulewidth=\dimen164
@@ -356,42 +354,42 @@ Package: booktabs 2020/01/12 v1.61803398 Publication quality tables
 \cmidrulesep=\dimen171
 \cmidrulekern=\dimen172
 \defaultaddspace=\dimen173
-\@cmidla=\count304
-\@cmidlb=\count305
+\@cmidla=\count305
+\@cmidlb=\count306
 \@aboverulesep=\dimen174
 \@belowrulesep=\dimen175
-\@thisruleclass=\count306
-\@lastruleclass=\count307
+\@thisruleclass=\count307
+\@lastruleclass=\count308
 \@thisrulewidth=\dimen176
 ) (/Users/nathan/Library/TinyTeX/texmf-dist/tex/latex/tools/calc.sty
 Package: calc 2017/05/25 v4.3 Infix arithmetic (KKT,FJ)
-\calc@Acount=\count308
-\calc@Bcount=\count309
+\calc@Acount=\count309
+\calc@Bcount=\count310
 \calc@Adimen=\dimen177
 \calc@Bdimen=\dimen178
 \calc@Askip=\skip57
 \calc@Bskip=\skip58
 LaTeX Info: Redefining \setlength on input line 80.
 LaTeX Info: Redefining \addtolength on input line 81.
-\calc@Ccount=\count310
+\calc@Ccount=\count311
 \calc@Cskip=\skip59
 ) (/Users/nathan/Library/TinyTeX/texmf-dist/tex/latex/etoolbox/etoolbox.sty
 Package: etoolbox 2020/10/05 v2.5k e-TeX tools for LaTeX (JAW)
-\etb@tempcnta=\count311
+\etb@tempcnta=\count312
 ) (/Users/nathan/Library/TinyTeX/texmf-dist/tex/latex/mdwtools/footnote.sty
 Package: footnote 1997/01/28 1.13 Save footnotes around boxes
-\fn@notes=\box55
+\fn@notes=\box59
 \fn@width=\dimen179
 ) (/Users/nathan/Library/TinyTeX/texmf-dist/tex/latex/graphics/graphicx.sty
-Package: graphicx 2020/09/09 v1.2b Enhanced LaTeX Graphics (DPC,SPQR)
+Package: graphicx 2020/12/05 v1.2c Enhanced LaTeX Graphics (DPC,SPQR)
 (/Users/nathan/Library/TinyTeX/texmf-dist/tex/latex/graphics/graphics.sty
-Package: graphics 2020/08/30 v1.4c Standard LaTeX Graphics (DPC,SPQR)
+Package: graphics 2021/03/04 v1.4d Standard LaTeX Graphics (DPC,SPQR)
 (/Users/nathan/Library/TinyTeX/texmf-dist/tex/latex/graphics/trig.sty
 Package: trig 2016/01/03 v1.10 sin cos tan (DPC)
 ) (/Users/nathan/Library/TinyTeX/texmf-dist/tex/latex/graphics-cfg/graphics.cfg
 File: graphics.cfg 2016/06/04 v1.11 sample graphics configuration
 )
-Package graphics Info: Driver file: xetex.def on input line 105.
+Package graphics Info: Driver file: xetex.def on input line 107.
 )
 \Gin@req@height=\dimen180
 \Gin@req@width=\dimen181
@@ -408,37 +406,37 @@ rs
 \f@nch@O@olf=\skip67
 \f@nch@O@orf=\skip68
 ) (/Users/nathan/Library/TinyTeX/texmf-dist/tex/latex/tools/array.sty
-Package: array 2020/10/01 v2.5c Tabular extension package (FMi)
+Package: array 2021/04/20 v2.5e Tabular extension package (FMi)
 \col@sep=\dimen182
-\ar@mcellbox=\box56
+\ar@mcellbox=\box60
 \extrarowheight=\dimen183
-\NC@list=\toks23
+\NC@list=\toks24
 \extratabsurround=\skip69
 \backup@length=\skip70
-\ar@cellbox=\box57
+\ar@cellbox=\box61
 ) (/Users/nathan/Library/TinyTeX/texmf-dist/tex/latex/multirow/multirow.sty
 Package: multirow 2021/03/15 v2.8 Span multiple rows of a table
 \multirow@colwidth=\skip71
-\multirow@cntb=\count312
+\multirow@cntb=\count313
 \multirow@dima=\skip72
 \bigstrutjot=\dimen184
 ) (/Users/nathan/Library/TinyTeX/texmf-dist/tex/latex/wrapfig/wrapfig.sty
 \wrapoverhang=\dimen185
 \WF@size=\dimen186
-\c@WF@wrappedlines=\count313
-\WF@box=\box58
-\WF@everypar=\toks24
+\c@WF@wrappedlines=\count314
+\WF@box=\box62
+\WF@everypar=\toks25
 Package: wrapfig 2003/01/31  v 3.6
 ) (/Users/nathan/Library/TinyTeX/texmf-dist/tex/latex/float/float.sty
 Package: float 2001/11/08 v1.3d Float enhancements (AL)
-\c@float@type=\count314
-\float@exts=\toks25
-\float@box=\box59
-\@float@everytoks=\toks26
-\@floatcapt=\box60
+\c@float@type=\count315
+\float@exts=\toks26
+\float@box=\box63
+\@float@everytoks=\toks27
+\@floatcapt=\box64
 ) (/Users/nathan/Library/TinyTeX/texmf-dist/tex/latex/colortbl/colortbl.sty
 Package: colortbl 2020/01/04 v1.0e Color table columns (DPC)
-\everycr=\toks27
+\everycr=\toks28
 \minrowclearance=\skip73
 ) (/Users/nathan/Library/TinyTeX/texmf-dist/tex/latex/pdflscape/pdflscape.sty
 Package: pdflscape 2019/12/05 v0.12 Display of landscape pages in PDF (HO)
@@ -451,17 +449,17 @@ Package pdflscape Info: Auto-detected driver: dvipdfm (xetex) on input line 98.
 Package: tabu 2019/01/11 v2.9 - flexible LaTeX tabulars (FC+tabu-fixed)
 (/Users/nathan/Library/TinyTeX/texmf-dist/tex/latex/varwidth/varwidth.sty
 Package: varwidth 2009/03/30 ver 0.92;  Variable-width minipages
-\@vwid@box=\box61
-\sift@deathcycles=\count315
+\@vwid@box=\box65
+\sift@deathcycles=\count316
 \@vwid@loff=\dimen187
 \@vwid@roff=\dimen188
 )
-\c@taburow=\count316
-\tabu@nbcols=\count317
-\tabu@cnt=\count318
-\tabu@Xcol=\count319
-\tabu@alloc=\count320
-\tabu@nested=\count321
+\c@taburow=\count317
+\tabu@nbcols=\count318
+\tabu@cnt=\count319
+\tabu@Xcol=\count320
+\tabu@alloc=\count321
+\tabu@nested=\count322
 \tabu@target=\dimen189
 \tabu@spreadtarget=\dimen190
 \tabu@naturalX=\dimen191
@@ -471,18 +469,18 @@ Package: varwidth 2009/03/30 ver 0.92;  Variable-width minipages
 \abovetabulinesep=\dimen195
 \belowtabulinesep=\dimen196
 \tabustrutrule=\dimen197
-\tabu@thebody=\toks28
-\tabu@footnotes=\toks29
-\tabu@box=\box62
-\tabu@arstrutbox=\box63
-\tabu@hleads=\box64
-\tabu@vleads=\box65
+\tabu@thebody=\toks29
+\tabu@footnotes=\toks30
+\tabu@box=\box66
+\tabu@arstrutbox=\box67
+\tabu@hleads=\box68
+\tabu@vleads=\box69
 \tabu@cellskip=\skip74
 )
 (/Users/nathan/Library/TinyTeX/texmf-dist/tex/latex/threeparttable/threeparttab
 le.sty
 Package: threeparttable 2003/06/13  v 3.0
-\@tempboxb=\box66
+\@tempboxb=\box70
 )
 (/Users/nathan/Library/TinyTeX/texmf-dist/tex/latex/threeparttablex/threepartta
 blex.sty
@@ -494,21 +492,21 @@ Package: trimspaces 2009/09/17 v1.1 Trim spaces around a token list
 ))
 \TPTL@width=\skip75
 ) (/Users/nathan/Library/TinyTeX/texmf-dist/tex/generic/ulem/ulem.sty
-\UL@box=\box67
-\UL@hyphenbox=\box68
+\UL@box=\box71
+\UL@hyphenbox=\box72
 \UL@skip=\skip76
-\UL@hook=\toks30
+\UL@hook=\toks31
 \UL@height=\dimen198
-\UL@pe=\count322
+\UL@pe=\count323
 \UL@pixel=\dimen199
-\ULC@box=\box69
+\ULC@box=\box73
 Package: ulem 2019/11/18
 \ULdepth=\dimen256
 ) (/Users/nathan/Library/TinyTeX/texmf-dist/tex/latex/makecell/makecell.sty
 Package: makecell 2009/08/03 V0.1e Managing of Tab Column Heads and Cells
 \rotheadsize=\dimen257
-\c@nlinenum=\count323
-\TeXr@lab=\toks31
+\c@nlinenum=\count324
+\TeXr@lab=\toks32
 )
 \cslhangindent=\skip77
 \csllabelwidth=\skip78
@@ -816,7 +814,7 @@ Package: refcount 2019/12/15 v3.6 Data extraction from label references (HO)
 ring.sty
 Package: gettitlestring 2019/12/15 v1.6 Cleanup title references (HO)
 )
-\c@section@level=\count324
+\c@section@level=\count325
 )
 LaTeX Info: Redefining \ref on input line 122.
 LaTeX Info: Redefining \pageref on input line 122.
@@ -891,64 +889,92 @@ File: ot1zplm.fd 2002/09/08 Fontinst v1.914 font definitions for OT1/zplm.
 \openout4 = `ssimm_supp_small.toc'.
 
 LaTeX Font Info:    Font shape `TU/latinmodern-math.otf(1)/m/n' will be
-(Font)              scaled to size 7.665pt on input line 137.
+(Font)              scaled to size 8.0pt on input line 138.
 LaTeX Font Info:    Font shape `TU/latinmodern-math.otf(1)/m/n' will be
-(Font)              scaled to size 5.475pt on input line 137.
+(Font)              scaled to size 6.0pt on input line 138.
+LaTeX Font Info:    Font shape `TU/latinmodern-math.otf(1)/m/n' will be
+(Font)              scaled to size 5.0pt on input line 138.
 LaTeX Font Info:    Font shape `TU/latinmodern-math.otf(2)/m/n' will be
-(Font)              scaled to size 10.95099pt on input line 137.
+(Font)              scaled to size 8.00073pt on input line 138.
 LaTeX Font Info:    Font shape `TU/latinmodern-math.otf(2)/m/n' will be
-(Font)              scaled to size 7.66568pt on input line 137.
+(Font)              scaled to size 6.00055pt on input line 138.
 LaTeX Font Info:    Font shape `TU/latinmodern-math.otf(2)/m/n' will be
-(Font)              scaled to size 5.4755pt on input line 137.
+(Font)              scaled to size 5.00046pt on input line 138.
 LaTeX Font Info:    Font shape `TU/latinmodern-math.otf(3)/m/n' will be
-(Font)              scaled to size 10.94882pt on input line 137.
+(Font)              scaled to size 7.99915pt on input line 138.
 LaTeX Font Info:    Font shape `TU/latinmodern-math.otf(3)/m/n' will be
-(Font)              scaled to size 7.66417pt on input line 137.
+(Font)              scaled to size 5.99936pt on input line 138.
 LaTeX Font Info:    Font shape `TU/latinmodern-math.otf(3)/m/n' will be
-(Font)              scaled to size 5.47441pt on input line 137.
+(Font)              scaled to size 4.99947pt on input line 138.
+LaTeX Font Info:    Font shape `TU/latinmodern-math.otf(1)/m/n' will be
+(Font)              scaled to size 7.665pt on input line 194.
+LaTeX Font Info:    Font shape `TU/latinmodern-math.otf(1)/m/n' will be
+(Font)              scaled to size 5.475pt on input line 194.
+LaTeX Font Info:    Font shape `TU/latinmodern-math.otf(2)/m/n' will be
+(Font)              scaled to size 10.95099pt on input line 194.
+LaTeX Font Info:    Font shape `TU/latinmodern-math.otf(2)/m/n' will be
+(Font)              scaled to size 7.66568pt on input line 194.
+LaTeX Font Info:    Font shape `TU/latinmodern-math.otf(2)/m/n' will be
+(Font)              scaled to size 5.4755pt on input line 194.
+LaTeX Font Info:    Font shape `TU/latinmodern-math.otf(3)/m/n' will be
+(Font)              scaled to size 10.94882pt on input line 194.
+LaTeX Font Info:    Font shape `TU/latinmodern-math.otf(3)/m/n' will be
+(Font)              scaled to size 7.66417pt on input line 194.
+LaTeX Font Info:    Font shape `TU/latinmodern-math.otf(3)/m/n' will be
+(Font)              scaled to size 5.47441pt on input line 194.
+
+Overfull \hbox (6.89355pt too wide) in paragraph at lines 194--234
+ [][] 
+ []
+
+[1
+
+]
 File: ssimm_supp_small_files/figure-latex/desc-fig-1.pdf Graphic file (type pdf
 )
 <use ssimm_supp_small_files/figure-latex/desc-fig-1.pdf>
-[1
-
-] [2] [3] [4] [5] [6]
+[2] [3] [4] [5] [6] [7] [8]
 File: ssimm_supp_small_files/figure-latex/ols-ind-sim2-1.pdf Graphic file (type
  pdf)
 <use ssimm_supp_small_files/figure-latex/ols-ind-sim2-1.pdf>
 
-Overfull \hbox (11.99425pt too wide) in paragraph at lines 330--331
+Overfull \hbox (11.99425pt too wide) in paragraph at lines 436--437
 [][] 
  []
 
-[7] [8]
-LaTeX Font Info:    Font shape `TU/latinmodern-math.otf(1)/m/n' will be
-(Font)              scaled to size 5.0pt on input line 342.
-LaTeX Font Info:    Font shape `TU/latinmodern-math.otf(2)/m/n' will be
-(Font)              scaled to size 5.00046pt on input line 342.
-LaTeX Font Info:    Font shape `TU/latinmodern-math.otf(3)/m/n' will be
-(Font)              scaled to size 4.99947pt on input line 342.
-
-Overfull \hbox (10.68895pt too wide) in paragraph at lines 342--355
+[9] [10]
+Overfull \hbox (10.68895pt too wide) in paragraph at lines 448--461
  [][] 
  []
 
-[9]
+[11]
 File: ssimm_supp_small_files/figure-latex/sens-1.pdf Graphic file (type pdf)
 <use ssimm_supp_small_files/figure-latex/sens-1.pdf>
-[10] [11] [12] [13] (./ssimm_supp_small.aux)
+[12] [13] [14]
+Overfull \hbox (107.71902pt too wide) in paragraph at lines 613--666
+ [][] 
+ []
+
+
+LaTeX Warning: Float too large for page by 65.46881pt on input line 666.
+
+
+LaTeX Warning: Float too large for page by 446.26859pt on input line 750.
+
+[15] [16] [17] [18] (./ssimm_supp_small.aux)
 
 LaTeX Warning: There were multiply-defined labels.
 
 Package rerunfilecheck Info: File `ssimm_supp_small.out' has not changed.
-(rerunfilecheck)             Checksum: 34727EA87EDD9261E214BB6ABCA2E91D;1539.
+(rerunfilecheck)             Checksum: A8533DDC2E21A6931F4A2BDC006D6821;1854.
  ) 
 Here is how much of TeX's memory you used:
- 17808 strings out of 478682
- 314168 string characters out of 5861934
- 827153 words of memory out of 5000000
- 37620 multiletter control sequences out of 15000+600000
- 412031 words of font info for 76 fonts, out of 8000000 for 9000
+ 17909 strings out of 478489
+ 316262 string characters out of 5858830
+ 872492 words of memory out of 5000000
+ 37913 multiletter control sequences out of 15000+600000
+ 414303 words of font info for 89 fonts, out of 8000000 for 9000
  14 hyphenation exceptions out of 8191
- 87i,11n,120p,2232b,339s stack positions out of 5000i,500n,10000p,200000b,80000s
+ 87i,13n,120p,2232b,368s stack positions out of 5000i,500n,10000p,200000b,80000s
 
-Output written on ssimm_supp_small.pdf (13 pages).
+Output written on ssimm_supp_small.pdf (18 pages).
