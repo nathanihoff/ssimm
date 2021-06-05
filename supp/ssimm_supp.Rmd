@@ -249,65 +249,161 @@ bind_rows(hwsei, nchild, years, distance, unemp, state_income) %>%
 
 \newpage
 
-# Alternate specifications of country proportion models
-```{r country-props-alt}
+# Robustness Checks
 
-# Spouse
-ag_2013_spouse1 <- lm(prop_spouse_same_sex ~ distw + contig + comlang_off + 
-                        comlang_ethno + colony +
+## Adjusting proportions based on empirical mismatch rates
+
+```{r respmode}
+tabyl(acs_couple_policy, respmode, year, same_sex) %>%
+  adorn_percentages('col') %>%
+  bind_rows() %>%
+  mutate(same_sex = c(F, F, F, T, T, T)) %>%
+  select(respmode, same_sex, everything()) %>%
+  kable(booktabs = T,
+        caption = 'Response mode proportions for different- and same-sex couples, by year. Proportions are within couple type and year.') %>%
+  kable_styling(font_size = 9)
+```
+
+```{r mismatch}
+
+tibble(`Study Year` = c(2010, 2010, 2016, 2016),
+       Relationship = c('Married', 'Unmarried Partner', 'Married', 'Unmarried Partner'),
+       `Mail` = c('59%', '7%', '47.4%', '5.6%'), 
+       `Internet` = c('NA', 'NA', '22.5%', '2.4%'), 
+       `CAPI/CATI` = c('46%', '13%', 'Unknown', 'Unknown'),
+       Overall = c('57.3%', '7%', '35%', '3.4%')) %>%
+  kable(booktabs = T, 
+        caption = 'Mismatch rates from Kreider \\& Lofquist (2015) and Kreider et al. (2017)') %>%
+      footnote(general = "American Community Survey 2008-2019. Authors\' calculations.",
+           general_title = 'Source:',
+           footnote_as_chunk = T) 
+```
+
+
+Published papers using the ACS to study same-sex couples overwhelmingly use the method by @gates_2009 employed our main paper to adjust for misreporting. However here we implement a novel method to adjust proportions of estimated immigrants in same-sex couples, based on the estimated mismatch rates from two U.S. Census Bureau studies.  Beginning in 2019, the ACS provides explicit categories for "Opposite-sex husband/wife/spouse," "Opposite-sex unmarried partner," "Same-sex husband/wife/spouse," and "Same-sex unmarried partner" [@walker_2021], so sex misreporting in the 2019 data is unlikely. Hence in most sensitivity analyses below, 2019 estimates are not adjusted for misreporting.  
+
+In a Census Bureau working paper, @kreider_2015 use personal information such as names and addresses match same-sex couples from the 2010 ACS to Social Security administrative data. They find that 57 percent of married couples coded as same-sex in the ACS are coded as different-sex in the administrative data. The corresponding sex mismatch rate for unmarried same-sex couples is 7 percent. (Our data include `r sum(acs_wide$related_partner == 'Spouse' & acs_wide$same_sex == T)` married and `r sum(acs_wide$related_partner == 'Unmarried Partner' & acs_wide$same_sex == T)` unmarried same-sex immigrant couples.) A follow-up study [@kreider_2017] shows that these mismatch rates appear to have fallen: In a 2016 ACS test module that included explicit categories for different- and same-sex spouses and partners, 31 percent of married and 3 percent of unmarried same-sex couples had inconsistent sex responses. This decreasing mismatch rate may be due to the greater numbers of same-sex couples openly identifying themselves as well as the growing popularity of responding to the ACS via Internet (see Supplementary Material), a response mode introduced in 2013 which is now the default [@u.s.censusbureau_2017]. In the 2016 test of the ACS, the mismatch rate for mail-in responses was 47 and 6 percent for married and unmarried same-sex couples, respectively, whereas for Internet responses they were only 22 and 2.4 percent [@kreider_2017]. A computer-assisted telephone interviewing (CATI) or computer-assisted personal interviewing (CAPI) response mode is sometimes administered as well, but the 2016 study did not assess its error rate. In the 2010 ACS, @kreider_2015 find CATI/CAPI sex reporting mismatch for 46 and 13 percent for married and unmarried same-sex couples, respectively. In our sample of immigrants in same-sex couples, `r sum(acs_couple_policy$respmode == 'Mail' & acs_couple_policy$same_sex == T)` responded by mail, `r with(filter(acs_couple_policy, same_sex == T), sum(respmode == 'CATI/CAPI'))` responded by CAPI/CATI, and `r sum(acs_couple_policy$respmode == 'Internet' & acs_couple_policy$same_sex == T)` responded by Internet survey. Response mode proportions by couple type are shown in Table \ref{tab:respmode}.  
+
+Table \ref{tab:mismatch} shows the mismatch rates estimated by @kreider_2015 and @kreider_2015. In the supplemental analysis below (Table \ref{tab:country-props-adj}), we use these apparent mismatch rates to adjust proportions used in models in Table 3 of the main paper. Each proportion is adjusted separately by marital status and response mode. For example, all internet respondents coded as being in married same-sex couples have their final proportion reduced by 22.5%. For mail-in responses, the proportions are reduced by the average between the two studies (`r (59+47.4)/2` percent for married and `r (7+5.6)/2` percent for unmarried couples). 
+
+
+```{r country-props-adj}
+ag <- lm(prop_same_sex_adj ~ origin_score,
+         data = acs_prop_yrimmig_policy)
+
+
+ag_country_orig <- lm(prop_same_sex_adj ~ distw + contig + comlang_off + comlang_ethno + colony +
+                   wage_dif + unemp_dif + vdem + origin_score + stock_prop,
+         data = acs_prop_yrimmig_policy)
+
+ag_country_orig_fe <- lm(prop_same_sex_adj ~ distw + contig + comlang_off + comlang_ethno + colony +
                    wage_dif + unemp_dif + vdem + origin_score + stock_prop + bpld,
-         data = mutate(acs_prop_yrimmig_policy, post_2013 = (yrimmig > 2013)))
+         data = acs_prop_yrimmig_policy)
 
-# Spouse, + 2013
-ag_2013_spouse2 <- lm(prop_spouse_same_sex ~ distw + contig + comlang_off + 
-                        comlang_ethno + colony +
+
+
+ag_country_orig_fe_2013 <- lm(prop_same_sex_adj ~ distw + contig + comlang_off + comlang_ethno + colony +
                    wage_dif + unemp_dif + vdem + origin_score + stock_prop + bpld +
                      post_2013,
          data = mutate(acs_prop_yrimmig_policy, post_2013 = (yrimmig > 2013)))
 
-# Spouse + interaction
-ag_2013_spouse_int <- lm(prop_spouse_same_sex ~ distw + contig + comlang_off + 
-                           comlang_ethno + colony + bpld +
-                   wage_dif + unemp_dif + vdem  + stock_prop +
+
+ag_2013_int_fe <- lm(prop_same_sex_adj ~ distw + contig + comlang_off + comlang_ethno + colony +
+                   wage_dif + unemp_dif + vdem  + stock_prop + bpld +
                      post_2013*origin_score,
          data = mutate(acs_prop_yrimmig_policy, post_2013 = (yrimmig > 2013)))
-
-# One immigrant
-ag_oneimm <- lm(prop_same_sex_oneimm ~ distw + contig + comlang_off + comlang_ethno + colony +
-                   wage_dif + unemp_dif + vdem + origin_score + stock_prop + bpld,
-         data = acs_prop_yrimmig_policy)
-
-ag_oneimm_2013 <- lm(prop_same_sex_oneimm ~ distw + contig + comlang_off + comlang_ethno + colony +
-                   wage_dif + unemp_dif + vdem + stock_prop + bpld + 
-                     post_2013 + origin_score,
-         data = mutate(acs_prop_yrimmig_policy, post_2013 = (yrimmig > 2013)))
-
-ag_oneimm_2013_int <- lm(prop_same_sex_oneimm ~ distw + contig + comlang_off + 
-                           comlang_ethno + colony +
-                   wage_dif + unemp_dif + vdem + stock_prop + bpld + 
-                     post_2013*origin_score,
-         data = mutate(acs_prop_yrimmig_policy, post_2013 = (yrimmig > 2013)))
-
-
 
 se_list <- list()
-mod_list <- list(ag_2013_spouse1, ag_2013_spouse2, ag_2013_spouse_int, 
-                 ag_oneimm, ag_oneimm_2013, ag_oneimm_2013_int)
+mod_list <- list(ag, ag_country_orig, ag_country_orig_fe,
+                 ag_country_orig_fe_2013, ag_2013_int_fe)
 for(mod_num in 1:length(mod_list)){
   se_list[[mod_num]] <- coef(summary(mod_list[[mod_num]], cluster = c("bpld")))[, 2]
 }
 
+
 stargazer(mod_list,
-          header = F, 
+          header = F,
           model.names = F,
-          keep = c('origin_score', 'post_2013'),
+          keep = c('origin_score',  'post_2013'),
           order = paste0("^", c('origin_score', 'post_2013TRUE', 
                                 'post_2013TRUE:origin_score') , "$"),
           covariate.labels = c('Country LGBT policy score', 
                                 'Post-2013', 'Country score × Post-2013'),
-          dep.var.labels   = c("Married", "One Immigrant"),
-          add.lines = list(c('Country controls?', rep('yes', 6)),
-                           c('Country FEs?', rep('yes', 6))),
+          dep.var.labels   = "Percent in same-sex couples by country-year",
+          add.lines = list(c('Country controls?', 'no', rep('yes', 4)),
+                           c('Country FEs?', 'no', 'no', rep('yes', 3))),
+          se = se_list,
+          keep.stat = c('n'),
+          star.cutoffs = c(0.1, 0.05, 0.01, 0.001),
+          star.char = c('†', '*', '**', '***'),
+          notes = c("Note: †p<0.1; *p<0.05; **p<0.01; ***p<0.001",
+                    "Source: American Community Survey 2008-2019"),
+          notes.label = '',
+          notes.align = 'l',
+          notes.append = F,
+          label = 'tab:country-props-adj',
+          title = 'Adjusted by rates of empirical sex mismatch by married, unmarried, and response mode. OLS regressions of percent of immigrants in same-sex couples by year of immigration and country of origin, adjusted. Country-clustered standard errors shown in parentheses. Country controls include population-weighted distance, contiguous border, common official language, common ethnic language, colonial relationship, wage differential, unemployment differential, proportion same-country stock, and democracy.')
+```
+
+```{r state-props-adj}
+
+state_prop <- lm(prop_same_sex_adj ~ state_policy, data = acs_dyad_policy)
+
+state_prop2 <- lm(prop_same_sex_adj ~ origin_score + state_policy, data = acs_dyad_policy)
+
+state_prop_fe <- lm(prop_same_sex_adj ~ state_policy + origin_score + distw + contig + 
+                          comlang_off + comlang_ethno + colony +
+                          wage_dif + unemp_dif + vdem + stock_prop +
+                           state_unemploy + state_income + Country + state, 
+                       data = acs_dyad_policy)
+
+state_prop_fe2 <- lm(prop_same_sex_adj ~ state_policy*origin_score + distw + contig + 
+                          comlang_off + comlang_ethno + colony +
+                          wage_dif + unemp_dif + vdem + stock_prop +
+                           state_unemploy + state_income + Country + state, 
+                       data = acs_dyad_policy)
+
+state_prop_2013 <- lm(prop_same_sex_adj ~ post_2013 + state_policy + origin_score + distw + contig + 
+                          comlang_off + comlang_ethno + colony +
+                          wage_dif + unemp_dif + vdem + stock_prop +
+                           state_unemploy + state_income + Country + state, 
+                       data = mutate(acs_dyad_policy, post_2013 = (year > 2013)))
+
+state_prop_2013_int <- lm(prop_same_sex_adj ~ post_2013*origin_score + state_policy + distw + contig + 
+                          comlang_off + comlang_ethno + colony +
+                          wage_dif + unemp_dif + vdem + stock_prop +
+                           state_unemploy + state_income + Country + state, 
+                       data = mutate(acs_dyad_policy, post_2013 = (year > 2013)))
+
+state_prop_2013_int2 <- lm(prop_same_sex_adj ~ post_2013*state_policy + origin_score + distw + contig + 
+                          comlang_off + comlang_ethno + colony +
+                          wage_dif + unemp_dif + vdem + stock_prop +
+                           state_unemploy + state_income + Country + state, 
+                       data = mutate(acs_dyad_policy, post_2013 = (year > 2013)))
+
+se_list <- list()
+mod_list <- list(state_prop, state_prop2, state_prop_fe, state_prop_fe2, 
+                 state_prop_2013, state_prop_2013_int2, state_prop_2013_int)
+
+for(mod_num in 1:length(mod_list)){
+  se_list[[mod_num]] <- coef(summary(mod_list[[mod_num]], cluster = c("state", "Country")))[, 2]
+}
+
+
+stargazer(mod_list,
+          header = F, 
+          keep = c('origin_score', 'state_policy', 'post_2013'),
+          # omit = c('Country', 'state'),
+          order = paste0("^", c('state_policy', 'origin_score', 
+                                'state_policy:origin_score', 'post_2013TRUE', 
+                                'post_2013TRUE:state_policy', 
+                                'post_2013TRUE:origin_score') , "$"),
+          covariate.labels = c('State LGB policy score', 'Country LGB policy score',
+                                'State score × country-score', 'Post-2013', 
+                               'State score × post-2013', 'Country score × post-2013'),
+          dep.var.labels = "Percent in same-sex couples by state-country-year",
+          add.lines = list(c('State controls and FEs?', 'no', 'no', rep('yes', 5)),
+                           c('Country controls and FEs?', 'no', 'no', rep('yes', 5))),
           se = se_list,
           keep.stat = c('n'),
           star.cutoffs = c(0.1, 0.05, 0.01, 0.001),
@@ -317,13 +413,12 @@ stargazer(mod_list,
           notes.label = '',
           notes.align = 'l',
           notes.append = F,
-          label = 'tab:country-props-alt',
-          title = 'Alternate Specifications of OLS regressions of percent of immigrants in same-sex couples by year of immigration and country of origin, using only proportions of married couples or couples with one immigrant and one U.S.-born citizen. Country-clustered standard errors shown in parentheses. Country controls include population-weighted distance, contiguous border, common official language, common ethnic language, colonial relationship, wage differential, unemployment differential, proportion same-country stock, and Polity 5 measure of democracy.')
+          label = 'tab:state-props-adj',
+          title = 'Adjusted by rates of empirical sex mismatch by married, unmarried, and response mode. Percent same-sex in by country of origin, U.S. state, and survey year. Country and state two-way clustered standard errors are shown in parentheses. State controls include unemployment rate and per-capita income. Country controls include population-weighted distance, contiguous border, common official language, common ethnic language, colonial relationship, wage differential, unemployment differential, proportion same-country stock, and democracy.')
+
 ```
 
-\newpage
-
-# Relative immmigrant population-weighted regressions
+## Relative immmigrant population-weighted regressions
 We perform the same regressions with proportion in same-sex couples by country or state, but weighted by the relative size of the immigrant stock.
 ```{r country-weights}
 ag <- lm(prop_same_sex ~ origin_score,
@@ -447,7 +542,83 @@ stargazer(mod_list,
 
 \newpage
 
-# OLS models of individual state of residence
+## Alternate specifications of country proportion models
+```{r country-props-alt}
+
+# Spouse
+ag_2013_spouse1 <- lm(prop_spouse_same_sex ~ distw + contig + comlang_off + 
+                        comlang_ethno + colony +
+                   wage_dif + unemp_dif + vdem + origin_score + stock_prop + bpld,
+         data = mutate(acs_prop_yrimmig_policy, post_2013 = (yrimmig > 2013)))
+
+# Spouse, + 2013
+ag_2013_spouse2 <- lm(prop_spouse_same_sex ~ distw + contig + comlang_off + 
+                        comlang_ethno + colony +
+                   wage_dif + unemp_dif + vdem + origin_score + stock_prop + bpld +
+                     post_2013,
+         data = mutate(acs_prop_yrimmig_policy, post_2013 = (yrimmig > 2013)))
+
+# Spouse + interaction
+ag_2013_spouse_int <- lm(prop_spouse_same_sex ~ distw + contig + comlang_off + 
+                           comlang_ethno + colony + bpld +
+                   wage_dif + unemp_dif + vdem  + stock_prop +
+                     post_2013*origin_score,
+         data = mutate(acs_prop_yrimmig_policy, post_2013 = (yrimmig > 2013)))
+
+# One immigrant
+ag_oneimm <- lm(prop_same_sex_oneimm ~ distw + contig + comlang_off + comlang_ethno + colony +
+                   wage_dif + unemp_dif + vdem + origin_score + stock_prop + bpld,
+         data = acs_prop_yrimmig_policy)
+
+ag_oneimm_2013 <- lm(prop_same_sex_oneimm ~ distw + contig + comlang_off + comlang_ethno + colony +
+                   wage_dif + unemp_dif + vdem + stock_prop + bpld + 
+                     post_2013 + origin_score,
+         data = mutate(acs_prop_yrimmig_policy, post_2013 = (yrimmig > 2013)))
+
+ag_oneimm_2013_int <- lm(prop_same_sex_oneimm ~ distw + contig + comlang_off + 
+                           comlang_ethno + colony +
+                   wage_dif + unemp_dif + vdem + stock_prop + bpld + 
+                     post_2013*origin_score,
+         data = mutate(acs_prop_yrimmig_policy, post_2013 = (yrimmig > 2013)))
+
+
+
+se_list <- list()
+mod_list <- list(ag_2013_spouse1, ag_2013_spouse2, ag_2013_spouse_int, 
+                 ag_oneimm, ag_oneimm_2013, ag_oneimm_2013_int)
+for(mod_num in 1:length(mod_list)){
+  se_list[[mod_num]] <- coef(summary(mod_list[[mod_num]], cluster = c("bpld")))[, 2]
+}
+
+stargazer(mod_list,
+          header = F, 
+          model.names = F,
+          keep = c('origin_score', 'post_2013'),
+          order = paste0("^", c('origin_score', 'post_2013TRUE', 
+                                'post_2013TRUE:origin_score') , "$"),
+          covariate.labels = c('Country LGBT policy score', 
+                                'Post-2013', 'Country score × Post-2013'),
+          dep.var.labels   = c("Married", "One Immigrant"),
+          add.lines = list(c('Country controls?', rep('yes', 6)),
+                           c('Country FEs?', rep('yes', 6))),
+          se = se_list,
+          keep.stat = c('n'),
+          star.cutoffs = c(0.1, 0.05, 0.01, 0.001),
+          star.char = c('†', '*', '**', '***'),
+          notes = c("Note: †p<0.1; *p<0.05; **p<0.01; ***p<0.001", 
+                    "Source: American Community Survey 2008-2019"), 
+          notes.label = '',
+          notes.align = 'l',
+          notes.append = F,
+          label = 'tab:country-props-alt',
+          title = 'Alternate Specifications of OLS regressions of percent of immigrants in same-sex couples by year of immigration and country of origin, using only proportions of married couples or couples with one immigrant and one U.S.-born citizen. Country-clustered standard errors shown in parentheses. Country controls include population-weighted distance, contiguous border, common official language, common ethnic language, colonial relationship, wage differential, unemployment differential, proportion same-country stock, and Polity 5 measure of democracy.')
+```
+
+\newpage
+
+
+
+## OLS models of individual state of residence
 ```{r ols-ind}
 
 ols_basic <- lm(state_policy ~ same_sex,
@@ -572,341 +743,7 @@ read_csv(here('supp', 'sim_df_ols.csv')) %>%
 
 \newpage
 
-# Adjusting proportions based on empirical mismatch rates
 
-```{r respmode}
-tabyl(acs_couple_policy, respmode, year, same_sex) %>%
-  adorn_percentages('col') %>%
-  bind_rows() %>%
-  mutate(same_sex = c(F, F, F, T, T, T)) %>%
-  select(respmode, same_sex, everything()) %>%
-  kable(booktabs = T,
-        caption = 'Response mode proportions for different- and same-sex couples, by year. Proportions are within couple type and year.') %>%
-  kable_styling(font_size = 9)
-```
-
-```{r mismatch}
-
-tibble(`Study Year` = c(2010, 2010, 2016, 2016),
-       Relationship = c('Married', 'Unmarried Partner', 'Married', 'Unmarried Partner'),
-       `Mail` = c('59%', '7%', '47.4%', '5.6%'), 
-       `Internet` = c('NA', 'NA', '22.5%', '2.4%'), 
-       `CAPI/CATI` = c('46%', '13%', 'Unknown', 'Unknown'),
-       Overall = c('57.3%', '7%', '35%', '3.4%')) %>%
-  kable(booktabs = T, 
-        caption = 'Mismatch rates from Kreider \\& Lofquist (2015) and Kreider et al. (2017)') %>%
-      footnote(general = "American Community Survey 2008-2019. Authors\' calculations.",
-           general_title = 'Source:',
-           footnote_as_chunk = T) 
-```
-
-
-Published papers using the ACS to study same-sex couples overwhelmingly use the method by @gates_2009 employed our main paper to adjust for misreporting. However here we implement a novel method to adjust proportions of estimated immigrants in same-sex couples, based on the estimated mismatch rates from two U.S. Census Bureau studies.  Beginning in 2019, the ACS provides explicit categories for "Opposite-sex husband/wife/spouse," "Opposite-sex unmarried partner," "Same-sex husband/wife/spouse," and "Same-sex unmarried partner" [@walker_2021], so sex misreporting in the 2019 data is unlikely. Hence in most sensitivity analyses below, 2019 estimates are not adjusted for misreporting.  
-
-In a Census Bureau working paper, @kreider_2015 use personal information such as names and addresses match same-sex couples from the 2010 ACS to Social Security administrative data. They find that 57 percent of married couples coded as same-sex in the ACS are coded as different-sex in the administrative data. The corresponding sex mismatch rate for unmarried same-sex couples is 7 percent. (Our data include `r sum(acs_wide$related_partner == 'Spouse' & acs_wide$same_sex == T)` married and `r sum(acs_wide$related_partner == 'Unmarried Partner' & acs_wide$same_sex == T)` unmarried same-sex immigrant couples.) A follow-up study [@kreider_2017] shows that these mismatch rates appear to have fallen: In a 2016 ACS test module that included explicit categories for different- and same-sex spouses and partners, 31 percent of married and 3 percent of unmarried same-sex couples had inconsistent sex responses. This decreasing mismatch rate may be due to the greater numbers of same-sex couples openly identifying themselves as well as the growing popularity of responding to the ACS via Internet (see Supplementary Material), a response mode introduced in 2013 which is now the default [@u.s.censusbureau_2017]. In the 2016 test of the ACS, the mismatch rate for mail-in responses was 47 and 6 percent for married and unmarried same-sex couples, respectively, whereas for Internet responses they were only 22 and 2.4 percent [@kreider_2017]. A computer-assisted telephone interviewing (CATI) or computer-assisted personal interviewing (CAPI) response mode is sometimes administered as well, but the 2016 study did not assess its error rate. In the 2010 ACS, @kreider_2015 find CATI/CAPI sex reporting mismatch for 46 and 13 percent for married and unmarried same-sex couples, respectively. In our sample of immigrants in same-sex couples, `r sum(acs_couple_policy$respmode == 'Mail' & acs_couple_policy$same_sex == T)` responded by mail, `r with(filter(acs_couple_policy, same_sex == T), sum(respmode == 'CATI/CAPI'))` responded by CAPI/CATI, and `r sum(acs_couple_policy$respmode == 'Internet' & acs_couple_policy$same_sex == T)` responded by Internet survey. Response mode proportions by couple type are shown in Table \ref{tab:respmode}.  
-
-Table \ref{tab:mismatch} shows the mismatch rates estimated by @kreider_2015 and @kreider_2015. In the supplemental analysis below (Table \ref{tab:country-props-adj}), we use these apparent mismatch rates to adjust proportions used in models in Table 3 of the main paper. Each proportion is adjusted separately by marital status and response mode. For example, all internet respondents coded as being in married same-sex couples have their final proportion reduced by 22.5%. For mail-in responses, the proportions are reduced by the average between the two studies (`r (59+47.4)/2` percent for married and `r (7+5.6)/2` percent for unmarried couples). 
-
-
-```{r country-props-adj}
-ag <- lm(prop_same_sex_adj ~ origin_score,
-         data = acs_prop_yrimmig_policy)
-
-
-ag_country_orig <- lm(prop_same_sex_adj ~ distw + contig + comlang_off + comlang_ethno + colony +
-                   wage_dif + unemp_dif + vdem + origin_score + stock_prop,
-         data = acs_prop_yrimmig_policy)
-
-ag_country_orig_fe <- lm(prop_same_sex_adj ~ distw + contig + comlang_off + comlang_ethno + colony +
-                   wage_dif + unemp_dif + vdem + origin_score + stock_prop + bpld,
-         data = acs_prop_yrimmig_policy)
-
-
-
-ag_country_orig_fe_2013 <- lm(prop_same_sex_adj ~ distw + contig + comlang_off + comlang_ethno + colony +
-                   wage_dif + unemp_dif + vdem + origin_score + stock_prop + bpld +
-                     post_2013,
-         data = mutate(acs_prop_yrimmig_policy, post_2013 = (yrimmig > 2013)))
-
-
-ag_2013_int_fe <- lm(prop_same_sex_adj ~ distw + contig + comlang_off + comlang_ethno + colony +
-                   wage_dif + unemp_dif + vdem  + stock_prop + bpld +
-                     post_2013*origin_score,
-         data = mutate(acs_prop_yrimmig_policy, post_2013 = (yrimmig > 2013)))
-
-se_list <- list()
-mod_list <- list(ag, ag_country_orig, ag_country_orig_fe,
-                 ag_country_orig_fe_2013, ag_2013_int_fe)
-for(mod_num in 1:length(mod_list)){
-  se_list[[mod_num]] <- coef(summary(mod_list[[mod_num]], cluster = c("bpld")))[, 2]
-}
-
-
-stargazer(mod_list,
-          header = F,
-          model.names = F,
-          keep = c('origin_score',  'post_2013'),
-          order = paste0("^", c('origin_score', 'post_2013TRUE', 
-                                'post_2013TRUE:origin_score') , "$"),
-          covariate.labels = c('Country LGBT policy score', 
-                                'Post-2013', 'Country score × Post-2013'),
-          dep.var.labels   = "Percent in same-sex couples by country-year",
-          add.lines = list(c('Country controls?', 'no', rep('yes', 4)),
-                           c('Country FEs?', 'no', 'no', rep('yes', 3))),
-          se = se_list,
-          keep.stat = c('n'),
-          star.cutoffs = c(0.1, 0.05, 0.01, 0.001),
-          star.char = c('†', '*', '**', '***'),
-          notes = c("Note: †p<0.1; *p<0.05; **p<0.01; ***p<0.001",
-                    "Source: American Community Survey 2008-2019"),
-          notes.label = '',
-          notes.align = 'l',
-          notes.append = F,
-          label = 'tab:country-props-adj',
-          title = 'Adjusted by rates of empirical sex mismatch by married, unmarried, and response mode. OLS regressions of percent of immigrants in same-sex couples by year of immigration and country of origin, adjusted. Country-clustered standard errors shown in parentheses. Country controls include population-weighted distance, contiguous border, common official language, common ethnic language, colonial relationship, wage differential, unemployment differential, proportion same-country stock, and democracy.')
-```
-
-```{r state-props-adj}
-state_prop <- lm(prop_same_sex_adj ~ state_policy, data = acs_dyad_policy)
-
-state_prop2 <- lm(prop_same_sex_adj ~ origin_score + state_policy, data = acs_dyad_policy)
-
-state_prop_fe <- lm(prop_same_sex_adj ~ state_unemploy + state_income + state + 
-                        origin_score + state_policy, 
-                       data = acs_dyad_policy)
-
-state_prop_fe2 <- lm(prop_same_sex_adj ~ state_policy + origin_score + distw + contig + 
-                          comlang_off + comlang_ethno + colony +
-                          wage_dif + unemp_dif + vdem + stock_prop +
-                           state_unemploy + state_income + Country + state, 
-                       data = acs_dyad_policy)
-
-state_prop_2013 <- lm(prop_same_sex_adj ~ post_2013 + state_policy + origin_score + distw + contig + 
-                          comlang_off + comlang_ethno + colony +
-                          wage_dif + unemp_dif + vdem + stock_prop +
-                           state_unemploy + state_income + Country + state, 
-                       data = mutate(acs_dyad_policy, post_2013 = (year > 2013)))
-
-state_prop_2013_int <- lm(prop_same_sex_adj ~ post_2013*origin_score + state_policy + distw + contig + 
-                          comlang_off + comlang_ethno + colony +
-                          wage_dif + unemp_dif + vdem + stock_prop +
-                           state_unemploy + state_income + Country + state, 
-                       data = mutate(acs_dyad_policy, post_2013 = (year > 2013)))
-
-# state_prop_2013 <- lm(prop_same_sex_adj ~ post_2013*(state_policy + origin_score), 
-#                        data = mutate(acs_dyad_policy, post_2013 = (year > 2013)))
-# state_prop_2013_2 <- lm(prop_same_sex_adj ~ post_2013*(state_policy + origin_score) + distw + contig + 
-#                           comlang_off + comlang_ethno + colony +
-#                           wage_dif + unemp_dif + vdem + 
-#                            state_unemploy + state_income + Country + state, 
-#                        data = mutate(acs_dyad_policy, post_2013 = (year > 2013)))
-
-se_list <- list()
-mod_list <- list(state_prop, state_prop2, state_prop_fe, state_prop_fe2, 
-                 state_prop_2013, state_prop_2013_int)
-
-for(mod_num in 1:length(mod_list)){
-  se_list[[mod_num]] <- coef(summary(mod_list[[mod_num]], cluster = c("state")))[, 2]
-}
-
-
-stargazer(mod_list,
-          header = F, 
-          keep = c('origin_score', 'state_policy', 'post_2013'),
-          # omit = c('Country', 'state'),
-          order = paste0("^", c('state_policy', 'origin_score', 'post_2013TRUE', 
-                                'post_2013TRUE:origin_score') , "$"),
-          covariate.labels = c('State LGB policy score', 'Country LGB policy score',
-                                'Post-2013', 'Country score × Post-2013'),
-          dep.var.labels = "Percent in same-sex couples by state-country-year",
-          add.lines = list(c('State controls and FEs?', 'no', 'no', rep('yes', 4)),
-                           c('Country controls and FEs?', rep('no', 3), rep('yes', 3))),
-          se = se_list,
-          keep.stat = c('n'),
-          star.cutoffs = c(0.1, 0.05, 0.01, 0.001),
-          star.char = c('†', '*', '**', '***'),
-          notes = c("Note: †p<0.1; *p<0.05; **p<0.01; ***p<0.001", 
-                    "Source: American Community Survey 2008-2019"), 
-          notes.label = '',
-          notes.align = 'l',
-          notes.append = F,
-          label = 'tab:state-props',
-          title = 'Adjusted by rates of empirical sex mismatch by married, unmarried, and response mode. Percent same-sex in by country of origin, U.S. state, and survey year. Country and state two-way clustered standard errors are shown in parentheses. State controls include unemployment rate and per-capita income. Country controls include population-weighted distance, contiguous border, common official language, common ethnic language, colonial relationship, wage differential, unemployment differential, proportion same-country stock, and democracy.')
-
-
-```
-
-Figure \ref{fig:sens} takes Model 3 from the country proportions models (Table 3) and Model 4 from the state proportions models (Table 4) and reduces the proportions of same-sex couples in the data for pre-2019 data. It varies the percentage of misreported same-sex married couples from 0 to 90 percent and of unmarried couples from 0 to 14 percent. Highlighted in blue bars are the empirical mismatch rates found in the two studies by @kreider_2015  and @kreider_2017. We see that even extremely high misreporting rates in the pre-2019 ACS do not reduce our results to 0. 
-
-```{r sens, eval = T, fig.cap = 'Coefficient for sending-country LGBT policy context for fixed effects models, adjusted for possible misreporting of same-sex couples in pre-2019 data. Ribbon shows 95 percent confidence intervals and blue bars show estimated misreporting from the 2010 and 2016 U.S. Census Bureau tests on the ACS.'}
-
-mod <- lm(partner ~ spouse + I(spouse^2), data.frame(spouse = c(0, .573, .35),
-           partner = c(0, .07, .034)))
-spouse_vec <- c(.573, .35, seq(from = 0, to = .9, length.out = 20))
-mis_df <- data.frame(spouse = spouse_vec,
-                     partner = predict(mod, newdata = data.frame(spouse = spouse_vec)))
-
-
-
-# mis_df <- data.frame(spouse = c(.573, .35, seq(from = 0, to = .9, length.out = 100)),
-#            partner = c(.07, .034, seq(from = 0, to = .3, length.out = 100)))
-
-sens_df <- list()
-
-
-for(i in 1:nrow(mis_df)){
-  sens_mod <- lm(prop_same_sex_adj2 ~ distw + contig + comlang_off + comlang_ethno + colony +
-                   wage_dif + unemp_dif + vdem + origin_score + stock_prop + bpld,
-         data = acs_prop_yrimmig_policy %>%
-                      # mutate(prop_same_sex_adj2 = (prop_spouse_same_sex*(1-mis_df[i,1]) +
-                      #                    prop_partner_same_sex*(1-mis_df[i,2])))
-           mutate(prop_same_sex_adj2 = (n_spouse_pre_2019_same_sex*(1-mis_df[i,1]) + 
-                                         n_spouse_2019_same_sex + 
-                                         n_partner_pre_2019_same_sex*(1-mis_df[i,2]) +
-                                         n_partner_2019_same_sex)/n_total * 100))
-  
-  sens_mod2 <- lm(prop_same_sex_adj2 ~ state_policy + origin_score + distw + contig + 
-                          comlang_off + comlang_ethno + colony +
-                          wage_dif + unemp_dif + vdem + stock_prop +
-                           state_unemploy + state_income + Country + state, 
-                       data = acs_dyad_policy %>%
-                    mutate(prop_same_sex_adj2 = (n_spouse_pre_2019_same_sex*(1-mis_df[i,1]) + 
-                                         n_spouse_2019_same_sex + 
-                                         n_partner_pre_2019_same_sex*(1-mis_df[i,2]) +
-                                         n_partner_2019_same_sex)/state_stock_year * 100))
-  
-  coef_os <- coef(summary(sens_mod, cluster = c("bpld")))['origin_score',]
-  coef_os2 <- coef(summary(sens_mod2, cluster = c("bpld", "state'")))['state_policy',]
-  coef_os3 <- coef(summary(sens_mod2, cluster = c("bpld", "state'")))['origin_score',]
-  sens_df[[i]] <- data.frame(est = coef_os[[1]],
-                             se = coef_os[[2]],
-                             est2 = coef_os2[[1]],
-                             se2 = coef_os2[[2]],
-                             est3 = coef_os3[[1]],
-                             se3 = coef_os3[[2]],
-                             mis_spouse = mis_df[i,1],
-                             mis_partner = mis_df[i,2])
-}
-
-sens_df <- bind_rows(sens_df) %>%
-  mutate(lower = est - 1.96*se, 
-         upper = est + 1.96*se,
-         lower2 = est2 - 1.96*se2, 
-         upper2 = est2 + 1.96*se2,
-         lower3 = est3 - 1.96*se3, 
-         upper3 = est3 + 1.96*se3,
-         highlight = mis_spouse %in% c(.573, .35),
-         facet = 'Without misreporting in 2019')
-
-# sens_df2 <- list()
-# for(i in 1:nrow(mis_df)){
-#   sens_mod <- lm(prop_same_sex_adj2 ~ distw + contig + comlang_off + comlang_ethno + colony +
-#                    wage_dif + unemp_dif + vdem + origin_score + stock_prop + bpld,
-#          data = acs_prop_yrimmig_policy %>%
-#                       mutate(prop_same_sex_adj2 = (prop_spouse_same_sex*(1-mis_df[i,1]) +
-#                                          prop_partner_same_sex*(1-mis_df[i,2]))))
-# 
-#   coef_os <- coef(summary(sens_mod, cluster = c("bpld")))['origin_score',]
-#   sens_df2[[i]] <- data.frame(est = coef_os[[1]],
-#                              se = coef_os[[2]],
-#                              mis_spouse = mis_df[i,1],
-#                              mis_partner = mis_df[i,2])
-# }
-# sens_df2 <- bind_rows(sens_df2) %>%
-#   mutate(lower = est - 1.96*se,
-#          upper = est + 1.96*se,
-#          highlight = mis_spouse %in% c(.573, .35),
-#          facet = 'Assuming misreporting in 2019') %>%
-#   bind_rows(sens_df)
-
-
-
-n_spouse <- sum(with(acs_couple_policy, same_sex == T & married == T))
-n_partner <- sum(with(acs_couple_policy, same_sex == T & married == F))
-
-add_global_label <- function(pwobj, Xlab = NULL, Ylab = NULL, Xgap = 0.03, Ygap = 0.03, ...) {
-    ylabgrob <- patchwork::plot_spacer()
-    if (!is.null(Ylab)) {
-        ylabgrob <- ggplot() +
-            geom_text(aes(x = .5, y = .5), label = Ylab, angle = 90, ...) +
-            theme_void()
-    }
-    if (!is.null(Xlab)) {
-        xlabgrob <- ggplot() +
-            geom_text(aes(x = .5, y = .5), label = Xlab, ...) +
-            theme_void()
-    }
-    if (!is.null(Ylab) & is.null(Xlab)) {
-        return((ylabgrob + patchworkGrob(pwobj)) + 
-            patchwork::plot_layout(widths = 100 * c(Ygap, 1 - Ygap)))
-    }
-    if (is.null(Ylab) & !is.null(Xlab)) {
-        return((ylabgrob + pwobj) + 
-            (xlabgrob) +
-            patchwork::plot_layout(heights = 100 * c(1 - Xgap, Xgap),
-                                   widths = c(0, 100),
-                                   design = "
-                                   AB
-                                   CC
-                                   "
-            ))
-    }
-    if (!is.null(Ylab) & !is.null(Xlab)) {
-        return((ylabgrob + pwobj) + 
-            (xlabgrob) +
-            patchwork::plot_layout(heights = 100 * c(1 - Xgap, Xgap),
-                                   widths = 100 * c(Ygap, 1 - Ygap),
-                                   design = "
-                                   AB
-                                   CC
-                                   "
-            ))
-    }
-    return(pwobj)
-}
-
-plot1 <- sens_df %>%
-  mutate(`Misreporting rate (weighted average)` = (mis_spouse*n_spouse+mis_partner*n_partner)/(n_spouse + n_partner)) %>%
-  ggplot(aes(x = `Misreporting rate (weighted average)`, y = est)) +
-  geom_line() +
-  geom_ribbon(aes(ymin = lower, ymax = upper), alpha = .2)  +
-  geom_hline(yintercept = 0, linetype = 'dashed') +
-  geom_errorbar(aes(ymin = lower, ymax = upper, width = .02, color = highlight)) +
-  # facet_wrap(~facet) +
-  theme(legend.position = "none") +
-  scale_color_manual(values = c('transparent', RColorBrewer::brewer.pal(3, 'Dark2')[3])) +
-  labs(y = 'Coefficient for country policy context', x = '') +
-  ggtitle('Country Model')
-
-plot2 <- sens_df %>%
-  mutate(`Misreporting rate (weighted average)` = (mis_spouse*n_spouse+mis_partner*n_partner)/(n_spouse + n_partner)) %>%
-  ggplot(aes(x = `Misreporting rate (weighted average)`, y = est2)) +
-  geom_line() +
-  geom_ribbon(aes(ymin = lower2, ymax = upper2), alpha = .2)  +
-  geom_hline(yintercept = 0, linetype = 'dashed') +
-  geom_errorbar(aes(ymin = lower2, ymax = upper2, width = .02, color = highlight)) +
-  #facet_wrap(~facet) +
-  theme(legend.position = "none") +
-  scale_color_manual(values = c('transparent', RColorBrewer::brewer.pal(3, 'Dark2')[3])) +
-  labs(y = 'Coefficient for state policy context', x = '') +
-  ggtitle('State Model')
-
-plot3 <- sens_df %>%
-  mutate(`Misreporting rate (weighted average)` = (mis_spouse*n_spouse+mis_partner*n_partner)/(n_spouse + n_partner)) %>%
-  ggplot(aes(x = `Misreporting rate (weighted average)`, y = est3)) +
-  geom_line() +
-  geom_ribbon(aes(ymin = lower3, ymax = upper3), alpha = .2)  +
-  geom_hline(yintercept = 0, linetype = 'dashed') +
-  geom_errorbar(aes(ymin = lower3, ymax = upper3, width = .02, color = highlight)) +
-  #facet_wrap(~facet) +
-  theme(legend.position = "none") +
-  scale_color_manual(values = c('transparent', RColorBrewer::brewer.pal(3, 'Dark2')[3])) +
-  labs(y = 'Coefficient for country policy context', x= '') +
-  ggtitle('State Model')
-
-(plot1 + plot2 + plot3) %>%
-  add_global_label(Xlab = 'Misreporting rate (weighted average)')
-```
 
 <!-- We next text the robustness of our results to omitted variable bias. -->
 

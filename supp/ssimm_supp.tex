@@ -117,7 +117,7 @@
 \makeatother
 \subtitle{Making Migration Sexy}
 \author{Nathan I. Hoffmann, Department of Sociology, University of California, Los Angeles \and Kristopher Velasco, Department of Sociology, University of Texas at Austin}
-\date{June 3, 2021}
+\date{June 4, 2021}
 
 \begin{document}
 \maketitle
@@ -291,153 +291,11 @@ Brazil & 14590\\
 
 \newpage
 
-\hypertarget{alternate-specifications-of-country-proportion-models}{%
-\section{Alternate specifications of country proportion models}\label{alternate-specifications-of-country-proportion-models}}
-
-\begin{table}[!htbp] \centering 
-  \caption{Alternate Specifications of OLS regressions of percent of immigrants in same-sex couples by year of immigration and country of origin, using only proportions of married couples or couples with one immigrant and one U.S.-born citizen. Country-clustered standard errors shown in parentheses. Country controls include population-weighted distance, contiguous border, common official language, common ethnic language, colonial relationship, wage differential, unemployment differential, proportion same-country stock, and Polity 5 measure of democracy.} 
-  \label{tab:country-props-alt} 
-\begin{tabular}{@{\extracolsep{5pt}}lcccccc} 
-\\[-1.8ex]\hline 
-\hline \\[-1.8ex] 
- & \multicolumn{6}{c}{\textit{Dependent variable:}} \\ 
-\cline{2-7} 
-\\[-1.8ex] & \multicolumn{3}{c}{Married} & \multicolumn{3}{c}{One Immigrant} \\ 
-\\[-1.8ex] & (1) & (2) & (3) & (4) & (5) & (6)\\ 
-\hline \\[-1.8ex] 
- Country LGBT policy score & 0.076$^{***}$ & 0.041$^{†}$ & 0.001 & 0.009 & 0.003 & $-$0.010 \\ 
-  & (0.022) & (0.024) & (0.028) & (0.008) & (0.009) & (0.010) \\ 
-  & & & & & & \\ 
- Post-2013 &  & 0.350$^{***}$ & 0.200$^{*}$ &  & 0.057$^{†}$ & 0.009 \\ 
-  &  & (0.085) & (0.100) &  & (0.030) & (0.035) \\ 
-  & & & & & & \\ 
- Country score × Post-2013 &  &  & 0.070$^{**}$ &  &  & 0.023$^{**}$ \\ 
-  &  &  & (0.025) &  &  & (0.009) \\ 
-  & & & & & & \\ 
-\hline \\[-1.8ex] 
-Country controls? & yes & yes & yes & yes & yes & yes \\ 
-Country FEs? & yes & yes & yes & yes & yes & yes \\ 
-Observations & 3,281 & 3,281 & 3,281 & 3,281 & 3,281 & 3,281 \\ 
-\hline 
-\hline \\[-1.8ex] 
-\multicolumn{7}{l}{Note: †p<0.1; *p<0.05; **p<0.01; ***p<0.001} \\ 
-\multicolumn{7}{l}{Source: American Community Survey 2008-2019} \\ 
-\end{tabular} 
-\end{table}
-
-\newpage
-
-\hypertarget{relative-immmigrant-population-weighted-regressions}{%
-\section{Relative immmigrant population-weighted regressions}\label{relative-immmigrant-population-weighted-regressions}}
-
-We perform the same regressions with proportion in same-sex couples by country or state, but weighted by the relative size of the immigrant stock.
-
-\begin{table}[!htbp] \centering 
-  \caption{Weighted OLS regressions of percent of immigrants in same-sex couples by year of immigration and country of origin. Country-clustered standard errors shown in parentheses.} 
-  \label{tab:country-props} 
-\begin{tabular}{@{\extracolsep{5pt}}lccccc} 
-\\[-1.8ex]\hline 
-\hline \\[-1.8ex] 
- & \multicolumn{5}{c}{\textit{Dependent variable:}} \\ 
-\cline{2-6} 
-\\[-1.8ex] & \multicolumn{5}{c}{Percent in same-sex couples by country-year} \\ 
-\\[-1.8ex] & (1) & (2) & (3) & (4) & (5)\\ 
-\hline \\[-1.8ex] 
- Country LGB policy score & 0.057$^{***}$ & 0.051$^{***}$ & 0.038$^{***}$ & 0.020$^{*}$ & 0.001 \\ 
-  & (0.005) & (0.006) & (0.007) & (0.008) & (0.009) \\ 
-  & & & & & \\ 
- Post-2013 &  &  &  & 0.180$^{***}$ & 0.062 \\ 
-  &  &  &  & (0.032) & (0.044) \\ 
-  & & & & & \\ 
- Country score × Post-2013 &  &  &  &  & 0.038$^{***}$ \\ 
-  &  &  &  &  & (0.010) \\ 
-  & & & & & \\ 
-\hline \\[-1.8ex] 
-Country controls? & no & yes & yes & yes & yes \\ 
-Country FEs? & no & no & yes & yes & yes \\ 
-Observations & 3,281 & 3,281 & 3,281 & 3,281 & 3,281 \\ 
-\hline 
-\hline \\[-1.8ex] 
-\multicolumn{6}{l}{Note: †p<0.1; *p<0.05; **p<0.01; ***p<0.001} \\ 
-\multicolumn{6}{l}{Source: American Community Survey 2008-2019} \\ 
-\end{tabular} 
-\end{table}
-
-\begin{table}[!htbp] \centering 
-  \caption{Weighted regression of percent same-sex in by country of origin, U.S. state, and survey year. Country-clustered standard errors are shown in parentheses.} 
-  \label{tab:state-props} 
-\begin{tabular}{@{\extracolsep{5pt}}lcccccc} 
-\\[-1.8ex]\hline 
-\hline \\[-1.8ex] 
- & \multicolumn{6}{c}{\textit{Dependent variable:}} \\ 
-\cline{2-7} 
-\\[-1.8ex] & \multicolumn{6}{c}{Percent in same-sex couples by state-country-year} \\ 
-\\[-1.8ex] & (1) & (2) & (3) & (4) & (5) & (6)\\ 
-\hline \\[-1.8ex] 
- State LGB policy score & 0.050$^{***}$ & 0.048$^{***}$ & 0.027 & 0.018 & 0.005 & 0.006 \\ 
-  & (0.006) & (0.006) & (0.020) & (0.021) & (0.023) & (0.024) \\ 
-  & & & & & & \\ 
- Country LGB policy score &  & 0.082$^{***}$ & 0.078$^{***}$ & 0.078$^{*}$ & 0.073$^{*}$ & 0.023 \\ 
-  &  & (0.009) & (0.009) & (0.031) & (0.032) & (0.043) \\ 
-  & & & & & & \\ 
- Post-2013 &  &  &  &  & 0.079 & 0.007 \\ 
-  &  &  &  &  & (0.060) & (0.073) \\ 
-  & & & & & & \\ 
- Country score × Post-2013 &  &  &  &  &  & 0.040$^{†}$ \\ 
-  &  &  &  &  &  & (0.023) \\ 
-  & & & & & & \\ 
-\hline \\[-1.8ex] 
-State controls and FEs? & no & no & yes & yes & yes & yes \\ 
-Country controls and FEs? & no & no & no & yes & yes & yes \\ 
-Observations & 35,868 & 35,868 & 35,868 & 35,868 & 35,868 & 35,868 \\ 
-\hline 
-\hline \\[-1.8ex] 
-\multicolumn{7}{l}{Note: †p<0.1; *p<0.05; **p<0.01; ***p<0.001} \\ 
-\multicolumn{7}{l}{Source: American Community Survey 2008-2019} \\ 
-\end{tabular} 
-\end{table}
-
-\newpage
-
-\hypertarget{ols-models-of-individual-state-of-residence}{%
-\section{OLS models of individual state of residence}\label{ols-models-of-individual-state-of-residence}}
-
-\begin{table}[!htbp] \centering 
-  \caption{Individual OLS analysis of state policy score. Country-clustered standard errors are shown in parentheses. Individual controls include sex, age, education, number of children, log(income), indicator for no income, and year of immigration, which are all interacted with the indicator for same-sex couple.} 
-  \label{tab:ols} 
-\begin{tabular}{@{\extracolsep{5pt}}lcccc} 
-\\[-1.8ex]\hline 
-\hline \\[-1.8ex] 
- & \multicolumn{4}{c}{\textit{Dependent variable:}} \\ 
-\cline{2-5} 
-\\[-1.8ex] & \multicolumn{4}{c}{Binned state LGB policy score} \\ 
-\\[-1.8ex] & (1) & (2) & (3) & (4)\\ 
-\hline \\[-1.8ex] 
- Same-sex & 0.520$^{***}$ & 0.370$^{***}$ & 25.000$^{*}$ & 21.000$^{**}$ \\ 
-  & (0.030) & (0.042) & (9.900) & (6.400) \\ 
-  & & & & \\ 
- Country LGB policy score &  & $-$0.048$^{***}$ & $-$0.073$^{***}$ & 0.016$^{***}$ \\ 
-  &  & (0.004) & (0.004) & (0.003) \\ 
-  & & & & \\ 
- Same-sex × country score &  & 0.073$^{***}$ & 0.057$^{***}$ & $-$0.005 \\ 
-  &  & (0.012) & (0.013) & (0.009) \\ 
-  & & & & \\ 
-\hline \\[-1.8ex] 
-Individual controls? & no & no & yes & yes \\ 
-State controls and FEs? & no & no & no & yes \\ 
-Country controls and FEs? & no & no & no & yes \\ 
-Observations & 107,179 & 107,179 & 107,179 & 107,179 \\ 
-\hline 
-\hline \\[-1.8ex] 
-\multicolumn{5}{l}{Note: †p<0.1; *p<0.05; **p<0.01; ***p<0.001} \\ 
-\multicolumn{5}{l}{Source: American Community Survey 2008-2019} \\ 
-\end{tabular} 
-\end{table}
-
-\newpage
+\hypertarget{robustness-checks}{%
+\section{Robustness Checks}\label{robustness-checks}}
 
 \hypertarget{adjusting-proportions-based-on-empirical-mismatch-rates}{%
-\section{Adjusting proportions based on empirical mismatch rates}\label{adjusting-proportions-based-on-empirical-mismatch-rates}}
+\subsection{Adjusting proportions based on empirical mismatch rates}\label{adjusting-proportions-based-on-empirical-mismatch-rates}}
 
 \begin{table}
 
@@ -515,6 +373,82 @@ Observations & 3,281 & 3,281 & 3,281 & 3,281 & 3,281 \\
 
 \begin{table}[!htbp] \centering 
   \caption{Adjusted by rates of empirical sex mismatch by married, unmarried, and response mode. Percent same-sex in by country of origin, U.S. state, and survey year. Country and state two-way clustered standard errors are shown in parentheses. State controls include unemployment rate and per-capita income. Country controls include population-weighted distance, contiguous border, common official language, common ethnic language, colonial relationship, wage differential, unemployment differential, proportion same-country stock, and democracy.} 
+  \label{tab:state-props-adj} 
+\begin{tabular}{@{\extracolsep{5pt}}lccccccc} 
+\\[-1.8ex]\hline 
+\hline \\[-1.8ex] 
+ & \multicolumn{7}{c}{\textit{Dependent variable:}} \\ 
+\cline{2-8} 
+\\[-1.8ex] & \multicolumn{7}{c}{Percent in same-sex couples by state-country-year} \\ 
+\\[-1.8ex] & (1) & (2) & (3) & (4) & (5) & (6) & (7)\\ 
+\hline \\[-1.8ex] 
+ State LGB policy score & 0.046$^{***}$ & 0.043$^{***}$ & 0.082$^{**}$ & 0.066$^{*}$ & 0.066$^{*}$ & 0.064$^{*}$ & 0.067$^{*}$ \\ 
+  & (0.008) & (0.008) & (0.029) & (0.029) & (0.032) & (0.033) & (0.032) \\ 
+  & & & & & & & \\ 
+ Country LGB policy score &  & 0.072$^{***}$ & 0.120$^{**}$ & 0.072$^{†}$ & 0.110$^{**}$ & 0.110$^{**}$ & 0.034 \\ 
+  &  & (0.009) & (0.037) & (0.040) & (0.038) & (0.038) & (0.046) \\ 
+  & & & & & & & \\ 
+ State score × country-score &  &  &  & 0.012$^{**}$ &  &  &  \\ 
+  &  &  &  & (0.004) &  &  &  \\ 
+  & & & & & & & \\ 
+ Post-2013 &  &  &  &  & 0.099 & 0.092 & 0.016 \\ 
+  &  &  &  &  & (0.081) & (0.090) & (0.085) \\ 
+  & & & & & & & \\ 
+ State score × post-2013 &  &  &  &  &  & 0.003 &  \\ 
+  &  &  &  &  &  & (0.019) &  \\ 
+  & & & & & & & \\ 
+ Country score × post-2013 &  &  &  &  &  &  & 0.060$^{**}$ \\ 
+  &  &  &  &  &  &  & (0.020) \\ 
+  & & & & & & & \\ 
+\hline \\[-1.8ex] 
+State controls and FEs? & no & no & yes & yes & yes & yes & yes \\ 
+Country controls and FEs? & no & no & yes & yes & yes & yes & yes \\ 
+Observations & 35,868 & 35,868 & 35,868 & 35,868 & 35,868 & 35,868 & 35,868 \\ 
+\hline 
+\hline \\[-1.8ex] 
+\multicolumn{8}{l}{Note: †p<0.1; *p<0.05; **p<0.01; ***p<0.001} \\ 
+\multicolumn{8}{l}{Source: American Community Survey 2008-2019} \\ 
+\end{tabular} 
+\end{table}
+
+\hypertarget{relative-immmigrant-population-weighted-regressions}{%
+\subsection{Relative immmigrant population-weighted regressions}\label{relative-immmigrant-population-weighted-regressions}}
+
+We perform the same regressions with proportion in same-sex couples by country or state, but weighted by the relative size of the immigrant stock.
+
+\begin{table}[!htbp] \centering 
+  \caption{Weighted OLS regressions of percent of immigrants in same-sex couples by year of immigration and country of origin. Country-clustered standard errors shown in parentheses.} 
+  \label{tab:country-props} 
+\begin{tabular}{@{\extracolsep{5pt}}lccccc} 
+\\[-1.8ex]\hline 
+\hline \\[-1.8ex] 
+ & \multicolumn{5}{c}{\textit{Dependent variable:}} \\ 
+\cline{2-6} 
+\\[-1.8ex] & \multicolumn{5}{c}{Percent in same-sex couples by country-year} \\ 
+\\[-1.8ex] & (1) & (2) & (3) & (4) & (5)\\ 
+\hline \\[-1.8ex] 
+ Country LGB policy score & 0.057$^{***}$ & 0.051$^{***}$ & 0.038$^{***}$ & 0.020$^{*}$ & 0.001 \\ 
+  & (0.005) & (0.006) & (0.007) & (0.008) & (0.009) \\ 
+  & & & & & \\ 
+ Post-2013 &  &  &  & 0.180$^{***}$ & 0.062 \\ 
+  &  &  &  & (0.032) & (0.044) \\ 
+  & & & & & \\ 
+ Country score × Post-2013 &  &  &  &  & 0.038$^{***}$ \\ 
+  &  &  &  &  & (0.010) \\ 
+  & & & & & \\ 
+\hline \\[-1.8ex] 
+Country controls? & no & yes & yes & yes & yes \\ 
+Country FEs? & no & no & yes & yes & yes \\ 
+Observations & 3,281 & 3,281 & 3,281 & 3,281 & 3,281 \\ 
+\hline 
+\hline \\[-1.8ex] 
+\multicolumn{6}{l}{Note: †p<0.1; *p<0.05; **p<0.01; ***p<0.001} \\ 
+\multicolumn{6}{l}{Source: American Community Survey 2008-2019} \\ 
+\end{tabular} 
+\end{table}
+
+\begin{table}[!htbp] \centering 
+  \caption{Weighted regression of percent same-sex in by country of origin, U.S. state, and survey year. Country-clustered standard errors are shown in parentheses.} 
   \label{tab:state-props} 
 \begin{tabular}{@{\extracolsep{5pt}}lcccccc} 
 \\[-1.8ex]\hline 
@@ -524,17 +458,17 @@ Observations & 3,281 & 3,281 & 3,281 & 3,281 & 3,281 \\
 \\[-1.8ex] & \multicolumn{6}{c}{Percent in same-sex couples by state-country-year} \\ 
 \\[-1.8ex] & (1) & (2) & (3) & (4) & (5) & (6)\\ 
 \hline \\[-1.8ex] 
- State LGB policy score & 0.046$^{***}$ & 0.043$^{***}$ & 0.089$^{**}$ & 0.082$^{**}$ & 0.066$^{*}$ & 0.067$^{*}$ \\ 
-  & (0.008) & (0.008) & (0.028) & (0.029) & (0.032) & (0.032) \\ 
+ State LGB policy score & 0.050$^{***}$ & 0.048$^{***}$ & 0.027 & 0.018 & 0.005 & 0.006 \\ 
+  & (0.006) & (0.006) & (0.020) & (0.021) & (0.023) & (0.024) \\ 
   & & & & & & \\ 
- Country LGB policy score &  & 0.072$^{***}$ & 0.067$^{***}$ & 0.120$^{**}$ & 0.110$^{**}$ & 0.034 \\ 
-  &  & (0.009) & (0.009) & (0.037) & (0.038) & (0.046) \\ 
+ Country LGB policy score &  & 0.082$^{***}$ & 0.078$^{***}$ & 0.078$^{*}$ & 0.073$^{*}$ & 0.023 \\ 
+  &  & (0.009) & (0.009) & (0.031) & (0.032) & (0.043) \\ 
   & & & & & & \\ 
- Post-2013 &  &  &  &  & 0.099 & 0.016 \\ 
-  &  &  &  &  & (0.081) & (0.085) \\ 
+ Post-2013 &  &  &  &  & 0.079 & 0.007 \\ 
+  &  &  &  &  & (0.060) & (0.073) \\ 
   & & & & & & \\ 
- Country score × Post-2013 &  &  &  &  &  & 0.060$^{**}$ \\ 
-  &  &  &  &  &  & (0.020) \\ 
+ Country score × Post-2013 &  &  &  &  &  & 0.040$^{†}$ \\ 
+  &  &  &  &  &  & (0.023) \\ 
   & & & & & & \\ 
 \hline \\[-1.8ex] 
 State controls and FEs? & no & no & yes & yes & yes & yes \\ 
@@ -547,13 +481,80 @@ Observations & 35,868 & 35,868 & 35,868 & 35,868 & 35,868 & 35,868 \\
 \end{tabular} 
 \end{table}
 
-Figure \ref{fig:sens} takes Model 3 from the country proportions models (Table 3) and Model 4 from the state proportions models (Table 4) and reduces the proportions of same-sex couples in the data for pre-2019 data. It varies the percentage of misreported same-sex married couples from 0 to 90 percent and of unmarried couples from 0 to 14 percent. Highlighted in blue bars are the empirical mismatch rates found in the two studies by \protect\hyperlink{ref-kreider_2015}{Kreider \& Lofquist} (\protect\hyperlink{ref-kreider_2015}{2015}) and \protect\hyperlink{ref-kreider_2017}{Kreider et al.} (\protect\hyperlink{ref-kreider_2017}{2017}). We see that even extremely high misreporting rates in the pre-2019 ACS do not reduce our results to 0.
+\newpage
 
-\begin{figure}
-\centering
-\includegraphics{ssimm_supp_files/figure-latex/sens-1.pdf}
-\caption{\label{fig:sens}Coefficient for sending-country LGBT policy context for fixed effects models, adjusted for possible misreporting of same-sex couples in pre-2019 data. Ribbon shows 95 percent confidence intervals and blue bars show estimated misreporting from the 2010 and 2016 U.S. Census Bureau tests on the ACS.}
-\end{figure}
+\hypertarget{alternate-specifications-of-country-proportion-models}{%
+\subsection{Alternate specifications of country proportion models}\label{alternate-specifications-of-country-proportion-models}}
+
+\begin{table}[!htbp] \centering 
+  \caption{Alternate Specifications of OLS regressions of percent of immigrants in same-sex couples by year of immigration and country of origin, using only proportions of married couples or couples with one immigrant and one U.S.-born citizen. Country-clustered standard errors shown in parentheses. Country controls include population-weighted distance, contiguous border, common official language, common ethnic language, colonial relationship, wage differential, unemployment differential, proportion same-country stock, and Polity 5 measure of democracy.} 
+  \label{tab:country-props-alt} 
+\begin{tabular}{@{\extracolsep{5pt}}lcccccc} 
+\\[-1.8ex]\hline 
+\hline \\[-1.8ex] 
+ & \multicolumn{6}{c}{\textit{Dependent variable:}} \\ 
+\cline{2-7} 
+\\[-1.8ex] & \multicolumn{3}{c}{Married} & \multicolumn{3}{c}{One Immigrant} \\ 
+\\[-1.8ex] & (1) & (2) & (3) & (4) & (5) & (6)\\ 
+\hline \\[-1.8ex] 
+ Country LGBT policy score & 0.076$^{***}$ & 0.041$^{†}$ & 0.001 & 0.009 & 0.003 & $-$0.010 \\ 
+  & (0.022) & (0.024) & (0.028) & (0.008) & (0.009) & (0.010) \\ 
+  & & & & & & \\ 
+ Post-2013 &  & 0.350$^{***}$ & 0.200$^{*}$ &  & 0.057$^{†}$ & 0.009 \\ 
+  &  & (0.085) & (0.100) &  & (0.030) & (0.035) \\ 
+  & & & & & & \\ 
+ Country score × Post-2013 &  &  & 0.070$^{**}$ &  &  & 0.023$^{**}$ \\ 
+  &  &  & (0.025) &  &  & (0.009) \\ 
+  & & & & & & \\ 
+\hline \\[-1.8ex] 
+Country controls? & yes & yes & yes & yes & yes & yes \\ 
+Country FEs? & yes & yes & yes & yes & yes & yes \\ 
+Observations & 3,281 & 3,281 & 3,281 & 3,281 & 3,281 & 3,281 \\ 
+\hline 
+\hline \\[-1.8ex] 
+\multicolumn{7}{l}{Note: †p<0.1; *p<0.05; **p<0.01; ***p<0.001} \\ 
+\multicolumn{7}{l}{Source: American Community Survey 2008-2019} \\ 
+\end{tabular} 
+\end{table}
+
+\newpage
+
+\hypertarget{ols-models-of-individual-state-of-residence}{%
+\subsection{OLS models of individual state of residence}\label{ols-models-of-individual-state-of-residence}}
+
+\begin{table}[!htbp] \centering 
+  \caption{Individual OLS analysis of state policy score. Country-clustered standard errors are shown in parentheses. Individual controls include sex, age, education, number of children, log(income), indicator for no income, and year of immigration, which are all interacted with the indicator for same-sex couple.} 
+  \label{tab:ols} 
+\begin{tabular}{@{\extracolsep{5pt}}lcccc} 
+\\[-1.8ex]\hline 
+\hline \\[-1.8ex] 
+ & \multicolumn{4}{c}{\textit{Dependent variable:}} \\ 
+\cline{2-5} 
+\\[-1.8ex] & \multicolumn{4}{c}{Binned state LGB policy score} \\ 
+\\[-1.8ex] & (1) & (2) & (3) & (4)\\ 
+\hline \\[-1.8ex] 
+ Same-sex & 0.520$^{***}$ & 0.370$^{***}$ & 25.000$^{*}$ & 21.000$^{**}$ \\ 
+  & (0.030) & (0.042) & (9.900) & (6.400) \\ 
+  & & & & \\ 
+ Country LGB policy score &  & $-$0.048$^{***}$ & $-$0.073$^{***}$ & 0.016$^{***}$ \\ 
+  &  & (0.004) & (0.004) & (0.003) \\ 
+  & & & & \\ 
+ Same-sex × country score &  & 0.073$^{***}$ & 0.057$^{***}$ & $-$0.005 \\ 
+  &  & (0.012) & (0.013) & (0.009) \\ 
+  & & & & \\ 
+\hline \\[-1.8ex] 
+Individual controls? & no & no & yes & yes \\ 
+State controls and FEs? & no & no & no & yes \\ 
+Country controls and FEs? & no & no & no & yes \\ 
+Observations & 107,179 & 107,179 & 107,179 & 107,179 \\ 
+\hline 
+\hline \\[-1.8ex] 
+\multicolumn{5}{l}{Note: †p<0.1; *p<0.05; **p<0.01; ***p<0.001} \\ 
+\multicolumn{5}{l}{Source: American Community Survey 2008-2019} \\ 
+\end{tabular} 
+\end{table}
+
+\newpage
 
 \hypertarget{full-regression-tables}{%
 \section{Full regression tables}\label{full-regression-tables}}
