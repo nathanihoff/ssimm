@@ -24,8 +24,8 @@ header-includes:
   - \setlength{\headheight}{13.6pt}
   - \rhead{\textit{Hoffmann and Velasco}}
 editor_options: 
-  chunk_output_type: console
   
+  chunk_output_type: console
 citeproc: no
 fontfamily: mathpazo
 fontsize: 11pt
@@ -35,7 +35,6 @@ link-citations: yes
 linkcolor: blue
 bibliography: zotero.bib  
 csl: apa.csl
-
 title: "Supplementary Material"
 subtitle: "Making Migration Sexy"
 date: "`r format(Sys.time(), '%B %e, %Y')`"
@@ -47,8 +46,7 @@ date: "`r format(Sys.time(), '%B %e, %Y')`"
  
 author:
 - Nathan I. Hoffmann, Department of Sociology, University of California, Los Angeles
-- Kristopher Velasco, Department of Sociology, University of Texas at Austin
-
+- Kristopher Velasco, Department of Sociology, Princeton University
 ---
 
 <!-- Turn off hyphenation -->
