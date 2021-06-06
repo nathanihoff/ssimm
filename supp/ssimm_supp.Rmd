@@ -325,7 +325,7 @@ stargazer(mod_list,
           keep = c('origin_score',  'post_2013'),
           order = paste0("^", c('origin_score', 'post_2013TRUE', 
                                 'post_2013TRUE:origin_score') , "$"),
-          covariate.labels = c('Country LGBT policy score', 
+          covariate.labels = c('Country LGB policy score', 
                                 'Post-2013', 'Country score × Post-2013'),
           dep.var.labels   = "Percent in same-sex couples by country-year",
           add.lines = list(c('Country controls?', 'no', rep('yes', 4)),
@@ -594,7 +594,7 @@ stargazer(mod_list,
           keep = c('origin_score', 'post_2013'),
           order = paste0("^", c('origin_score', 'post_2013TRUE', 
                                 'post_2013TRUE:origin_score') , "$"),
-          covariate.labels = c('Country LGBT policy score', 
+          covariate.labels = c('Country LGB policy score', 
                                 'Post-2013', 'Country score × Post-2013'),
           dep.var.labels   = c("Married", "One Immigrant"),
           add.lines = list(c('Country controls?', rep('yes', 6)),
@@ -733,7 +733,7 @@ read_csv(here('supp', 'sim_df_ols.csv')) %>%
   geom_ribbon(aes(ymin=fit.low, ymax=fit.high, 
                   fill = same_sex, col = NULL), alpha = .2) +
   xlab('LGB policy score for country of origin') +
-  ylab('Predicted U.S. state LGBT policy score') +
+  ylab('Predicted U.S. state LGB policy score') +
   theme(legend.justification=c(1,0),
         legend.position=c(.95,.38))
 ```
