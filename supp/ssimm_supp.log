@@ -1,4 +1,4 @@
-This is XeTeX, Version 3.141592653-2.6-0.999993 (TeX Live 2021) (preloaded format=xelatex 2021.6.2)  4 JUN 2021 18:49
+This is XeTeX, Version 3.141592653-2.6-0.999993 (TeX Live 2021) (preloaded format=xelatex 2021.6.2)  6 JUN 2021 13:51
 entering extended mode
  restricted \write18 enabled.
  %&-line parsing enabled.
@@ -919,36 +919,37 @@ LaTeX Font Info:    Font shape `TU/latinmodern-math.otf(3)/m/n' will be
 (Font)              scaled to size 5.99936pt on input line 138.
 LaTeX Font Info:    Font shape `TU/latinmodern-math.otf(3)/m/n' will be
 (Font)              scaled to size 4.99947pt on input line 138.
-File: ssimm_supp_files/figure-latex/desc-fig-1.pdf Graphic file (type pdf)
-<use ssimm_supp_files/figure-latex/desc-fig-1.pdf>
 [1
 
-] [2] [3] [4]
-Overfull \hbox (10.68895pt too wide) in paragraph at lines 305--318
- [][] 
- []
-
-[5]
-Overfull \hbox (28.6435pt too wide) in paragraph at lines 377--412
- [][] 
- []
-
-[6] [7] [8] [9] [10] [11]
-Overfull \hbox (39.35796pt too wide) in paragraph at lines 614--667
+] [2]
+File: ssimm_supp_files/figure-latex/desc-fig-1.pdf Graphic file (type pdf)
+<use ssimm_supp_files/figure-latex/desc-fig-1.pdf>
+[3] [4]
+Overfull \hbox (10.68895pt too wide) in paragraph at lines 313--326
  [][] 
  []
 
 
-LaTeX Warning: Float too large for page by 446.26859pt on input line 751.
+Overfull \hbox (28.6435pt too wide) in paragraph at lines 379--414
+ [][] 
+ []
+
+[5] [6] [7] [8] [9] [10] [11]
+Overfull \hbox (39.35796pt too wide) in paragraph at lines 616--669
+ [][] 
+ []
+
+
+LaTeX Warning: Float too large for page by 256.65912pt on input line 754.
 
 [12] [13] [14] [15] (./ssimm_supp.aux)
 Package rerunfilecheck Info: File `ssimm_supp.out' has not changed.
-(rerunfilecheck)             Checksum: 103C3DC9D15EF49C46FD8913839B4888;2041.
+(rerunfilecheck)             Checksum: B272EFC4D62B7E1A6B7A5B1CF248C405;2031.
  ) 
 Here is how much of TeX's memory you used:
  17898 strings out of 478489
- 315378 string characters out of 5858830
- 872355 words of memory out of 5000000
+ 315376 string characters out of 5858830
+ 873281 words of memory out of 5000000
  37902 multiletter control sequences out of 15000+600000
  414311 words of font info for 90 fonts, out of 8000000 for 9000
  14 hyphenation exceptions out of 8191

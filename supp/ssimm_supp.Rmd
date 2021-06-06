@@ -131,7 +131,9 @@ acs_couple_policy_small <- bind_rows(
 
 ```
 
-# Descriptive statistics
+
+
+# Descriptive Statistics
 ```{r desc-table-country}
 theme_gtsummary_compact()
 
@@ -170,8 +172,9 @@ acs_couple_policy %>%
   as_kable_extra(booktabs = T)
 ```
 
+\newpage
 
-# Additional descriptive analyses
+# Additional Descriptive Trends
 ```{r desc-top1}
 acs_couple_policy %>%
   filter(same_sex == T) %>%
@@ -251,6 +254,15 @@ bind_rows(hwsei, nchild, years, distance, unemp, state_income) %>%
 
 ## Adjusting proportions based on empirical mismatch rates
 
+
+
+
+Published papers using the ACS to study same-sex couples overwhelmingly use the method by @gates_2009 employed our main paper to adjust for misreporting. However here we implement a novel method to adjust proportions of estimated immigrants in same-sex couples, based on the estimated mismatch rates from two U.S. Census Bureau studies.  Beginning in 2019, the ACS provides explicit categories for "Opposite-sex husband/wife/spouse," "Opposite-sex unmarried partner," "Same-sex husband/wife/spouse," and "Same-sex unmarried partner" [@walker_2021], so sex misreporting in the 2019 data is unlikely. Hence in most sensitivity analyses below, 2019 estimates are not adjusted for misreporting.  
+
+In a Census Bureau working paper, @kreider_2015 use personal information such as names and addresses match same-sex couples from the 2010 ACS to Social Security administrative data. They find that 57 percent of married couples coded as same-sex in the ACS are coded as different-sex in the administrative data. The corresponding sex mismatch rate for unmarried same-sex couples is 7 percent. (Our data include `r sum(acs_wide$related_partner == 'Spouse' & acs_wide$same_sex == T)` married and `r sum(acs_wide$related_partner == 'Unmarried Partner' & acs_wide$same_sex == T)` unmarried same-sex immigrant couples.) A follow-up study [@kreider_2017] shows that these mismatch rates appear to have fallen: In a 2016 ACS test module that included explicit categories for different- and same-sex spouses and partners, 31 percent of married and 3 percent of unmarried same-sex couples had inconsistent sex responses. This decreasing mismatch rate may be due to the greater numbers of same-sex couples openly identifying themselves as well as the growing popularity of responding to the ACS via Internet (see Supplementary Material), a response mode introduced in 2013 which is now the default [@u.s.censusbureau_2017]. In the 2016 test of the ACS, the mismatch rate for mail-in responses was 47 and 6 percent for married and unmarried same-sex couples, respectively, whereas for Internet responses they were only 22 and 2.4 percent [@kreider_2017]. A computer-assisted telephone interviewing (CATI) or computer-assisted personal interviewing (CAPI) response mode is sometimes administered as well, but the 2016 study did not assess its error rate. In the 2010 ACS, @kreider_2015 find CATI/CAPI sex reporting mismatch for 46 and 13 percent for married and unmarried same-sex couples, respectively. In our sample of immigrants in same-sex couples, `r sum(acs_couple_policy$respmode == 'Mail' & acs_couple_policy$same_sex == T)` responded by mail, `r with(filter(acs_couple_policy, same_sex == T), sum(respmode == 'CATI/CAPI'))` responded by CAPI/CATI, and `r sum(acs_couple_policy$respmode == 'Internet' & acs_couple_policy$same_sex == T)` responded by Internet survey. Response mode proportions by couple type are shown in Table \ref{tab:respmode}.  
+
+Table \ref{tab:mismatch} shows the mismatch rates estimated by @kreider_2015 and @kreider_2015. In the supplemental analysis below (Table \ref{tab:country-props-adj}), we use these apparent mismatch rates to adjust proportions used in models in Table 3 of the main paper. Each proportion is adjusted separately by marital status and response mode. For example, all internet respondents coded as being in married same-sex couples have their final proportion reduced by 22.5%. For mail-in responses, the proportions are reduced by the average between the two studies (`r (59+47.4)/2` percent for married and `r (7+5.6)/2` percent for unmarried couples). 
+
 ```{r respmode}
 tabyl(acs_couple_policy, respmode, year, same_sex) %>%
   adorn_percentages('col') %>%
@@ -276,14 +288,6 @@ tibble(`Study Year` = c(2010, 2010, 2016, 2016),
            general_title = 'Source:',
            footnote_as_chunk = T) 
 ```
-
-
-Published papers using the ACS to study same-sex couples overwhelmingly use the method by @gates_2009 employed our main paper to adjust for misreporting. However here we implement a novel method to adjust proportions of estimated immigrants in same-sex couples, based on the estimated mismatch rates from two U.S. Census Bureau studies.  Beginning in 2019, the ACS provides explicit categories for "Opposite-sex husband/wife/spouse," "Opposite-sex unmarried partner," "Same-sex husband/wife/spouse," and "Same-sex unmarried partner" [@walker_2021], so sex misreporting in the 2019 data is unlikely. Hence in most sensitivity analyses below, 2019 estimates are not adjusted for misreporting.  
-
-In a Census Bureau working paper, @kreider_2015 use personal information such as names and addresses match same-sex couples from the 2010 ACS to Social Security administrative data. They find that 57 percent of married couples coded as same-sex in the ACS are coded as different-sex in the administrative data. The corresponding sex mismatch rate for unmarried same-sex couples is 7 percent. (Our data include `r sum(acs_wide$related_partner == 'Spouse' & acs_wide$same_sex == T)` married and `r sum(acs_wide$related_partner == 'Unmarried Partner' & acs_wide$same_sex == T)` unmarried same-sex immigrant couples.) A follow-up study [@kreider_2017] shows that these mismatch rates appear to have fallen: In a 2016 ACS test module that included explicit categories for different- and same-sex spouses and partners, 31 percent of married and 3 percent of unmarried same-sex couples had inconsistent sex responses. This decreasing mismatch rate may be due to the greater numbers of same-sex couples openly identifying themselves as well as the growing popularity of responding to the ACS via Internet (see Supplementary Material), a response mode introduced in 2013 which is now the default [@u.s.censusbureau_2017]. In the 2016 test of the ACS, the mismatch rate for mail-in responses was 47 and 6 percent for married and unmarried same-sex couples, respectively, whereas for Internet responses they were only 22 and 2.4 percent [@kreider_2017]. A computer-assisted telephone interviewing (CATI) or computer-assisted personal interviewing (CAPI) response mode is sometimes administered as well, but the 2016 study did not assess its error rate. In the 2010 ACS, @kreider_2015 find CATI/CAPI sex reporting mismatch for 46 and 13 percent for married and unmarried same-sex couples, respectively. In our sample of immigrants in same-sex couples, `r sum(acs_couple_policy$respmode == 'Mail' & acs_couple_policy$same_sex == T)` responded by mail, `r with(filter(acs_couple_policy, same_sex == T), sum(respmode == 'CATI/CAPI'))` responded by CAPI/CATI, and `r sum(acs_couple_policy$respmode == 'Internet' & acs_couple_policy$same_sex == T)` responded by Internet survey. Response mode proportions by couple type are shown in Table \ref{tab:respmode}.  
-
-Table \ref{tab:mismatch} shows the mismatch rates estimated by @kreider_2015 and @kreider_2015. In the supplemental analysis below (Table \ref{tab:country-props-adj}), we use these apparent mismatch rates to adjust proportions used in models in Table 3 of the main paper. Each proportion is adjusted separately by marital status and response mode. For example, all internet respondents coded as being in married same-sex couples have their final proportion reduced by 22.5%. For mail-in responses, the proportions are reduced by the average between the two studies (`r (59+47.4)/2` percent for married and `r (7+5.6)/2` percent for unmarried couples). 
-
 
 ```{r country-props-adj}
 ag <- lm(prop_same_sex_adj ~ origin_score,
@@ -745,7 +749,7 @@ read_csv(here('supp', 'sim_df_ols.csv')) %>%
 
 <!-- We next text the robustness of our results to omitted variable bias. -->
 
-# Full regression tables
+# Full Regression Tables
 ```{r country-props-full}
 ag <- lm(prop_same_sex ~ origin_score,
          data = acs_prop_yrimmig_policy)
@@ -943,7 +947,7 @@ stargazer(mod_list,
           notes.label = '',
           notes.align = 'l',
           notes.append = F,
-          #no.space = T,
+          font.size = 'footnotesize',
           label = 'tab:ord-full',
           title = 'Individual ordered logit analysis of three-category state policy score. Country and state two-way clustered standard errors are shown in parentheses. Individual controls include sex, age, education, number of children, IHS-transformed income, indicator for no income, and year of immigration, which are all interacted with the indicator for same-sex couple. State controls include unemployment rate and per-capita income. Country controls include population-weighted distance, contiguous border, common official language, common ethnic language, colonial relationship, wage differential, unemployment differential, proportion same-country stock, and democracy.')
 ```
