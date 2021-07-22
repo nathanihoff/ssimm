@@ -172,9 +172,55 @@ acs_couple_policy %>%
   as_kable_extra(booktabs = T)
 ```
 
+
+
+
 \newpage
 
 # Additional Descriptive Trends
+Figure \ref{fig:scatter-country} relies on the data used in the country-level models. The vertical axis represents the proportion of immigrants from each country in same-sex couples in each year of immigration, from 1991 to 2019, while the horizontal axis indicates the policy score of the country of origin in the year of immigration. The line shows the bivariate regression line.   
+
+Figure \ref{fig:scatter-state} relies on the data used in the state-level models, with the vertical axis showing the proportion of immigrants from each country in same-sex couples in each state, in each survey year, from 2008 to 2019. In the left panel, the horizontal axis represents the origin country policy score in the mean year of immigration for that group, while the right panel's horizontal axis represents the state policy score in the survey year. The lines shows the bivariate regression lines.  
+
+```{r scatter-country, fig.cap = "Proportion of immigrants from each country in same-sex couples in each year of immigration, from 1991 to 2019. The horizontal axis indicates the policy score of the country of origin in the year of immigration. Points are jittered for clarity, and percentages above 20 are not shown."}
+
+acs_prop_yrimmig_policy %>%
+  filter(prop_same_sex < 20) %>%
+  ggplot(aes(x = origin_score, y = prop_same_sex, color = yrimmig)) +
+  geom_jitter(alpha = .5) + 
+  scale_color_continuous() +
+  geom_abline() +
+  labs(x= 'LGB policy score for country of origin', 
+        y = 'Percentage of immigrants in same-sex couples')
+```
+
+
+
+```{r scatter-state, fig.cap = "Proportion of immigrants from each country in same-sex couples in each state, in each survey year, from 2008 to 2019. The left panel's horizontal axis represents the origin country policy score in the mean year of immigration for that group, while the right panel's horizontal axis represents the state policy score in the survey year. Points are jittered for clarity, and percentages above 20 are not shown."}
+state_plot_1 <- acs_dyad_policy %>%
+  filter(same_prop < 20) %>%
+  ggplot(aes(x = state_policy, y = same_prop, color = year)) +
+  geom_jitter(alpha = .5) +
+  geom_abline() +
+  scale_color_continuous(low = 'black', high = 'green') +
+    labs(x= 'LGB policy score for country of origin', 
+        y = 'Percentage of immigrants in same-sex couples')
+
+state_plot_2 <- acs_dyad_policy %>%
+  filter(same_prop < 20) %>%
+  ggplot(aes(x = origin_score, y = same_prop, color = mean_year_immig)) +
+  geom_jitter(alpha = .5) +
+  geom_abline() +
+  scale_color_continuous() +
+    labs(x= 'LGB policy score for U.S. state of residence', 
+        y = '')
+
+
+
+state_plot_1 + state_plot_2
+
+```
+
 ```{r desc-top1}
 acs_couple_policy %>%
   filter(same_sex == T) %>%
@@ -567,6 +613,38 @@ ag_2013_spouse_int <- lm(prop_spouse_same_sex ~ distw + contig + comlang_off +
                      post_2013*origin_score,
          data = mutate(acs_prop_yrimmig_policy, post_2013 = (yrimmig > 2013)))
 
+se_list <- list()
+mod_list <- list(ag_2013_spouse1, ag_2013_spouse2, ag_2013_spouse_int)
+for(mod_num in 1:length(mod_list)){
+  se_list[[mod_num]] <- coef(summary(mod_list[[mod_num]], cluster = c("bpld")))[, 2]
+}
+
+stargazer(mod_list,
+          header = F, 
+          model.names = F,
+          keep = c('origin_score', 'post_2013'),
+          order = paste0("^", c('origin_score', 'post_2013TRUE', 
+                                'post_2013TRUE:origin_score') , "$"),
+          covariate.labels = c('Country LGB policy score', 
+                                'Post-2013', 'Country score × Post-2013'),
+          dep.var.labels   = c("Married"),
+          add.lines = list(c('Country controls?', rep('yes', 3)),
+                           c('Country FEs?', rep('yes', 3))),
+          se = se_list,
+          keep.stat = c('n'),
+          star.cutoffs = c(0.1, 0.05, 0.01, 0.001),
+          star.char = c('†', '*', '**', '***'),
+          notes = c("Note: †p<0.1; *p<0.05; **p<0.01; ***p<0.001", 
+                    "Source: American Community Survey 2008-2019"), 
+          notes.label = '',
+          notes.align = 'l',
+          notes.append = F,
+          label = 'tab:country-props-alt',
+          title = 'Alternate specifications of OLS regressions of percent of immigrants in same-sex couples by year of immigration and country of origin, using only proportions of married couples. Country-clustered standard errors shown in parentheses. Country controls include population-weighted distance, contiguous border, common official language, common ethnic language, colonial relationship, wage differential, unemployment differential, proportion same-country stock, and Polity 5 measure of democracy.')
+```
+
+
+```{r country-props-alt2}
 # One immigrant
 ag_oneimm <- lm(prop_same_sex_oneimm ~ distw + contig + comlang_off + comlang_ethno + colony +
                    wage_dif + unemp_dif + vdem + origin_score + stock_prop + bpld,
@@ -584,10 +662,26 @@ ag_oneimm_2013_int <- lm(prop_same_sex_oneimm ~ distw + contig + comlang_off +
          data = mutate(acs_prop_yrimmig_policy, post_2013 = (yrimmig > 2013)))
 
 
+# Two immigrants
+ag_twoimm <- lm(prop_same_sex_twoimm ~ distw + contig + comlang_off + comlang_ethno + colony +
+                   wage_dif + unemp_dif + vdem + origin_score + stock_prop + bpld,
+         data = acs_prop_yrimmig_policy)
+
+ag_twoimm_2013 <- lm(prop_same_sex_twoimm ~ distw + contig + comlang_off + comlang_ethno + colony +
+                   wage_dif + unemp_dif + vdem + stock_prop + bpld +
+                     post_2013 + origin_score,
+         data = mutate(acs_prop_yrimmig_policy, post_2013 = (yrimmig > 2013)))
+
+ag_twoimm_2013_int <- lm(prop_same_sex_twoimm ~ distw + contig + comlang_off +
+                           comlang_ethno + colony +
+                   wage_dif + unemp_dif + vdem + stock_prop + bpld +
+                     post_2013*origin_score,
+         data = mutate(acs_prop_yrimmig_policy, post_2013 = (yrimmig > 2013)))
+
 
 se_list <- list()
-mod_list <- list(ag_2013_spouse1, ag_2013_spouse2, ag_2013_spouse_int, 
-                 ag_oneimm, ag_oneimm_2013, ag_oneimm_2013_int)
+mod_list <- list(ag_oneimm, ag_oneimm_2013, ag_oneimm_2013_int,
+                 ag_twoimm, ag_twoimm_2013, ag_twoimm_2013_int)
 for(mod_num in 1:length(mod_list)){
   se_list[[mod_num]] <- coef(summary(mod_list[[mod_num]], cluster = c("bpld")))[, 2]
 }
@@ -600,7 +694,7 @@ stargazer(mod_list,
                                 'post_2013TRUE:origin_score') , "$"),
           covariate.labels = c('Country LGB policy score', 
                                 'Post-2013', 'Country score × Post-2013'),
-          dep.var.labels   = c("Married", "One Immigrant"),
+          dep.var.labels   = c("One Immigrant", "Two Immigrants"),
           add.lines = list(c('Country controls?', rep('yes', 6)),
                            c('Country FEs?', rep('yes', 6))),
           se = se_list,
@@ -613,7 +707,7 @@ stargazer(mod_list,
           notes.align = 'l',
           notes.append = F,
           label = 'tab:country-props-alt',
-          title = 'Alternate Specifications of OLS regressions of percent of immigrants in same-sex couples by year of immigration and country of origin, using only proportions of married couples or couples with one immigrant and one U.S.-born citizen. Country-clustered standard errors shown in parentheses. Country controls include population-weighted distance, contiguous border, common official language, common ethnic language, colonial relationship, wage differential, unemployment differential, proportion same-country stock, and Polity 5 measure of democracy.')
+          title = 'Alternate specifications of OLS regressions of percent of immigrants in same-sex couples by year of immigration and country of origin, using only proportions of couples with one immigrant and one U.S.-born citizen or two immigrants. Country-clustered standard errors shown in parentheses. Country controls include population-weighted distance, contiguous border, common official language, common ethnic language, colonial relationship, wage differential, unemployment differential, proportion same-country stock, and Polity 5 measure of democracy.')
 ```
 
 \newpage

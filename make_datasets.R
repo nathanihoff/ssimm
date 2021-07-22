@@ -150,6 +150,8 @@ acs_dyad <- acs_coupled_imms %>%
             n_partner = sum(perwt[married == F]),
             n_spouse_oneimm = sum(perwt[imm_couple == 'one' & married == T]),
             n_partner_oneimm = sum(perwt[imm_couple == 'one' & married == F]),
+            n_spouse_twoimm = sum(perwt[imm_couple == 'two' & married == T]),
+            n_partner_twoimm = sum(perwt[imm_couple == 'two' & married == F]),
             n_spouse_adj = sum(perwt[married == T & year == 2019]) +
               sum(perwt[respmode == 'Mail' & married == T & year < 2019])*(1-(.59+.474)/2) +
               sum(perwt[respmode == 'CATI/CAPI' & married == T & year < 2019])*(1-.46) +
@@ -234,6 +236,8 @@ acs_prop_yrimmig <- acs_wide %>%
             n_partner = sum(perwt[married == F]),
             n_spouse_oneimm = sum(perwt[imm_couple == 'one' & married == T]),
             n_partner_oneimm = sum(perwt[imm_couple == 'one' & married == F]),
+            n_spouse_twoimm = sum(perwt[imm_couple == 'two' & married == T]),
+            n_partner_twoimm = sum(perwt[imm_couple == 'two' & married == F]),
             n_spouse_adj = sum(perwt[married == T & year == 2019]) +
               sum(perwt[respmode == 'Mail' & married == T & year < 2019])*(1-(.59+.474)/2) +
               sum(perwt[respmode == 'CATI/CAPI' & married == T & year < 2019])*(1-.46) +
@@ -291,7 +295,8 @@ acs_prop_yrimmig <- acs_wide %>%
     prop_spouse_same_sex = n_spouse_same_sex / n_total * 100,
     prop_partner_same_sex = n_partner_same_sex / n_total * 100,
     prop_same_sex = prop_spouse_same_sex + prop_partner_same_sex,
-    prop_same_sex_oneimm = (n_spouse_oneimm_same_sex + n_partner_oneimm_same_sex) / n_total * 100)
+    prop_same_sex_oneimm = (n_spouse_oneimm_same_sex + n_partner_oneimm_same_sex) / n_total * 100,
+    prop_same_sex_twoimm = (n_spouse_twoimm_same_sex + n_partner_twoimm_same_sex) / n_total * 100)
 
 
 
@@ -521,7 +526,8 @@ acs_dyad_policy1 <- acs_dyad %>%
     prop_spouse_same_sex = n_spouse_same_sex / state_stock_year * 100,
     prop_partner_same_sex = n_partner_same_sex / state_stock_year * 100,
     same_prop = prop_spouse_same_sex + prop_partner_same_sex,
-    prop_same_sex_oneimm = (n_spouse_oneimm_same_sex + n_partner_oneimm_same_sex) / state_stock_year * 100)
+    prop_same_sex_oneimm = (n_spouse_oneimm_same_sex + n_partner_oneimm_same_sex) / state_stock_year * 100,
+    prop_same_sex_twoimm = (n_spouse_twoimm_same_sex + n_partner_twoimm_same_sex) / state_stock_year * 100)
   
   
   # mutate(same_prop = same_sex_stock / state_stock_year * 100,
@@ -597,7 +603,7 @@ acs_couple_policy <- acs_coupled_imms %>%
           nchild, ihs_income, no_income, yrimmig, 
           distw, contig, comlang_off, comlang_ethno,
           wage_dif, unemp_dif, vdem, stock_prop,
-          state_unemploy, state_income)
+          state_unemploy, state_income) %>%
   filter(allocated == F)
 
 write_rds(acs_couple_policy, here('data', 'acs_couple_policy.rds'))
