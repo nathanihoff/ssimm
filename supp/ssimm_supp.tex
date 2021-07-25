@@ -117,7 +117,7 @@
 \makeatother
 \subtitle{Making Migration Sexy}
 \author{Nathan I. Hoffmann, Department of Sociology, University of California, Los Angeles \and Kristopher Velasco, Department of Sociology, Princeton University}
-\date{July 22, 2021}
+\date{July 25, 2021}
 
 \begin{document}
 \maketitle
@@ -507,37 +507,40 @@ Observations & 35,868 & 35,868 & 35,868 & 35,868 & 35,868 & 35,868 \\
 \begin{table}[!htbp] \centering 
   \caption{Alternate specifications of OLS regressions of percent of immigrants in same-sex couples by year of immigration and country of origin, using only proportions of married couples. Country-clustered standard errors shown in parentheses. Country controls include population-weighted distance, contiguous border, common official language, common ethnic language, colonial relationship, wage differential, unemployment differential, proportion same-country stock, and Polity 5 measure of democracy.} 
   \label{tab:country-props-alt} 
-\begin{tabular}{@{\extracolsep{5pt}}lccc} 
+\begin{tabular}{@{\extracolsep{5pt}}lccccc} 
 \\[-1.8ex]\hline 
 \hline \\[-1.8ex] 
- & \multicolumn{3}{c}{\textit{Dependent variable:}} \\ 
-\cline{2-4} 
-\\[-1.8ex] & \multicolumn{3}{c}{Married} \\ 
-\\[-1.8ex] & (1) & (2) & (3)\\ 
+ & \multicolumn{5}{c}{\textit{Dependent variable:}} \\ 
+\cline{2-6} 
+\\[-1.8ex] & \multicolumn{3}{c}{Married} & \multicolumn{2}{c}{Percentage same-sex} \\ 
+\\[-1.8ex] & (1) & (2) & (3) & (4) & (5)\\ 
 \hline \\[-1.8ex] 
- Country LGB policy score & 0.076$^{***}$ & 0.041$^{†}$ & 0.001 \\ 
-  & (0.022) & (0.024) & (0.028) \\ 
-  & & & \\ 
- Post-2013 &  & 0.350$^{***}$ & 0.200$^{*}$ \\ 
-  &  & (0.085) & (0.100) \\ 
-  & & & \\ 
- Country score × Post-2013 &  &  & 0.070$^{**}$ \\ 
-  &  &  & (0.025) \\ 
-  & & & \\ 
+ Country LGB policy score & 0.076$^{***}$ & 0.041$^{†}$ & 0.001 & $-$0.056 & $-$0.056 \\ 
+  & (0.022) & (0.024) & (0.028) & (0.053) & (0.053) \\ 
+  & & & & & \\ 
+ (Country LGB policy score)$\wedge{}$2 &  & 0.350$^{***}$ & 0.200$^{*}$ &  & 0.260$^{**}$ \\ 
+  &  & (0.085) & (0.100) &  & (0.089) \\ 
+  & & & & & \\ 
+ Post-2013 &  &  & 0.070$^{**}$ &  &  \\ 
+  &  &  & (0.025) &  &  \\ 
+  & & & & & \\ 
+ Country score × Post-2013 &  &  &  & 0.014$^{*}$ & 0.010$^{†}$ \\ 
+  &  &  &  & (0.006) & (0.006) \\ 
+  & & & & & \\ 
 \hline \\[-1.8ex] 
-Country controls? & yes & yes & yes \\ 
-Country FEs? & yes & yes & yes \\ 
-Observations & 3,281 & 3,281 & 3,281 \\ 
+Country controls? & yes & yes & yes & yes & yes \\ 
+Country FEs? & yes & yes & yes & yes & yes \\ 
+Observations & 3,281 & 3,281 & 3,281 & 3,281 & 3,281 \\ 
 \hline 
 \hline \\[-1.8ex] 
-\multicolumn{4}{l}{Note: †p<0.1; *p<0.05; **p<0.01; ***p<0.001} \\ 
-\multicolumn{4}{l}{Source: American Community Survey 2008-2019} \\ 
+\multicolumn{6}{l}{Note: †p<0.1; *p<0.05; **p<0.01; ***p<0.001} \\ 
+\multicolumn{6}{l}{Source: American Community Survey 2008-2019} \\ 
 \end{tabular} 
 \end{table}
 
 \begin{table}[!htbp] \centering 
   \caption{Alternate specifications of OLS regressions of percent of immigrants in same-sex couples by year of immigration and country of origin, using only proportions of couples with one immigrant and one U.S.-born citizen or two immigrants. Country-clustered standard errors shown in parentheses. Country controls include population-weighted distance, contiguous border, common official language, common ethnic language, colonial relationship, wage differential, unemployment differential, proportion same-country stock, and Polity 5 measure of democracy.} 
-  \label{tab:country-props-alt} 
+  \label{tab:country-props-alt2} 
 \begin{tabular}{@{\extracolsep{5pt}}lcccccc} 
 \\[-1.8ex]\hline 
 \hline \\[-1.8ex] 

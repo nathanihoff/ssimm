@@ -590,6 +590,8 @@ stargazer(mod_list,
 
 \newpage
 
+
+
 ## Alternate specifications of country proportion models
 ```{r country-props-alt}
 
@@ -613,8 +615,29 @@ ag_2013_spouse_int <- lm(prop_spouse_same_sex ~ distw + contig + comlang_off +
                      post_2013*origin_score,
          data = mutate(acs_prop_yrimmig_policy, post_2013 = (yrimmig > 2013)))
 
+# Quadratic
+ag_2013_quad1 <- lm(prop_same_sex ~ distw + contig + comlang_off + 
+                        comlang_ethno + colony +
+                   wage_dif + unemp_dif + vdem + origin_score + I(origin_score^2) + stock_prop + bpld,
+         data = mutate(acs_prop_yrimmig_policy, post_2013 = (yrimmig > 2013)))
+
+# Quadratic, + 2013
+ag_2013_quad2 <- lm(prop_same_sex ~ distw + contig + comlang_off + 
+                        comlang_ethno + colony +
+                   wage_dif + unemp_dif + vdem + origin_score + I(origin_score^2) + stock_prop + bpld +
+                     post_2013,
+         data = mutate(acs_prop_yrimmig_policy, post_2013 = (yrimmig > 2013)))
+
+# # Quadratic + interaction
+# ag_2013_quad_int <- lm(prop_same_sex ~ distw + contig + comlang_off + 
+#                            comlang_ethno + colony + bpld +
+#                    wage_dif + unemp_dif + vdem  + stock_prop +
+#                      post_2013*origin_score + I(origin_score^2),
+#          data = mutate(acs_prop_yrimmig_policy, post_2013 = (yrimmig > 2013)))
+
 se_list <- list()
-mod_list <- list(ag_2013_spouse1, ag_2013_spouse2, ag_2013_spouse_int)
+mod_list <- list(ag_2013_spouse1, ag_2013_spouse2, ag_2013_spouse_int, 
+                 ag_2013_quad1, ag_2013_quad2)
 for(mod_num in 1:length(mod_list)){
   se_list[[mod_num]] <- coef(summary(mod_list[[mod_num]], cluster = c("bpld")))[, 2]
 }
@@ -623,13 +646,13 @@ stargazer(mod_list,
           header = F, 
           model.names = F,
           keep = c('origin_score', 'post_2013'),
-          order = paste0("^", c('origin_score', 'post_2013TRUE', 
+          order = paste0("^", c('origin_score', 'I(origin_score^2)', 'post_2013TRUE',
                                 'post_2013TRUE:origin_score') , "$"),
-          covariate.labels = c('Country LGB policy score', 
+          covariate.labels = c('Country LGB policy score', '(Country LGB policy score)$\\wedge{}$2',
                                 'Post-2013', 'Country score × Post-2013'),
-          dep.var.labels   = c("Married"),
-          add.lines = list(c('Country controls?', rep('yes', 3)),
-                           c('Country FEs?', rep('yes', 3))),
+          dep.var.labels   = c("Married", "Percentage same-sex"),
+          add.lines = list(c('Country controls?', rep('yes', 5)),
+                           c('Country FEs?', rep('yes', 5))),
           se = se_list,
           keep.stat = c('n'),
           star.cutoffs = c(0.1, 0.05, 0.01, 0.001),
@@ -706,7 +729,7 @@ stargazer(mod_list,
           notes.label = '',
           notes.align = 'l',
           notes.append = F,
-          label = 'tab:country-props-alt',
+          label = 'tab:country-props-alt2',
           title = 'Alternate specifications of OLS regressions of percent of immigrants in same-sex couples by year of immigration and country of origin, using only proportions of couples with one immigrant and one U.S.-born citizen or two immigrants. Country-clustered standard errors shown in parentheses. Country controls include population-weighted distance, contiguous border, common official language, common ethnic language, colonial relationship, wage differential, unemployment differential, proportion same-country stock, and Polity 5 measure of democracy.')
 ```
 

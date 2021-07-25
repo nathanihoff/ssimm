@@ -1,11 +1,11 @@
-This is XeTeX, Version 3.141592653-2.6-0.999993 (TeX Live 2021) (preloaded format=xelatex 2021.7.5)  22 JUL 2021 16:19
+This is XeTeX, Version 3.141592653-2.6-0.999993 (TeX Live 2021) (preloaded format=xelatex 2021.7.25)  25 JUL 2021 10:30
 entering extended mode
  restricted \write18 enabled.
  %&-line parsing enabled.
 **ssimm_supp.tex
 (./ssimm_supp.tex
 LaTeX2e <2021-06-01> patch level 1
-L3 programming layer <2021-06-18> (/Users/nathan/Library/TinyTeX/texmf-dist/tex
+L3 programming layer <2021-07-12> (/Users/nathan/Library/TinyTeX/texmf-dist/tex
 /latex/base/article.cls
 Document Class: article 2021/02/12 v1.4n Standard LaTeX document class
 (/Users/nathan/Library/TinyTeX/texmf-dist/tex/latex/base/size11.clo
@@ -87,11 +87,11 @@ Package: ifluatex 2019/10/25 v1.5 ifluatex legacy package. Use iftex instead.
 )
 (/Users/nathan/Library/TinyTeX/texmf-dist/tex/latex/unicode-math/unicode-math.s
 ty (/Users/nathan/Library/TinyTeX/texmf-dist/tex/latex/l3kernel/expl3.sty
-Package: expl3 2021-06-18 L3 programming layer (loader) 
+Package: expl3 2021-07-12 L3 programming layer (loader) 
 
 (/Users/nathan/Library/TinyTeX/texmf-dist/tex/latex/l3backend/l3backend-xetex.d
 ef
-File: l3backend-xetex.def 2021-05-07 L3 backend support: XeTeX
+File: l3backend-xetex.def 2021-07-12 L3 backend support: XeTeX
 (|extractbb --version)
 \c__kernel_sys_dvipdfmx_version_int=\count198
 \l__color_backend_stack_int=\count199
@@ -510,11 +510,7 @@ Package: makecell 2009/08/03 V0.1e Managing of Tab Column Heads and Cells
 )
 \cslhangindent=\skip77
 \csllabelwidth=\skip78
-(./ssimm_supp.aux
-
-LaTeX Warning: Label `tab:country-props-alt' multiply defined.
-
-)
+(./ssimm_supp.aux)
 \openout1 = `ssimm_supp.aux'.
 
 LaTeX Font Info:    Checking defaults for OML/cmm/m/it on input line 122.
@@ -945,25 +941,22 @@ Overfull \hbox (28.6435pt too wide) in paragraph at lines 395--430
  []
 
 [6] [7] [8] [9] [10] [11] [12] [13]
-Overfull \hbox (39.35796pt too wide) in paragraph at lines 663--716
+Overfull \hbox (39.35796pt too wide) in paragraph at lines 666--719
  [][] 
  []
 
 
-LaTeX Warning: Float too large for page by 256.65912pt on input line 801.
+LaTeX Warning: Float too large for page by 256.65912pt on input line 804.
 
 [14] [15] [16] [17] (./ssimm_supp.aux)
-
-LaTeX Warning: There were multiply-defined labels.
-
 Package rerunfilecheck Info: File `ssimm_supp.out' has not changed.
 (rerunfilecheck)             Checksum: B272EFC4D62B7E1A6B7A5B1CF248C405;2031.
  ) 
 Here is how much of TeX's memory you used:
- 17907 strings out of 478451
- 316162 string characters out of 5857871
- 875029 words of memory out of 5000000
- 37947 multiletter control sequences out of 15000+600000
+ 17909 strings out of 478475
+ 316190 string characters out of 5858358
+ 872857 words of memory out of 5000000
+ 37925 multiletter control sequences out of 15000+600000
  414311 words of font info for 90 fonts, out of 8000000 for 9000
  14 hyphenation exceptions out of 8191
  87i,13n,120p,2226b,339s stack positions out of 5000i,500n,10000p,200000b,80000s
