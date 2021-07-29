@@ -1444,8 +1444,6 @@ Third, we assess whether the results in Table \ref{tab:country-props} are driven
 
 
 
-
-
 # Discussion and Conclusion
 In 2013, there were `r round(same_2013 /1e3, 1)` thousand same-sex couples that included immigrants in the U.S. By 2019, this number had nearly doubled to `r round(same_2019 /1e3, 1)` thousand. Despite this expansive growth, far outpacing overall migration rates, there is little demographic research investigating the characteristics of these couples or the factors influencing their migratory patterns. The research on queer migrants that does exist is largely qualitative and focused on asylum claims. Consequently, we know little about who these migrants are, why they are leaving their home countries, or where they are choosing to locate once in the U.S. Answering these questions is important, not just because this represents an increasing number of border crossers, but because this process has the potential to reshape our conceptualization of who immigrants are, their motivations for moving, and how policy unrelated to migration can shape the aspirations and capabilities of would-be migrants [@dehaas_2021].  
 
