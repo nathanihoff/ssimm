@@ -1,4 +1,4 @@
-This is XeTeX, Version 3.141592653-2.6-0.999993 (TeX Live 2021) (preloaded format=xelatex 2021.7.25)  25 JUL 2021 10:30
+This is XeTeX, Version 3.141592653-2.6-0.999993 (TeX Live 2021) (preloaded format=xelatex 2021.7.25)  31 JUL 2021 16:33
 entering extended mode
  restricted \write18 enabled.
  %&-line parsing enabled.
@@ -941,22 +941,22 @@ Overfull \hbox (28.6435pt too wide) in paragraph at lines 395--430
  []
 
 [6] [7] [8] [9] [10] [11] [12] [13]
-Overfull \hbox (39.35796pt too wide) in paragraph at lines 666--719
+Overfull \hbox (39.35796pt too wide) in paragraph at lines 682--735
  [][] 
  []
 
 
-LaTeX Warning: Float too large for page by 256.65912pt on input line 804.
+LaTeX Warning: Float too large for page by 256.65912pt on input line 820.
 
 [14] [15] [16] [17] (./ssimm_supp.aux)
 Package rerunfilecheck Info: File `ssimm_supp.out' has not changed.
 (rerunfilecheck)             Checksum: B272EFC4D62B7E1A6B7A5B1CF248C405;2031.
  ) 
 Here is how much of TeX's memory you used:
- 17909 strings out of 478475
- 316190 string characters out of 5858358
- 872857 words of memory out of 5000000
- 37925 multiletter control sequences out of 15000+600000
+ 17910 strings out of 478475
+ 316199 string characters out of 5858358
+ 871976 words of memory out of 5000000
+ 37926 multiletter control sequences out of 15000+600000
  414311 words of font info for 90 fonts, out of 8000000 for 9000
  14 hyphenation exceptions out of 8191
  87i,13n,120p,2226b,339s stack positions out of 5000i,500n,10000p,200000b,80000s

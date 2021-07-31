@@ -117,7 +117,7 @@
 \makeatother
 \subtitle{Making Migration Sexy}
 \author{Nathan I. Hoffmann, Department of Sociology, University of California, Los Angeles \and Kristopher Velasco, Department of Sociology, Princeton University}
-\date{July 25, 2021}
+\date{July 31, 2021}
 
 \begin{document}
 \maketitle
@@ -505,27 +505,27 @@ Observations & 35,868 & 35,868 & 35,868 & 35,868 & 35,868 & 35,868 \\
 \subsection{Alternate specifications of country proportion models}\label{alternate-specifications-of-country-proportion-models}}
 
 \begin{table}[!htbp] \centering 
-  \caption{Alternate specifications of OLS regressions of percent of immigrants in same-sex couples by year of immigration and country of origin, using only proportions of married couples. Country-clustered standard errors shown in parentheses. Country controls include population-weighted distance, contiguous border, common official language, common ethnic language, colonial relationship, wage differential, unemployment differential, proportion same-country stock, and Polity 5 measure of democracy.} 
+  \caption{Alternate specifications of OLS regressions of percent of immigrants in same-sex couples by year of immigration and country of origin. Models add a quadratic term or include only married couples. Country-clustered standard errors shown in parentheses. Country controls include population-weighted distance, contiguous border, common official language, common ethnic language, colonial relationship, wage differential, unemployment differential, proportion same-country stock, and Polity 5 measure of democracy.} 
   \label{tab:country-props-alt} 
 \begin{tabular}{@{\extracolsep{5pt}}lccccc} 
 \\[-1.8ex]\hline 
 \hline \\[-1.8ex] 
  & \multicolumn{5}{c}{\textit{Dependent variable:}} \\ 
 \cline{2-6} 
-\\[-1.8ex] & \multicolumn{3}{c}{Married} & \multicolumn{2}{c}{Percentage same-sex} \\ 
+\\[-1.8ex] & \multicolumn{2}{c}{Percentage same-sex} & \multicolumn{3}{c}{Married} \\ 
 \\[-1.8ex] & (1) & (2) & (3) & (4) & (5)\\ 
 \hline \\[-1.8ex] 
- Country LGB policy score & 0.076$^{***}$ & 0.041$^{†}$ & 0.001 & $-$0.056 & $-$0.056 \\ 
-  & (0.022) & (0.024) & (0.028) & (0.053) & (0.053) \\ 
+ Country LGB policy score & $-$0.056 & $-$0.056 & 0.076$^{***}$ & 0.041$^{†}$ & 0.001 \\ 
+  & (0.053) & (0.053) & (0.022) & (0.024) & (0.028) \\ 
   & & & & & \\ 
- (Country LGB policy score)$\wedge{}$2 &  & 0.350$^{***}$ & 0.200$^{*}$ &  & 0.260$^{**}$ \\ 
-  &  & (0.085) & (0.100) &  & (0.089) \\ 
+ (Country LGB policy score) $\hat{}$ 2 & 0.014$^{*}$ & 0.010$^{†}$ &  &  &  \\ 
+  & (0.006) & (0.006) &  &  &  \\ 
   & & & & & \\ 
- Post-2013 &  &  & 0.070$^{**}$ &  &  \\ 
-  &  &  & (0.025) &  &  \\ 
+ Post-2013 &  & 0.260$^{**}$ &  & 0.350$^{***}$ & 0.200$^{*}$ \\ 
+  &  & (0.089) &  & (0.085) & (0.100) \\ 
   & & & & & \\ 
- Country score × Post-2013 &  &  &  & 0.014$^{*}$ & 0.010$^{†}$ \\ 
-  &  &  &  & (0.006) & (0.006) \\ 
+ Country score × Post-2013 &  &  &  &  & 0.070$^{**}$ \\ 
+  &  &  &  &  & (0.025) \\ 
   & & & & & \\ 
 \hline \\[-1.8ex] 
 Country controls? & yes & yes & yes & yes & yes \\ 
@@ -538,6 +538,22 @@ Observations & 3,281 & 3,281 & 3,281 & 3,281 & 3,281 \\
 \end{tabular} 
 \end{table}
 
+\begin{table}
+
+\caption{\label{tab:fit}Goodness-of-fit statistics for linear and quadratic country proportion models.}
+\centering
+\begin{tabular}[t]{lrrr}
+\toprule
+Model & Log-likelihood & AIC & BIC\\
+\midrule
+Country proportions, linear & -6460 & 13163 & 13901\\
+Country proportions, quadratic & -6458 & 13160 & 13903\\
++2013, linear & -6455 & 13154 & 13898\\
++2013, quadratic & -6454 & 13153 & 13903\\
+\bottomrule
+\end{tabular}
+\end{table}
+
 \begin{table}[!htbp] \centering 
   \caption{Alternate specifications of OLS regressions of percent of immigrants in same-sex couples by year of immigration and country of origin, using only proportions of couples with one immigrant and one U.S.-born citizen or two immigrants. Country-clustered standard errors shown in parentheses. Country controls include population-weighted distance, contiguous border, common official language, common ethnic language, colonial relationship, wage differential, unemployment differential, proportion same-country stock, and Polity 5 measure of democracy.} 
   \label{tab:country-props-alt2} 
@@ -546,7 +562,7 @@ Observations & 3,281 & 3,281 & 3,281 & 3,281 & 3,281 \\
 \hline \\[-1.8ex] 
  & \multicolumn{6}{c}{\textit{Dependent variable:}} \\ 
 \cline{2-7} 
-\\[-1.8ex] & \multicolumn{3}{c}{One Immigrant} & \multicolumn{3}{c}{Two Immigrants} \\ 
+\\[-1.8ex] & \multicolumn{3}{c}{One immigrant} & \multicolumn{3}{c}{Two immigrants} \\ 
 \\[-1.8ex] & (1) & (2) & (3) & (4) & (5) & (6)\\ 
 \hline \\[-1.8ex] 
  Country LGB policy score & 0.009 & 0.003 & $-$0.010 & 0.043$^{†}$ & 0.020 & $-$0.009 \\ 
