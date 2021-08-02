@@ -862,7 +862,7 @@ dif_pred2 <- filter(sim_df, same_sex == 'Different-sex', origin_score == orig_ma
 \end{center}
 
 - Nathan I. Hoffmann ([nathanihoff\@ucla.edu](mailto:nathanihoff@ucla.edu))
-- Kristopher Velasco ([krisvelasco\@utexas.edu](mailto:krisvelasco\@utexas.edu))
+- Kristopher Velasco ([kvelasco\@princeton.edu](mailto:kvelasco\@princeton.edu))
 - Full paper on SocArXiv: https://osf.io/preprints/socarxiv/hxjkt/
 
 
