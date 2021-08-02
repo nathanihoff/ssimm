@@ -18,7 +18,7 @@ output:
 
 
 title: "Making Migration Sexy: How State and National Policies Influence Migration of Same-Sex Couples"
-subtitle: "PAA 2021 Annual Meeting"
+subtitle: "ASA 2021 Annual Meeting"
 
 
 author: |
