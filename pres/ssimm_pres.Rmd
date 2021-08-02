@@ -14,7 +14,7 @@ output:
 # header-includes:
 #   - \AtBeginDocument{\title[Making Migration Sexy]{Making Migration Sexy: How State and National Policies Influence Migration of Same-Sex Couples}}
 #   -\AtBeginDocument{\author[Hoffmann \& Velasco]{ Nathan I. Hoffmann, Sociology, UCLA
-#  \\ Kristopher Velasco, Sociology, UT Austin}}
+#  \\ Kristopher Velasco, Sociology, Princeton}}
 
 
 title: "Making Migration Sexy: How State and National Policies Influence Migration of Same-Sex Couples"
@@ -23,9 +23,9 @@ subtitle: "PAA 2021 Annual Meeting"
 
 author: |
   | Nathan I. Hoffmann, Department of Sociology, UCLA
-  | Kristopher Velasco, Depatment of Sociology, UT Austin
+  | Kristopher Velasco, Depatment of Sociology, Princeton
 
-date: "UCLA & UT Austin"
+date: "UCLA & Princeton"
 ---
 
 ```{r setup, include=F}
