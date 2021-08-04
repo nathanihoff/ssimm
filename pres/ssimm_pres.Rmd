@@ -199,6 +199,7 @@ total_df %>%
     + OLS regression with state and country fixed effects
 - **Analysis 3**: Individual-level models predicting state policy environment
     + Ordered logistic regression with survey-year fixed effects
+    + See paper for more details.
 
 
 # Results
@@ -483,11 +484,11 @@ ggplot(coef_df, aes(x = variable, y = Estimate,
 ```
 
 
-## Model Results: Individual Analysis
-- Ordered logit to predict three-category LGB policy environment at the U.S. state level corroborate findings from previous models
-- At the individual level, immigrants in same-sex couples are more likely to live in progressive states, net of individual characteristics
-- Interaction between country of origin and same-sex partnership: LGB immigrants from more progressive origin countries tend to live in more progressive U.S. states
-    + For immigrants in different-sex couples, interaction term is insignificant
+<!-- ## Model Results: Individual Analysis -->
+<!-- - Ordered logit to predict three-category LGB policy environment at the U.S. state level corroborate findings from previous models -->
+<!-- - At the individual level, immigrants in same-sex couples are more likely to live in progressive states, net of individual characteristics -->
+<!-- - Interaction between country of origin and same-sex partnership: LGB immigrants from more progressive origin countries tend to live in more progressive U.S. states -->
+<!--     + For immigrants in different-sex couples, interaction term is insignificant -->
 
 
 # Discussion
