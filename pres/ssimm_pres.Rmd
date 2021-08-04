@@ -227,7 +227,7 @@ wage_dif <- acs_ind_survey %>%
   mutate(same_sex = ifelse(same_sex == T, 'Same-Sex', 'Different-Sex')) %>%
   group_by(year, same_sex) %>%
   summarize(var = survey_mean(wage_dif, vartype = "ci", na.rm = T)) %>%
-  mutate(var_name = 'Bilateral Wage Differential in Year of Migration')
+  mutate(var_name = 'Bilateral Per-Capita GDP Differential in Year of Migration')
 
 vdem <- acs_ind_survey %>%
   mutate(same_sex = ifelse(same_sex == T, 'Same-Sex', 'Different-Sex')) %>%
@@ -236,20 +236,20 @@ vdem <- acs_ind_survey %>%
   mutate(var_name = 'V-Dem Score in Year of Migration')
 
 
-desc_plot <- function(df, legend_pos = c(.8, .8)){
+desc_plot <- function(df, legend_pos = c(.8, .8), ylab = ''){
   df %>%
     rename(Year = year) %>%
     ggplot(aes(x = Year, y = var, color = same_sex)) +
     geom_line() +
     geom_ribbon(aes(ymin = var_low, ymax = var_upp, fill = same_sex, col = NULL), alpha = .2) +
     facet_wrap(~var_name) +
-    ylab('') +
+    ylab(ylab) +
     theme(legend.justification=c(1,0),
         legend.position= legend_pos,
         legend.background = element_rect(fill = alpha("white", 0.5)))
 }
 
-desc_plot(income, legend_pos = c(.5,.82))
+desc_plot(income, legend_pos = c(.5,.82), ylab = '1999 U.S. dollars (thousands)')
 
 # bind_rows(income, wage_dif, vdem, prop_stock) %>%
 #   rename(Year = year) %>%
@@ -266,7 +266,7 @@ desc_plot(income, legend_pos = c(.5,.82))
 
 ## Descriptive Statistics
 ```{r desc2}
-desc_plot(wage_dif, c(.3, .83))
+desc_plot(wage_dif, c(.3, .83), ylab = '1999 U.S. dollars (thousands)')
 ```
 
 ## Descriptive Statistics
