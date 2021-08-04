@@ -307,7 +307,7 @@ Kristopher Velasco, Depatment of Sociology, Princeton}
     This necessarily excludes single and non-cohabiting LGB individuals
   \end{itemize}
 \item
-  Sample of 7,500 immigrants in same-sex couples compared to 947,227
+  Sample of 7,011 immigrants in same-sex couples compared to 898,869
   immigrants in different-sex couples
 \end{itemize}
 \end{frame}
@@ -391,77 +391,29 @@ Kristopher Velasco, Depatment of Sociology, Princeton}
 \end{center}
 \end{frame}
 
-\begin{frame}[fragile]{Descriptive Statistics}
+\begin{frame}{Descriptive Statistics}
 \protect\hypertarget{descriptive-statistics}{}
-\begin{verbatim}
-## Error: Problem with `summarise()` column `var`.
-## i `var = survey_mean(polity5, vartype = "ci", na.rm = T)`.
-## x object 'polity5' not found
-## i The error occurred in group 1: year = 2008, same_sex = "Different-Sex".
-\end{verbatim}
-
-\begin{verbatim}
-## Error in list2(...): object 'polity5' not found
-\end{verbatim}
+\includegraphics{ssimm_pres_files/figure-beamer/desc-1.pdf}
 \end{frame}
 
 \begin{frame}{Descriptive Statistics}
 \protect\hypertarget{descriptive-statistics-1}{}
-\includegraphics{ssimm_pres_files/figure-beamer/policy-desc-1.pdf}
+\includegraphics{ssimm_pres_files/figure-beamer/desc2-1.pdf}
 \end{frame}
 
 \begin{frame}{Descriptive Statistics}
 \protect\hypertarget{descriptive-statistics-2}{}
-\begin{table}
-
-\caption{\label{tab:country-tab}Sending countries ranked by proportion immigrant couples with same-sex partners}
-\centering
-\fontsize{9}{11}\selectfont
-\begin{tabular}[t]{lllr}
-\toprule
-Rank & Country of origin & Proportion same-sex & Mean policy score\\
-\midrule
-1 & Belgium & 2.98 \% & 5.38\\
-2 & Australia & 2.73 \% & 4.56\\
-3 & Netherlands & 2.61 \% & 7.20\\
-4 & Malaysia & 2.56 \% & -1.01\\
-5 & Mongolia & 2.41 \% & 2.15\\
-6 & Zimbabwe & 2.38 \% & -1.07\\
-7 & Finland & 2.37 \% & 4.42\\
-8 & Singapore & 2.34 \% & -0.02\\
-9 & Cyprus & 2.30 \% & 0.66\\
-10 & Spain & 2.27 \% & 6.33\\
-\bottomrule
-\multicolumn{4}{l}{\rule{0pt}{1em}\textit{Source:} American Community Survey 2008-2019. Authors' calculations.}\\
-\end{tabular}
-\end{table}
+\includegraphics{ssimm_pres_files/figure-beamer/desc3-1.pdf}
 \end{frame}
 
 \begin{frame}{Descriptive Statistics}
 \protect\hypertarget{descriptive-statistics-3}{}
-\begin{table}
+\includegraphics{ssimm_pres_files/figure-beamer/desc4-1.pdf}
+\end{frame}
 
-\caption{\label{tab:state-tab}States ranked by proportion immigrant couples with same-sex partners}
-\centering
-\fontsize{9}{11}\selectfont
-\begin{tabular}[t]{lllr}
-\toprule
-Rank & State & Proportion same-sex & Mean policy score\\
-\midrule
-1 & Vermont & 2.10 \% & 5.25\\
-2 & Maine & 1.51 \% & 4.85\\
-3 & Montana & 1.47 \% & 0.93\\
-4 & Missouri & 1.11 \% & 1.96\\
-5 & Massachusetts & 1.10 \% & 4.80\\
-6 & New York & 1.08 \% & 4.89\\
-7 & Florida & 0.99 \% & 1.00\\
-8 & New Hampshire & 0.95 \% & 4.40\\
-9 & Minnesota & 0.92 \% & 4.66\\
-10 & New Mexico & 0.92 \% & 4.80\\
-\bottomrule
-\multicolumn{4}{l}{\rule{0pt}{1em}\textit{Source:} American Community Survey 2008-2019. Authors' calculations.}\\
-\end{tabular}
-\end{table}
+\begin{frame}{Descriptive Statistics}
+\protect\hypertarget{descriptive-statistics-4}{}
+\includegraphics{ssimm_pres_files/figure-beamer/policy-desc-1.pdf}
 \end{frame}
 
 \begin{frame}{Model Results: Country-of-Origin Effects (Table 3)}
@@ -469,14 +421,49 @@ Rank & State & Proportion same-sex & Mean policy score\\
 \includegraphics{ssimm_pres_files/figure-beamer/country-coefs-1.pdf}
 \end{frame}
 
+\begin{frame}{Model Results: Country-of-Origin Effects (Table 3)}
+\protect\hypertarget{model-results-country-of-origin-effects-table-3-1}{}
+\includegraphics{ssimm_pres_files/figure-beamer/country-coefs2-1.pdf}
+\end{frame}
+
 \begin{frame}{Model Results: State Effects (Table 4)}
 \protect\hypertarget{model-results-state-effects-table-4}{}
 \includegraphics{ssimm_pres_files/figure-beamer/state-coefs-1.pdf}
 \end{frame}
 
-\begin{frame}{Model Results: Individual Analysis (Table 5)}
-\protect\hypertarget{model-results-individual-analysis-table-5}{}
-\includegraphics{ssimm_pres_files/figure-beamer/ind-coefs-1.pdf}
+\begin{frame}{Model Results: State Effects (Table 4)}
+\protect\hypertarget{model-results-state-effects-table-4-1}{}
+\includegraphics{ssimm_pres_files/figure-beamer/state-coefs2-1.pdf}
+\end{frame}
+
+\begin{frame}{Model Results: State Effects (Table 4)}
+\protect\hypertarget{model-results-state-effects-table-4-2}{}
+\includegraphics{ssimm_pres_files/figure-beamer/state-coefs3-1.pdf}
+\end{frame}
+
+\begin{frame}{Model Results: Individual Analysis}
+\protect\hypertarget{model-results-individual-analysis}{}
+\begin{itemize}
+\tightlist
+\item
+  Ordered logit to predict three-category LGB policy environment at the
+  U.S. state level corroborate findings from previous models
+\item
+  At the individual level, immigrants in same-sex couples are more
+  likely to live in progressive states, net of individual
+  characteristics
+\item
+  Interaction between country of origin and same-sex partnership: LGB
+  immigrants from more progressive origin countries tend to live in more
+  progressive U.S. states
+
+  \begin{itemize}
+  \tightlist
+  \item
+    For immigrants in different-sex couples, interaction term is
+    insignificant
+  \end{itemize}
+\end{itemize}
 \end{frame}
 
 \hypertarget{discussion}{%
@@ -534,8 +521,74 @@ Rank & State & Proportion same-sex & Mean policy score\\
   Kristopher Velasco
   (\href{mailto:kvelasco@princeton.edu}{\nolinkurl{kvelasco@princeton.edu}})
 \item
-  Full paper on SocArXiv: \url{https://osf.io/preprints/socarxiv/hxjkt/}
+  Full paper on SocArXiv: \url{https://tinyurl.com/hoffmann-velasco}
 \end{itemize}
+
+\end{frame}
+\appendix
+\begin{frame}<0| handout:0>
+\end{frame}
+
+\hypertarget{supplemental-material}{%
+\section{Supplemental material}\label{supplemental-material}}
+
+\begin{frame}{Descriptive Statistics}
+\protect\hypertarget{descriptive-statistics-5}{}
+\begin{table}
+
+\caption{\label{tab:country-tab}Sending countries ranked by proportion immigrant couples with same-sex partners}
+\centering
+\fontsize{9}{11}\selectfont
+\begin{tabular}[t]{lllr}
+\toprule
+Rank & Country of origin & Proportion same-sex & Mean policy score\\
+\midrule
+1 & Belgium & 2.98 \% & 5.38\\
+2 & Australia & 2.73 \% & 4.56\\
+3 & Netherlands & 2.61 \% & 7.20\\
+4 & Malaysia & 2.56 \% & -1.01\\
+5 & Mongolia & 2.41 \% & 2.15\\
+6 & Zimbabwe & 2.38 \% & -1.07\\
+7 & Finland & 2.37 \% & 4.42\\
+8 & Singapore & 2.34 \% & -0.02\\
+9 & Cyprus & 2.30 \% & 0.66\\
+10 & Spain & 2.27 \% & 6.33\\
+\bottomrule
+\multicolumn{4}{l}{\rule{0pt}{1em}\textit{Source:} American Community Survey 2008-2019. Authors' calculations.}\\
+\end{tabular}
+\end{table}
+\end{frame}
+
+\begin{frame}{Descriptive Statistics}
+\protect\hypertarget{descriptive-statistics-6}{}
+\begin{table}
+
+\caption{\label{tab:state-tab}States ranked by proportion immigrant couples with same-sex partners}
+\centering
+\fontsize{9}{11}\selectfont
+\begin{tabular}[t]{lllr}
+\toprule
+Rank & State & Proportion same-sex & Mean policy score\\
+\midrule
+1 & Vermont & 2.10 \% & 5.25\\
+2 & Maine & 1.51 \% & 4.85\\
+3 & Montana & 1.47 \% & 0.93\\
+4 & Missouri & 1.11 \% & 1.96\\
+5 & Massachusetts & 1.10 \% & 4.80\\
+6 & New York & 1.08 \% & 4.89\\
+7 & Florida & 0.99 \% & 1.00\\
+8 & New Hampshire & 0.95 \% & 4.40\\
+9 & Minnesota & 0.92 \% & 4.66\\
+10 & New Mexico & 0.92 \% & 4.80\\
+\bottomrule
+\multicolumn{4}{l}{\rule{0pt}{1em}\textit{Source:} American Community Survey 2008-2019. Authors' calculations.}\\
+\end{tabular}
+\end{table}
+\end{frame}
+
+\begin{frame}{Model Results: Individual Analysis (Table 5)}
+\protect\hypertarget{model-results-individual-analysis-table-5}{}
+\includegraphics{ssimm_pres_files/figure-beamer/ind-coefs-1.pdf}
 \end{frame}
 
 \end{document}

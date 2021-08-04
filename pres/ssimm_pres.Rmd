@@ -72,7 +72,8 @@ ucladarkblue = '#003B5C'
 uclalightblue = '#8BB8E8'
 gray = '#808080'
 black = '#000000'
-ucla_palette = c(black, gray, uclalightblue)
+blue = "#0000FF"
+ucla_palette = c(uclablue, black, gray)
 
 theme_set(theme_classic(base_size = 21) + 
             theme(legend.title=element_blank(), 
@@ -81,9 +82,10 @@ theme_set(theme_classic(base_size = 21) +
                   rect = element_rect(fill = "transparent"),
                   plot.background = element_rect(fill = "transparent", color = NA),
                   panel.background = element_rect(fill = "transparent", color = NA)))
-# ggplot <- function(...) ggplot2::ggplot(...) + scale_color_manual(values = ucla_palette)
-ggplot <- function(...) ggplot2::ggplot(...) + scale_color_brewer(palette="Dark2") + 
-  scale_fill_brewer(palette="Dark2")
+ggplot <- function(...) ggplot2::ggplot(...) + scale_color_manual(values = ucla_palette) +
+  scale_fill_manual(values = ucla_palette)
+# ggplot <- function(...) ggplot2::ggplot(...) + scale_color_brewer(palette="Dark2") + 
+#   scale_fill_brewer(palette="Dark2")
 ```
 
 ```{r load, include = F}
@@ -142,8 +144,7 @@ total_df %>%
   facet_wrap(~same_sex, scales = "free") +
   xlim(2007, 2019) +
   theme(legend.justification=c(1,0),
-        legend.position=c(.15,.35)) + 
-  scale_color_brewer(palette="Dark2") + scale_fill_brewer(palette="Dark2")
+        legend.position=c(.15,.35))
 
 ```
 
@@ -176,7 +177,7 @@ total_df %>%
     + immigrated at age 18 or older post-1990
 - Immigrants in same-sex couples are identified as foreign-born respondents who live with a same-sex married or unmarried partner
     + This necessarily excludes single and non-cohabiting LGB individuals
-- Sample of 7,500 immigrants in same-sex couples compared to 947,227 immigrants in different-sex couples
+- Sample of 7,011 immigrants in same-sex couples compared to 898,869 immigrants in different-sex couples
 
 
 ## Variables
@@ -215,36 +216,6 @@ income <- acs_ind_survey %>%
   summarize(var = survey_mean(inctot, vartype = "ci", na.rm = T)) %>%
   mutate(var_name = 'Individual Income')
 
-# hwsei <- acs_ind_survey %>%
-#   mutate(same_sex = ifelse(same_sex == T, 'Same-Sex', 'Different-Sex')) %>%
-#   group_by(year, same_sex) %>%
-#   summarize(var = survey_mean(hwsei, vartype = "ci", na.rm = T)) %>%
-#   mutate(var_name = 'Hauser and Warren Socioeconomic Index')
-# 
-# nchild <- acs_ind_survey %>%
-#   mutate(same_sex = ifelse(same_sex == T, 'Same-Sex', 'Different-Sex')) %>%
-#   group_by(year, same_sex) %>%
-#   summarize(var = survey_mean(nchild, vartype = "ci", na.rm = T)) %>%
-#   mutate(var_name = 'Number of Children')
-# 
-# years <- acs_ind_survey %>%
-#   mutate(same_sex = ifelse(same_sex == T, 'Same-Sex', 'Different-Sex')) %>%
-#   group_by(year, same_sex) %>%
-#   summarize(var = survey_mean(years_in_us, vartype = "ci", na.rm = T)) %>%
-#   mutate(var_name = 'Years in U.S.')
-
-# distance <- acs_ind_survey %>%
-#   mutate(same_sex = ifelse(same_sex == T, 'Same-Sex', 'Different-Sex')) %>%
-#   group_by(year, same_sex) %>%
-#   summarize(var = survey_mean(distw, vartype = "ci", na.rm = T)) %>%
-#   mutate(var_name = 'Distance to Country of Origin (KM)')
-# 
-# unemp <- acs_ind_survey %>%
-#   mutate(same_sex = ifelse(same_sex == T, 'Same-Sex', 'Different-Sex')) %>%
-#   group_by(year, same_sex) %>%
-#   summarize(var = survey_mean(unemp_dif, vartype = "ci", na.rm = T)) %>%
-#   mutate(var_name = 'Difference in Unemployment Rates')
-
 prop_stock <- acs_ind_survey %>%
   mutate(same_sex = ifelse(same_sex == T, 'Same-Sex', 'Different-Sex')) %>%
   group_by(year, same_sex) %>%
@@ -257,38 +228,61 @@ wage_dif <- acs_ind_survey %>%
   summarize(var = survey_mean(wage_dif, vartype = "ci", na.rm = T)) %>%
   mutate(var_name = 'Bilateral Wage Differential in Year of Migration')
 
-polity5 <- acs_ind_survey %>%
+vdem <- acs_ind_survey %>%
   mutate(same_sex = ifelse(same_sex == T, 'Same-Sex', 'Different-Sex')) %>%
   group_by(year, same_sex) %>%
-  summarize(var = survey_mean(polity5, vartype = "ci", na.rm = T)) %>%
-  mutate(var_name = 'Polity5 Score in Year of Migration')
-
-# state_income <- acs_ind_survey %>%
-#   mutate(same_sex = ifelse(same_sex == T, 'Same-Sex', 'Different-Sex')) %>%
-#   group_by(year, same_sex) %>%
-#   summarize(var = survey_mean(state_income, vartype = "ci", na.rm = T)) %>%
-#   mutate(var_name = 'U.S. State of Residence Per Capita Income')
+  summarize(var = survey_mean(vdem, vartype = "ci", na.rm = T)) %>%
+  mutate(var_name = 'V-Dem Score in Year of Migration')
 
 
+desc_plot <- function(df, legend_pos = c(.8, .8)){
+  df %>%
+    rename(Year = year) %>%
+    ggplot(aes(x = Year, y = var, color = same_sex)) +
+    geom_line() +
+    geom_ribbon(aes(ymin = var_low, ymax = var_upp, fill = same_sex, col = NULL), alpha = .2) +
+    facet_wrap(~var_name) +
+    ylab('') +
+    theme(legend.justification=c(1,0),
+        legend.position= legend_pos,
+        legend.background = element_rect(fill = alpha("white", 0.5)))
+}
 
-bind_rows(income, wage_dif, polity5, prop_stock) %>%
-  rename(Year = year) %>%
-  ggplot(aes(x = Year, y = var, color = same_sex)) +
-  geom_line() +
-  geom_ribbon(aes(ymin = var_low, ymax = var_upp, fill = same_sex, col = NULL), alpha = .2) +
-  facet_wrap(~var_name, scales = "free") +
-  ylab('') +
-  theme(legend.justification=c(1,0),
-      legend.position=c(.22,.82),
-      legend.background = element_rect(fill = alpha("white", 0.5))) + 
-  scale_color_brewer(palette="Dark2") + scale_fill_brewer(palette="Dark2")
- 
+desc_plot(income, legend_pos = c(.5,.82))
+
+# bind_rows(income, wage_dif, vdem, prop_stock) %>%
+#   rename(Year = year) %>%
+#   ggplot(aes(x = Year, y = var, color = same_sex)) +
+#   geom_line() +
+#   geom_ribbon(aes(ymin = var_low, ymax = var_upp, fill = same_sex, col = NULL), alpha = .2) +
+#   facet_wrap(~var_name, scales = "free") +
+#   ylab('') +
+#   theme(legend.justification=c(1,0),
+#       legend.position=c(.22,.82),
+#       legend.background = element_rect(fill = alpha("white", 0.5))) 
+```
+
+
+## Descriptive Statistics
+```{r desc2}
+desc_plot(wage_dif, c(.3, .83))
 ```
 
 ## Descriptive Statistics
+```{r desc3}
+desc_plot(vdem, c(.9, .8))
+```
+
+## Descriptive Statistics
+```{r desc4}
+desc_plot(prop_stock, c(.8, .76))
+```
+
+
+
+
+## Descriptive Statistics
 ```{r policy-desc}
-
-
 origin_df <- acs_ind_survey %>%
   mutate(same_sex = ifelse(same_sex == T, 'Same-Sex', 'Different-Sex')) %>%
   group_by(year, same_sex) %>%
@@ -310,10 +304,224 @@ bind_rows(origin_df, state_df) %>%
                   fill = same_sex, col = NULL), alpha = .2) +
   facet_wrap(~var, scales = "free") +
   theme(legend.justification=c(1,0),
-        legend.position=c(.25,.65)) + 
-  scale_color_brewer(palette="Dark2") + scale_fill_brewer(palette="Dark2")
+        legend.position=c(.25,.65))
 ```
 
+
+
+
+
+
+## Model Results: Country-of-Origin Effects (Table 3)
+```{r country-coefs}
+ag_country_orig_fe <- lm(prop_same_sex ~ distw + contig + comlang_off + comlang_ethno + colony +
+                   wage_dif + unemp_dif + vdem + origin_score + stock_prop + bpld,
+         data = acs_prop_yrimmig_policy)
+
+ag_2013_int_fe <- lm(prop_same_sex ~ distw + contig + comlang_off + comlang_ethno + colony +
+                   wage_dif + unemp_dif + vdem  + stock_prop + bpld +
+                     post_2013*origin_score,
+         data = acs_prop_yrimmig_policy)
+
+coef_list <- list()
+mod_list <- list(ag_country_orig_fe,  ag_2013_int_fe)
+mod_names <- c('3: Country controls and FEs', '5: Controls + 2013 Interaction')
+for(mod_num in 1:length(mod_list)){
+  coef_list[[mod_num]]  <- coef(summary(mod_list[[mod_num]], cluster = c("bpld"))) %>%
+    as.data.frame() %>%
+    rownames_to_column('variable') %>%
+    mutate(lower = Estimate - 1.96*`Std. Error`, 
+           upper = Estimate + 1.96*`Std. Error`,
+           model = mod_names[mod_num])
+}
+
+coef_df <- bind_rows(coef_list) %>%
+  filter(variable %in% c('origin_score', 'post_2013TRUE', 'post_2013TRUE:origin_score')) %>%
+  mutate(variable = 
+           case_when(
+              variable == 'origin_score' ~ 'Country LGB policy score',
+              variable == 'post_2013TRUE' ~ 'Post-2013',
+              variable == 'post_2013TRUE:origin_score' ~ 'Country score × Post-2013'),
+         variable = factor(variable, 
+                           levels = c('Country score × Post-2013', 'Post-2013', 'Country LGB policy score'))
+         )
+
+ggplot(coef_df, aes(x = variable, y = Estimate, 
+                    color = ifelse(startsWith(model, '3'), 'black', 'grey'))) +
+  geom_point(position = position_dodge(0.2)) +
+  geom_errorbar(aes(ymin = lower, ymax = upper),
+                width = .1, alpha = 1, position = position_dodge(0.2)) +
+  geom_hline(yintercept = 0, linetype = 2) +
+  coord_flip() +
+  facet_wrap(~model) +
+  # scale_y_continuous(breaks = c(seq(-1.00,.50,.20))) +
+  # scale_y_continuous(breaks = c(seq(-100,50,20))) +
+  labs(x = '', y = 'Effect on percentage in same-sex couples') +
+  theme(panel.grid.major.y = element_line('transparent')) +
+  scale_color_identity()
+
+```
+
+## Model Results: Country-of-Origin Effects (Table 3)
+```{r country-coefs2}
+ggplot(coef_df, aes(x = variable, y = Estimate, 
+                    color = ifelse(startsWith(model, '5'), 'black', 'grey'))) +
+  geom_point(position = position_dodge(0.2)) +
+  geom_errorbar(aes(ymin = lower, ymax = upper),
+                width = .1, alpha = 1, position = position_dodge(0.2)) +
+  geom_hline(yintercept = 0, linetype = 2) +
+  coord_flip() +
+  facet_wrap(~model) +
+  # scale_y_continuous(breaks = c(seq(-1.00,.50,.20))) +
+  # scale_y_continuous(breaks = c(seq(-100,50,20))) +
+  labs(x = '', y = 'Effect on percentage in same-sex couples') +
+  theme(panel.grid.major.y = element_line('transparent')) +
+  scale_color_identity()
+
+```
+
+
+
+## Model Results: State Effects (Table 4)
+```{r state-coefs}
+state_prop_fe <- lm(same_prop ~ state_policy + origin_score + distw + contig + 
+                          comlang_off + comlang_ethno + colony +
+                          wage_dif + unemp_dif + vdem + stock_prop +
+                           state_unemploy + state_income + Country + state, 
+                       data = acs_dyad_policy)
+
+state_prop_fe2 <- lm(same_prop ~ state_policy*origin_score + distw + contig + 
+                          comlang_off + comlang_ethno + colony +
+                          wage_dif + unemp_dif + vdem + stock_prop +
+                           state_unemploy + state_income + Country + state, 
+                       data = acs_dyad_policy)
+state_prop_2013_int <- lm(same_prop ~ post_2013*origin_score + state_policy + distw + contig + 
+                          comlang_off + comlang_ethno + colony +
+                          wage_dif + unemp_dif + vdem + stock_prop +
+                           state_unemploy + state_income + Country + state, 
+                       data = mutate(acs_dyad_policy, post_2013 = (year > 2013)))
+
+coef_list <- list()
+mod_list <- list(state_prop_fe,  state_prop_fe2, state_prop_2013_int)
+mod_names <- c('3: Country and state controls + FEs', 
+               '4: Controls + Interaction' , 
+               '7: Controls + 2013 Interaction')
+for(mod_num in 1:length(mod_list)){
+  coef_list[[mod_num]]  <- coef(summary(mod_list[[mod_num]], cluster = c("state", "Country"))) %>%
+    as.data.frame() %>%
+    rownames_to_column('variable') %>%
+    mutate(lower = Estimate - 1.96*`Std. Error`, 
+           upper = Estimate + 1.96*`Std. Error`,
+           model = mod_names[mod_num])
+}
+
+coef_df <- bind_rows(coef_list) %>%
+  filter(variable %in% c('state_policy', 'origin_score', 
+                                'state_policy:origin_score', 'post_2013TRUE', 
+                                'post_2013TRUE:state_policy', 
+                                'post_2013TRUE:origin_score')) %>%
+  mutate(variable = 
+           case_when(
+              variable == 'origin_score' ~ 'Country LGB policy score',
+              variable == 'post_2013TRUE' ~ 'Post-2013',
+              variable == 'post_2013TRUE:origin_score' ~ 'Country score × Post-2013',
+              variable == 'state_policy' ~ 'State LGB policy score',
+              variable == 'state_policy:origin_score' ~ 'State score × country-score'),
+         variable = factor(variable, 
+                           levels = rev(c('State LGB policy score', 'Country LGB policy score',
+                                'State score × country-score', 'Post-2013', 
+                               'Country score × Post-2013')))
+         )
+
+ggplot(coef_df, aes(x = variable, y = Estimate,
+                    color = ifelse(startsWith(model, '3'), 'black', 'grey'))) +
+  geom_point(position = position_dodge(0.2)) +
+  geom_errorbar(aes(ymin = lower, ymax = upper),
+                width = .1, alpha = 1, position = position_dodge(0.2)) +
+  geom_hline(yintercept = 0, linetype = 2) +
+  coord_flip() +
+  facet_wrap(~model, labeller = label_wrap_gen(width=20)) +
+  # scale_y_continuous(breaks = c(seq(-1.00,.50,.20))) +
+  # scale_y_continuous(breaks = c(seq(-100,50,20))) +
+  labs(x = '', y = 'Effect on percentage in same-sex couples') +
+  theme(panel.grid.major.y = element_line('transparent')) +
+  scale_color_identity()
+```
+
+## Model Results: State Effects (Table 4)
+```{r state-coefs2}
+ggplot(coef_df, aes(x = variable, y = Estimate,
+                    color = ifelse(startsWith(model, '4'), 'black', 'grey'))) +
+  geom_point(position = position_dodge(0.2)) +
+  geom_errorbar(aes(ymin = lower, ymax = upper),
+                width = .1, alpha = 1, position = position_dodge(0.2)) +
+  geom_hline(yintercept = 0, linetype = 2) +
+  coord_flip() +
+  facet_wrap(~model, labeller = label_wrap_gen(width=20)) +
+  # scale_y_continuous(breaks = c(seq(-1.00,.50,.20))) +
+  # scale_y_continuous(breaks = c(seq(-100,50,20))) +
+  labs(x = '', y = 'Effect on percentage in same-sex couples') +
+  theme(panel.grid.major.y = element_line('transparent')) +
+  scale_color_identity()
+```
+
+## Model Results: State Effects (Table 4)
+```{r state-coefs3}
+ggplot(coef_df, aes(x = variable, y = Estimate,
+                    color = ifelse(startsWith(model, '7'), 'black', 'grey'))) +
+  geom_point(position = position_dodge(0.2)) +
+  geom_errorbar(aes(ymin = lower, ymax = upper),
+                width = .1, alpha = 1, position = position_dodge(0.2)) +
+  geom_hline(yintercept = 0, linetype = 2) +
+  coord_flip() +
+  facet_wrap(~model, labeller = label_wrap_gen(width=20)) +
+  # scale_y_continuous(breaks = c(seq(-1.00,.50,.20))) +
+  # scale_y_continuous(breaks = c(seq(-100,50,20))) +
+  labs(x = '', y = 'Effect on percentage in same-sex couples') +
+  theme(panel.grid.major.y = element_line('transparent')) +
+  scale_color_identity()
+```
+
+
+## Model Results: Individual Analysis
+- Ordered logit to predict three-category LGB policy environment at the U.S. state level corroborate findings from previous models
+- At the individual level, immigrants in same-sex couples are more likely to live in progressive states, net of individual characteristics
+- Interaction between country of origin and same-sex partnership: LGB immigrants from more progressive origin countries tend to live in more progressive U.S. states
+    + For immigrants in different-sex couples, interaction term is insignificant
+
+
+# Discussion
+## Discussion
+- Immigrants in same-sex couples have higher income, occupational prestige, and education than those in different-sex couples, and they come from countries with smaller wage and unemployment gaps with the U.S.
+- Progressive countries send higher proportions of immigrants in same-sex couples
+    + Contrary to existing, mostly qualitative scholarship on queer migration 
+- Mixed evidence that immigrants in same-sex couples reside in more progressive U.S. states
+- Policies not explicitly related to migration may shape migration flows
+    + Importance of migration scholars studying the state's governance of identity
+    + Need to move beyond the traditional economic and network explanations of migration
+
+
+
+## 
+\begin{center}
+  \huge{\textcolor{uclablue}{Thank You}}
+\end{center}
+
+- Nathan I. Hoffmann ([nathanihoff\@ucla.edu](mailto:nathanihoff@ucla.edu))
+- Kristopher Velasco ([kvelasco\@princeton.edu](mailto:kvelasco\@princeton.edu))
+- Full paper on SocArXiv: https://tinyurl.com/hoffmann-velasco/
+
+
+
+``` {=latex}
+\end{frame}
+\appendix
+\begin{frame}<0| handout:0>
+```
+
+
+
+# Supplemental material
 
 ## Descriptive Statistics
 ```{r country-tab}
@@ -401,126 +609,6 @@ state_vec <- state_tab$`Mean policy score`
 names(state_vec) <- state_tab$`State`
 ```
 
-
-
-## Model Results: Country-of-Origin Effects (Table 3)
-```{r country-coefs}
-ag_country_orig_fe <- lm(prop_same_sex ~ distw + contig + comlang_off + comlang_ethno + colony +
-                   wage_dif + unemp_dif + vdem + origin_score + stock_prop + bpld,
-         data = acs_prop_yrimmig_policy)
-
-ag_2013_int_fe <- lm(prop_same_sex ~ distw + contig + comlang_off + comlang_ethno + colony +
-                   wage_dif + unemp_dif + vdem  + stock_prop + bpld +
-                     post_2013*origin_score,
-         data = acs_prop_yrimmig_policy)
-
-coef_list <- list()
-mod_list <- list(ag_country_orig_fe,  ag_2013_int_fe)
-mod_names <- c('3: Country controls and FEs', '5: Controls + 2013 Interaction')
-for(mod_num in 1:length(mod_list)){
-  coef_list[[mod_num]]  <- coef(summary(mod_list[[mod_num]], cluster = c("bpld"))) %>%
-    as.data.frame() %>%
-    rownames_to_column('variable') %>%
-    mutate(lower = Estimate - 1.96*`Std. Error`, 
-           upper = Estimate + 1.96*`Std. Error`,
-           model = mod_names[mod_num])
-}
-
-coef_df <- bind_rows(coef_list) %>%
-  filter(variable %in% c('origin_score', 'post_2013TRUE', 'post_2013TRUE:origin_score')) %>%
-  mutate(variable = 
-           case_when(
-              variable == 'origin_score' ~ 'Country LGB policy score',
-              variable == 'post_2013TRUE' ~ 'Post-2013',
-              variable == 'post_2013TRUE:origin_score' ~ 'Country score × Post-2013'),
-         variable = factor(variable, 
-                           levels = c('Country score × Post-2013', 'Post-2013', 'Country LGB policy score'))
-         )
-
-ggplot(coef_df, aes(x = variable, y = Estimate)) +
-  geom_point(position = position_dodge(0.2)) +
-  geom_errorbar(aes(ymin = lower, ymax = upper),
-                width = .1, alpha = 1, position = position_dodge(0.2)) +
-  geom_hline(yintercept = 0, linetype = 2) +
-  coord_flip() +
-  facet_wrap(~model) +
-  # scale_y_continuous(breaks = c(seq(-1.00,.50,.20))) +
-  # scale_y_continuous(breaks = c(seq(-100,50,20))) +
-  labs(x = '', y = 'Effect on percentage in same-sex couples') +
-  theme(panel.grid.major.y = element_line('transparent'))
-
-```
-
-
-
-## Model Results: State Effects (Table 4)
-```{r state-coefs}
-state_prop_fe <- lm(same_prop ~ state_policy + origin_score + distw + contig + 
-                          comlang_off + comlang_ethno + colony +
-                          wage_dif + unemp_dif + vdem + stock_prop +
-                           state_unemploy + state_income + Country + state, 
-                       data = acs_dyad_policy)
-
-state_prop_fe2 <- lm(same_prop ~ state_policy*origin_score + distw + contig + 
-                          comlang_off + comlang_ethno + colony +
-                          wage_dif + unemp_dif + vdem + stock_prop +
-                           state_unemploy + state_income + Country + state, 
-                       data = acs_dyad_policy)
-state_prop_2013_int <- lm(same_prop ~ post_2013*origin_score + state_policy + distw + contig + 
-                          comlang_off + comlang_ethno + colony +
-                          wage_dif + unemp_dif + vdem + stock_prop +
-                           state_unemploy + state_income + Country + state, 
-                       data = mutate(acs_dyad_policy, post_2013 = (year > 2013)))
-
-coef_list <- list()
-mod_list <- list(state_prop_fe,  state_prop_fe2, state_prop_2013_int)
-mod_names <- c('3: Country and state controls and FEs', 
-               '4: Controls + Interaction' , 
-               '7: Controls + 2013 Interaction')
-for(mod_num in 1:length(mod_list)){
-  coef_list[[mod_num]]  <- coef(summary(mod_list[[mod_num]], cluster = c("state", "Country"))) %>%
-    as.data.frame() %>%
-    rownames_to_column('variable') %>%
-    mutate(lower = Estimate - 1.96*`Std. Error`, 
-           upper = Estimate + 1.96*`Std. Error`,
-           model = mod_names[mod_num])
-}
-
-coef_df <- bind_rows(coef_list) %>%
-  filter(variable %in% c('state_policy', 'origin_score', 
-                                'state_policy:origin_score', 'post_2013TRUE', 
-                                'post_2013TRUE:state_policy', 
-                                'post_2013TRUE:origin_score')) %>%
-  mutate(variable = 
-           case_when(
-              variable == 'origin_score' ~ 'Country LGB policy score',
-              variable == 'post_2013TRUE' ~ 'Post-2013',
-              variable == 'post_2013TRUE:origin_score' ~ 'Country score × Post-2013',
-              variable == 'state_policy' ~ 'State LGB policy score',
-              variable == 'state_policy:origin_score' ~ 'State score × country-score'),
-         variable = factor(variable, 
-                           levels = rev(c('State LGB policy score', 'Country LGB policy score',
-                                'State score × country-score', 'Post-2013', 
-                               'Country score × Post-2013')))
-         )
-
-ggplot(coef_df, aes(x = variable, y = Estimate)) +
-  geom_point(position = position_dodge(0.2)) +
-  geom_errorbar(aes(ymin = lower, ymax = upper),
-                width = .1, alpha = 1, position = position_dodge(0.2)) +
-  geom_hline(yintercept = 0, linetype = 2) +
-  coord_flip() +
-  facet_wrap(~model, labeller = label_wrap_gen(width=20)) +
-  # scale_y_continuous(breaks = c(seq(-1.00,.50,.20))) +
-  # scale_y_continuous(breaks = c(seq(-100,50,20))) +
-  labs(x = '', y = 'Effect on 3-category state LGB policy score') +
-  theme(panel.grid.major.y = element_line('transparent'))
-
-```
-
-
-
-
 ## Model Results: Individual Analysis (Table 5)
 ```{r ind-coefs}
 ord_interact_controls <- polr(state_policy_binned ~ 
@@ -560,37 +648,7 @@ ggplot(coef_df, aes(x = variable, y = Value)) +
   facet_wrap(~model) +
   # scale_y_continuous(breaks = c(seq(-1.00,.50,.20))) +
   # scale_y_continuous(breaks = c(seq(-100,50,20))) +
-  labs(x = '', y = 'Effect on percentage in same-sex couples') +
+  labs(x = '', y = 'Effect on 3-category state LGB policy score') +
   theme(panel.grid.major.y = element_line('transparent'))
 
 ```
-
-
-
-
-
-
-# Discussion
-## Discussion
-- Immigrants in same-sex couples have higher income, occupational prestige, and education than those in different-sex couples, and they come from countries with smaller wage and unemployment gaps with the U.S.
-- Progressive countries send higher proportions of immigrants in same-sex couples
-    + Contrary to existing, mostly qualitative scholarship on queer migration 
-- Mixed evidence that immigrants in same-sex couples reside in more progressive U.S. states
-- Policies not explicitly related to migration may shape migration flows
-    + Importance of migration scholars studying the state's governance of identity
-    + Need to move beyond the traditional economic and network explanations of migration
-
-
-
-## 
-\begin{center}
-  \huge{\textcolor{uclablue}{Thank You}}
-\end{center}
-
-- Nathan I. Hoffmann ([nathanihoff\@ucla.edu](mailto:nathanihoff@ucla.edu))
-- Kristopher Velasco ([kvelasco\@princeton.edu](mailto:kvelasco\@princeton.edu))
-- Full paper on SocArXiv: https://osf.io/preprints/socarxiv/hxjkt/
-
-
-
-
