@@ -184,8 +184,8 @@ total_df %>%
 
 ## Variables
 - Explanatory variables
-    + Country of origin LGBT policy index (sum of 14 policies)
-    + U.S. state LGBT policy index (sum of 8 policies)
+    + Country of origin LGBT policy index (sum of 14 policies) (Velasco 2020)
+    + U.S. state LGBT policy index (sum of 8 policies) (Movement Advancement Project 2020)
 - Controls
     + Factors from standard migration models, including country- and state-level economic, political, and demographic variables from the UN, U.S. government, and other sources
     + The relative size of the co-national immigrant population as a proxy for immigrant networks
