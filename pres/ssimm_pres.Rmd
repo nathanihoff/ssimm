@@ -156,11 +156,11 @@ total_df %>%
 
 
 ## Our Intervention
-- Incorporate an aspirations-capabilities framework (De Haas 2021)
+- Incorporate an aspirations-capabilities framework (de Haas 2021)
 - We argue that the state's regulation of sexuality influences migratory patterns through altering the aspirations and capabilities to migrate
 - This population is particularly sensitive to changing policy
     + Same-sex relationships were not recognized by the U.S. government before the 2013 DOMA decision
-    + Growing awareness of LGBTQ+ rights within global discourses increases the saliency of considering such policies to motivate migration
+    + Growing awareness of LGBTQ+ rights within global discourses increases the salience of considering such policies to motivate migration
     + Policy may overpower traditional migration theories
 
 
@@ -500,10 +500,12 @@ ggplot(coef_df, aes(x = variable, y = Estimate,
     + Contrary to existing, mostly qualitative scholarship on queer migration 
     + Patterns hold across one-immigrant and two-immigrant couples
 - Immigrants in same-sex couples reside in more progressive U.S. states
+
+## Discussion
 - Policies not explicitly related to migration may shape migration flows
-    + Importance of migration scholars studying the state's governance of identity
-    + Need to move beyond the traditional economic and network explanations of migration
-    + Incorporating an aspirations-capabilities framework is a fruitful strategy moving forward (De Haas 2021)
+- Importance of migration scholars studying the state's governance of identity
+- Need to move beyond the traditional economic and network explanations of migration
+- Incorporating an aspirations-capabilities framework is a fruitful strategy moving forward (de Haas 2021)
 
 
 
