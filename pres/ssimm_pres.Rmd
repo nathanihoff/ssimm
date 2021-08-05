@@ -156,9 +156,11 @@ total_df %>%
 
 
 ## Our Intervention
-- We argue that it is imperative to take sexuality, and the state’s role in governing sexuality, into account for understanding migratory patterns
+- Incorporate an aspirations-capabilities framework (De Haas 2021)
+- We argue that the state's regulation of sexuality influences migratory patterns through altering the aspirations and capabilities to migrate
 - This population is particularly sensitive to changing policy
     + Same-sex relationships were not recognized by the U.S. government before the 2013 DOMA decision
+    + Growing awareness of LGBTQ+ rights within global discourses increases the saliency of considering such policies to motivate migration
     + Policy may overpower traditional migration theories
 
 
@@ -496,10 +498,12 @@ ggplot(coef_df, aes(x = variable, y = Estimate,
 - Immigrants in same-sex couples have higher income, occupational prestige, and education than those in different-sex couples, and they come from countries with smaller wage and unemployment gaps with the U.S.
 - Progressive countries send higher proportions of immigrants in same-sex couples
     + Contrary to existing, mostly qualitative scholarship on queer migration 
-- Mixed evidence that immigrants in same-sex couples reside in more progressive U.S. states
+    + Patterns hold across one-immigrant and two-immigrant couples
+- Immigrants in same-sex couples reside in more progressive U.S. states
 - Policies not explicitly related to migration may shape migration flows
     + Importance of migration scholars studying the state's governance of identity
     + Need to move beyond the traditional economic and network explanations of migration
+    + Incorporating an aspirations-capabilities framework is a fruitful strategy moving forward (De Haas 2021)
 
 
 
