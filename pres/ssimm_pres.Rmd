@@ -122,8 +122,8 @@ total_df <- acs_wide_survey %>%
 ## Introduction
 - In 2013, the U.S. Supreme Court struck down the Defense of Marriage Act
 - From 2013 to 2019, 76% increase in immigrant same-sex couples, compared to 13% for different-sex
-- How has changing policy environment, both at country of origin and in U.S. states, contributed toward growth in immigrants in same-sex couples?
-- How can understanding LGB migration help us better understand the links between migration, policy, and identity more broadly?
+- LGB policy environments, both at country of origin and in U.S. states, are changing rapidly and yet, little is understood how this contributes toward the migration of immigrants in same-sex couples
+- More broadly, how can understanding LGB migration help us better understand the links between migration, policy, and identity more broadly?
 
 ## Introduction
 ```{r total-pop}
