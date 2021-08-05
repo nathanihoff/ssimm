@@ -165,7 +165,7 @@ total_df %>%
 
 
 ## Our Intervention
-- We consider policy at both country of origin and U.S. state
+- We consider policy at both country of origin and U.S. state (FitzGerald 2008)
 - Country of origin
     + Do LGB people choose to flee repressive policy contexts?
     + Or does progressive policy create the capacity for migration?
