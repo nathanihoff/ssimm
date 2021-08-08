@@ -17,7 +17,7 @@ output:
 #  \\ Kristopher Velasco, Sociology, Princeton}}
 
 
-title: "Making Migration Sexy: How State and National Policies Influence Migration of Same-Sex Couples"
+title: "Making Migration Sexy: How State and National Policies Influence International Migration of Same-Sex Couples"
 subtitle: "ASA 2021 Annual Meeting"
 
 
@@ -381,6 +381,159 @@ ggplot(coef_df, aes(x = variable, y = Estimate,
   labs(x = '', y = 'Effect on percentage in same-sex couples') +
   theme(panel.grid.major.y = element_line('transparent')) +
   scale_color_identity()
+
+```
+
+<!-- ## Model Results: Country-of-Origin Effects (Table 3) -->
+```{r country-sim, eval = F}
+Mode <- function(x) {
+ ux <- unique(x)
+ ux[which.max(tabulate(match(x, ux)))]
+}
+
+predict.rob <- function(x,clcov,newdata){
+  if(missing(newdata)){ newdata <- x$model }
+  tt <- terms(x)
+  Terms <- delete.response(tt)
+  m.mat <- model.matrix(Terms, data=newdata)
+  m.coef <- x$coef
+  fit <- as.vector(m.mat %*% as.matrix(x$coef))
+  se.fit <- sqrt(diag(m.mat%*%clcov%*%t(m.mat)))
+  return(list(fit=fit,se.fit=se.fit))
+  }
+
+# Jamaica (-1, rank 12), Mexico (3.5, rank 1), France (6.3, rank 33)
+
+sim_dat1 <- acs_prop_yrimmig_policy %>%
+  group_by(yrimmig) %>%
+  summarize(across(c(comlang_off, comlang_ethno, colony, contig), Mode),
+           across(c(distw, wage_dif, unemp_dif, vdem, stock_prop), mean, na.rm = T))
+
+
+sim_dat_j <- sim_dat1 %>%
+  mutate(bpld = 'Jamaica', origin_score = -1)
+
+
+sim_dat_m <- sim_dat1 %>%
+  mutate(bpld = 'Mexico', origin_score = 3.5)
+
+sim_dat_f <- sim_dat1 %>%
+  mutate(bpld = 'France', origin_score = 6.3)
+
+sim_dat <- bind_rows(sim_dat_j, sim_dat_m, sim_dat_f) %>%
+           mutate(post_2013 = (yrimmig > 2013),
+                  bpld = factor(bpld, levels = unique(acs_prop_yrimmig_policy$bpld)))
+
+cbind(sim_dat,
+          predict(ag_2013_int_fe, newdata = sim_dat, interval = 'confidence')) %>%
+  ggplot(aes(x = yrimmig, y = fit, color = bpld)) +
+  geom_line() +
+  geom_ribbon(aes(ymin = lwr, ymax = upr, fill = bpld, col = NULL), alpha = .2)
+
+
+
+# predict.rob(x = ag_2013_int_fe, 
+#             clcov = vcovCL(ag_2013_int_fe, cluster = ~ bpld),
+#             newdata = sim_dat)
+
+sim <- list()
+for(var in c('educ_short', 'imm15', 'int_lang')){
+ sim_dat_loop <- bind_rows(rep(list(select(sim_dat, -!!sym(var))),
+                               length(unique(pull(pew, !!sym(var))))))
+ sim_dat_loop[, var] <- rep(unique(pull(pew, !!sym(var))), each = 3)
+ sim_dat_loop <- sim_dat_loop %>%
+   mutate(variable = var,
+          value = as.character(!!sym(var)))
+ sim_dat_loop <- bind_cols(sim_dat_loop,
+                           predict(ind_int,
+                                   newdata = sim_dat_loop,
+                                   se.fit = T)) %>%
+   mutate(fit.low = fit - 1.96 * se.fit,
+          fit.high = fit + 1.96 * se.fit) 
+ sim[[var]] <- sim_dat_loop
+}
+sim <- bind_rows(sim) %>%
+ mutate(value = case_when(value == '0' ~ 'No',
+                          value == '1' ~ 'Yes',
+                          T ~ value),
+        variable = case_when(variable == 'educ_short' ~ 'Education',
+                             variable == 'imm15' ~ '1.5 Generation',
+                             variable == 'int_lang' ~ 'Spanish Interview'),
+ across(c(fit, fit.low, fit.high), sigmoid))
+
+
+
+
+
+
+
+
+
+
+
+
+
+## Simulation
+set.seed(185)
+sims <- 10
+sim <- list()
+sim_mod <- list(sims)
+pseudo_mod <- ag_2013_int_fe
+k <- length(coef(pseudo_mod))
+theta_mat <- MASS::mvrnorm(sims, coef(pseudo_mod), vcovCL(pseudo_mod, cluster = ~ bpld))
+var1_vals <- unique(acs_prop_yrimmig_policy$yrimmig)
+
+
+
+
+
+
+# acs_prop_yrimmig_policy %>%
+#   group_by(bpld) %>%
+#   summarize(origin_score = mean(origin_score),
+#             stock_prop = mean(stock_prop)) %>%
+#   arrange(desc(stock_prop)) %>%
+#   as.data.frame()
+
+
+
+for (i in 1:sims) {
+  if(i %% 10 == 0) print(i)
+  theta <- as.numeric(theta_mat[i,])
+  pseudo_mod$coefficients <- theta[1:k]
+  
+  for(var1 in unique(acs_prop_yrimmig_policy$yrimmig)){
+    for(val2 in range(acs_prop_yrimmig_policy$origin_score)){
+        sim_dat <- acs_prop_yrimmig_policy %>%
+          select(all.vars(formula(ag_2013_int_fe)))
+        sim_dat[, 'yrimmig'] <- val1
+        sim_dat[, var2] <- val2
+
+        pred_dat <- as.numeric(predict(pseudo_mod, newdata = sim_dat))
+
+       sim[[paste0(var,var1, var2, i)]] <-
+        data.frame(
+          fit = mean(pred_dat),
+                          yrimmig = val1,
+                          origin_score = as.character(val2))
+    }
+  }
+}
+
+sim_df <- bind_rows(sim) %>%
+  group_by(legalstat_imp, variable, value) %>%
+  summarize(fit.low = quantile(fit, .025), fit.high = quantile(fit, .975), fit = mean(fit)) %>%
+  mutate(across(c(fit, fit.low, fit.high), sigmoid)) %>%
+  mutate(value = case_when(value == '0' ~ 'No',
+                           value == '1' ~ 'Yes',
+                           T ~ value),
+         variable = case_when(variable == 'educ_short' ~ 'Education',
+                              variable == 'imm15' ~ '1.5 Generation',
+                              variable == 'int_lang' ~ 'Interview Language'),
+         `Legal status` = legalstat_imp)
+
+
+write_csv(sim_df, 'ind_sim.csv')
 
 ```
 
