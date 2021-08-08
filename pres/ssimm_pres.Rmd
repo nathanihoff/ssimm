@@ -652,7 +652,7 @@ ggplot(coef_df, aes(x = variable, y = Estimate,
 - Immigrants in same-sex couples have higher incomes, occupational prestige, and education than those in different-sex couples, and they come from countries with smaller wage and unemployment gaps with the U.S.
 - Progressive countries send higher proportions of immigrants in same-sex couples
     + Contrary to existing, mostly qualitative scholarship on queer migration 
-    + Patterns hold across one- and two-immigrant couples
+    + Patterns hold across one- and two-immigrant couples.
 - Immigrants in same-sex couples reside in more progressive U.S. states
 
 ## Discussion
