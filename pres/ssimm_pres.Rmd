@@ -168,6 +168,7 @@ total_df %>%
 - We consider policy at both country of origin and U.S. state (FitzGerald 2008)
 - Country of origin
     + Do LGB people choose to flee repressive policy contexts?
+      + Qualitative approaches to queer migration identify this (Carrillo 2017; Vogler 2016)
     + Or does progressive policy create the capacity for migration?
 - U.S. state
     + Do immigrants in same-sex couples, like their U.S.-born counterparts, choose to live in more progressive states?
