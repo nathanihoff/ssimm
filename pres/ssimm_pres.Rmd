@@ -406,7 +406,7 @@ predict.rob <- function(x,clcov,newdata){
 sim_dat1 <- acs_prop_yrimmig_policy %>%
   group_by(yrimmig) %>%
   summarize(across(c(comlang_off, comlang_ethno, colony, contig), Mode),
-           across(c(distw, wage_dif, unemp_dif, vdem, stock_prop), mean, na.rm = T))
+            across(c(distw, wage_dif, unemp_dif, vdem, stock_prop), mean, na.rm = T))
 
 
 sim_dat_j <- sim_dat1 %>%
