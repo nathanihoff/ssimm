@@ -46,7 +46,7 @@ date: "`r format(Sys.time(), '%B %e, %Y')`"
  
 author:
 - Nathan I. Hoffmann, Department of Sociology, University of California, Los Angeles
-- Kristopher Noah Velasco, Department of Sociology, Princeton University
+- Kristopher Velasco, Department of Sociology, Princeton University
 abstract: "As same-sex couples gain greater social acceptance and new rights, their numbers reported on surveys in the United States are rapidly increasing. Yet few researchers have studied immigrants in same-sex couples on a large scale. Using the American Community Survey from 2008 to 2019, this study compares immigrants in same-sex couples to corresponding different-sex couples in order to characterize and assess the scale of LGB migration to the U.S. as well as the role of LGB policy. Compared to different-sex immigrant couples, immigrants in same-sex couples come from richer, more democratic countries that are less represented in immigrant networks. Contrary to previous work focusing on LGB immigrants from repressive contexts, fixed effects models show that these immigrants are more likely to come from LGB-friendly countries. In addition, immigrants in same-sex couples are more likely to live in progressive U.S. states, net of potential confounders. This effect increases in strength as migrants come from more LGB-friendly countries of origin. These findings put into question dominant models of migration that emphasize economic and network effects, suggesting the importance of considering sexuality as well as political and lifestyle motivations more broadly."  
   
 keywords: "immigration, same-sex couples, LGBQ policy, sexuality"   
