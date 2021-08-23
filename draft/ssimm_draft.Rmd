@@ -84,19 +84,28 @@ library(here)
 library(plm)
 library(stargazer)
 library(patchwork)
+library(rworldmap)
+require(maps)
 library(tidyverse)
 
 # knitr::opts_chunk$set(error=TRUE) 
 
 options("yaml.eval.expr" = TRUE)
 
+uclablue = '#2774AE'
+gray = '#808080'
+black = '#000000'
+ucla_palette = c(uclablue, black, gray)
+
 # theme_set(theme_cowplot(font_family = 'Palatino') + 
 theme_set(theme_classic(base_family = 'Palatino') + 
             theme(legend.title=element_blank(), 
                   panel.grid.major.y = element_line('grey80'),
                   legend.background = element_rect(fill = "transparent")))
-ggplot <- function(...) ggplot2::ggplot(...) + scale_color_brewer(palette="Dark2") +
-  scale_fill_brewer(palette="Dark2")
+ggplot <- function(...) ggplot2::ggplot(...) + scale_color_manual(values = ucla_palette) +
+  scale_fill_manual(values = ucla_palette)
+# ggplot <- function(...) ggplot2::ggplot(...) + scale_color_brewer(palette="Dark2") +
+#   scale_fill_brewer(palette="Dark2")
 
 # library(colorspace)
 # colorspace_palette = 'RdPu'
@@ -205,14 +214,14 @@ total_df %>%
          n_low = n_low/1000, n_upp = n_upp/1000,
          Year = year) %>%
   ggplot(aes(x = Year, y = `Total population (thousands)`, 
-             color = imm_couple)) +
+             linetype = imm_couple)) +
   geom_line() +
-  geom_ribbon(aes(ymin = n_low, ymax = n_upp, fill = imm_couple, col = NULL), alpha = .2) +
-  geom_vline(xintercept = 2013, linetype = 'dashed') +
+  geom_ribbon(aes(ymin = n_low, ymax = n_upp, group = imm_couple, col = NULL), alpha = .2) +
+  geom_vline(xintercept = 2013, linetype = 1) +
   facet_wrap(~same_sex, scales = "free") +
   xlim(2007, 2019) +
   theme(legend.justification=c(1,0),
-        legend.position=c(.15,.35))
+        legend.position=c(.15,.4))
 
 ```
 
@@ -223,7 +232,9 @@ The federal environment governing immigration significantly changed after 2013. 
 ## Conventional Explanations
 Our analysis compares conventional explanations for migration to political ones related to LGB policy. Massey et al. [-@massey_1999, p. 50] provided an influential synthesis of migration theories from sociology, economics, and anthropology, arguing that "causal processes relevant to international migration might operate on multiple levels simultaneously." Our investigation incorporates insights from their work as well as assesses how sexuality and LGB policy complicate migration research. At one level, neoclassical economic theories underscore that promise of material gain is a frequent motivation to migrate [@hatton_2005a; @todaro_1980], predicting that migrants will follow wage and unemployment differentials across countries. To account for migration costs, these models often adjust for distance: Immigrants are more likely to migrate between proximate countries, especially those that share a border. At another level, migration streams often continue in a process of cumulative causation even after wage differentials decrease [@massey_1990_social]; this is due in large part to immigrant networks migrants that share information and resources to lower the cost of migration and settling in the destination country [@massey_1987] as well as institutions that arise to ease entry and settlement [@hernandez-leon_2013]. Quantitative scholars often measure immigration networks using the relative size of co-national immigrant stock [@beine_2016].  
 
-The theories synthesized by @massey_1999 remained largely materialistic. @garip_2016 argues that different theories of migration are more relevant for different types of migrants; as the most prevalent migrant types shift, theories arise to better explain them. Our study builds on this work by probing migrant heterogeneity, assessing what the theories of migration synthesized by @massey_1999 might miss when accounting for the migration of this LGB subpopulation. More recent research adds political and cultural variables to the causal mix. Not only physical but cultural proximity can matter to the migration process; scholars have shown that shared language, colonial history, and democracy matter in the sending country [@karemera_2000; @mayda_2010], and immigrant rights matter in the receiving country [@fitzgerald_2014]. Work on the relationship between welfare policies and immigration suggests that social policies not explicitly related to the latter can impact the migration and settlement processes. Historically, welfare and immigration were tightly linked in the U.S. [@fox_2012], and welfare generosity may play a role in shaping choice of destination for prospective emigrants today [@razin_2015; @ferwerda_2021_pull]. Our research builds on these insights to test how non-welfare social policy specific to LGB individuals may influence their migration and settlement.
+The theories synthesized by @massey_1999 remained largely materialistic. 
+<!-- @garip_2016 argues that different theories of migration are more relevant for different types of migrants; as the most prevalent migrant types shift, theories arise to better explain them.  -->
+Our study heeds Garip's [-@garip_2016] call to explore migrant heterogeneity, assessing what the theories of migration synthesized by @massey_1999 might miss when accounting for the migration of this LGB subpopulation. Recent research has shown that not only physical but cultural proximity can matter to the migration process; scholars have shown that shared language, colonial history, and democracy matter in the sending country [@karemera_2000; @mayda_2010], and immigrant rights matter in the receiving country [@fitzgerald_2014]. Work on the relationship between welfare policies and immigration suggests that social policies not explicitly related to the latter can impact the migration and settlement processes. Historically, welfare and immigration were tightly linked in the U.S. [@fox_2012], and welfare generosity may play a role in shaping choice of destination for prospective emigrants today [@razin_2015; @ferwerda_2021_pull]. Our research builds on these insights to test how non-welfare social policy specific to LGB individuals may influence their migration and settlement.
  
  
 <!-- Sexuality may interact with processes of migration in ways not anticipated by the migration theories synthesized by @massey_1999 or recent work on political and cultural factors. Whereas @massey_1999 sought to integrate migration theories at different causal levels, more recent sociological work seeks to uncover heterogeneity between different types of migrants [@garip_2012; @drouhot_2021_what]. @garip_2016 argues that different theories of migration are more relevant for different types of migrants; as the most prevalent migrant types shift, theories arise to better explain them. Our study builds on this work by probing migrant heterogeneity, assessing what the theories of migration synthesized by @massey_1999 might miss when accounting for the migration of this LGB subpopulation. We also seek to intervene within migration scholarship by explicitly considering how sexuality, and the governance of it, expand our comprehension of migration atop this previous work. --> 
@@ -235,48 +246,48 @@ The theories synthesized by @massey_1999 remained largely materialistic. @garip_
 
 
 
-## Our Intervention
+## Sexuality in an Aspirations-Capabilities Framework
 <!-- We harness an aspirations-capabilities framework [@dehaas_2021; @schewel_2020; @carling_2018_aspiration], which allows consideration of the conventional migration theories discussed above as well as additional factors more relevant to LGB individuals.  -->
 We incorporate the conventional migration theories discussed above into a broader aspirations-capabilities framework [@dehaas_2021; @schewel_2020; @carling_2018_aspiration].
 De Haas [-@dehaas_2021, p. 17] defines migration as “a function of aspirations and capabilities to migrate within given sets of *perceived* geographical opportunity structures” (emphasis added). This framework blends individual, agentic motivations for migration (e.g., subjective desires and imaginations of well-being) with structural factors that condition these aspirations and the capabilities to act upon them (e.g., culture and policy). Thus, we use this framework to situation our intervention: to demonstrate why sexuality, and the state’s governance of it, meaningfully contributes toward understandings of migration [@carrillo_2018; @cantu_2009; @suen_2021_sexual].  
 
 The state plays an important role setting structural conditions that influence migratory pathways. One direct route is by establishing law governing migration itself. Indeed, significant scholarship details how such laws and policies are used to target distinct populations -- whether based on labor market needs [@hahamovitch_2014; @castles_2006], assistance following local disaster [@bekaert_2020; @hunter_2015], or familial ties [@kofman_2004_family]. However, @dehaas_2021 offers a more expansive view of the state. He contends that the state influences migration through policy that shapes individual’s life aspirations and well-being -- whether real or imagined -- and by conditioning the capacity to migrate based on Berlin's [-@berlin_1969_four] negative and positive “liberties." For example, explicit migration policy represents a “negative liberty,” whereby the state externally imposes opportunities and constraints, but liberal telecommunications policy that allows for the transnational flow of news, media, and information is a “positive liberty” that influences the capacity to migrate -- in this case by increasing knowledge of alternatives and the “capacity to aspire” [@dehaas_2021]. Therefore, the aspirations-capabilities framework is not a rejection of previous theories of migration, but a more expansive framework that acknowledges the subjective role of individuals to determine if migration advances their well-being within given conditions.
 
-### Sexuality in an Aspirations-Capabilities Framework
+<!-- Sexuality, and the state’s governance of it, squarely fits within this framework. Sexuality is a salient quality of well-being and, as demonstrated by the DOMA decision in the U.S., conditions the capacity to migrate. Moreover, recent global expansions of LGB rights allows us to leverage varied policy landscapes and investigate beyond migration-oriented policy to theorize the role of the state within these processes. -->
 
-Sexuality, and the state’s governance of it, squarely fits within this framework. Sexuality is a salient quality of well-being and, as demonstrated by the DOMA decision in the U.S., conditions the capacity to migrate. Moreover, recent global expansions of LGB rights allows us to leverage varied policy landscapes and investigate beyond migration-oriented policy to theorize the role of the state within these processes.  
-
-Sexuality has long factored into migratory decisions. However, as the global awareness of LGB rights expands, sexuality is increasingly an important factor when deciding to leave one’s home country [@mole_2018a; @murray_2016]. This is partly due to international organizations’ construction of sexuality as a legitimate basis for leaving. For example, in 2008 the United Nations High Commissioner for Refugees issued a new guidance note for why and how countries should consider sexual orientation and gender identity when granting asylum claims [@unhcr_2008]. The note continues to guide various authorities to consider discriminatory domestic policies when evaluating asylum claims as such policies “can create or contribute to an oppressive atmosphere of intolerance and generate a threat of prosecution” [@unhcr_2008, p. 8]. International organizations like the European Union and several countries now incorporate this guidance [@giametta_2020]. 
+Sexuality has long factored into migratory decisions. However, as the global awareness of LGB rights expands, sexuality is increasingly an important factor shaping the aspirations and capabilities to leave one’s home country [@mole_2018a; @murray_2016]. This is partly due to international organizations’ construction of sexuality as a legitimate basis for leaving. For example, in 2008 the United Nations High Commissioner for Refugees issued a new guidance note for why and how countries should consider sexual orientation and gender identity when granting asylum claims [@unhcr_2008]. The note continues to guide various authorities to consider discriminatory domestic policies when evaluating asylum claims as such policies “can create or contribute to an oppressive atmosphere of intolerance and generate a threat of prosecution” [@unhcr_2008, p. 8]. International organizations such as the European Union and several countries now incorporate this guidance [@giametta_2020]. 
 <!-- The note states:   -->
 
 <!-- >[I]ndividuals experience serious human rights abuses and other forms of persecution due to their actual or perceived sexual orientation and/or gender identity. While persecution of Lesbian, Gay, Bisexual, Transgender and Intersex (hereafter “LGBTI”) individuals and those perceived to be LGBTI is not a new phenomenon, there is greater awareness in many countries of asylum that people fleeing persecution for reasons of their sexual orientation and/or gender identity can qualify as refugees [...]. [@unhcr_2008, p. 2] -->
  
 
-Therefore, the globalization of LGB rights -- along with the transnational flow of information, cultural content, general visibility, and changing policy environments that accompany it [@ayoub_2016; @ayoub_2017] -- are likely to influence the migration of LGB communities by changing aspirations and capabilities to migrate. Current research on the types of policy environments likely to influence the migration of those in same-sex couples, however, is both limited in scope and mixed in outcomes. Although family-related migration has long overshadowed work-related among permanent migrants to the U.S. [@kandel_2018_familybased], theorization on family migration has largely ignored same-sex couples [e.g. @kofman_2004_family]. Additionally, emerging scholarship at the intersection of sexuality and migration is overwhelmingly qualitative, preventing generalizations about this population. 
+Therefore, the globalization of LGB rights -- along with the transnational flow of information, cultural content, general visibility, and changing policy environments that accompany it [@ayoub_2016; @ayoub_2017] -- are likely to influence the migration of LGB communities by changing aspirations and capabilities to migrate. Current research on the types of policy environments likely to influence the migration of those in same-sex couples, however, is both limited in scope and mixed in outcomes. Although family-related migration has long overshadowed work-related among permanent migrants to the U.S. [@kandel_2018_familybased], theorization on the former has largely ignored same-sex couples [e.g. @kofman_2004_family]. Additionally, emerging scholarship at the intersection of sexuality and migration is overwhelmingly qualitative, preventing generalizations about this population. 
 <!-- Although this provides rich insights into the motivations and consequences of migration, differing effects of policies emerge. Research on queer asylum, one key line of research within this area, suggests repressive policies are more likely to spur migration to the U.S. However, another set of scholarship, extending from research on "lifestyle migration," suggests affirming policy environments may serve as a migratory launchpad.  -->
 Thus a broader portrait for how policy environments influence queer migration is urgently needed.  
 
 <!-- Prior to developing our theorization, we clarify our target population. Given the DOMA ruling's direct influence on couples as well as data limitations, we do not consider individuals who do not cohabit with a romantic partner. We control for this by considering only couples, whether same- or different-sex. Four types of couples are included in this population: (1) two-immigrant couples who came to the U.S. together; (2) two-immigrant couples that formed once in the U.S.; (3) mixed status couples where an immigrant migrated to be with their U.S.-born partner; and (4) mixed status couples that formed in the U.S. We theorize general mechanisms that influence all composition types but, below, acknowledge the potential or differential effects depending on couple composition. We elaborate on the implications of these scope conditions in the Discussion. -->
 
-### How Policies at Country of Origin Influence Migration
+## How Policies at Country of Origin Influence Migration
 
-Much queer migration research suggests that migrants in same-sex relationships are largely escaping repressive contexts. Since U.S. policy environment did not define same-sex partners as “family” before 2013, asylum remained one of the few viable mechanisms for entry and dramatically limited the capacity to migrate into the U.S. [@luibheid_2008; @vogler_2016]. Although the U.S. is less progressive and inviting compared to many other Western states, high-profile developments like marriage equality can contribute to an imagined openness relative to many locations around the world. For example, access to gay content in film and on the Internet contributed toward Iranian refugees to seek sexual freedom in the West [@karimi_2020]. These asylum seekers assumed, or aspired to live in, more affirming environments and knew such countries allowed sexual orientation as a basis for asylum. Additionally, another strand of research documents people in more oppressive contexts seeking out partners in more equitable locations who can then sponsor them through the immigration process [@carrillo_2018; @corey-boulet_2019]. Consequently, as Adur [-@adur_2018, p. 321, emphasis theirs] summarizes, “sexuality also shapes migration as LGBTI immigrants relocate in pursuit of spaces that they *imagine* will be safer and more liberal.” Though such studies suggest immigrants in same-sex couples are largely fleeing repressive contexts, to what extent is this representative of immigrants in same-sex couples more generally? 
+Much queer migration research suggests that migrants in same-sex relationships are largely escaping repressive contexts. Since U.S. policy environment did not define same-sex partners as “family” before 2013, asylum remained one of the few viable mechanisms for entry and dramatically limited the capacity to migrate into the U.S. [@luibheid_2008; @vogler_2016]. Although the U.S. is less progressive and inviting compared to many other Western states, high-profile developments such as marriage equality can contribute to an imagined openness relative to many locations around the world. For example, access to gay content in film and on the Internet contributed toward Iranian refugees to seek sexual freedom in the West [@karimi_2020]. These asylum seekers assumed, or aspired to live in, more affirming environments and knew such countries allowed sexual orientation as a basis for asylum. Additionally, another strand of research documents people in more oppressive contexts seeking out partners in more equitable locations who can then sponsor them through the immigration process [@carrillo_2018; @corey-boulet_2019]. Consequently, as Adur [-@adur_2018, p. 321, emphasis theirs] summarizes, “sexuality also shapes migration as LGBTI immigrants relocate in pursuit of spaces that they *imagine* will be safer and more liberal.” Though such studies suggest immigrants in same-sex couples are largely fleeing repressive contexts, to what extent is this representative of immigrants in same-sex couples more generally? 
 
 Alternatively, immigrants in same-sex couples may come from countries with greater recognition and access to sexuality-related rights and services. There are two interrelated reasons for this. First, affirming policy environments are likely to enable people’s capacity to make such an important, expensive, move. Long-standing research on immigrant selection demonstrates that migrants are typically from stronger social positions -- more formal education, higher incomes, and more prestigious occupations [@feliciano_2020]. Given the high barriers to migrating, supportive policies such as access to full marriage equality and protections against employment discrimination may enable the capacity to migrate by providing the necessary social, human, and economic capitals. Second, same-sex coupledom, like marriage, is a culturally contingent artifact [@philpot_2016_gay]. Consequently, the interactive dynamics between policy and culture within an immigrant’s country of origin is likely to influence their desire to be part of a couple to begin with [@baiocco_2014_desire; @flores_2016_backlash; @ocobock_2020_leveraging; @suen_2021_sexual]. Policies supportive of LGB communities normalize and validate such identities and partnerships [@ocobock_2020_leveraging] -- influencing those with same-sex attractions to imagine and aspire such possibilities for themselves. And, relatedly, being from a country where the state recognizes one’s sexuality and validates these relationships may make survey respondents, once in the U.S., more comfortable disclosing such relationships. As such, immigrants from countries without this cultural and political background may be more reticent to desire or disclose same-sex partnership. 
 
-Indeed, these arguments follow from scholarship on lifestyle migration -- which de Haas integrates with the aspirations-capabilities framework. Benson and O'Reilly [-@benson_2009, p. 608] refer to lifestyle migration as the "relocation of relatively affluent people within the developed world searching for a better way of life."  Typically, lifestyle migration is conceptualized as a highly individualized decision-making process as conceptualizations of "better way of life" differ drastically [@benson_2016]. However, supportive LGB policies may offer a structural opening by which same-sex couples have the opportunity and bandwidth to consider these individualistic choices. Of course, as mentioned, there is little previous research on how same-sex immigrant couples fare socioeconomically. However, if these migrants mimic their U.S.-based counterparts, their better standing will likely enable lifestyle migration processes.
+<!-- Indeed, these arguments follow from scholarship on lifestyle migration, which @dehass_2021 integrates into the aspirations-capabilities framework. -->
+Scholarship on lifestyle migration supports these arguments. Benson and O'Reilly [-@benson_2009, p. 608] refer to lifestyle migration as the "relocation of relatively affluent people within the developed world searching for a better way of life." Lifestyle migration is conceptualized as a highly individualized decision-making process as conceptualizations of "better way of life" differ drastically [@benson_2016]. Supportive LGB policies may offer a structural opening by which same-sex couples have the opportunity and bandwidth to consider these individualistic choices. 
+<!-- Of course, as mentioned, there is little previous research on how same-sex immigrant couples fare socioeconomically. However, if these migrants mirror their high-earning U.S.-based counterparts [@badgett_2021_lgbtq], their better standing will likely enable lifestyle migration processes. -->
 
 
-### How Policies at U.S. State of Residence Influence Migration
+## How Policies at U.S. State of Residence Influence Migration
 
 While these country-of-origin policies may enable the movement of same-sex couples out of their home country, the varied policy environments across U.S. states are likely to differentially encourage the entry of these couples. Though research often focuses on either country of origin or destination, part of our intervention is to study these in tandem to provide a more comprehensive understanding of migration [@fitzgerald_2008; @luthra_2018]. 
 <!-- Indeed, especially coming from an aspirations-capabilities framework where subjective perceptions are meaningful, this dual investigation is necessary to understand relative contrasts.   -->
 
-Typically, a strong predictor of where migrants locate within the U.S. are network effects -- they locate where their family, friends, and other social relations are located [@massey_1987; @portes_1998; @palloni_2001]. Existing research highlights that gay and lesbian couples within the U.S. were likely to leave states without marriage equality prior to national recognition [@beaudin_2017] and that queer migrants often have strong cross-national networks for relaying information [@stella_2020]. This likely results in a greater concentration of same-sex couples in states with marriage equality and other protective policies and increasing the chances that same-sex immigrant couples know someone in those states as well. Additionally, if migrants are coming from a country with greater legal protections, they are unlikely to want to relocate to a state where such rights are no longer recognized -- making the political environment acutely important. Of course, this is predicated on the assumption that migrants take such distinct sub-national variations into account -- which they very well may not. Consequently, the "pull" to individual states may operate independently from specific state laws affirming LGB people and their relationships.  
+Typically, a strong predictor of where migrants locate within the U.S. are network effects -- they locate where their family, friends, and other social relations are located [@massey_1987; @portes_1998; @palloni_2001]. Existing research highlights that gay and lesbian couples within the U.S. were likely to leave states without marriage equality prior to national recognition [@beaudin_2017] and that queer migrants often have strong cross-national networks for relaying information [@stella_2020]. This likely results in a greater concentration of same-sex couples in states with marriage equality and other protective policies. Additionally, if migrants are coming from a country with greater legal protections, they are unlikely to want to relocate to a state where such rights are no longer recognized -- rendering the political environment acutely important. Of course, this is predicated on the assumption that migrants take such distinct sub-national variations into account -- which they very well may not. Consequently, the "pull" to individual states may operate independently from specific state laws affirming LGB people and their relationships.  
 
 Though limited, existing demographic research does give some insights into how immigrants in same-sex couples might choose their state of residence once in the U.S. Cohabiting same-sex couples already within the U.S. are more likely to reside in states in the Northeast and West, such as Vermont, Massachusetts, California, and Oregon [@gates_2013a], that have often been at the forefront in safeguarding LGB rights. The same-sex population is growing most rapidly, however, in the Midwest and South (*ibid.*). Regardless of state, same-sex couples are more concentrated in urban areas, although this is truer for men than women [@baumle_2009]. This evidence suggests that immigrants in same-sex couples are likely to choose progressive states and cities as their place of residence.  
 
-In sum, it is evident that sexuality, and the policies governing it, are salient factors driving migratory decisions -- either enabling same-sex couples the opportunity and flexibility to make decisions that are best for them or by erecting such a repressive environment that it forces migrants to flee to where imagination of opportunity awaits. Despite qualitative examinations into queer migrants, especially asylum seekers, there is no large-$N$ investigation into how the significant transformation of LGB policies -- both globally and across U.S. states -- influence migration patterns in the U.S. or their descriptive attributes. Therefore, this research seeks to fill this gap in the literature by providing such an analysis and to further understand how the changing policy landscapes are differentially influencing the lives of queer people depending on their social positions.
+In sum, it is evident that sexuality and the policies governing it are salient factors driving migratory decisions -- either enabling the opportunity and flexibility for same-sex couples to make decisions that are best for them or by erecting an environment so repressive that it forces migrants to flee to where imagination of opportunity awaits. Despite qualitative examinations into queer migrants, especially asylum seekers, there is no large-$N$ investigation into how significant transformation of LGB policies -- both globally and across U.S. states -- influence migration into the U.S. Therefore, this research seeks to fill this gap in the literature by providing such an analysis and to further understand how the changing policy landscapes are differentially influencing the lives of queer people depending on their social positions.
 
 
 <!-- Prior to getting to the data and results of this analysis, it is first important to contextualize the present article within existing demographic scholarship.  -->
@@ -373,7 +384,7 @@ wage_dif <- acs_ind_survey %>%
   mutate(same_sex = ifelse(same_sex == T, 'Same-Sex', 'Different-Sex')) %>%
   group_by(year, same_sex) %>%
   summarize(var = survey_mean(wage_dif, vartype = "ci", na.rm = T)) %>%
-  mutate(var_name = 'Bilateral Per-Capita GDP Differential in Year of Migration')
+  mutate(var_name = 'GDP Differential in Year of Migration')
 
 vdem <- acs_ind_survey %>%
   mutate(same_sex = ifelse(same_sex == T, 'Same-Sex', 'Different-Sex')) %>%
@@ -391,9 +402,9 @@ vdem <- acs_ind_survey %>%
 
 bind_rows(income, wage_dif, vdem, prop_stock) %>%
   rename(Year = year) %>%
-  ggplot(aes(x = Year, y = var, color = same_sex)) +
+  ggplot(aes(x = Year, y = var, linetype = same_sex)) +
   geom_line() +
-  geom_ribbon(aes(ymin = var_low, ymax = var_upp, fill = same_sex, col = NULL), alpha = .2) +
+  geom_ribbon(aes(ymin = var_low, ymax = var_upp, group = same_sex, col = NULL), alpha = .2) +
   facet_wrap(~var_name, scales = "free") +
   ylab('') +
   theme(legend.justification=c(1,0),
@@ -428,18 +439,119 @@ state_df <- acs_ind_survey %>%
 bind_rows(origin_df, state_df) %>%
   rename(Year = year) %>%
   ggplot(aes(x = Year, y = `Policy Score`, 
-             color = same_sex)) +
+             linetype = same_sex)) +
   geom_line() +
   geom_ribbon(aes(ymin = `Policy Score_low`, ymax = `Policy Score_upp`, 
-                  fill = same_sex, col = NULL), alpha = .2) +
+                  group = same_sex, col = NULL), alpha = .2) +
   facet_wrap(~var, scales = "free") +
   theme(legend.justification=c(1,0),
-        legend.position=c(.25,.65))
+        legend.position=c(.25,.6))
 ```
 
 
 
-```{r country-tab}
+
+```{r country-map, fig.cap = 'Percentage of immigrants to the U.S. in same-sex couples by country of origin, averaging over years of immigration from 1991 to 2019.'}
+country_tab <- acs_couple_policy %>%
+  mutate(bpld = ifelse(bpld == "United Kingdom, ns", "England", bpld)) %>%
+  group_by(bpld, same_sex) %>%
+  count(wt = perwt) %>%
+  pivot_wider(names_from = 'same_sex', values_from = 'n') %>%
+  mutate(prop_samesex = round(100*`TRUE` / `FALSE`, 2)) %>%
+  rename(Country = bpld)
+
+country_tab$Country <- recode(country_tab$Country,
+                              'Burma (Myanmar)' = 'Myanmar',
+                              'England' = 'UK',
+                              'Cambodia (Kampuchea)' = 'Cambodia',
+                              'Egypt/United Arab Rep.' = 'Egypt', 
+                              'Guyana/British Guiana' = 'Guyana',
+                              'Korea' = 'South Korea',
+                              'Republic of Georgia' = 'Georgia',
+                              'South Africa (Union of)' = 'South Africa',
+                              'Sri Lanka (Ceylon)' = 'Sri Lanka',
+                              'Yemen Arab Republic (North)' = 'Yemen'
+)
+
+country_tab$region <- country_tab$Country
+
+
+# 
+# # Adding immigrant data to the maps package data
+# sPDF <- joinCountryData2Map(country_tab,
+#                             joinCode = "NAME",
+#                             nameJoinColumn = "Country")
+# 
+# # Dropping Antarctica
+# new_world <- subset(sPDF, continent != "Antarctica")
+# 
+# mapDevice(titleSpace = 0) #create world map shaped window
+# 
+# mapParams <- mapCountryData(new_world,
+#                             nameColumnToPlot="prop_samesex",
+#                             catMethod = "fixedWidth",
+#                             numCats = 100, 
+#                             colourPalette = "white2Black",
+#                             addLegend = F,
+#                             mapTitle = '')
+# 
+# do.call(addMapLegend,
+#         c(mapParams,
+#           legendLabels = "limits",
+#           legendIntervals = "page",
+#           horizontal = F))
+
+
+world_map <- map_data('world') %>%
+  filter(!(region %in% c('Antarctica', 'Greenland'))) 
+
+left_join(country_tab, world_map, by = 'region') %>%
+  bind_rows(left_join(world_map, country_tab, by = 'region') %>%
+  filter(is.na(prop_samesex)) %>%
+  mutate(prop_samesex = 0)) %>%
+  ggplot(mapping = aes(x = long, y = lat, group = group, fill = prop_samesex)) +
+  geom_polygon(color = "gray90", size = 0.1) +
+  coord_fixed(1.3) +
+  theme_map(font_family = 'Palatino') +
+  labs(fill = "Same-sex (%)")+ scale_fill_gradient(low = "white", high = "black") +
+  theme(legend.justification=c(0,0), legend.position=c(.1,.1),
+         legend.title=element_text(size=9),
+         legend.key.size = unit(0.3, 'cm'),
+         legend.text = element_text(size = 8))
+
+```
+
+```{r state-map, fig.cap = 'Percentage of immigrants in same-sex couples in U.S. states, averaging over ACS survey years 2008 to 2019.'}
+state_tab <- acs_wide %>%
+  filter(state != 'District of Columbia') %>%
+  group_by(state, same_sex) %>%
+  count(wt = hhwt) %>%
+  pivot_wider(names_from = 'same_sex', values_from = 'n') %>%
+  mutate(prop_samesex = round(100*`TRUE` / `FALSE`, 2))
+
+state_tab$region <- tolower(state_tab$state)
+
+# Getting the map ready
+us_states <- map_data("state")
+
+state_imm <- left_join(us_states, state_tab)
+
+
+ggplot(data = state_imm,
+       mapping = aes(x = long, y = lat, group = group, fill = prop_samesex)) +
+  geom_polygon(color = "gray90", size = 0.1) +
+  coord_map(projection = "albers", lat0 = 39, lat1 = 45) +
+  theme_map(font_family = 'Palatino') + 
+  labs(fill = "Same-sex (%)") + 
+  scale_fill_gradient(low = "white", high = "black") +
+  theme(legend.justification=c(0,0), legend.position=c(.05,.05),
+    legend.title=element_text(size=9),
+    legend.key.size = unit(0.3, 'cm'),
+    legend.text = element_text(size = 8))
+```
+
+
+```{r country-tab, eval = T}
 country_tab <- acs_couple_policy %>%
   group_by(bpld, same_sex) %>%
   count(wt = perwt) %>%
@@ -488,7 +600,7 @@ names(country_vec) <- country_tab$`Country of origin`
 
 ```
 
-```{r state-tab}
+```{r state-tab, eval = T}
 state_tab <- acs_wide %>%
   filter(state != 'District of Columbia') %>%
   group_by(state, same_sex) %>%
@@ -521,7 +633,11 @@ state_vec <- state_tab$`Mean policy score`
 names(state_vec) <- state_tab$`State`
 ```
 
-Table \ref{tab:country-tab} ranks the proportion of U.S. immigrants in same-sex couples based on country of origin, averaging over the 12 years of survey data. The top sending countries include interesting diversity. Though there are a number of Western countries with more progressive policies in year of departure for immigrants in our sample, notably, Malaysia, Zimbabwe, and Singapore are also in the top 10. Having countries within the top 10 span multiple regions and cultures gives initial support that responses to ACS questions are not being significantly altered due to these differences. Nor does it appear as though responses to the ACS are simply a function of country-of-origin LGB policies as these also vary significantly across the top 10. These patterns provide a level of validity to this measure. Table \ref{tab:state-tab} similarly ranks U.S. state by the proportion of immigrants in same-sex couples, averaging over the period of interest. Although states with progressive policies make the top of the list, Montana, Missouri, and Florida still make the list with less affirming policy environments.
+
+
+Figure \ref{fig:country-map} shows the percentage of immigrants to the U.S. in same-sex couples from each country of origin, averaging over the 29 possible years of immigration, and Table \ref{tab:country-tab} presents the top ten of these along with average LGB policy score over these years. The top sending countries include interesting diversity. Though there are a number of Western countries with more progressive policies in year of departure for immigrants in our sample, notably, Malaysia, Zimbabwe, and Singapore are also in the top 10. Having countries within the top 10 span multiple regions and cultures gives initial support that responses to ACS questions are not being significantly altered due to these differences. Nor does it appear as though responses to the ACS are simply a function of country-of-origin LGB policies as these also vary significantly across the top 10. These patterns provide a level of validity to this measure. Figure \ref{fig:state-map} similarly presents the percentage of immigrants in same-sex couples in U.S. states, averaging over the survey years and possible countries of origin, and Table \ref{tab:state-tab} ranks the top ten. Although states with progressive policies make the top of the list, Montana, Missouri, and Florida still make the list with less affirming policy environments.
+
+<!-- Figure \ref{fig:country-map} shows the percentage of U.S. immigrants in same-sex couples based on country of origin, averaging over the 12 years of survey data. The top sending countries include interesting diversity. Though there are a number of Western countries with more progressive policies in year of departure for immigrants in our sample, notably, Malaysia, Zimbabwe, and Singapore are also in the top 10. Having countries within the top sending countries span multiple regions and cultures gives preliminary support that responses to ACS questions are not being significantly altered due to these differences. Nor does it appear as though responses to the ACS are simply a function of country-of-origin LGB policies, as these also vary significantly across the top sending countries. These patterns provide a level of validity to this measure. Table \ref{tab:state-tab} similarly ranks U.S. state by the proportion of immigrants in same-sex couples, averaging over the period of interest. Although states with progressive policies make the top of the list, Montana, Missouri, and Florida still make the list with less affirming policy environments. -->
 
 
 ## Model Results
@@ -606,13 +722,16 @@ stargazer(mod_list,
           keep.stat = c('n'),
           star.cutoffs = c(0.1, 0.05, 0.01, 0.001),
           star.char = c('†', '*', '**', '***'),
-          notes = c("Note: †p<0.1; *p<0.05; **p<0.01; ***p<0.001",
-                    "Source: American Community Survey 2008-2019"),
+          notes = c("\\parbox[t]{.8\\textwidth}{\\textit{Note}: †\\textit{p}<0.1; *\\textit{p}<0.05; **\\textit{p}<0.01; ***\\textit{p}<0.001. Country-clustered standard errors shown in parentheses. Country controls include population-weighted distance, contiguous border, common official language, common ethnic language, colonial relationship, per-capita GDP differential, unemployment differential, proportion same-country stock, and democracy.}",
+                    "\\textit{Source}: American Community Survey 2008-2019"),
           notes.label = '',
           notes.align = 'l',
           notes.append = F,
           label = 'tab:country-props',
-          title = 'OLS regressions of percent of immigrants in same-sex couples by year of immigration and country of origin. Country-clustered standard errors shown in parentheses. Country controls include population-weighted distance, contiguous border, common official language, common ethnic language, colonial relationship, per-capita GDP differential, unemployment differential, proportion same-country stock, and democracy.')
+          title = 'OLS regressions of percent of immigrants in same-sex couples by year of immigration and country of origin.')
+
+
+
 
 
 # mod_list <- list(ag, ag_country_orig, ag_country_orig_fe, 
@@ -827,13 +946,13 @@ stargazer(mod_list,
           keep.stat = c('n'),
           star.cutoffs = c(0.1, 0.05, 0.01, 0.001),
           star.char = c('†', '*', '**', '***'),
-          notes = c("Note: †p<0.1; *p<0.05; **p<0.01; ***p<0.001", 
-                    "Source: American Community Survey 2008-2019"), 
+          notes = c("\\parbox[t]{\\textwidth}{\\textit{Note}: †\\textit{p}<0.1; *\\textit{p}<0.05; **\\textit{p}<0.01; ***\\textit{p}<0.001. Country and state two-way clustered standard errors are shown in parentheses. State controls include unemployment rate and per-capita income. Country controls include population-weighted distance, contiguous border, common official language, common ethnic language, colonial relationship, per-capita GDP differential, unemployment differential, proportion same-country stock, and democracy.}",
+                    "\\textit{Source}: American Community Survey 2008-2019"),
           notes.label = '',
           notes.align = 'l',
           notes.append = F,
           label = 'tab:state-props',
-          title = 'Percent same-sex in by country of origin, U.S. state, and survey year. Country and state two-way clustered standard errors are shown in parentheses. State controls include unemployment rate and per-capita income. Country controls include population-weighted distance, contiguous border, common official language, common ethnic language, colonial relationship, per-capita GDP differential, unemployment differential, proportion same-country stock, and democracy.')
+          title = 'Percent same-sex in by country of origin, U.S. state, and survey year.')
 
 origin_effect <- sd(acs_couple_policy$origin_score, na.rm = T)*coef(state_prop2)[['origin_score']]
 state_effect <- sd(acs_couple_policy$state_policy, na.rm = T)*coef(state_prop2)[['state_policy']]
@@ -1073,14 +1192,14 @@ stargazer(mod_list,
           omit.stat = 'n',
           star.cutoffs = c(0.1, 0.05, 0.01, 0.001),
           star.char = c('†', '*', '**', '***'),
-          notes = c("Note: †p<0.1; *p<0.05; **p<0.01; ***p<0.001", 
-                    "Source: American Community Survey 2008-2019"), 
+          notes = c("\\parbox[t]{.8\\textwidth}{\\textit{Note}: †\\textit{p}<0.1; *\\textit{p}<0.05; **\\textit{p}<0.01; ***\\textit{p}<0.001. Country and state two-way clustered standard errors are shown in parentheses. Individual controls include sex, age, education, number of children, IHS-transformed income, indicator for no income, and year of immigration, which are all interacted with the indicator for same-sex couple. State controls include unemployment rate and per-capita income. Country controls include population-weighted distance, contiguous border, common official language, common ethnic language, colonial relationship, per-capita GDP differential, unemployment differential, proportion same-country stock, and democracy.}",
+                    "\\textit{Source}: American Community Survey 2008-2019"),
           notes.label = '',
           notes.align = 'l',
           notes.append = F,
           #no.space = T,
           label = 'tab:ord',
-          title = 'Individual ordered logit analysis of three-category state policy score. Country and state two-way clustered standard errors are shown in parentheses. Individual controls include sex, age, education, number of children, IHS-transformed income, indicator for no income, and year of immigration, which are all interacted with the indicator for same-sex couple. State controls include unemployment rate and per-capita income. Country controls include population-weighted distance, contiguous border, common official language, common ethnic language, colonial relationship, per-capita GDP differential, unemployment differential, proportion same-country stock, and democracy.')
+          title = 'Individual ordered logit analysis of three-category state policy score.')
 ```
 
 
@@ -1281,7 +1400,7 @@ We put these results into perspective using simulated probabilities over the ent
 
 
 ## Robustness Checks
-```{r sens, eval = T, fig.cap = 'Coefficients for sending-country and U.S. state LGB policy context for fixed effects models in Tables 3 and 4, adjusted for possible misreporting of same-sex couples in pre-2019 data. Ribbon shows 95 percent confidence intervals and blue bars show estimated misreporting from the 2010 and 2016 U.S. Census Bureau tests on the ACS.'}
+```{r sens, eval = T, fig.cap = 'Coefficients for sending-country and U.S. state LGB policy context for fixed effects models in Tables 3 and 4, adjusted for possible misreporting of same-sex couples in pre-2019 data. Ribbon shows 95 percent confidence intervals and dashed bars show estimated misreporting from the 2010 and 2016 U.S. Census Bureau tests on the ACS.'}
 
 mod <- lm(partner ~ spouse + I(spouse^2), data.frame(spouse = c(0, .573, .35),
            partner = c(0, .07, .034)))
@@ -1409,15 +1528,17 @@ add_global_label <- function(pwobj, Xlab = NULL, Ylab = NULL, Xgap = 0.03, Ygap 
 }
 
 plot1 <- sens_df %>%
-  mutate(`Misreporting rate (weighted average)` = (mis_spouse*n_spouse+mis_partner*n_partner)/(n_spouse + n_partner)) %>%
+  mutate(`Misreporting rate (weighted average)` =
+           (mis_spouse*n_spouse+mis_partner*n_partner)/(n_spouse + n_partner)) %>%
   ggplot(aes(x = `Misreporting rate (weighted average)`, y = est)) +
   geom_line() +
   geom_ribbon(aes(ymin = lower, ymax = upper), alpha = .2)  +
-  geom_hline(yintercept = 0, linetype = 'dashed') +
-  geom_errorbar(aes(ymin = lower, ymax = upper, width = .02, color = highlight)) +
+  geom_hline(yintercept = 0, linetype = 1) +
+  geom_errorbar(aes(ymin = lower, ymax = upper, width = .02, color = highlight),
+                linetype = 2) +
   # facet_wrap(~facet) +
   theme(legend.position = "none") +
-  scale_color_manual(values = c('transparent', RColorBrewer::brewer.pal(3, 'Dark2')[3])) +
+  scale_color_manual(values = c('transparent', 'black')) +
   labs(y = 'Coefficient for country score', x = '') +
   ggtitle('Country Model 3')
 
@@ -1426,11 +1547,12 @@ plot2 <- sens_df %>%
   ggplot(aes(x = `Misreporting rate (weighted average)`, y = est2)) +
   geom_line() +
   geom_ribbon(aes(ymin = lower2, ymax = upper2), alpha = .2)  +
-  geom_hline(yintercept = 0, linetype = 'dashed') +
-  geom_errorbar(aes(ymin = lower2, ymax = upper2, width = .02, color = highlight)) +
+  geom_hline(yintercept = 0, linetype = 1) +
+  geom_errorbar(aes(ymin = lower2, ymax = upper2, width = .02, color = highlight), 
+                linetype = 2) +
   #facet_wrap(~facet) +
   theme(legend.position = "none") +
-  scale_color_manual(values = c('transparent', RColorBrewer::brewer.pal(3, 'Dark2')[3])) +
+  scale_color_manual(values = c('transparent', 'black')) +
   labs(y = 'Coefficient for state score', x = '') +
   ggtitle('State Model 4')
 
@@ -1439,11 +1561,12 @@ plot3 <- sens_df %>%
   ggplot(aes(x = `Misreporting rate (weighted average)`, y = est3)) +
   geom_line() +
   geom_ribbon(aes(ymin = lower3, ymax = upper3), alpha = .2)  +
-  geom_hline(yintercept = 0, linetype = 'dashed') +
-  geom_errorbar(aes(ymin = lower3, ymax = upper3, width = .02, color = highlight)) +
+  geom_hline(yintercept = 0, linetype = 1) +
+  geom_errorbar(aes(ymin = lower3, ymax = upper3, width = .02, color = highlight), 
+                linetype = 2) +
   #facet_wrap(~facet) +
   theme(legend.position = "none") +
-  scale_color_manual(values = c('transparent', RColorBrewer::brewer.pal(3, 'Dark2')[3])) +
+  scale_color_manual(values = c('transparent', 'black')) +
   labs(y = 'Coefficient for country score', x= '') +
   ggtitle('State Model 4')
 
@@ -1453,7 +1576,7 @@ plot3 <- sens_df %>%
 
 Our results hold up to a variety of robustness checks presented in the Supplementary Material; we outline the major results here. First, as mentioned above, sex misreporting may bias the results by including a non-trivial number of different-sex couples in the counts of same-sex couples. Published papers using the ACS to study same-sex couples overwhelmingly deal with potential misreporting using the method suggested by @gates_2009 that we employ: dropping respondents whose sex or relation to household head were allocated by the Census Bureau. We conduct a more stringent test of the sensitivity of our results to misreporting, using the empirical mismatch rates by survey response mode from two studies conducted by the Census Bureau in 2010 and 2016 [@kreider_2015; @kreider_2017] to reduce the proportions of immigrants in same-sex couples in data before 2019.^[Beginning in 2019, the ACS added explicit "opposite-sex" and "same-sex" categories for spouses and unmarried partners, so data for this year should be in large part purged of sex misreporting [@walker_2021]. See the Supplementary Material for more details.]  
 
-Here we show the hypothetical effects on our coefficients of even very high misreporting rates. Figure \ref{fig:sens} takes Model 3 from the country proportions models (Table \ref{tab:country-props}) and Model 4 from the state proportions models (Table \ref{tab:state-props}) and reduces the proportions of same-sex couples in the data for pre-2019 data. It varies the percentage of misreported same-sex married couples from 0 to 90 percent and of unmarried couples from 0 to 14 percent; the horizontal axis shows a weighted average of misreporting between these two groups. Highlighted in blue bars are the empirical mismatch rates found in the two studies by @kreider_2015 and @kreider_2017. We see that even extremely high misreporting rates in the pre-2019 ACS do not render these coefficients insignificant. In the supplementary material, we present the coefficients of interest for all of the models in Tables \ref{tab:country-props} and \ref{tab:state-props} with proportions reduced to levels implied by the studies by @kreider_2015 and @kreider_2017. Results are substantively the same.  
+Here we show the hypothetical effects on our coefficients of even very high misreporting rates. Figure \ref{fig:sens} takes Model 3 from the country proportions models (Table \ref{tab:country-props}) and Model 4 from the state proportions models (Table \ref{tab:state-props}) and reduces the proportions of same-sex couples in the data for pre-2019 data. It varies the percentage of misreported same-sex married couples from 0 to 90 percent and of unmarried couples from 0 to 14 percent; the horizontal axis shows a weighted average of misreporting between these two groups. Highlighted in dashed bars are the empirical mismatch rates found in the two studies by @kreider_2015 and @kreider_2017. We see that even extremely high misreporting rates in the pre-2019 ACS do not render these coefficients insignificant. In the supplementary material, we present the coefficients of interest for all of the models in Tables \ref{tab:country-props} and \ref{tab:state-props} with proportions reduced to levels implied by the studies by @kreider_2015 and @kreider_2017. Results are substantively the same.  
 
 Second, although our analysis for the most part has been at the country or state levels, there is the question of whether the aggregate trends in Tables \ref{tab:country-props} and \ref{tab:state-props} are driven by smaller, progressive countries that send relatively few immigrants. Hence in the Supplementary Material we re-specify these models using Weighted Least Squares, weighting by the relative size of the immigrant stock in the year of immigration. Results are substantively the same, with country LGB policy score remaining strong throughout, though the effect of U.S. state LGB policy is somewhat weaker. This implies that, for the typical immigrant, associations with LGB policy at country-or-origin are stronger than those with U.S. state LGB policy.  
 
