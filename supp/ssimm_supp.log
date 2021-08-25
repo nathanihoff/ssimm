@@ -1,4 +1,4 @@
-This is XeTeX, Version 3.141592653-2.6-0.999993 (TeX Live 2021) (preloaded format=xelatex 2021.8.24)  25 AUG 2021 09:46
+This is XeTeX, Version 3.141592653-2.6-0.999993 (TeX Live 2021) (preloaded format=xelatex 2021.8.24)  25 AUG 2021 12:01
 entering extended mode
  restricted \write18 enabled.
  %&-line parsing enabled.
@@ -957,27 +957,34 @@ Overfull \hbox (12.0pt too wide) in paragraph at lines 552--578
  [][] 
  []
 
-[12] [13] [14]
-Overfull \hbox (42.11197pt too wide) in paragraph at lines 674--727
+[12] [13]
+File: ssimm_supp_files/figure-latex/placebo-country-1.pdf Graphic file (type pd
+f)
+<use ssimm_supp_files/figure-latex/placebo-country-1.pdf>
+File: ssimm_supp_files/figure-latex/placebo-state-1.pdf Graphic file (type pdf)
+
+<use ssimm_supp_files/figure-latex/placebo-state-1.pdf>
+[14] [15] [16]
+Overfull \hbox (42.11197pt too wide) in paragraph at lines 689--742
  [][] 
  []
 
-[15]
-Overfull \hbox (46.71103pt too wide) in paragraph at lines 733--781
+[17]
+Overfull \hbox (51.33704pt too wide) in paragraph at lines 748--796
  [][] 
  []
 
-[16] [17] [18] (./ssimm_supp.aux)
+[18] [19] [20] (./ssimm_supp.aux)
 Package rerunfilecheck Info: File `ssimm_supp.out' has not changed.
-(rerunfilecheck)             Checksum: 5C6769E5FBC51FB51BA2021D66FCC1FD;2040.
+(rerunfilecheck)             Checksum: 9D8CBD68920638388834E0ED545F3094;2349.
  ) 
 Here is how much of TeX's memory you used:
- 17908 strings out of 478475
- 316125 string characters out of 5858358
- 857125 words of memory out of 5000000
- 37926 multiletter control sequences out of 15000+600000
+ 17927 strings out of 478475
+ 317056 string characters out of 5858358
+ 857666 words of memory out of 5000000
+ 37943 multiletter control sequences out of 15000+600000
  414303 words of font info for 89 fonts, out of 8000000 for 9000
  14 hyphenation exceptions out of 8191
  87i,13n,120p,2226b,338s stack positions out of 5000i,500n,10000p,200000b,80000s
 
-Output written on ssimm_supp.pdf (18 pages).
+Output written on ssimm_supp.pdf (20 pages).

@@ -67,6 +67,7 @@ knitr::opts_chunk$set(echo = F, warning = F, message = F, cache = T, results = '
                       cache.lazy = F)
 # knitr::opts_chunk$set(fig.pos = "h", out.extra = "")
 
+library(broom)
 library(janitor)
 library(priceR)
 library(kableExtra)
@@ -133,11 +134,15 @@ acs_ind_survey <- acs_couple_policy %>% as_survey_design(ids = cluster, weights 
 
 # Smaller dataset for initial ordered logit analyses
 set.seed(1859)
-acs_couple_policy_small <- bind_rows(
-  filter(acs_couple_policy, same_sex == T),
-  sample_n(filter(acs_couple_policy, same_sex == F), 1e5)
-)
-
+# acs_couple_policy_small <- bind_rows(
+#   filter(acs_couple_policy, same_sex == T),
+#   sample_n(filter(acs_couple_policy, same_sex == F), 1e5)
+# )
+acs_couple_policy_small <- acs_couple_policy
+# acs_couple_policy_small <- bind_rows(
+#   filter(acs_couple_policy, same_sex == T, yrimmig >= 1991),
+#   sample_n(filter(acs_couple_policy, same_sex == F), 1e5)
+# ) 
 
 ```
 
@@ -938,6 +943,109 @@ read_csv(here('supp', 'sim_df_ols.csv')) %>%
   ylab('Predicted U.S. state LGB policy score') +
   theme(legend.justification=c(1,0),
         legend.position=c(.95,.38))
+```
+
+
+
+## Placebo Tests of Post-2013 Dichotomous Variable
+```{r placebo-country, fig.cap = 'Country model placebo test of replacing the post-2013 dichotomous variable with 1991 through 2018, showing coefficient values with 95% confidence intervals.. Model numbers refer to Table 3 in the main paper.'}
+
+placebo_list <- list()
+
+for(year_loop in 1991:2018){
+  placebo_list[[paste0(year_loop, 'simple')]] <- 
+    lm(prop_same_sex ~ distw + contig + comlang_off + comlang_ethno + colony +
+                     wage_dif + unemp_dif + vdem + origin_score + stock_prop + post_year + bpld,
+           data = mutate(acs_prop_yrimmig_policy, post_year = (yrimmig > year_loop))) %>%
+      summary(cluster = c("bpld")) %>%
+      tidy() %>% 
+      filter(term %in% c('post_yearTRUE', 'post_yearTRUE:origin_score')) %>%
+      mutate(model = '4: Simple', year = year_loop)
+  
+  placebo_list[[paste0(year_loop, 'int')]] <-  
+    lm(prop_same_sex ~ distw + contig + comlang_off + comlang_ethno + colony +
+                     wage_dif + unemp_dif + vdem  + stock_prop + bpld +
+                       post_year*origin_score,
+           data = mutate(acs_prop_yrimmig_policy, post_year = (yrimmig > year_loop)))%>%
+      summary(cluster = c("bpld")) %>%
+      tidy() %>% 
+      filter(term %in% c('post_yearTRUE', 'post_yearTRUE:origin_score')) %>%
+      mutate(model = '5: Interaction', year = year_loop) 
+}
+placebo_df <- bind_rows(placebo_list) %>%
+    mutate(Coefficient = case_when(term == 'post_yearTRUE' ~ 'Post-year',
+                          term == 'post_yearTRUE:origin_score' ~ 'Country score × post-year'),
+         Coefficient = factor(Coefficient, levels = c('Post-year', 'Country score × post-year')))
+
+placebo_df %>%
+  ggplot(aes(x = year, y = estimate, color = Coefficient)) +
+  geom_line() +
+  geom_ribbon(aes(ymin = estimate - 1.96*std.error, ymax = estimate + 1.96*std.error, 
+                  fill = Coefficient, col = NULL), alpha = .2) +
+  geom_vline(xintercept = 2013, linetype = 2) +
+  geom_hline(yintercept = 0, linetype = 1) +
+  facet_wrap(~model) +
+  labs(x = 'Year for post-year variable', y = 'Estimate') +
+  theme(legend.title = element_text(),
+        legend.position="bottom")
+```
+
+```{r placebo-state, fig.cap = 'State model placebo test of replacing the post-2013 dichotomous variable with 2008 through 2018, showing coefficient values with 95% confidence intervals. Model numbers refer to Table 4 in the main paper.'}
+
+placebo_list <- list()
+
+for(year_loop in 2008:2018){
+  placebo_list[[paste0(year_loop, 'simple')]]  <- 
+    lm(same_prop ~ post_year + state_policy + origin_score + distw + contig + 
+                          comlang_off + comlang_ethno + colony +
+                          wage_dif + unemp_dif + vdem + stock_prop +
+                           state_unemploy + state_income + Country + state, 
+                       data = mutate(acs_dyad_policy, post_year = (year > year_loop))) %>%
+      summary(cluster = c("bpld")) %>%
+      tidy() %>% 
+      filter(term %in% c('post_yearTRUE', 'post_yearTRUE:origin_score', 'post_yearTRUE:state_policy')) %>%
+      mutate(model = '5: Simple', year = year_loop)
+
+  placebo_list[[paste0(year_loop, 'int1')]]  <- 
+    lm(same_prop ~ post_year*state_policy + origin_score + distw + contig + 
+                            comlang_off + comlang_ethno + colony +
+                            wage_dif + unemp_dif + vdem + stock_prop +
+                             state_unemploy + state_income + Country + state, 
+                         data = mutate(acs_dyad_policy, post_year = (year > year_loop))) %>%
+      summary(cluster = c("bpld")) %>%
+      tidy() %>% 
+      filter(term %in% c('post_yearTRUE', 'post_yearTRUE:origin_score', 'post_yearTRUE:state_policy')) %>%
+      mutate(model = '6: State Interaction', year = year_loop)
+  
+  placebo_list[[paste0(year_loop, 'int2')]]  <- 
+    lm(same_prop ~ post_year*origin_score + state_policy + distw + contig + 
+                            comlang_off + comlang_ethno + colony +
+                            wage_dif + unemp_dif + vdem + stock_prop +
+                             state_unemploy + state_income + Country + state, 
+                         data = mutate(acs_dyad_policy, post_year = (year > year_loop))) %>%
+      summary(cluster = c("bpld")) %>%
+      tidy() %>% 
+      filter(term %in% c('post_yearTRUE', 'post_yearTRUE:origin_score', 'post_yearTRUE:state_policy')) %>%
+      mutate(model = '7: Country Interaction', year = year_loop)
+}
+placebo_df2 <- bind_rows(placebo_list) %>%
+  rename(`Year for post-year variable` = year, Estimate = estimate) %>%
+  mutate(term = case_when(term == 'post_yearTRUE' ~ 'Post-year',
+                          term == 'post_yearTRUE:origin_score' ~ 'Country score × post-year',
+                          term == 'post_yearTRUE:state_policy' ~ 'State score × post-year'),
+         Coefficient = factor(term, levels = c('Post-year', 'State score × post-year', 
+                                               'Country score × post-year')))
+
+placebo_df2 %>%
+  ggplot(aes(x = `Year for post-year variable`, y = Estimate, color = Coefficient)) +
+  geom_line() +
+  geom_ribbon(aes(ymin = Estimate - 1.96*std.error, ymax = Estimate + 1.96*std.error, 
+                  fill = Coefficient, col = NULL), alpha = .2) +
+  geom_vline(xintercept = 2013, linetype = 2) +
+  geom_hline(yintercept = 0, linetype = 1) +
+  facet_wrap(~model) +
+  theme(legend.title = element_text(),
+        legend.position="bottom")
 ```
 
 
