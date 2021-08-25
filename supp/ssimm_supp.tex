@@ -70,12 +70,16 @@
 \pagestyle{fancy}
 \setlength{\headheight}{13.6pt}
 \rhead{\textit{Hoffmann and Velasco}}
+\lhead{\textit{August 25, 2021}}
+\usepackage{float}
+\counterwithin{figure}{section}
+\counterwithin{table}{section}
+\usepackage{float}
 \usepackage{booktabs}
 \usepackage{longtable}
 \usepackage{array}
 \usepackage{multirow}
 \usepackage{wrapfig}
-\usepackage{float}
 \usepackage{colortbl}
 \usepackage{pdflscape}
 \usepackage{tabu}
@@ -117,7 +121,7 @@
 \makeatother
 \subtitle{Making Migration Sexy}
 \author{Nathan I. Hoffmann, Department of Sociology, University of California, Los Angeles \and Kristopher Velasco, Department of Sociology, Princeton University}
-\date{July 31, 2021}
+\date{August 25, 2021}
 
 \begin{document}
 \maketitle
@@ -127,10 +131,14 @@
 \setcounter{tocdepth}{2}
 \tableofcontents
 }
+\hypertarget{appendix-appendix}{%
+\appendix}
+
+
 \hypertarget{descriptive-statistics}{%
 \section{Descriptive Statistics}\label{descriptive-statistics}}
 
-\begin{table}
+\begin{table}[!h]
 
 \caption{\label{tab:desc-table-country}Summary statistics for country-level analysis}
 \centering
@@ -139,25 +147,25 @@
 \toprule
 Characteristic & N = 3,281\\
 \midrule
-prop\_same\_sex & 0.00 (0.00, 0.45)\\
-distw & 8,949 (7,441, 11,790)\\
-contig & 58 (1.8\%)\\
-comlang\_off & 801 (24\%)\\
-comlang\_ethno & 1,382 (42\%)\\
+Percent in same-sex couples & 0.00 (0.00, 0.45)\\
+Country LGB policy score & 1 (0, 3)\\
+Distance (km) & 8,949 (7,441, 11,790)\\
+Contiguous border & 58 (1.8\%)\\
+Common official language & 801 (24\%)\\
 \addlinespace
-colony & 116 (3.5\%)\\
-wage\_dif & 27 (19, 32)\\
-unemp\_dif & -0.5 (-4.6, 2.1)\\
-vdem & 0.40 (0.18, 0.75)\\
-origin\_score & 1 (0, 3)\\
+Common ethnic language & 1,382 (42\%)\\
+Ever colonial relationship & 116 (3.5\%)\\
+Per-cap. GDP difference & 27 (19, 32)\\
+Unemployment difference & -0.5 (-4.6, 2.1)\\
+Liberal democracy (V-Dem) & 0.40 (0.18, 0.75)\\
 \addlinespace
-stock\_prop & 0.002 (0.001, 0.005)\\
+Proportion same-country stock & 0.002 (0.001, 0.005)\\
 \bottomrule
 \multicolumn{2}{l}{\rule{0pt}{1em}\textsuperscript{1} Median (IQR); n (\%)}\\
 \end{tabular}
 \end{table}
 
-\begin{table}
+\begin{table}[!h]
 
 \caption{\label{tab:desc-table-state}Summary statistics for state-level analysis}
 \centering
@@ -166,28 +174,28 @@ stock\_prop & 0.002 (0.001, 0.005)\\
 \toprule
 Characteristic & N = 35,868\\
 \midrule
-same\_prop & 0.00 (0.00, 0.00)\\
-state\_policy & 2 (0, 5)\\
-origin\_score & 1 (0, 3)\\
-distw & 8,883 (7,282, 11,800)\\
-contig & 1,135 (3.2\%)\\
+Percent in same-sex couples & 0.00 (0.00, 0.00)\\
+State LGB policy score & 2 (0, 5)\\
+Country LGB policy score & 1 (0, 3)\\
+Distance (km) & 8,883 (7,282, 11,800)\\
+Contiguous border & 1,135 (3.2\%)\\
 \addlinespace
-comlang\_off & 8,951 (25\%)\\
-comlang\_ethno & 16,558 (46\%)\\
-colony & 1,940 (5.4\%)\\
-wage\_dif & 29 (22, 32)\\
-unemp\_dif & -1.2 (-5.4, 1.2)\\
+Common official language & 8,951 (25\%)\\
+Common ethnic language & 16,558 (46\%)\\
+Ever colonial relationship & 1,940 (5.4\%)\\
+Per-cap. GDP difference & 29 (22, 32)\\
+Unemployment difference & -1.2 (-5.4, 1.2)\\
 \addlinespace
-vdem & 0.42 (0.21, 0.76)\\
-stock\_prop & 0.003 (0.001, 0.009)\\
-state\_unemploy & 5.70 (4.26, 7.77)\\
-state\_income & 31.9 (28.8, 36.3)\\
+Liberal democracy (V-Dem) & 0.42 (0.21, 0.76)\\
+Proportion same-country stock & 0.003 (0.001, 0.009)\\
+State unemployment rate & 5.70 (4.26, 7.77)\\
+State per-capita income & 31.9 (28.8, 36.3)\\
 \bottomrule
 \multicolumn{2}{l}{\rule{0pt}{1em}\textsuperscript{1} Median (IQR); n (\%)}\\
 \end{tabular}
 \end{table}
 
-\begin{table}
+\begin{table}[!h]
 
 \caption{\label{tab:desc-table-ind}Summary statistics for individual-level analysis}
 \centering
@@ -196,39 +204,40 @@ state\_income & 31.9 (28.8, 36.3)\\
 \toprule
 Characteristic & Overall, N = 905,880 & Different-sex, N = 898,869 & Same-sex, N = 7,011\\
 \midrule
-state\_policy\_binned &  &  & \\
+State LGB policy &  &  & \\
 \hspace{1em}Repressive & 191,363 (21\%) & 190,430 (21\%) & 933 (13\%)\\
 \hspace{1em}Neutral & 173,191 (19\%) & 171,740 (19\%) & 1,451 (21\%)\\
 \hspace{1em}Progressive & 541,326 (60\%) & 536,699 (60\%) & 4,627 (66\%)\\
-origin\_score & 2 (0, 2) & 2 (0, 2) & 2 (1, 4)\\
+Country LGB policy score & 2 (0, 2) & 2 (0, 2) & 2 (1, 4)\\
 \addlinespace
-sex &  &  & \\
+Sex &  &  & \\
 \hspace{1em}Female & 492,258 (54\%) & 489,790 (54\%) & 2,468 (35\%)\\
 \hspace{1em}Male & 413,622 (46\%) & 409,079 (46\%) & 4,543 (65\%)\\
-age & 42 (36, 50) & 42 (36, 50) & 41 (35, 49)\\
-educ &  &  & \\
+Age & 42 (36, 50) & 42 (36, 50) & 41 (35, 49)\\
+Education &  &  & \\
 \addlinespace
 \hspace{1em}< HS & 184,468 (20\%) & 183,700 (20\%) & 768 (11\%)\\
 \hspace{1em}college & 379,412 (42\%) & 375,807 (42\%) & 3,605 (51\%)\\
 \hspace{1em}HS & 220,977 (24\%) & 219,489 (24\%) & 1,488 (21\%)\\
 \hspace{1em}some col & 121,023 (13\%) & 119,873 (13\%) & 1,150 (16\%)\\
-nchild & 1 (0, 2) & 1 (0, 2) & 0 (0, 1)\\
+Number of children & 1 (0, 2) & 1 (0, 2) & 0 (0, 1)\\
 \addlinespace
-ihs\_income & 3.44 (1.86, 4.29) & 3.43 (1.85, 4.29) & 3.75 (2.67, 4.58)\\
-no\_income & 183,150 (20\%) & 182,216 (20\%) & 934 (13\%)\\
-yrimmig & 2,001 (1,997, 2,007) & 2,001 (1,997, 2,007) & 2,003 (1,998, 2,010)\\
-distw & 8,089 (2,468, 12,724) & 8,089 (2,468, 12,724) & 7,457 (3,003, 11,183)\\
-contig & 230,331 (25\%) & 228,744 (25\%) & 1,587 (23\%)\\
+IHS-transformed income & 3.44 (1.86, 4.29) & 3.43 (1.85, 4.29) & 3.75 (2.67, 4.58)\\
+No income & 183,150 (20\%) & 182,216 (20\%) & 934 (13\%)\\
+Year of immigration & 2,001 (1,997, 2,007) & 2,001 (1,997, 2,007) & 2,003 (1,998, 2,010)\\
+Distance (km) & 8,089 (2,468, 12,724) & 8,089 (2,468, 12,724) & 7,457 (3,003, 11,183)\\
+Contiguous border & 230,331 (25\%) & 228,744 (25\%) & 1,587 (23\%)\\
 \addlinespace
-comlang\_off & 270,016 (30\%) & 267,851 (30\%) & 2,165 (31\%)\\
-comlang\_ethno & 624,052 (69\%) & 619,326 (69\%) & 4,726 (67\%)\\
-wage\_dif & 26 (23, 31) & 26 (23, 31) & 25 (15, 30)\\
-unemp\_dif & 0.9 (-1.6, 2.2) & 0.9 (-1.6, 2.2) & 0.4 (-2.8, 2.0)\\
-vdem & 0.43 (0.26, 0.59) & 0.43 (0.26, 0.59) & 0.47 (0.32, 0.76)\\
+Common official language & 270,016 (30\%) & 267,851 (30\%) & 2,165 (31\%)\\
+Common ethnic language & 624,052 (69\%) & 619,326 (69\%) & 4,726 (67\%)\\
+Ever colonial relationship & 80,270 (8.9\%) & 79,214 (8.8\%) & 1,056 (15\%)\\
+Per-cap. GDP difference & 26 (23, 31) & 26 (23, 31) & 25 (15, 30)\\
+Unemployment difference & 0.9 (-1.6, 2.2) & 0.9 (-1.6, 2.2) & 0.4 (-2.8, 2.0)\\
 \addlinespace
-stock\_prop & 0.03 (0.01, 0.04) & 0.03 (0.01, 0.04) & 0.02 (0.01, 0.04)\\
-state\_unemploy & 5.82 (4.43, 8.13) & 5.82 (4.43, 8.13) & 4.92 (4.14, 7.23)\\
-state\_income & 34.5 (31.1, 39.1) & 34.5 (31.1, 39.1) & 35.8 (31.8, 41.1)\\
+Liberal democracy (V-Dem) & 0.43 (0.26, 0.59) & 0.43 (0.26, 0.59) & 0.47 (0.32, 0.76)\\
+Proportion same-country stock & 0.03 (0.01, 0.04) & 0.03 (0.01, 0.04) & 0.02 (0.01, 0.04)\\
+State unemployment rate & 5.82 (4.43, 8.13) & 5.82 (4.43, 8.13) & 4.92 (4.14, 7.23)\\
+State per-capita income & 34.5 (31.1, 39.1) & 34.5 (31.1, 39.1) & 35.8 (31.8, 41.1)\\
 \bottomrule
 \multicolumn{4}{l}{\rule{0pt}{1em}\textsuperscript{1} n (\%); Median (IQR)}\\
 \end{tabular}
@@ -255,7 +264,7 @@ Figure \ref{fig:scatter-state} relies on the data used in the state-level models
 \caption{\label{fig:scatter-state}Proportion of immigrants from each country in same-sex couples in each state, in each survey year, from 2008 to 2019. The left panel's horizontal axis represents the origin country policy score in the mean year of immigration for that group, while the right panel's horizontal axis represents the state policy score in the survey year. Points are jittered for clarity, and percentages above 20 are not shown.}
 \end{figure}
 
-\begin{table}
+\begin{table}[!h]
 
 \caption{\label{tab:desc-top1}Top 10 sending countries of immigrants in same-sex couples in the American Community Survey 2008-2019}
 \centering
@@ -278,7 +287,7 @@ Vietnam & 167\\
 \end{tabular}
 \end{table}
 
-\begin{table}
+\begin{table}[!h]
 
 \caption{\label{tab:desc-top2}Top 10 sending countries of immigrants in different-sex couples in the American Community Survey 2008-2019}
 \centering
@@ -321,7 +330,7 @@ In a Census Bureau working paper, \protect\hyperlink{ref-kreider_2015}{Kreider \
 
 Table \ref{tab:mismatch} shows the mismatch rates estimated by \protect\hyperlink{ref-kreider_2015}{Kreider \& Lofquist} (\protect\hyperlink{ref-kreider_2015}{2015}) and \protect\hyperlink{ref-kreider_2015}{Kreider \& Lofquist} (\protect\hyperlink{ref-kreider_2015}{2015}). In the supplemental analysis below (Table \ref{tab:country-props-adj}), we use these apparent mismatch rates to adjust proportions used in models in Table 3 of the main paper. Each proportion is adjusted separately by marital status and response mode. For example, all internet respondents coded as being in married same-sex couples have their final proportion reduced by 22.5\%. For mail-in responses, the proportions are reduced by the average between the two studies (53 percent for married and 6.3 percent for unmarried couples).
 
-\begin{table}
+\begin{table}[!h]
 
 \caption{\label{tab:respmode}Response mode proportions for different- and same-sex couples, by year. Proportions are within couple type and year.}
 \centering
@@ -341,7 +350,7 @@ Mail & TRUE & 0.72 & 0.75 & 0.78 & 0.71 & 0.77 & 0.28 & 0.22 & 0.19 & 0.18 & 0.1
 \end{tabular}
 \end{table}
 
-\begin{table}
+\begin{table}[!h]
 
 \caption{\label{tab:mismatch}Mismatch rates from Kreider \& Lofquist (2015) and Kreider et al. (2017)}
 \centering
@@ -358,8 +367,8 @@ Study Year & Relationship & Mail & Internet & CAPI/CATI & Overall\\
 \end{tabular}
 \end{table}
 
-\begin{table}[!htbp] \centering 
-  \caption{Adjusted by rates of empirical sex mismatch by married, unmarried, and response mode. OLS regressions of percent of immigrants in same-sex couples by year of immigration and country of origin, adjusted. Country-clustered standard errors shown in parentheses. Country controls include population-weighted distance, contiguous border, common official language, common ethnic language, colonial relationship, wage differential, unemployment differential, proportion same-country stock, and democracy.} 
+\begin{table}[H] \centering 
+  \caption{OLS regressions of percent of immigrants in same-sex couples by year of immigration and country of origin, adjusted by rates of empirical sex mismatch by married, unmarried, and response mode. } 
   \label{tab:country-props-adj} 
 \begin{tabular}{@{\extracolsep{5pt}}lccccc} 
 \\[-1.8ex]\hline 
@@ -384,13 +393,13 @@ Country FEs? & no & no & yes & yes & yes \\
 Observations & 3,281 & 3,281 & 3,281 & 3,281 & 3,281 \\ 
 \hline 
 \hline \\[-1.8ex] 
-\multicolumn{6}{l}{Note: †p<0.1; *p<0.05; **p<0.01; ***p<0.001} \\ 
-\multicolumn{6}{l}{Source: American Community Survey 2008-2019} \\ 
+\multicolumn{6}{l}{\parbox[t]{.8\textwidth}{\textit{Note}: †\textit{p}<0.1; *\textit{p}<0.05; **\textit{p}<0.01; ***\textit{p}<0.001. Country-clustered standard errors shown in parentheses. Country controls include population-weighted distance, contiguous border, common official language, common ethnic language, colonial relationship, wage differential, unemployment differential, proportion same-country stock, and democracy.}} \\ 
+\multicolumn{6}{l}{\textit{Source}: American Community Survey 2008-2019} \\ 
 \end{tabular} 
 \end{table}
 
-\begin{table}[!htbp] \centering 
-  \caption{Adjusted by rates of empirical sex mismatch by married, unmarried, and response mode. Percent same-sex in by country of origin, U.S. state, and survey year. Country and state two-way clustered standard errors are shown in parentheses. State controls include unemployment rate and per-capita income. Country controls include population-weighted distance, contiguous border, common official language, common ethnic language, colonial relationship, wage differential, unemployment differential, proportion same-country stock, and democracy.} 
+\begin{table}[H] \centering 
+  \caption{Adjusted by rates of empirical sex mismatch by married, unmarried, and response mode. Percent same-sex in by country of origin, U.S. state, and survey year.} 
   \label{tab:state-props-adj} 
 \begin{tabular}{@{\extracolsep{5pt}}lccccccc} 
 \\[-1.8ex]\hline 
@@ -424,17 +433,19 @@ Country controls and FEs? & no & no & yes & yes & yes & yes & yes \\
 Observations & 35,868 & 35,868 & 35,868 & 35,868 & 35,868 & 35,868 & 35,868 \\ 
 \hline 
 \hline \\[-1.8ex] 
-\multicolumn{8}{l}{Note: †p<0.1; *p<0.05; **p<0.01; ***p<0.001} \\ 
-\multicolumn{8}{l}{Source: American Community Survey 2008-2019} \\ 
+\multicolumn{8}{l}{\parbox[t]{\textwidth}{\textit{Note}: †\textit{p}<0.1; *\textit{p}<0.05; **\textit{p}<0.01; ***\textit{p}<0.001. Country and state two-way clustered standard errors are shown in parentheses. State controls include unemployment rate and per-capita income. Country controls include population-weighted distance, contiguous border, common official language, common ethnic language, colonial relationship, wage differential, unemployment differential, proportion same-country stock, and democracy.}} \\ 
+\multicolumn{8}{l}{\textit{Source}: American Community Survey 2008-2019} \\ 
 \end{tabular} 
 \end{table}
+
+\newpage
 
 \hypertarget{relative-immmigrant-population-weighted-regressions}{%
 \subsection{Relative immmigrant population-weighted regressions}\label{relative-immmigrant-population-weighted-regressions}}
 
 We perform the same regressions with proportion in same-sex couples by country or state, but weighted by the relative size of the immigrant stock.
 
-\begin{table}[!htbp] \centering 
+\begin{table}[H] \centering 
   \caption{Weighted OLS regressions of percent of immigrants in same-sex couples by year of immigration and country of origin. Country-clustered standard errors shown in parentheses.} 
   \label{tab:country-props} 
 \begin{tabular}{@{\extracolsep{5pt}}lccccc} 
@@ -460,13 +471,13 @@ Country FEs? & no & no & yes & yes & yes \\
 Observations & 3,281 & 3,281 & 3,281 & 3,281 & 3,281 \\ 
 \hline 
 \hline \\[-1.8ex] 
-\multicolumn{6}{l}{Note: †p<0.1; *p<0.05; **p<0.01; ***p<0.001} \\ 
-\multicolumn{6}{l}{Source: American Community Survey 2008-2019} \\ 
+\multicolumn{6}{l}{\parbox[t]{.8\textwidth}{\textit{Note}: †\textit{p}<0.1; *\textit{p}<0.05; **\textit{p}<0.01; ***\textit{p}<0.001. Country-clustered standard errors shown in parentheses. Country controls include population-weighted distance, contiguous border, common official language, common ethnic language, colonial relationship, wage differential, unemployment differential, proportion same-country stock, and democracy.}} \\ 
+\multicolumn{6}{l}{\textit{Source}: American Community Survey 2008-2019} \\ 
 \end{tabular} 
 \end{table}
 
-\begin{table}[!htbp] \centering 
-  \caption{Weighted regression of percent same-sex in by country of origin, U.S. state, and survey year. Country-clustered standard errors are shown in parentheses.} 
+\begin{table}[H] \centering 
+  \caption{Weighted regression of percent same-sex in by country of origin, U.S. state, and survey year. } 
   \label{tab:state-props} 
 \begin{tabular}{@{\extracolsep{5pt}}lcccccc} 
 \\[-1.8ex]\hline 
@@ -494,8 +505,8 @@ Country controls and FEs? & no & no & no & yes & yes & yes \\
 Observations & 35,868 & 35,868 & 35,868 & 35,868 & 35,868 & 35,868 \\ 
 \hline 
 \hline \\[-1.8ex] 
-\multicolumn{7}{l}{Note: †p<0.1; *p<0.05; **p<0.01; ***p<0.001} \\ 
-\multicolumn{7}{l}{Source: American Community Survey 2008-2019} \\ 
+\multicolumn{7}{l}{\parbox[t]{.8\textwidth}{\textit{Note}: †\textit{p}<0.1; *\textit{p}<0.05; **\textit{p}<0.01; ***\textit{p}<0.001. Country and state two-way clustered standard errors are shown in parentheses. State controls include unemployment rate and per-capita income. Country controls include population-weighted distance, contiguous border, common official language, common ethnic language, colonial relationship, wage differential, unemployment differential, proportion same-country stock, and democracy.}} \\ 
+\multicolumn{7}{l}{\textit{Source}: American Community Survey 2008-2019} \\ 
 \end{tabular} 
 \end{table}
 
@@ -504,58 +515,39 @@ Observations & 35,868 & 35,868 & 35,868 & 35,868 & 35,868 & 35,868 \\
 \hypertarget{alternate-specifications-of-country-proportion-models}{%
 \subsection{Alternate specifications of country proportion models}\label{alternate-specifications-of-country-proportion-models}}
 
-\begin{table}[!htbp] \centering 
-  \caption{Alternate specifications of OLS regressions of percent of immigrants in same-sex couples by year of immigration and country of origin. Models add a quadratic term or include only married couples. Country-clustered standard errors shown in parentheses. Country controls include population-weighted distance, contiguous border, common official language, common ethnic language, colonial relationship, wage differential, unemployment differential, proportion same-country stock, and Polity 5 measure of democracy.} 
+\begin{table}[H] \centering 
+  \caption{Alternate specifications of OLS regressions of percent of immigrants in same-sex couples by year of immigration and country of origin, including only married couples.} 
   \label{tab:country-props-alt} 
-\begin{tabular}{@{\extracolsep{5pt}}lccccc} 
+\begin{tabular}{@{\extracolsep{5pt}}lccc} 
 \\[-1.8ex]\hline 
 \hline \\[-1.8ex] 
- & \multicolumn{5}{c}{\textit{Dependent variable:}} \\ 
-\cline{2-6} 
-\\[-1.8ex] & \multicolumn{2}{c}{Percentage same-sex} & \multicolumn{3}{c}{Married} \\ 
-\\[-1.8ex] & (1) & (2) & (3) & (4) & (5)\\ 
+ & \multicolumn{3}{c}{\textit{Dependent variable:}} \\ 
+\cline{2-4} 
+\\[-1.8ex] & \multicolumn{3}{c}{Percentage same-sex} \\ 
+\\[-1.8ex] & (1) & (2) & (3)\\ 
 \hline \\[-1.8ex] 
- Country LGB policy score & $-$0.056 & $-$0.056 & 0.076$^{***}$ & 0.041$^{†}$ & 0.001 \\ 
-  & (0.053) & (0.053) & (0.022) & (0.024) & (0.028) \\ 
-  & & & & & \\ 
- (Country LGB policy score) $\hat{}$ 2 & 0.014$^{*}$ & 0.010$^{†}$ &  &  &  \\ 
-  & (0.006) & (0.006) &  &  &  \\ 
-  & & & & & \\ 
- Post-2013 &  & 0.260$^{**}$ &  & 0.350$^{***}$ & 0.200$^{*}$ \\ 
-  &  & (0.089) &  & (0.085) & (0.100) \\ 
-  & & & & & \\ 
- Country score × Post-2013 &  &  &  &  & 0.070$^{**}$ \\ 
-  &  &  &  &  & (0.025) \\ 
-  & & & & & \\ 
+ Country LGB policy score & 0.076$^{***}$ & 0.041$^{†}$ & 0.001 \\ 
+  & (0.022) & (0.024) & (0.028) \\ 
+  & & & \\ 
+ Post-2013 &  & 0.350$^{***}$ & 0.200$^{*}$ \\ 
+  &  & (0.085) & (0.100) \\ 
+  & & & \\ 
+ Country score × Post-2013 &  &  & 0.070$^{**}$ \\ 
+  &  &  & (0.025) \\ 
+  & & & \\ 
 \hline \\[-1.8ex] 
-Country controls? & yes & yes & yes & yes & yes \\ 
-Country FEs? & yes & yes & yes & yes & yes \\ 
-Observations & 3,281 & 3,281 & 3,281 & 3,281 & 3,281 \\ 
+Country controls? & yes & yes & yes \\ 
+Country FEs? & yes & yes & yes \\ 
+Observations & 3,281 & 3,281 & 3,281 \\ 
 \hline 
 \hline \\[-1.8ex] 
-\multicolumn{6}{l}{Note: †p<0.1; *p<0.05; **p<0.01; ***p<0.001} \\ 
-\multicolumn{6}{l}{Source: American Community Survey 2008-2019} \\ 
+\multicolumn{4}{l}{\parbox[t]{.7\textwidth}{\textit{Note}: †\textit{p}<0.1; *\textit{p}<0.05; **\textit{p}<0.01; ***\textit{p}<0.001. Country-clustered standard errors shown in parentheses. Country controls include population-weighted distance, contiguous border, common official language, common ethnic language, colonial relationship, wage differential, unemployment differential, proportion same-country stock, and Polity 5 measure of democracy.}} \\ 
+\multicolumn{4}{l}{\textit{Source}: American Community Survey 2008-2019} \\ 
 \end{tabular} 
 \end{table}
 
-\begin{table}
-
-\caption{\label{tab:fit}Goodness-of-fit statistics for linear and quadratic country proportion models.}
-\centering
-\begin{tabular}[t]{lrrr}
-\toprule
-Model & Log-likelihood & AIC & BIC\\
-\midrule
-Country proportions, linear & -6460 & 13163 & 13901\\
-Country proportions, quadratic & -6458 & 13160 & 13903\\
-+2013, linear & -6455 & 13154 & 13898\\
-+2013, quadratic & -6454 & 13153 & 13903\\
-\bottomrule
-\end{tabular}
-\end{table}
-
-\begin{table}[!htbp] \centering 
-  \caption{Alternate specifications of OLS regressions of percent of immigrants in same-sex couples by year of immigration and country of origin, using only proportions of couples with one immigrant and one U.S.-born citizen or two immigrants. Country-clustered standard errors shown in parentheses. Country controls include population-weighted distance, contiguous border, common official language, common ethnic language, colonial relationship, wage differential, unemployment differential, proportion same-country stock, and Polity 5 measure of democracy.} 
+\begin{table}[H] \centering 
+  \caption{Alternate specifications of OLS regressions of percent of immigrants in same-sex couples by year of immigration and country of origin, using only proportions of couples with one immigrant and one U.S.-born citizen or two immigrants.} 
   \label{tab:country-props-alt2} 
 \begin{tabular}{@{\extracolsep{5pt}}lcccccc} 
 \\[-1.8ex]\hline 
@@ -580,8 +572,8 @@ Country FEs? & yes & yes & yes & yes & yes & yes \\
 Observations & 3,281 & 3,281 & 3,281 & 3,281 & 3,281 & 3,281 \\ 
 \hline 
 \hline \\[-1.8ex] 
-\multicolumn{7}{l}{Note: †p<0.1; *p<0.05; **p<0.01; ***p<0.001} \\ 
-\multicolumn{7}{l}{Source: American Community Survey 2008-2019} \\ 
+\multicolumn{7}{l}{\parbox[t]{\textwidth}{\textit{Note}: †\textit{p}<0.1; *\textit{p}<0.05; **\textit{p}<0.01; ***\textit{p}<0.001. Country-clustered standard errors shown in parentheses. Country controls include population-weighted distance, contiguous border, common official language, common ethnic language, colonial relationship, wage differential, unemployment differential, proportion same-country stock, and Polity 5 measure of democracy.}} \\ 
+\multicolumn{7}{l}{\textit{Source}: American Community Survey 2008-2019} \\ 
 \end{tabular} 
 \end{table}
 
@@ -590,8 +582,8 @@ Observations & 3,281 & 3,281 & 3,281 & 3,281 & 3,281 & 3,281 \\
 \hypertarget{ols-models-of-individual-state-of-residence}{%
 \subsection{OLS models of individual state of residence}\label{ols-models-of-individual-state-of-residence}}
 
-\begin{table}[!htbp] \centering 
-  \caption{Individual OLS analysis of state policy score. Country-clustered standard errors are shown in parentheses. Individual controls include sex, age, education, number of children, log(income), indicator for no income, and year of immigration, which are all interacted with the indicator for same-sex couple.} 
+\begin{table}[H] \centering 
+  \caption{Individual OLS analysis of state policy score.} 
   \label{tab:ols} 
 \begin{tabular}{@{\extracolsep{5pt}}lcccc} 
 \\[-1.8ex]\hline 
@@ -617,8 +609,8 @@ Country controls and FEs? & no & no & no & yes \\
 Observations & 107,011 & 107,011 & 107,011 & 107,011 \\ 
 \hline 
 \hline \\[-1.8ex] 
-\multicolumn{5}{l}{Note: †p<0.1; *p<0.05; **p<0.01; ***p<0.001} \\ 
-\multicolumn{5}{l}{Source: American Community Survey 2008-2019} \\ 
+\multicolumn{5}{l}{\parbox[t]{.75\textwidth}{\textit{Note}: †\textit{p}<0.1; *\textit{p}<0.05; **\textit{p}<0.01; ***\textit{p}<0.001. Country-clustered standard errors are shown in parentheses. Individual controls include sex, age, education, number of children, log(income), indicator for no income, and year of immigration, which are all interacted with the indicator for same-sex couple.}} \\ 
+\multicolumn{5}{l}{\textit{Source}: American Community Survey 2008-2019} \\ 
 \end{tabular} 
 \end{table}
 
@@ -627,8 +619,8 @@ Observations & 107,011 & 107,011 & 107,011 & 107,011 \\
 \hypertarget{full-regression-tables}{%
 \section{Full Regression Tables}\label{full-regression-tables}}
 
-\begin{table}[!htbp] \centering 
-  \caption{OLS regressions of percent of immigrants in same-sex couples by year of immigration and country of origin. Country-clustered standard errors shown in parentheses. Country controls include population-weighted distance, contiguous border, common official language, common ethnic language, colonial relationship, wage differential, unemployment differential, proportion same-country stock, and democracy.} 
+\begin{table}[H] \centering 
+  \caption{OLS regressions of percent of immigrants in same-sex couples by year of immigration and country of origin.} 
   \label{tab:country-props-full} 
 \begin{tabular}{@{\extracolsep{5pt}}lccccc} 
 \\[-1.8ex]\hline 
@@ -644,23 +636,23 @@ Observations & 107,011 & 107,011 & 107,011 & 107,011 \\
   &  &  &  & (0.088) & (0.100) \\ 
   Country score × Post-2013 &  &  &  &  & 0.074$^{**}$ \\ 
   &  &  &  &  & (0.026) \\ 
-  distw &  & 0.00003$^{**}$ & 0.001 & 0.001 & 0.001 \\ 
+  Distance (km) &  & 0.00003$^{**}$ & 0.001 & 0.001 & 0.001 \\ 
   &  & (0.00001) & (0.001) & (0.001) & (0.001) \\ 
-  contig &  & 0.380 & 0.900 & 0.960 & 0.650 \\ 
+  Contiguous border &  & 0.380 & 0.900 & 0.960 & 0.650 \\ 
   &  & (0.360) & (3.900) & (3.900) & (3.900) \\ 
-  comlang\_off &  & $-$0.049 & $-$8.200 & $-$7.500 & $-$7.500 \\ 
+  Common official language &  & $-$0.049 & $-$8.200 & $-$7.500 & $-$7.500 \\ 
   &  & (0.100) & (10.000) & (10.000) & (10.000) \\ 
-  comlang\_ethno &  & 0.065 & 4.400 & 4.000 & 4.000 \\ 
+  Common ethnic language &  & 0.065 & 4.400 & 4.000 & 4.000 \\ 
   &  & (0.089) & (4.900) & (4.900) & (4.900) \\ 
-  colony &  & 0.190 & 6.800 & 6.300 & 6.300 \\ 
+  Ever colonial relationship &  & 0.190 & 6.800 & 6.300 & 6.300 \\ 
   &  & (0.180) & (7.400) & (7.400) & (7.400) \\ 
-  wage\_dif &  & $-$0.006$^{†}$ & 0.010 & 0.001 & 0.006 \\ 
+  Per-cap. GDP difference &  & $-$0.006$^{†}$ & 0.010 & 0.001 & 0.006 \\ 
   &  & (0.003) & (0.008) & (0.009) & (0.009) \\ 
-  unemp\_dif &  & 0.001 & 0.007 & 0.010 & 0.014 \\ 
+  Unemployment difference &  & 0.001 & 0.007 & 0.010 & 0.014 \\ 
   &  & (0.005) & (0.011) & (0.011) & (0.011) \\ 
-  vdem &  & 0.560$^{***}$ & $-$0.400 & $-$0.390 & $-$0.270 \\ 
+  Liberal democracy (V-Dem) &  & 0.560$^{***}$ & $-$0.400 & $-$0.390 & $-$0.270 \\ 
   &  & (0.160) & (0.400) & (0.400) & (0.400) \\ 
-  stock\_prop &  & $-$2.500 & 0.790 & 0.096 & 1.400 \\ 
+  Proportion same-country stock &  & $-$2.500 & 0.790 & 0.096 & 1.400 \\ 
   &  & (1.900) & (13.000) & (13.000) & (13.000) \\ 
   Constant & 0.320$^{***}$ & $-$0.032 & $-$7.700 & $-$6.800 & $-$6.800 \\ 
   & (0.036) & (0.190) & (9.400) & (9.400) & (9.300) \\ 
@@ -670,13 +662,13 @@ Country FEs? & no & no & yes & yes & yes \\
 Observations & 3,281 & 3,281 & 3,281 & 3,281 & 3,281 \\ 
 \hline 
 \hline \\[-1.8ex] 
-\multicolumn{6}{l}{Note: †p<0.1; *p<0.05; **p<0.01; ***p<0.001} \\ 
-\multicolumn{6}{l}{Source: American Community Survey 2008-2019} \\ 
+\multicolumn{6}{l}{\parbox[t]{.8\textwidth}{\textit{Note}: †\textit{p}<0.1; *\textit{p}<0.05; **\textit{p}<0.01; ***\textit{p}<0.001. Country-clustered standard errors shown in parentheses.}} \\ 
+\multicolumn{6}{l}{\textit{Source}: American Community Survey 2008-2019} \\ 
 \end{tabular} 
 \end{table}
 
-\begin{table}[!htbp] \centering 
-  \caption{Percent same-sex in by country of origin, U.S. state, and survey year. Country and state two-way clustered standard errors are shown in parentheses. State controls include unemployment rate and per-capita income. Country controls include population-weighted distance, contiguous border, common official language, common ethnic language, colonial relationship, wage differential, unemployment differential, proportion same-country stock, and democracy.} 
+\begin{table}[H] \centering 
+  \caption{Percent same-sex in by country of origin, U.S. state, and survey year.} 
   \label{tab:state-props-full} 
 \footnotesize 
 \begin{tabular}{@{\extracolsep{2pt}}lccccccc} 
@@ -687,39 +679,39 @@ Observations & 3,281 & 3,281 & 3,281 & 3,281 & 3,281 \\
 \\[-1.8ex] & \multicolumn{7}{c}{Percent in same-sex couples by state-country-year} \\ 
 \\[-1.8ex] & (1) & (2) & (3) & (4) & (5) & (6) & (7)\\ 
 \hline \\[-1.8ex] 
- state\_policy & 0.055$^{***}$ & 0.052$^{***}$ & 0.097$^{**}$ & 0.078$^{*}$ & 0.066$^{†}$ & 0.064$^{†}$ & 0.067$^{†}$ \\ 
+ State LGB policy score & 0.055$^{***}$ & 0.052$^{***}$ & 0.097$^{**}$ & 0.078$^{*}$ & 0.066$^{†}$ & 0.064$^{†}$ & 0.067$^{†}$ \\ 
   & (0.010) & (0.010) & (0.034) & (0.034) & (0.037) & (0.038) & (0.037) \\ 
-  origin\_score &  & 0.086$^{***}$ & 0.130$^{**}$ & 0.077 & 0.120$^{**}$ & 0.120$^{**}$ & 0.015 \\ 
+  Country LGB policy score &  & 0.086$^{***}$ & 0.130$^{**}$ & 0.077 & 0.120$^{**}$ & 0.120$^{**}$ & 0.015 \\ 
   &  & (0.010) & (0.044) & (0.047) & (0.044) & (0.044) & (0.053) \\ 
-  state\_policy:origin\_score &  &  &  & 0.013$^{**}$ &  &  &  \\ 
+  State score × country-score &  &  &  & 0.013$^{**}$ &  &  &  \\ 
   &  &  &  & (0.004) &  &  &  \\ 
-  post\_2013 &  &  &  &  & 0.190$^{*}$ & 0.180$^{†}$ & 0.077 \\ 
+  Post-2013 &  &  &  &  & 0.190$^{*}$ & 0.180$^{†}$ & 0.077 \\ 
   &  &  &  &  & (0.094) & (0.100) & (0.100) \\ 
-  post\_2013TRUE:state\_policy &  &  &  &  &  & 0.004 &  \\ 
+  State score × post-2013 &  &  &  &  &  & 0.004 &  \\ 
   &  &  &  &  &  & (0.022) &  \\ 
-  post\_2013TRUE:origin\_score &  &  &  &  &  &  & 0.079$^{***}$ \\ 
+  Country score × post-2013 &  &  &  &  &  &  & 0.079$^{***}$ \\ 
   &  &  &  &  &  &  & (0.023) \\ 
-  distw &  &  & 0.004$^{***}$ & 0.004$^{***}$ & 0.004$^{***}$ & 0.004$^{***}$ & 0.004$^{***}$ \\ 
+  Distance (km) &  &  & 0.004$^{***}$ & 0.004$^{***}$ & 0.004$^{***}$ & 0.004$^{***}$ & 0.004$^{***}$ \\ 
   &  &  & (0.001) & (0.001) & (0.001) & (0.001) & (0.001) \\ 
-  contig &  &  & 10.000 & 8.000 & 12.000 & 11.000 & 5.200 \\ 
+  Contiguous border &  &  & 10.000 & 8.000 & 12.000 & 11.000 & 5.200 \\ 
   &  &  & (12.000) & (12.000) & (12.000) & (12.000) & (12.000) \\ 
-  comlang\_off &  &  & $-$40.000$^{***}$ & $-$39.000$^{***}$ & $-$40.000$^{***}$ & $-$40.000$^{***}$ & $-$38.000$^{***}$ \\ 
+  Common official language &  &  & $-$40.000$^{***}$ & $-$39.000$^{***}$ & $-$40.000$^{***}$ & $-$40.000$^{***}$ & $-$38.000$^{***}$ \\ 
   &  &  & (11.000) & (11.000) & (11.000) & (11.000) & (12.000) \\ 
-  comlang\_ethno &  &  & 20.000$^{***}$ & 20.000$^{***}$ & 20.000$^{***}$ & 20.000$^{***}$ & 19.000$^{***}$ \\ 
+  Common ethnic language &  &  & 20.000$^{***}$ & 20.000$^{***}$ & 20.000$^{***}$ & 20.000$^{***}$ & 19.000$^{***}$ \\ 
   &  &  & (5.600) & (5.600) & (5.600) & (5.600) & (5.600) \\ 
-  colony &  &  & 28.000$^{***}$ & 27.000$^{**}$ & 29.000$^{***}$ & 29.000$^{***}$ & 27.000$^{**}$ \\ 
+  Ever colonial relationship &  &  & 28.000$^{***}$ & 27.000$^{**}$ & 29.000$^{***}$ & 29.000$^{***}$ & 27.000$^{**}$ \\ 
   &  &  & (8.400) & (8.400) & (8.400) & (8.400) & (8.400) \\ 
-  wage\_dif &  &  & 0.002 & 0.001 & 0.0004 & 0.0004 & $-$0.003 \\ 
+  Per-cap. GDP difference &  &  & 0.002 & 0.001 & 0.0004 & 0.0004 & $-$0.003 \\ 
   &  &  & (0.013) & (0.013) & (0.013) & (0.013) & (0.013) \\ 
-  unemp\_dif &  &  & 0.002 & 0.005 & $-$0.001 & $-$0.001 & 0.006 \\ 
+  Unemployment difference &  &  & 0.002 & 0.005 & $-$0.001 & $-$0.001 & 0.006 \\ 
   &  &  & (0.016) & (0.016) & (0.016) & (0.016) & (0.016) \\ 
-  vdem &  &  & 0.360 & 0.390 & 0.300 & 0.300 & 0.380 \\ 
+  Liberal democracy (V-Dem) &  &  & 0.360 & 0.390 & 0.300 & 0.300 & 0.380 \\ 
   &  &  & (0.590) & (0.590) & (0.590) & (0.590) & (0.590) \\ 
-  stock\_prop &  &  & $-$16.000 & $-$8.300 & $-$20.000 & $-$20.000 & 1.700 \\ 
+  Proportion same-country stock &  &  & $-$16.000 & $-$8.300 & $-$20.000 & $-$20.000 & 1.700 \\ 
   &  &  & (45.000) & (45.000) & (45.000) & (45.000) & (45.000) \\ 
-  state\_unemploy &  &  & 0.021 & 0.020 & 0.039 & 0.038 & 0.039 \\ 
+  State unemployment rate &  &  & 0.021 & 0.020 & 0.039 & 0.038 & 0.039 \\ 
   &  &  & (0.022) & (0.022) & (0.024) & (0.024) & (0.024) \\ 
-  state\_income &  &  & 0.032 & 0.030 & 0.027 & 0.026 & 0.029 \\ 
+  State per-capita income &  &  & 0.032 & 0.030 & 0.027 & 0.026 & 0.029 \\ 
   &  &  & (0.022) & (0.022) & (0.023) & (0.024) & (0.023) \\ 
   Constant & 0.370$^{***}$ & 0.240$^{***}$ & $-$38.000$^{***}$ & $-$37.000$^{***}$ & $-$38.000$^{***}$ & $-$38.000$^{***}$ & $-$36.000$^{***}$ \\ 
   & (0.035) & (0.038) & (11.000) & (11.000) & (11.000) & (11.000) & (11.000) \\ 
@@ -729,13 +721,13 @@ Country controls and FEs? & no & no & yes & yes & yes & yes & yes \\
 Observations & 35,868 & 35,868 & 35,868 & 35,868 & 35,868 & 35,868 & 35,868 \\ 
 \hline 
 \hline \\[-1.8ex] 
-\multicolumn{8}{l}{Note: †p<0.1; *p<0.05; **p<0.01; ***p<0.001} \\ 
-\multicolumn{8}{l}{Source: American Community Survey 2008-2019} \\ 
+\multicolumn{8}{l}{\parbox[t]{\textwidth}{\textit{Note}: †\textit{p}<0.1; *\textit{p}<0.05; **\textit{p}<0.01; ***\textit{p}<0.001. Country and state two-way clustered standard errors are shown in parentheses.}} \\ 
+\multicolumn{8}{l}{\textit{Source}: American Community Survey 2008-2019} \\ 
 \end{tabular} 
 \end{table}
 
-\begin{table}[!htbp] \centering 
-  \caption{Individual ordered logit analysis of three-category state policy score. Country and state two-way clustered standard errors are shown in parentheses. Individual controls include sex, age, education, number of children, IHS-transformed income, indicator for no income, and year of immigration, which are all interacted with the indicator for same-sex couple. State controls include unemployment rate and per-capita income. Country controls include population-weighted distance, contiguous border, common official language, common ethnic language, colonial relationship, wage differential, unemployment differential, proportion same-country stock, and democracy.} 
+\begin{table}[H] \centering 
+  \caption{Individual ordered logit analysis of three-category state policy score.} 
   \label{tab:ord-full} 
 \footnotesize 
 \begin{tabular}{@{\extracolsep{5pt}}lcccc} 
@@ -746,76 +738,45 @@ Observations & 35,868 & 35,868 & 35,868 & 35,868 & 35,868 & 35,868 & 35,868 \\
 \\[-1.8ex] & \multicolumn{4}{c}{Binned state LGB policy score} \\ 
 \\[-1.8ex] & (1) & (2) & (3) & (4)\\ 
 \hline \\[-1.8ex] 
- Same-sex &  & $-$0.040$^{***}$ & $-$0.046$^{***}$ & $-$0.006$^{***}$ \\ 
-  &  & (0.001) & (0.001) & (0.002) \\ 
-  Country LGB policy score &  & 0.052$^{***}$ & 0.048$^{***}$ & 0.009$^{***}$ \\ 
-  &  & (0.003) & (0.004) & (0.0002) \\ 
-  Same-sex × country score & 0.350$^{***}$ & 0.250$^{***}$ & 23.000$^{***}$ & 19.000$^{***}$ \\ 
-  & (0.009) & (0.012) & (0.0001) & (0.00000) \\ 
-  genderMale &  &  & $-$0.170$^{***}$ & $-$0.089$^{***}$ \\ 
-  &  &  & (0.004) & (0.0002) \\ 
-  age &  &  & 0.015$^{***}$ & 0.008$^{***}$ \\ 
-  &  &  & (0.0002) & (0.0002) \\ 
-  educcollege &  &  & 0.042$^{***}$ & $-$0.150$^{***}$ \\ 
-  &  &  & (0.003) & (0.0003) \\ 
-  educHS &  &  & 0.051$^{***}$ & $-$0.072$^{***}$ \\ 
-  &  &  & (0.004) & (0.0001) \\ 
-  educsome col &  &  & 0.005 & $-$0.061$^{***}$ \\ 
-  &  &  & (0.004) & (0.00002) \\ 
-  nchild &  &  & 0.013$^{***}$ & 0.029$^{***}$ \\ 
-  &  &  & (0.002) & (0.002) \\ 
-  ihs\_income &  &  & 0.120$^{***}$ & 0.041$^{***}$ \\ 
-  &  &  & (0.001) & (0.001) \\ 
-  no\_income &  &  & 0.200$^{***}$ & 0.009$^{***}$ \\ 
-  &  &  & (0.001) & (0.0003) \\ 
-  yrimmig &  &  & 0.016$^{***}$ & 0.024$^{***}$ \\ 
-  &  &  & (0.00001) & (0.00002) \\ 
-  distw &  &  &  & 0.0001$^{***}$ \\ 
-  &  &  &  & (0.00000) \\ 
-  contig &  &  &  & 0.260$^{***}$ \\ 
-  &  &  &  & (0.001) \\ 
-  comlang\_off &  &  &  & 0.077$^{***}$ \\ 
-  &  &  &  & (0.0002) \\ 
-  comlang\_ethno &  &  &  & $-$0.180$^{***}$ \\ 
-  &  &  &  & (0.0004) \\ 
-  wage\_dif &  &  &  & $-$0.015$^{***}$ \\ 
-  &  &  &  & (0.0003) \\ 
-  unemp\_dif &  &  &  & $-$0.001$^{**}$ \\ 
-  &  &  &  & (0.001) \\ 
-  vdem &  &  &  & $-$0.220$^{***}$ \\ 
-  &  &  &  & (0.0001) \\ 
-  stock\_prop &  &  &  & 1.500$^{***}$ \\ 
-  &  &  &  & (0.0001) \\ 
-  state\_unemploy &  &  &  & 0.230$^{***}$ \\ 
-  &  &  &  & (0.001) \\ 
-  state\_income &  &  &  & 0.510$^{***}$ \\ 
-  &  &  &  & (0.001) \\ 
-  same\_sexTRUE:genderMale &  &  & 0.170$^{***}$ & $-$0.030$^{***}$ \\ 
-  &  &  & (0.001) & (0.00001) \\ 
-  same\_sexTRUE:age &  &  & $-$0.010$^{***}$ & $-$0.011$^{***}$ \\ 
-  &  &  & (0.001) & (0.001) \\ 
-  same\_sexTRUE:educcollege &  &  & 0.200$^{***}$ & 0.260$^{***}$ \\ 
-  &  &  & (0.001) & (0.00001) \\ 
-  same\_sexTRUE:educHS &  &  & 0.055$^{***}$ & 0.160$^{***}$ \\ 
-  &  &  & (0.0004) & (0.00001) \\ 
-  same\_sexTRUE:educsome col &  &  & 0.200$^{***}$ & 0.290$^{***}$ \\ 
-  &  &  & (0.0003) & (0.00000) \\ 
-  same\_sexTRUE:nchild &  &  & $-$0.084$^{***}$ & $-$0.025$^{***}$ \\ 
-  &  &  & (0.008) & (0.0001) \\ 
-  same\_sexTRUE:ihs\_income &  &  & 0.063$^{***}$ & 0.029$^{***}$ \\ 
-  &  &  & (0.005) & (0.0001) \\ 
-  same\_sexTRUE:no\_income &  &  & 0.350$^{***}$ & 0.350$^{***}$ \\ 
-  &  &  & (0.001) & (0.00001) \\ 
-  same\_sexTRUE:yrimmig &  &  & $-$0.011$^{***}$ & $-$0.009$^{***}$ \\ 
-  &  &  & (0.00002) & (0.00002) \\ 
+ Same-sex & 0.350$^{***}$ (0.009) & 0.250$^{***}$ (0.012) & 23.000$^{***}$ (0.0001) & 19.000$^{***}$ (0.00000) \\ 
+  Country LGB policy score &  & $-$0.040$^{***}$ (0.001) & $-$0.046$^{***}$ (0.001) & $-$0.006$^{***}$ (0.002) \\ 
+  Male &  &  & $-$0.170$^{***}$ (0.004) & $-$0.089$^{***}$ (0.0002) \\ 
+  Age &  &  & 0.015$^{***}$ (0.0002) & 0.008$^{***}$ (0.0002) \\ 
+  Education: college &  &  & 0.042$^{***}$ (0.003) & $-$0.150$^{***}$ (0.0003) \\ 
+  Education: high school &  &  & 0.051$^{***}$ (0.004) & $-$0.072$^{***}$ (0.0001) \\ 
+  Education: some college &  &  & 0.005 (0.004) & $-$0.061$^{***}$ (0.00002) \\ 
+  Number of children &  &  & 0.013$^{***}$ (0.002) & 0.029$^{***}$ (0.002) \\ 
+  IHS-transformed income &  &  & 0.120$^{***}$ (0.001) & 0.041$^{***}$ (0.001) \\ 
+  No income &  &  & 0.200$^{***}$ (0.001) & 0.009$^{***}$ (0.0003) \\ 
+  Year of immigration &  &  & 0.016$^{***}$ (0.00001) & 0.024$^{***}$ (0.00002) \\ 
+  Distance (km) &  &  &  & 0.0001$^{***}$ (0.00000) \\ 
+  Contiguous border &  &  &  & 0.260$^{***}$ (0.001) \\ 
+  Common official language &  &  &  & 0.077$^{***}$ (0.0002) \\ 
+  Common ethnic language &  &  &  & $-$0.180$^{***}$ (0.0004) \\ 
+  Ever colonial relationship &  &  &  & $-$0.015$^{***}$ (0.0003) \\ 
+  Per-cap. GDP difference &  &  &  & $-$0.001$^{**}$ (0.001) \\ 
+  Unemployment difference &  &  &  & $-$0.220$^{***}$ (0.0001) \\ 
+  Liberal democracy (V-Dem) &  &  &  & 1.500$^{***}$ (0.0001) \\ 
+  Proportion same-country stock &  &  &  & 0.230$^{***}$ (0.001) \\ 
+  State unemployment rate &  &  &  & 0.510$^{***}$ (0.001) \\ 
+  State per-capita income &  & 0.052$^{***}$ (0.003) & 0.048$^{***}$ (0.004) & 0.009$^{***}$ (0.0002) \\ 
+  Same-sex × country score &  &  & 0.170$^{***}$ (0.001) & $-$0.030$^{***}$ (0.00001) \\ 
+  Same-sex × Male &  &  & $-$0.010$^{***}$ (0.001) & $-$0.011$^{***}$ (0.001) \\ 
+  Same-sex × Age &  &  & 0.200$^{***}$ (0.001) & 0.260$^{***}$ (0.00001) \\ 
+  Same-sex × Education: college &  &  & 0.055$^{***}$ (0.0004) & 0.160$^{***}$ (0.00001) \\ 
+  Same-sex × Education: high school &  &  & 0.200$^{***}$ (0.0003) & 0.290$^{***}$ (0.00000) \\ 
+  Same-sex × Education: some college &  &  & $-$0.084$^{***}$ (0.008) & $-$0.025$^{***}$ (0.0001) \\ 
+  Same-sex × Number of children &  &  & 0.063$^{***}$ (0.005) & 0.029$^{***}$ (0.0001) \\ 
+  Same-sex × IHS-transformed income &  &  & 0.350$^{***}$ (0.001) & 0.350$^{***}$ (0.00001) \\ 
+  Same-sex × No income &  &  & $-$0.011$^{***}$ (0.00002) & $-$0.009$^{***}$ (0.00002) \\ 
  \hline \\[-1.8ex] 
 Individual controls? & no & no & yes & yes \\ 
 State and country controls? & no & no & no & yes \\ 
 Observations & 107,011 & 107,011 & 107,011 & 107,011 \\ 
 \hline 
 \hline \\[-1.8ex] 
-\multicolumn{5}{l}{Note: †p<0.1; *p<0.05; **p<0.01; ***p<0.001} \\ 
-\multicolumn{5}{l}{Source: American Community Survey 2008-2019} \\ 
+\multicolumn{5}{l}{\parbox[t]{\textwidth}{\textit{Note}: †\textit{p}<0.1; *\textit{p}<0.05; **\textit{p}<0.01; ***\textit{p}<0.001. Country and state two-way clustered standard errors are shown in parentheses.}} \\ 
+\multicolumn{5}{l}{\textit{Source}: American Community Survey 2008-2019} \\ 
 \end{tabular} 
 \end{table}
 

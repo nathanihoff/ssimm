@@ -180,7 +180,7 @@ In 2013, the U.S. Supreme Court overturned the Defense of Marriage Act and requi
 
 The Supreme Court ruling occurred against a backdrop of rapidly changing laws concerning same-sex couples -- and LGB communities, generally -- both in the U.S. and abroad. As some countries expanded rights and social recognition, others imposed new forms of repression [@hadler_2018_world]. These varied dynamics raise an important question: How do changing policy environments influence the migration patterns of individuals in same-sex couples into and across the U.S.? While gender is increasingly recognized as an integral part of the migration process [@lutz_2010; @hondagneu-sotelo_2012], sexuality receives relatively scant attention. Moreover, migration scholarship is only recently recognizing the role of the state to shape both the aspirations and capabilities to migrate through social policies, even those unrelated to migration itself [@dehaas_2021; @fitzgerald_2014]. Emerging qualitative work has demonstrated, however, that both sexuality and the policies governing it are highly salient factors influencing migration decisions to the U.S. [@ahmad_2013; @carrillo_2018; @mai_2009; @gorman-murray_2009]. Studying the migration of same-sex couples into and across the U.S. allows us to make broader inferences into how the interaction between sexuality and policy shape migration decisions, underscoring the importance of political and "lifestyle" considerations into understandings of migration [@benson_2012; @fitzgerald_2014].  
 
-To address our research question, we evaluate how LGB policies at country-of-origin and U.S. state of residence relate to the migratory patterns for immigrants cohabiting with a same-sex partner. We do so by integrating two types of data. First, we rely on American Community Survey (ACS) data from 2008 to 2019 [@ruggles_2021], which allows the identification of individuals in cohabiting same-sex couples as well as their country of origin, U.S. state of residence, and potentially confounding individual characteristics. Second, we harness original datasets indexing LGB policy changes in 193 countries and all U.S. states from 1991 to 2019 [@velasco_2020]. We merge these two primary data sources with country- and state-level control variables from the UN, World Bank, U.S. government, and other sources.  
+To address our research question, we evaluate how LGB policies at country of origin and U.S. state of residence relate to the migratory patterns for immigrants cohabiting with a same-sex partner. We do so by integrating two types of data. First, we rely on American Community Survey (ACS) data from 2008 to 2019 [@ruggles_2021], which allows the identification of individuals in cohabiting same-sex couples as well as their country of origin, U.S. state of residence, and potentially confounding individual characteristics. Second, we harness original datasets indexing LGB policy changes in 193 countries and all U.S. states from 1991 to 2019 [@velasco_2020]. We merge these two primary data sources with country- and state-level control variables from the UN, World Bank, U.S. government, and other sources.  
 
 Our analytic strategy proceeds in four parts. First, we descriptively understand who these cohabiting LGB immigrants are. This first step is important because little is known about this growing population. Second, we focus on country-of-origin effects, modeling how representation of immigrants in same-sex partnerships changes over time in relation to the LGB policy context of the country of origin. Third, we factor in the role of changing state LGB policy context in models at the U.S. state level. Lastly, we shift our attention to the individual, assessing how being an immigrant in a same-sex couple, net of other individual factors, bears upon choice of LGB policy context by state. We also consider how this relationship is moderated by LGB policy context in the country of origin.
 
@@ -321,7 +321,7 @@ Our country- and state-level controls come from a variety of sources. Country-of
 
 <!-- the World Bank's Global Bilateral Migration Database [@ozden_2011] for 1960, 1970, and 1980 and -->
 
-For our individual-level analysis we include individual controls from the ACS for reported sex, age, education (with categories for less than high school, high school, some college, and college), year of immigration, inverse hyperbolic sign of positive income in the past year [similar to the natural log transformation; see @burbidge_1988_alternative], and a binary unemployment indicator (for income reported to be 0 or less). Descriptive statistics of variables used in all analyses are included in the Suppelementary Material. 
+For our individual-level analysis we include individual controls from the ACS for reported sex, age, education (with categories for less than high school, high school, some college, and college), year of immigration, inverse hyperbolic sign of positive income in the past year [similar to the natural log transformation; see @burbidge_1988_alternative], and a binary unemployment indicator (for income reported to be 0 or less). Descriptive statistics of variables used in all analyses are included in the Supplementary Material. 
 
 
 
@@ -407,9 +407,10 @@ bind_rows(income, wage_dif, vdem, prop_stock) %>%
   geom_ribbon(aes(ymin = var_low, ymax = var_upp, group = same_sex, col = NULL), alpha = .2) +
   facet_wrap(~var_name, scales = "free") +
   ylab('') +
-  theme(legend.justification=c(1,0),
-      legend.position=c(.22,.82),
-      legend.background = element_rect(fill = alpha("white", 0.5)))
+  theme( # legend.justification=c(1,0),
+  #     legend.position=c(.22,.82),
+  #     legend.background = element_rect(fill = alpha("white", 0.5))
+      legend.position="bottom")
  
 ```
 
@@ -1400,7 +1401,7 @@ We put these results into perspective using simulated probabilities over the ent
 
 
 ## Robustness Checks
-```{r sens, eval = T, fig.cap = 'Coefficients for sending-country and U.S. state LGB policy context for fixed effects models in Tables 3 and 4, adjusted for possible misreporting of same-sex couples in pre-2019 data. Ribbon shows 95 percent confidence intervals and dashed bars show estimated misreporting from the 2010 and 2016 U.S. Census Bureau tests on the ACS.'}
+```{r sens, eval = T, fig.cap = 'Coefficients for sending-country and U.S. state LGB policy context for fixed effects models in Tables 3 and 4, adjusted for hypothetical misreporting rates of married and unmarried same-sex couples in pre-2019 data. Ribbon shows 95 percent confidence intervals and dashed bars show estimated misreporting from the 2010 and 2016 U.S. Census Bureau tests on the ACS.'}
 
 mod <- lm(partner ~ spouse + I(spouse^2), data.frame(spouse = c(0, .573, .35),
            partner = c(0, .07, .034)))
@@ -1539,7 +1540,7 @@ plot1 <- sens_df %>%
   # facet_wrap(~facet) +
   theme(legend.position = "none") +
   scale_color_manual(values = c('transparent', 'black')) +
-  labs(y = 'Coefficient for country score', x = '') +
+  labs(y = 'Coefficient for country score', x = 'Misreporting rate') +
   ggtitle('Country Model 3')
 
 plot2 <- sens_df %>%
@@ -1553,7 +1554,7 @@ plot2 <- sens_df %>%
   #facet_wrap(~facet) +
   theme(legend.position = "none") +
   scale_color_manual(values = c('transparent', 'black')) +
-  labs(y = 'Coefficient for state score', x = '') +
+  labs(y = 'Coefficient for state score', x = 'Misreporting rate') +
   ggtitle('State Model 4')
 
 plot3 <- sens_df %>%
@@ -1567,18 +1568,18 @@ plot3 <- sens_df %>%
   #facet_wrap(~facet) +
   theme(legend.position = "none") +
   scale_color_manual(values = c('transparent', 'black')) +
-  labs(y = 'Coefficient for country score', x= '') +
+  labs(y = 'Coefficient for country score', x= 'Misreporting rate') +
   ggtitle('State Model 4')
 
-(plot1 + plot2 + plot3) %>%
-  add_global_label(Xlab = 'Misreporting rate (weighted average)')
+(plot1 + plot2 + plot3)#  %>%
+  # add_global_label(Xlab = 'Misreporting rate (weighted average)')
 ```
 
 Our results hold up to a variety of robustness checks presented in the Supplementary Material; we outline the major results here. First, as mentioned above, sex misreporting may bias the results by including a non-trivial number of different-sex couples in the counts of same-sex couples. Published papers using the ACS to study same-sex couples overwhelmingly deal with potential misreporting using the method suggested by @gates_2009 that we employ: dropping respondents whose sex or relation to household head were allocated by the Census Bureau. We conduct a more stringent test of the sensitivity of our results to misreporting, using the empirical mismatch rates by survey response mode from two studies conducted by the Census Bureau in 2010 and 2016 [@kreider_2015; @kreider_2017] to reduce the proportions of immigrants in same-sex couples in data before 2019.^[Beginning in 2019, the ACS added explicit "opposite-sex" and "same-sex" categories for spouses and unmarried partners, so data for this year should be in large part purged of sex misreporting [@walker_2021]. See the Supplementary Material for more details.]  
 
 Here we show the hypothetical effects on our coefficients of even very high misreporting rates. Figure \ref{fig:sens} takes Model 3 from the country proportions models (Table \ref{tab:country-props}) and Model 4 from the state proportions models (Table \ref{tab:state-props}) and reduces the proportions of same-sex couples in the data for pre-2019 data. It varies the percentage of misreported same-sex married couples from 0 to 90 percent and of unmarried couples from 0 to 14 percent; the horizontal axis shows a weighted average of misreporting between these two groups. Highlighted in dashed bars are the empirical mismatch rates found in the two studies by @kreider_2015 and @kreider_2017. We see that even extremely high misreporting rates in the pre-2019 ACS do not render these coefficients insignificant. In the supplementary material, we present the coefficients of interest for all of the models in Tables \ref{tab:country-props} and \ref{tab:state-props} with proportions reduced to levels implied by the studies by @kreider_2015 and @kreider_2017. Results are substantively the same.  
 
-Second, although our analysis for the most part has been at the country or state levels, there is the question of whether the aggregate trends in Tables \ref{tab:country-props} and \ref{tab:state-props} are driven by smaller, progressive countries that send relatively few immigrants. Hence in the Supplementary Material we re-specify these models using Weighted Least Squares, weighting by the relative size of the immigrant stock in the year of immigration. Results are substantively the same, with country LGB policy score remaining strong throughout, though the effect of U.S. state LGB policy is somewhat weaker. This implies that, for the typical immigrant, associations with LGB policy at country-or-origin are stronger than those with U.S. state LGB policy.  
+Second, although our analysis for the most part has been at the country or state levels, there is the question of whether the aggregate trends in Tables \ref{tab:country-props} and \ref{tab:state-props} are driven by smaller, progressive countries that send relatively few immigrants. Hence in the Supplementary Material we re-specify these models using Weighted Least Squares, weighting by the relative size of the immigrant stock in the year of immigration. Results are substantively the same, with country LGB policy score remaining strong throughout, though the effect of U.S. state LGB policy is somewhat weaker. This implies that, for the typical immigrant, associations with LGB policy at country of origin are stronger than those with U.S. state LGB policy.  
 
 Third, we assess whether the results in Table \ref{tab:country-props} are driven by trends for married couples or those with one U.S.-born partner. Limiting the sample to either type of couple does not change our results. Finally, we re-specify individual models with the state policy outcome treated as continuous and estimate linear models using OLS. Results are substantively the same as in Table \ref{tab:ord}.
 
