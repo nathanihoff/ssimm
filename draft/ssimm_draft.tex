@@ -4,9 +4,9 @@
 \PassOptionsToPackage{dvipsnames,svgnames*,x11names*}{xcolor}
 %
 \documentclass[
-  11pt,
+  12pt,
 ]{article}
-\usepackage[]{mathpazo}
+\usepackage{lmodern}
 \usepackage{amsmath}
 \usepackage{ifxetex,ifluatex}
 \ifnum 0\ifxetex 1\fi\ifluatex 1\fi=0 % if pdftex
@@ -18,6 +18,7 @@
   \usepackage{unicode-math}
   \defaultfontfeatures{Scale=MatchLowercase}
   \defaultfontfeatures[\rmfamily]{Ligatures=TeX,Scale=1}
+  \setmainfont[]{Times New Roman}
 \fi
 % Use upquote if available, for straight quotes in verbatim environments
 \IfFileExists{upquote.sty}{\usepackage{upquote}}{}
@@ -29,9 +30,7 @@
 \IfFileExists{xurl.sty}{\usepackage{xurl}}{} % add URL line breaks if available
 \IfFileExists{bookmark.sty}{\usepackage{bookmark}}{\usepackage{hyperref}}
 \hypersetup{
-  pdftitle={Making Migration Sexy: How State and National Policies Influence International Migration of Same-Sex Couples},
-  pdfauthor={Nathan I. Hoffmann, Department of Sociology, University of California, Los Angeles; Kristopher Velasco, Department of Sociology, Princeton University},
-  pdfkeywords={immigration, same-sex couples, LGB policy, sexuality},
+  pdftitle={Making Migration Sexy: How LGB Policies Influence International Migration},
   colorlinks=true,
   linkcolor=blue,
   filecolor=Maroon,
@@ -66,12 +65,8 @@
 \setlength{\emergencystretch}{3em} % prevent overfull lines
 \providecommand{\tightlist}{%
   \setlength{\itemsep}{0pt}\setlength{\parskip}{0pt}}
-\setcounter{secnumdepth}{5}
-\usepackage{fancyhdr}
-\pagestyle{fancy}
-\setlength{\headheight}{13.6pt}
-\rhead{\textit{Hoffmann and Velasco}}
-\lhead{\textit{August 25, 2021}}
+\setcounter{secnumdepth}{-\maxdimen} % remove section numbering
+\usepackage{setspace}\doublespace
 \usepackage{booktabs}
 \usepackage{longtable}
 \usepackage{array}
@@ -110,15 +105,12 @@
 \newcommand{\CSLRightInline}[1]{\parbox[t]{\linewidth - \csllabelwidth}{#1}\break}
 \newcommand{\CSLIndent}[1]{\hspace{\cslhangindent}#1}
 
-\title{Making Migration Sexy: How State and National Policies Influence International Migration of Same-Sex Couples\thanks{The authors contributed equally to this paper. We thank Roger Waldinger, Margaret Peters, Filiz Garip, the Migration Working Group at UCLA, and participants at the Annual Meetings of the American Sociological Association and the Population Association of America for their helpful feedback.}}
-\author{Nathan I. Hoffmann, Department of Sociology, University of California, Los Angeles \and Kristopher Velasco, Department of Sociology, Princeton University}
-\date{August 25, 2021}
+\title{Making Migration Sexy: How LGB Policies Influence International Migration}
+\author{}
+\date{\vspace{-2.5em}}
 
 \begin{document}
 \maketitle
-\begin{abstract}
-Both internationally and in the U.S., the policy landscape for same-sex couples is changing rapidly. Yet few researchers have studied the relationship between LGB rights and immigration on a large scale, even as surveys report rapidly increasing numbers of immigrant same-sex couples in the U.S. Using the American Community Survey from 2008 to 2019 and original datasets indexing LGB policy changes in 193 countries and all U.S. states over 29 years, this study characterizes and assesses the scale of LGB migration to the U.S. as well as the role of LGB policy. Compared to different-sex immigrant couples, immigrants in same-sex couples come from richer, more democratic countries that are less represented in immigrant networks. Contrary to previous work focusing on LGB immigrants from repressive contexts, fixed effects models show that these immigrants are more likely to come from LGB-friendly countries. They are also more likely to live in progressive U.S. states, an effect that increases in strength as migrants come from more LGB-friendly countries of origin. These findings highlight how sexuality as well as state policies seemingly unrelated to migration can shape aspirations and capabilities to migrate.
-\end{abstract}
 
 \hypertarget{introduction}{%
 \section{Introduction}\label{introduction}}
@@ -165,8 +157,7 @@ Our study heeds Garip's (\protect\hyperlink{ref-garip_2016}{2016}) call to explo
 \hypertarget{sexuality-in-an-aspirations-capabilities-framework}{%
 \subsection{Sexuality in an Aspirations-Capabilities Framework}\label{sexuality-in-an-aspirations-capabilities-framework}}
 
-We incorporate the conventional migration theories discussed above into a broader aspirations-capabilities framework (\protect\hyperlink{ref-carling_2018_aspiration}{Carling \& Collins, 2018}; \protect\hyperlink{ref-dehaas_2021}{de Haas, 2021}; \protect\hyperlink{ref-schewel_2020}{Schewel, 2020}).
-De Haas (\protect\hyperlink{ref-dehaas_2021}{2021, p. 17}) defines migration as ``a function of aspirations and capabilities to migrate within given sets of \emph{perceived} geographical opportunity structures'' (emphasis added). This framework blends individual, agentic motivations for migration (e.g., subjective desires and imaginations of well-being) with structural factors that condition these aspirations and the capabilities to act upon them (e.g., culture and policy). Thus, we use this framework to situation our intervention: to demonstrate why sexuality, and the state's governance of it, meaningfully contributes toward understandings of migration (\protect\hyperlink{ref-cantu_2009}{Cantú, 2009}; \protect\hyperlink{ref-carrillo_2018}{Carrillo, 2018}; \protect\hyperlink{ref-suen_2021_sexual}{Suen, 2021}).
+We incorporate the conventional migration theories discussed above into a broader aspirations-capabilities framework (\protect\hyperlink{ref-carling_2018_aspiration}{Carling \& Collins, 2018}; \protect\hyperlink{ref-dehaas_2021}{de Haas, 2021}; \protect\hyperlink{ref-schewel_2020}{Schewel, 2020}). De Haas (\protect\hyperlink{ref-dehaas_2021}{2021, p. 17}) defines migration as ``a function of aspirations and capabilities to migrate within given sets of \emph{perceived} geographical opportunity structures'' (emphasis added). This framework blends individual, agentic motivations for migration (e.g., subjective desires and imaginations of well-being) with structural factors that condition these aspirations and the capabilities to act upon them (e.g., culture and policy). Thus, we use this framework to situation our intervention: to demonstrate why sexuality, and the state's governance of it, meaningfully contributes toward understandings of migration (\protect\hyperlink{ref-cantu_2009}{Cantú, 2009}; \protect\hyperlink{ref-carrillo_2018}{Carrillo, 2018}; \protect\hyperlink{ref-suen_2021_sexual}{Suen, 2021}).
 
 The state plays an important role setting structural conditions that influence migratory pathways. One direct route is by establishing law governing migration itself. Indeed, significant scholarship details how such laws and policies are used to target distinct populations -- whether based on labor market needs (\protect\hyperlink{ref-castles_2006}{Castles, 2006}; \protect\hyperlink{ref-hahamovitch_2014}{Hahamovitch, 2014}), assistance following local disaster (\protect\hyperlink{ref-bekaert_2020}{Bekaert et al., 2020}; \protect\hyperlink{ref-hunter_2015}{Hunter et al., 2015}), or familial ties (\protect\hyperlink{ref-kofman_2004_family}{Kofman, 2004}). However, \protect\hyperlink{ref-dehaas_2021}{de Haas} (\protect\hyperlink{ref-dehaas_2021}{2021}) offers a more expansive view of the state. He contends that the state influences migration through policy that shapes individual's life aspirations and well-being -- whether real or imagined -- and by conditioning the capacity to migrate based on Berlin's (\protect\hyperlink{ref-berlin_1969_four}{1969}) negative and positive ``liberties.'' For example, explicit migration policy represents a ``negative liberty,'' whereby the state externally imposes opportunities and constraints, but liberal telecommunications policy that allows for the transnational flow of news, media, and information is a ``positive liberty'' that influences the capacity to migrate -- in this case by increasing knowledge of alternatives and the ``capacity to aspire'' (\protect\hyperlink{ref-dehaas_2021}{de Haas, 2021}). Therefore, the aspirations-capabilities framework is not a rejection of previous theories of migration, but a more expansive framework that acknowledges the subjective role of individuals to determine if migration advances their well-being within given conditions.
 

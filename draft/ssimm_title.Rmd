@@ -1,0 +1,68 @@
+---
+output:
+  bookdown::word_document2:
+    reference_docx: "word-template.docx"
+    toc: no
+    number_sections: yes
+    pandoc_args: !expr rmdfiltr::add_wordcount_filter(rmdfiltr::add_citeproc_filter(args = NULL))
+    latex_engine: xelatex
+    keep_tex: yes
+    #template: svm-latex-ms.tex
+# output: 
+#   pdf_document:
+#     citation_package: natbib
+#     keep_tex: true
+#     fig_caption: true
+#     latex_engine: pdflatex
+#     template: svm-latex-ms.tex
+header-includes:
+  - \usepackage{setspace}\doublespace
+
+
+
+editor_options: 
+  chunk_output_type: console
+  
+citeproc: no
+# fontfamily: mathpazo
+mainfont: "Times New Roman"
+fontsize: 12pt
+geometry: margin=1in
+indent: false
+link-citations: yes
+linkcolor: blue
+bibliography: zotero.bib  
+csl: apa.csl
+title: "Making Migration Sexy: How LGB Policies Influence International Migration"
+# date: "`r format(Sys.time(), '%B %e, %Y')`"
+# author:
+# - name: Nathan I. Hoffmann
+#   affiliation: Department of Sociology, University of California, Los Angeles
+# - name: Kristopher Velasco
+#   affiliation: Department of Sociology, Princeton University
+ 
+author:
+- Nathan I. Hoffmann, Department of Sociology, University of California, Los Angeles
+- Kristopher Velasco, Department of Sociology, Princeton University
+
+# abstract: "Both internationally and in the U.S., the policy landscape for same-sex couples is changing rapidly. Yet few researchers have studied the relationship between LGB rights and immigration on a large scale, even as surveys report swiftly increasing numbers of immigrant same-sex couples in the U.S. Using the American Community Survey from 2008 to 2019 and original datasets indexing LGB policy changes in 193 countries and all U.S. states over 29 years, this study characterizes and assesses the scale of LGB migration to the U.S. as well as the role of LGB policy. Compared to different-sex immigrant couples, immigrants in same-sex couples come from richer, more democratic countries that are less represented in immigrant networks. Contrary to previous work focusing on LGB immigrants from repressive contexts, fixed effects models show that these immigrants are more likely to come from LGB-friendly countries. They are also more likely to live in progressive U.S. states, an effect that increases in strength as migrants come from more LGB-friendly countries of origin. These findings highlight how sexuality as well as state policies seemingly unrelated to migration can shape migratory pathways."  
+  
+
+
+
+---
+
+**Word count**: 11,791   
+
+**Key words**: migration, same-sex couples, LGB policy, sexuality, public policy  
+
+**Acknowledgments**: The authors contributed equally to this paper. We thank Phillip Ayoub, Filiz Garip, Margaret Peters, Roger Waldinger, the Migration Working Group at UCLA, and participants at the Annual Meetings of the American Sociological Association and the Population Association of America for their helpful feedback.  
+
+**Corresponding author**  
+Nathan I. Hoffmann  
+Department of Sociology  
+264 Haines Hall  
+Los Angeles, CA  90095-1551  
+*Phone*: 913-653-5662  
+*Email*: nathanihoff\@ucla.edu
+
