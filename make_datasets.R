@@ -340,7 +340,8 @@ acs_dyad <- read.csv(here('data', 'acs_dyad.csv'))
 
 dist_dat <- read_dta(here('data', 'dist_cepii.dta')) %>%
   filter(iso_d == 'USA') %>%
-  select(-iso_d)
+  select(-iso_d) %>%
+  mutate(iso_o = ifelse(iso_o == 'ROM', 'ROU', iso_o))
 
 # Wage difference = USA - country of origin
 penn_wages <- read.csv(here('data', 'penn_wages.csv')) %>%

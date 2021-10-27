@@ -100,6 +100,7 @@ options("yaml.eval.expr" = TRUE)
 uclablue = '#2774AE'
 gray = '#808080'
 black = '#000000'
+uclagold = '#FFB81C'
 ucla_palette = c(uclablue, black, gray)
 
 # theme_set(theme_cowplot(font_family = 'Palatino') + 
@@ -302,10 +303,9 @@ In sum, it is evident that sexuality and the policies governing it are salient f
 
 # Data
 ## Identifying Same-Sex Couples in the ACS
-We merge individual-level data on immigrants in the U.S. with state- and country-level variables from a variety of datasets. The individual data come from the 2008 to 2019 ACS [@ruggles_2021]. Each year, the ACS surveys a 1-percent representative sample of the U.S. population about their education, occupation, income, family structure, immigration status, country of origin, location, and a variety of other individual and household attributes. We define a same-sex couple as two individuals of the same sex in the same household who report their relationship as "spouse" or "unmarried partner." We limit the sample to individuals who immigrated at the age of 18 or older and in 1991 or later.^[The exception is for for Figure \@ref(fig:total-pop), where we include those who immigrated in any year, at age 18 or older.] Hence this analysis considers four types of couples: (1) two-immigrant couples who came to the U.S. together; (2) two-immigrant couples that formed once in the U.S.; (3) mixed status couples where an immigrant migrated to be with their U.S.-born partner; and (4) mixed status couples that formed in the U.S. As shown in the Supplementary Material, results do not differ substantively for one- or two-immigrant couples. We are unable to differentiate between couples that partnered or married abroad and those that do so in the U.S. We elaborate on the implications of these scope conditions in the Discussion.  
+We merge individual-level data on immigrants in the U.S. with state- and country-level variables from a variety of datasets. The individual data come from the 2008 to 2019 ACS [@ruggles_2021]. Each year, the ACS surveys a 1-percent representative sample of the U.S. population about their education, occupation, income, family structure, immigration status, country of origin, location, and a variety of other individual and household attributes. We define a same-sex couple as two individuals of the same sex in the same household who report their relationship as "spouse" or "unmarried partner." We limit the sample to individuals who immigrated at the age of 18 or older and in 1991 or later.^[The exception is for for Figure \@ref(fig:total-pop), where we include those who immigrated in any year, at age 18 or older.] Hence this analysis considers four types of couples: (1) two-immigrant couples who came to the U.S. together; (2) two-immigrant couples that formed once in the U.S.; (3) mixed status couples where an immigrant migrated to be with their U.S.-born partner; and (4) mixed status couples that formed in the U.S. As shown in the Supplementary Material, results do not differ substantively for one- or two-immigrant couples. We are unable to differentiate between couples that partnered or married abroad and those that did so in the U.S. We elaborate on the implications of these scope conditions in the Discussion.  
 
 The 12 years of survey data contain `r nrow(filter(acs_wide, same_sex == T & (yrimmig_main >= 1991 | yrimmig_partner >= 1991)))` same-sex couples that include at least one immigrant, for a total of `r nrow(filter(acs_couple_policy, same_sex == T))` immigrants in same-sex couples with complete data. These immigrants are compared to `r nrow(filter (acs_wide, same_sex == F & (yrimmig_main >= 1991 | yrimmig_partner >= 1991)))` corresponding different-sex couples containing `r nrow(filter(acs_couple_policy, same_sex == F))` individual immigrants. Below, we outline how we use these data to construct dependent variables based on each analysis. All analyses incorporate ACS sampling weights.  
-
 
 Measuring the prevalence of same-sex couples in the U.S. is difficult [@michaels_2013]. As in most nationally representative demographic work on same-sex couples [@baumle_2013; @baumle_2019], we are able to identify only LGB couples that cohabit; unpartnered LGB individuals and those who do not live with their partner are not included in the analysis [@baumle_2009, p. 6]. In addition, LGB individuals who do not feel comfortable with the partner labels of the ACS are not in the sample. Another pitfall is measurement error: Misreporting may result when different-sex couples accidentally misspecify the gender of one of the partners [@gates_2009; @goodnature_2021]. Beginning in 2008 the Census Bureau made changes to ACS gender and partnership questions in order to prevent such errors [@u.s.censusbureau_2013], so we rely on data only from 2008 onward, but difficulties remain. If even a small number of different-sex couples misreport one partner's sex, the counts of same-sex couples will be inflated. Following @gates_2009, we remove all respondents that had either their relationship or sex variable allocated by the Census Bureau, which results in dropping `r 7683 - sum(acs_couple_policy$same_sex == T)` immigrants in same-sex couples and `r 949775 - sum(acs_couple_policy$same_sex == F)` in different-sex couples, or `r round(1-nrow(acs_couple_policy) / 957458, 4) * 100` percent of the sample. This is the strategy used by most studies of same-sex couples in the ACS [e.g. @boertien_2019; @gates_2013; @goldberg_2021; @christafore_2019; @martell_2020]. We also include robustness checks to test the sensitivity of our results to high rates of misreporting.
 
@@ -313,8 +313,7 @@ Measuring the prevalence of same-sex couples in the U.S. is difficult [@michaels
 ## Explanatory Variables
 Our explanatory variables of interest are the LGB policy contexts in country of origin and U.S. state of residence. To create the U.S. state policy index, we compile data from the Movement Advancement Project, a leading LGB organization in the U.S. that collects data on a number of relevant policies. Our state index encompasses both progressive policies (full marriage equality, state recognition of civil unions and domestic partnerships, ban on all employment and housing discrimination based on sexual orientation, hate crime protections based on sexual orientation, legal joint adoption by same-sex couples, and a ban on conversation therapy for minors) and regressive policies (criminalization of sodomy, state constitutional bans of marriage equality, religious freedom exemptions to discriminate against same-sex couples in adoption, and state-level bans on local non-discrimination ordinances encompassing sexual orientation). The state index ranges from `r min(acs_couple_policy$state_policy, na.rm = T)` to `r max(acs_couple_policy$state_policy, na.rm = T)`, and the mean score of country of origin for immigrants in our sample is `r mean(acs_couple_policy$state_policy, na.rm = T)`.
 
-We measure the origin country policy environment using a modified LGBT Policy Index [@velasco_2018]. The index comprises 16 policies, many similar to those above, but including additional policies like the death penalty for homosexual acts, propaganda laws limiting free speech for LGB communities, and equal age of consent between same-sex and different-sex couples. We remove policies targeting gender identity and transgender communities from the original index. Both state and country indices are created by summing the net total of progressive policies (scored $+1$) over regressive policies (scored $-1$). The country index ranges from `r min(acs_couple_policy$origin_score, na.rm = T)` to `r max(acs_couple_policy$origin_score, na.rm = T)`, and the mean score of country of origin for immigrants in our sample is `r mean(acs_couple_policy$origin_score, na.rm = T)`.
-Immigrants are assigned U.S. state index scores based on their state of residence as reported in the ACS. They are assigned country-of-origin index scores based on their birthplace and year of immigration.  
+We measure the origin country policy environment using a modified LGBT Policy Index [@velasco_2018]. The index comprises 16 policies, many similar to those above, but including additional policies like the death penalty for homosexual acts, propaganda laws limiting free speech for LGB communities, and equal age of consent between same-sex and different-sex couples. We remove policies targeting gender identity and transgender communities from the original index. Both state and country indices are created by summing the net total of progressive policies (scored $+1$) over regressive policies (scored $-1$). The country index ranges from `r min(acs_couple_policy$origin_score, na.rm = T)` to `r max(acs_couple_policy$origin_score, na.rm = T)`, and the mean score of country of origin for immigrants in our sample is `r mean(acs_couple_policy$origin_score, na.rm = T)`. Immigrants are assigned U.S. state index scores based on their state of residence as reported in the ACS. They are assigned country-of-origin index scores based on their birthplace and year of immigration.  
 
 Aside from the country and state indices, we also include a binary variable to indicate the change in national policy environment within the U.S. following the overturning of DOMA. This represents an important shift opening up traditional pathways of immigration to same-sex couples. We also include an interaction term between this post-DOMA indicator and country-of-origin index because we theorize that the effects will be more pronounced following this period.
 
@@ -331,11 +330,51 @@ For our individual-level analysis we include individual controls from the ACS fo
 
 
 # Analytic Strategy
-Our first goal is to isolate the effects of country-of-origin LGB policy on the immigration of immigrants in same-sex couples. The ideal survey would follow potential immigrants over time and have information about sexual orientation, allowing us to estimate how the probability of migrating and choice of U.S. state of residence vary by sexual orientation. This ideal dataset does not exist, but we approximate it at the macro level. We take the number of immigrants in same-sex couples from a given country and a given year of immigration and divide by the total number of immigrants from that country-year. We then multiply by 100 to yield a percentage. In effect this controls for aspects of the migration process common to all immigrants from a given country; if sending-country LGB policy has no effect on migration rates of LGB immigrants, then we would expect these proportions to be similar across countries. However, even if proportions of immigrants in same-sex couples vary between countries, LGB policy may not be the cause; perhaps LGB immigrants respond idiosyncratically to gravity-model variables that may covary with LGB policy, such as country income, unemployment, democratization, relationship to the U.S., and immigrant networks, so we control for these variables in our preferred model and estimate using ordinary least squares (OLS) regression. Our preferred model also includes country fixed effects to account for unobserved heterogeneity within countries. All of these models use country-clustered standard errors. In light of the 2013 Supreme Court decision on DOMA, we also add a dichotomous variable for whether the year of immigration was later than 2013, and we interact this variable with sending-country policy score. As discussed below, we test other possible years for this dichotomous variable and report the results in Section C of the Supplementary Material.  
+Our first goal is to isolate the effects of country-of-origin LGB policy on the immigration of immigrants in same-sex couples. The ideal survey would follow potential immigrants over time and have information about sexual orientation, allowing us to estimate how the probability of migrating and choice of U.S. state of residence vary by sexual orientation. This ideal dataset does not exist, but we approximate it by conducting three sets of analyses, reshaping the data in different ways to test different aspects of our theory (see Table \ref{tab:analytic}).  
 
-Our next set of models address how differing LGB policy environments across U.S. states influence proportions of immigrants in same-sex couples. We reshape the data so that each observation is the proportion of individual immigrants in same-sex couples from country $x$ in state $y$ in year $z$, then multiply by 100. As in the previous set of models, this reshaping acts to control for aspects of migrant settlement common to immigrants from the same country. We merge this by survey year to state-level measures of LGB policy, per capita income, unemployment rate, and we merge with origin-country LGB policy and the same country-level controls as in the previous models using the mean year of immigration for each immigrant group.  We regress the state-country-survey year proportion on state and sending-country policy scores, including state and origin-country controls. We include state and country-of-origin fixed effects, and we cluster errors at the state and country levels.    
+For the first set of analyses, we pool the 12 years of ACS data and take the (sampling-weighted) number of immigrants in same-sex couples from a given country and a given year of immigration and divide by the total number of immigrants from that country-year. We then multiply by 100 to yield a percentage. In effect this controls for aspects of the migration process common to all immigrants from a given country; if sending-country LGB policy has no effect on LGB immigrants, then we would expect these proportions to be similar across countries. However, even if proportions of immigrants in same-sex couples vary between countries, LGB policy may not be the cause; perhaps LGB immigrants respond idiosyncratically to migration-relevant variables that may covary with LGB policy, such as country income, unemployment, democratization, relationship to the U.S., and immigrant networks, so we control for these variables in our preferred model and estimate using ordinary least squares (OLS) regression. Our preferred model also includes country fixed effects to account for unobserved heterogeneity within countries. All of these models use country-clustered standard errors. In light of the 2013 Supreme Court decision on DOMA, we also add a dichotomous variable for whether the year of immigration was later than 2013, and we interact this variable with sending-country policy score. As discussed below, we test other possible years for this dichotomous variable and report the results in Section C of the Supplementary Material.  
 
-Our final set of models turns toward the individual: Conditional on immigrating to the U.S., do immigrants in same-sex couples choose more LGB-friendly states to reside in? And how does sending-country LGB context moderate this relationship? This part of the analysis uses ordered logistic regression to predict the policy index of state of residence. Whereas the full U.S. state policy index ranges from `r min(acs_couple_policy$state_policy, na.rm = T)` to `r max(acs_couple_policy$state_policy, na.rm = T)`, we break up the index into three "bins": repressive (0 or less), neutral (1 or 2), and progressive (3 or greater). We regress this ordered categorical outcome on a same-sex indicator and country-of-origin policy score, interacting these variables in our preferred model. The interaction term estimates the possibly moderating effect of origin-country policy context. We also control for individual attributes that could possibly confound our results, interacting these with the same-sex indicator, and we include country-clustered standard errors. The final models also include state and country controls.
+```{r analytic}
+tibble(`Analytic Strategy` = c(1,2,3),
+       Name = c('Country-of-Origin Effects',
+                'State Effects',
+                'Individual Analysis'),
+           `Dependent Variable` = 
+             c('Proportion of immigrants in same-sex couples, for each country in each of year of immigration 1991-2019',
+               'Proportion of immigrants in same-sex couples, for each country, state, and survey year 2008-2019',
+               'Binned state policy context for individual immigrants'),
+           `Example` = c('Among ACS respondents who immigrated from France in 2001, a weighted 1.3 percent were in same-sex couples at the time of survey.',
+                         'Among ACS respondents who immigrated from France and resided in New York at the time of the 2012 survey, a weighted 0.91 percent were in same-sex couples.',
+                         'One immigrant from France in ACS survey year 2012 lived in a progressive policy context.'),
+           `LGB Policy for Sending Country` = c('linked to year of immigration',
+                                     'linked to survey year',
+                                     'linked to year of immigration'),
+           `LGB Policy for U.S. State` = c('NA',
+                                     'linked to survey year',
+                                     'linked to survey year')
+) %>%
+  # kable(booktabs = T, format = 'html') %>%
+  # kable_styling('striped')
+  as_hux() %>%
+  set_bold(1, T)             %>%
+  set_bottom_border(1, everywhere) %>%
+  set_caption('Analytic strategies') 
+
+
+# acs_prop_yrimmig_policy %>%
+#   filter(country == 'France', yrimmig == 2001) %>%
+#   select(prop_same_sex, n_dif_sex, n_same_sex)
+# 
+# acs_dyad_policy %>%
+#   filter(country == 'France', year == 2015, state == 'New York') %>%
+#   select(same_prop, n_dif_sex, n_same_sex)
+
+```
+
+
+Our second set of models address how differing LGB policy environments across U.S. states influence proportions of immigrants in same-sex couples. We reshape the data so that each observation is the proportion of individual immigrants in same-sex couples from country $x$ in state $y$ in year $z$, then multiply by 100. As in the previous set of models, this reshaping acts to control for aspects of migrant settlement common to immigrants from the same country. We merge this by survey year to state-level measures of LGB policy, per capita income, unemployment rate, and we merge with origin-country LGB policy and the same country-level controls as in the previous models using the mean year of immigration for each immigrant group.  We regress the state-country-survey year proportion on state and sending-country policy scores, including state and origin-country controls. We include state and country-of-origin fixed effects, and we cluster errors at the state and country levels.    
+
+Our third and final set of models turns toward the individual: Conditional on immigrating to the U.S., do immigrants in same-sex couples choose more LGB-friendly states to reside in? And how does sending-country LGB context moderate this relationship? This part of the analysis uses ordered logistic regression to predict the policy index of state of residence. Whereas the full U.S. state policy index ranges from `r min(acs_couple_policy$state_policy, na.rm = T)` to `r max(acs_couple_policy$state_policy, na.rm = T)`, we break up the index into three "bins": repressive (0 or less), neutral (1 or 2), and progressive (3 or greater). We regress this ordered categorical outcome on a same-sex indicator and country-of-origin policy score, interacting these variables in our preferred model. The interaction term estimates the possibly moderating effect of origin-country policy context. We also control for individual attributes that could possibly confound our results, interacting these with the same-sex indicator, and we include country-clustered standard errors. The final models also include state and country controls.
 
 
 # Results
@@ -461,14 +500,16 @@ Although we see significant differences between same- and different-sex couples 
 
 ```{r country-map, fig.cap = 'Percentage of immigrants to the U.S. in same-sex couples by country of origin, averaging over years of immigration from 1991 to 2019.'}
 country_tab <- acs_couple_policy %>%
-  mutate(bpld = ifelse(bpld == "United Kingdom, ns", "England", bpld)) %>%
+  mutate(bpld = ifelse(bpld == "United Kingdom, ns", "England", bpld),
+         bpld = ifelse(bpldid == 46500, 'Russia', bpld),
+         bpld = ifelse(bpldid == 46510, 'Belarus', bpld)) %>%
   group_by(bpld, same_sex) %>%
   count(wt = perwt) %>%
   pivot_wider(names_from = 'same_sex', values_from = 'n') %>%
   mutate(prop_samesex = round(100*`TRUE` / `FALSE`, 2)) %>%
-  rename(Country = bpld)
+  rename(region = bpld)
 
-country_tab$Country <- recode(country_tab$Country,
+country_tab$region <- recode(country_tab$region,
                               'Burma (Myanmar)' = 'Myanmar',
                               'England' = 'UK',
                               'Cambodia (Kampuchea)' = 'Cambodia',
@@ -478,10 +519,9 @@ country_tab$Country <- recode(country_tab$Country,
                               'Republic of Georgia' = 'Georgia',
                               'South Africa (Union of)' = 'South Africa',
                               'Sri Lanka (Ceylon)' = 'Sri Lanka',
-                              'Yemen Arab Republic (North)' = 'Yemen'
+                              'Yemen Arab Republic (North)' = 'Yemen',
+                              'Other USSR/"Russia"' = 'Russia'
 )
-
-country_tab$region <- country_tab$Country
 
 
 # 
@@ -516,12 +556,17 @@ world_map <- map_data('world') %>%
 left_join(country_tab, world_map, by = 'region') %>%
   bind_rows(left_join(world_map, country_tab, by = 'region') %>%
   filter(is.na(prop_samesex)) %>%
-  mutate(prop_samesex = 0)) %>%
-  ggplot(mapping = aes(x = long, y = lat, group = group, fill = prop_samesex)) +
-  geom_polygon(color = "gray90", size = 0.1) +
+  mutate(prop_samesex = NA)) %>%
+  ggplot(mapping = aes(x = long, y = lat, group = group, 
+                       fill = prop_samesex)) +
+                       #fill = case_when(prop_samsex == 0.0012515612315, 'white', prop_samesex))) +
+  #geom_polygon(color = "gray90", size = 0.1) +
+  geom_polygon(color = "gray75", size = 0.1) +
   coord_fixed(1.3) +
   theme_map(font_family = 'Palatino') +
-  labs(fill = "Same-sex (%)")+ scale_fill_gradient(low = "white", high = "black") +
+  labs(fill = "Same-sex (%)")+ 
+  scale_fill_gradient(low = uclablue, high = uclagold, na.value = 'gray95') +
+  #scale_fill_gradient(low = "white", high = "black") +
   theme(legend.justification=c(0,0), legend.position=c(.1,.1),
          legend.title=element_text(size=9),
          legend.key.size = unit(0.3, 'cm'),
@@ -547,11 +592,12 @@ state_imm <- left_join(us_states, state_tab)
 
 ggplot(data = state_imm,
        mapping = aes(x = long, y = lat, group = group, fill = prop_samesex)) +
-  geom_polygon(color = "gray90", size = 0.1) +
+  geom_polygon(color = "gray75", size = 0.1) +
   coord_map(projection = "albers", lat0 = 39, lat1 = 45) +
   theme_map(font_family = 'Palatino') + 
   labs(fill = "Same-sex (%)") + 
-  scale_fill_gradient(low = "white", high = "black") +
+  scale_fill_gradient(low = uclablue, high = uclagold) +
+  #scale_fill_gradient(low = "white", high = "black") +
   theme(legend.justification=c(0,0), legend.position=c(.05,.0),
     legend.title=element_text(size=9),
     legend.key.size = unit(0.3, 'cm'),
