@@ -211,15 +211,25 @@ acs_dyad2 <- left_join(acs_dyad2, acs_dyad_yrimmig2)
 
 
 # Proportion same sex by year of immigration and country ####
-# no weights
 country_yrimmig_df <- acs_imm %>%
   filter(yrimmig >= 1991) %>%
   group_by(bpld, yrimmig) %>%
   summarize(n_total = sum(perwt), 
             n_spouse = sum(perwt[related == 'Spouse']), 
-            n_partner = sum(perwt[related == 'Unmarried Partner'])) %>%
+            n_partner = sum(perwt[related == 'Unmarried Partner']),
+            n_total_recent = sum(perwt[year == yrimmig + 1])) %>%
   mutate(bpld = as_factor(bpld),
          yrimmig = as.numeric(yrimmig))
+
+# country_yrimmig_recent_df <- acs_imm %>%
+#   filter(yrimmig >= 1991) %>%
+#   mutate(bpld = as_factor(bpld),
+#          yrimmig = as.numeric(yrimmig)) %>%
+#   group_by(bpld, yrimmig) %>%
+#   summarize(n_total_recent = sum(perwt[year = yrimmig + 1]))
+  
+
+
 
 acs_prop_yrimmig <- acs_wide %>%
   filter(imm_couple != 'none',
@@ -249,7 +259,10 @@ acs_prop_yrimmig <- acs_wide %>%
             n_spouse_2019 = sum(perwt[married == T & year == 2019]),
             n_spouse_pre_2019 = sum(perwt[married == T & year < 2019]),
             n_partner_2019 = sum(perwt[married == F & year == 2019]),
-            n_partner_pre_2019 = sum(perwt[married == F & year < 2019])) %>%
+            n_partner_pre_2019 = sum(perwt[married == F & year < 2019]),
+            n_recent = sum(perwt[year = yrimmig + 1]),
+            n_spouse_recent = sum(perwt[married == T & year == yrimmig + 1]),
+            n_partner_recent = sum(perwt[married == F & year == yrimmig + 1])) %>%
   # summarize(n = n(), 
   #           n_spouse = sum(married == T),
   #           n_partner = sum(married == F),
@@ -296,7 +309,8 @@ acs_prop_yrimmig <- acs_wide %>%
     prop_partner_same_sex = n_partner_same_sex / n_total * 100,
     prop_same_sex = prop_spouse_same_sex + prop_partner_same_sex,
     prop_same_sex_oneimm = (n_spouse_oneimm_same_sex + n_partner_oneimm_same_sex) / n_total * 100,
-    prop_same_sex_twoimm = (n_spouse_twoimm_same_sex + n_partner_twoimm_same_sex) / n_total * 100)
+    prop_same_sex_twoimm = (n_spouse_twoimm_same_sex + n_partner_twoimm_same_sex) / n_total * 100,
+    prop_same_sex_recent = (n_spouse_recent_same_sex + n_partner_recent_same_sex) / n_total_recent * 100)
 
 
 
@@ -613,6 +627,17 @@ write_csv(acs_dyad_policy, here('data', 'acs_dyad_policy.csv'))
 # write_csv(acs_dyad_policy_old, here('data', 'acs_dyad_policy_old.csv'))
 
 
-acs_prop_yrimmig_policy_old <- read_csv(here('data', 'acs_prop_yrimmig_policy_old.csv'))
+# acs_prop_yrimmig_policy_old <- read_csv(here('data', 'acs_prop_yrimmig_policy_old.csv'))
 
 
+# acs_prop_yrimmig %>%
+#   filter(yrimmig >= 2007 & yrimmig <= 2018) %>%
+#   group_by(yrimmig) %>%
+#   summarize(n_recent_samesex = sum(n_spouse_recent_same_sex + n_partner_recent_same_sex),
+#             n_recent_difsex = sum(n_spouse_recent_dif_sex + n_partner_recent_dif_sex)) %>%
+#   pivot_longer(-yrimmig) %>%
+#   ggplot(aes(x = yrimmig, y = value)) +
+#   facet_wrap(~name, scales = 'free') +
+#   geom_line()
+
+  

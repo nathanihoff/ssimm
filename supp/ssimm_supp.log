@@ -1,11 +1,11 @@
-This is XeTeX, Version 3.141592653-2.6-0.999993 (TeX Live 2021) (preloaded format=xelatex 2021.8.24)  26 AUG 2021 17:53
+This is XeTeX, Version 3.141592653-2.6-0.999993 (TeX Live 2021) (preloaded format=xelatex 2021.9.21)  2 NOV 2021 15:24
 entering extended mode
  restricted \write18 enabled.
  %&-line parsing enabled.
 **ssimm_supp.tex
 (./ssimm_supp.tex
 LaTeX2e <2021-06-01> patch level 1
-L3 programming layer <2021-07-12> (/Users/nathan/Library/TinyTeX/texmf-dist/tex
+L3 programming layer <2021-08-27> (/Users/nathan/Library/TinyTeX/texmf-dist/tex
 /latex/base/article.cls
 Document Class: article 2021/02/12 v1.4n Standard LaTeX document class
 (/Users/nathan/Library/TinyTeX/texmf-dist/tex/latex/base/size11.clo
@@ -87,7 +87,7 @@ Package: ifluatex 2019/10/25 v1.5 ifluatex legacy package. Use iftex instead.
 )
 (/Users/nathan/Library/TinyTeX/texmf-dist/tex/latex/unicode-math/unicode-math.s
 ty (/Users/nathan/Library/TinyTeX/texmf-dist/tex/latex/l3kernel/expl3.sty
-Package: expl3 2021-07-12 L3 programming layer (loader) 
+Package: expl3 2021-08-27 L3 programming layer (loader) 
 
 (/Users/nathan/Library/TinyTeX/texmf-dist/tex/latex/l3backend/l3backend-xetex.d
 ef
@@ -111,11 +111,11 @@ TeX
 
 (/Users/nathan/Library/TinyTeX/texmf-dist/tex/latex/l3packages/xparse/xparse.st
 y
-Package: xparse 2021-08-04 L3 Experimental document command parser
+Package: xparse 2021-08-27 L3 Experimental document command parser
 )
 (/Users/nathan/Library/TinyTeX/texmf-dist/tex/latex/l3packages/l3keys2e/l3keys2
 e.sty
-Package: l3keys2e 2021-08-04 LaTeX2e option processing using LaTeX3 keys
+Package: l3keys2e 2021-08-27 LaTeX2e option processing using LaTeX3 keys
 ) (/Users/nathan/Library/TinyTeX/texmf-dist/tex/latex/fontspec/fontspec.sty
 Package: fontspec 2020/02/21 v2.7i Font selection for XeLaTeX and LuaLaTeX
 
@@ -936,7 +936,7 @@ Overfull \hbox (10.68895pt too wide) in paragraph at lines 332--345
  []
 
 [7]
-Overfull \hbox (39.07872pt too wide) in paragraph at lines 397--431
+Overfull \hbox (42.55713pt too wide) in paragraph at lines 397--431
  [][] 
  []
 
@@ -945,34 +945,34 @@ Overfull \hbox (12.0pt too wide) in paragraph at lines 541--567
  [][] 
  []
 
-[12]
+[12] [13]
 File: ssimm_supp_files/figure-latex/placebo-country-1.pdf Graphic file (type pd
 f)
 <use ssimm_supp_files/figure-latex/placebo-country-1.pdf>
 File: ssimm_supp_files/figure-latex/placebo-state-1.pdf Graphic file (type pdf)
 
 <use ssimm_supp_files/figure-latex/placebo-state-1.pdf>
-[13] [14] [15]
-Overfull \hbox (42.11197pt too wide) in paragraph at lines 640--692
+[14] [15] [16]
+Overfull \hbox (42.11197pt too wide) in paragraph at lines 670--722
  [][] 
  []
 
-[16]
-Overfull \hbox (12.0pt too wide) in paragraph at lines 698--738
+[17]
+Overfull \hbox (12.0pt too wide) in paragraph at lines 728--768
  [][] 
  []
 
-[17] [18] [19] (./ssimm_supp.aux)
+[18] [19] [20] (./ssimm_supp.aux)
 Package rerunfilecheck Info: File `ssimm_supp.out' has not changed.
 (rerunfilecheck)             Checksum: A6C4FD66996BA56574DF12D06B4EC4BA;2057.
  ) 
 Here is how much of TeX's memory you used:
- 17756 strings out of 478475
- 314790 string characters out of 5858358
- 847436 words of memory out of 5000000
- 37776 multiletter control sequences out of 15000+600000
+ 17757 strings out of 478492
+ 314818 string characters out of 5861182
+ 846609 words of memory out of 5000000
+ 37760 multiletter control sequences out of 15000+600000
  414303 words of font info for 89 fonts, out of 8000000 for 9000
  14 hyphenation exceptions out of 8191
  87i,13n,120p,2226b,338s stack positions out of 5000i,500n,10000p,200000b,80000s
 
-Output written on ssimm_supp.pdf (19 pages).
+Output written on ssimm_supp.pdf (20 pages).
