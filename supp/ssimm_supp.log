@@ -1,11 +1,11 @@
-This is XeTeX, Version 3.141592653-2.6-0.999993 (TeX Live 2021) (preloaded format=xelatex 2021.9.21)  2 NOV 2021 15:24
+This is XeTeX, Version 3.141592653-2.6-0.999993 (TeX Live 2021) (preloaded format=xelatex 2021.11.4)  5 NOV 2021 14:06
 entering extended mode
  restricted \write18 enabled.
  %&-line parsing enabled.
 **ssimm_supp.tex
 (./ssimm_supp.tex
 LaTeX2e <2021-06-01> patch level 1
-L3 programming layer <2021-08-27> (/Users/nathan/Library/TinyTeX/texmf-dist/tex
+L3 programming layer <2021-10-18> (/Users/nathan/Library/TinyTeX/texmf-dist/tex
 /latex/base/article.cls
 Document Class: article 2021/02/12 v1.4n Standard LaTeX document class
 (/Users/nathan/Library/TinyTeX/texmf-dist/tex/latex/base/size11.clo
@@ -87,11 +87,11 @@ Package: ifluatex 2019/10/25 v1.5 ifluatex legacy package. Use iftex instead.
 )
 (/Users/nathan/Library/TinyTeX/texmf-dist/tex/latex/unicode-math/unicode-math.s
 ty (/Users/nathan/Library/TinyTeX/texmf-dist/tex/latex/l3kernel/expl3.sty
-Package: expl3 2021-08-27 L3 programming layer (loader) 
+Package: expl3 2021-10-18 L3 programming layer (loader) 
 
 (/Users/nathan/Library/TinyTeX/texmf-dist/tex/latex/l3backend/l3backend-xetex.d
 ef
-File: l3backend-xetex.def 2021-08-04 L3 backend support: XeTeX
+File: l3backend-xetex.def 2021-10-18 L3 backend support: XeTeX
 (|extractbb --version)
 \c__kernel_sys_dvipdfmx_version_int=\count198
 \l__color_backend_stack_int=\count199
@@ -158,28 +158,28 @@ tim
 (/Users/nathan/Library/TinyTeX/texmf-dist/tex/latex/base/textcomp.sty
 Package: textcomp 2020/02/02 v2.0n Standard LaTeX package
 )) (/Users/nathan/Library/TinyTeX/texmf-dist/tex/latex/xcolor/xcolor.sty
-Package: xcolor 2016/05/11 v2.12 LaTeX color extensions (UK)
+Package: xcolor 2021/10/31 v2.13 LaTeX color extensions (UK)
 (/Users/nathan/Library/TinyTeX/texmf-dist/tex/latex/graphics-cfg/color.cfg
 File: color.cfg 2016/01/02 v1.6 sample color configuration
 )
-Package xcolor Info: Driver file: xetex.def on input line 225.
+Package xcolor Info: Driver file: xetex.def on input line 227.
 (/Users/nathan/Library/TinyTeX/texmf-dist/tex/latex/graphics-def/xetex.def
 File: xetex.def 2021/03/18 v5.0k Graphics/color driver for xetex
 )
-Package xcolor Info: Model `cmy' substituted by `cmy0' on input line 1348.
-Package xcolor Info: Model `RGB' extended on input line 1364.
-Package xcolor Info: Model `HTML' substituted by `rgb' on input line 1366.
-Package xcolor Info: Model `Hsb' substituted by `hsb' on input line 1367.
-Package xcolor Info: Model `tHsb' substituted by `hsb' on input line 1368.
-Package xcolor Info: Model `HSB' substituted by `hsb' on input line 1369.
-Package xcolor Info: Model `Gray' substituted by `gray' on input line 1370.
-Package xcolor Info: Model `wave' substituted by `hsb' on input line 1371.
+Package xcolor Info: Model `cmy' substituted by `cmy0' on input line 1352.
+Package xcolor Info: Model `RGB' extended on input line 1368.
+Package xcolor Info: Model `HTML' substituted by `rgb' on input line 1370.
+Package xcolor Info: Model `Hsb' substituted by `hsb' on input line 1371.
+Package xcolor Info: Model `tHsb' substituted by `hsb' on input line 1372.
+Package xcolor Info: Model `HSB' substituted by `hsb' on input line 1373.
+Package xcolor Info: Model `Gray' substituted by `gray' on input line 1374.
+Package xcolor Info: Model `wave' substituted by `hsb' on input line 1375.
 (/Users/nathan/Library/TinyTeX/texmf-dist/tex/latex/graphics/dvipsnam.def
 File: dvipsnam.def 2016/06/17 v3.0m Driver-dependent file (DPC,SPQR)
 ) (/Users/nathan/Library/TinyTeX/texmf-dist/tex/latex/xcolor/svgnam.def
-File: svgnam.def 2016/05/11 v2.12 Predefined colors according to SVG 1.1 (UK)
+File: svgnam.def 2021/10/31 v2.13 Predefined colors according to SVG 1.1 (UK)
 ) (/Users/nathan/Library/TinyTeX/texmf-dist/tex/latex/xcolor/x11nam.def
-File: x11nam.def 2016/05/11 v2.12 Predefined colors according to Unix/X11 (UK)
+File: x11nam.def 2021/10/31 v2.13 Predefined colors according to Unix/X11 (UK)
 )) (/Users/nathan/Library/TinyTeX/texmf-dist/tex/latex/hyperref/hyperref.sty
 Package: hyperref 2021-06-07 v7.00m Hypertext links for LaTeX
 (/Users/nathan/Library/TinyTeX/texmf-dist/tex/generic/ltxcmds/ltxcmds.sty
@@ -936,29 +936,29 @@ Overfull \hbox (10.68895pt too wide) in paragraph at lines 332--345
  []
 
 [7]
-Overfull \hbox (42.55713pt too wide) in paragraph at lines 397--431
+Overfull \hbox (42.55713pt too wide) in paragraph at lines 398--433
  [][] 
  []
 
-[8] [9] [10] [11]
-Overfull \hbox (12.0pt too wide) in paragraph at lines 541--567
+[8] [9] [10] [11] [12]
+Overfull \hbox (12.0pt too wide) in paragraph at lines 577--603
  [][] 
  []
 
-[12] [13]
+[13] [14]
 File: ssimm_supp_files/figure-latex/placebo-country-1.pdf Graphic file (type pd
 f)
 <use ssimm_supp_files/figure-latex/placebo-country-1.pdf>
 File: ssimm_supp_files/figure-latex/placebo-state-1.pdf Graphic file (type pdf)
 
 <use ssimm_supp_files/figure-latex/placebo-state-1.pdf>
-[14] [15] [16]
-Overfull \hbox (42.11197pt too wide) in paragraph at lines 670--722
+[15] [16]
+Overfull \hbox (42.11197pt too wide) in paragraph at lines 679--732
  [][] 
  []
 
 [17]
-Overfull \hbox (12.0pt too wide) in paragraph at lines 728--768
+Overfull \hbox (12.0pt too wide) in paragraph at lines 738--778
  [][] 
  []
 
@@ -967,10 +967,10 @@ Package rerunfilecheck Info: File `ssimm_supp.out' has not changed.
 (rerunfilecheck)             Checksum: A6C4FD66996BA56574DF12D06B4EC4BA;2057.
  ) 
 Here is how much of TeX's memory you used:
- 17757 strings out of 478492
- 314818 string characters out of 5861182
- 846609 words of memory out of 5000000
- 37760 multiletter control sequences out of 15000+600000
+ 17757 strings out of 478472
+ 314902 string characters out of 5860539
+ 849381 words of memory out of 5000000
+ 37780 multiletter control sequences out of 15000+600000
  414303 words of font info for 89 fonts, out of 8000000 for 9000
  14 hyphenation exceptions out of 8191
  87i,13n,120p,2226b,338s stack positions out of 5000i,500n,10000p,200000b,80000s
