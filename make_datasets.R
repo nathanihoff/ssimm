@@ -34,7 +34,7 @@ acs <- read_dta('/Users/nathan/Data/ACS/acs_2008_2019.dta') %>%
       educ == 6 ~ 'HS',
       educ %in% 7:9 ~ 'some col',
       educ %in% 10:11 ~ 'college'),
-    bpldid = case_when(as_factor(bpld) == 'England' ~ 41300,
+    bpldid = case_when(bpld %in% c(41000, 41100, 41410) ~ 41300, # England, Scotland, Northern Ireland
                        as_factor(bpld) == 'Korea' ~ 50220,
                        T ~ bpldid))
 
@@ -438,7 +438,7 @@ lgbt_policy <- read.csv(here('data', 'lgb_origin_index.csv')) %>%
   left_join(vdem) %>%
   left_join(dist_dat) %>%
   arrange(Country, year)
-
+ 
 
 # migrant stock by year
 # UN data: 1990-2017, every 5 years
@@ -508,7 +508,7 @@ acs_prop_yrimmig_policy <- acs_prop_yrimmig %>%
   # mutate(pre_1991 = yrimmig <1991,
   #        yrimmig = ifelse(yrimmig < 1991, 1991, yrimmig)) %>%
   left_join(lgbt_policy, by = c('yrimmig' = 'year', 'bpldid' = 'Code')) %>%
-  left_join(yearly_prop, by = c('yrimmig' = 'year', 'iso_o' = 'iso_o')) %>%
+  left_join(select(yearly_prop, -bpldid), by = c('yrimmig' = 'year', 'iso_o' = 'iso_o')) %>%
   filter(!is.na(origin_score)) %>%
   mutate(prop_same_sex = prop_same_sex,
          prop_dif_sex = prop_dif_sex,
@@ -518,7 +518,8 @@ acs_prop_yrimmig_policy <- acs_prop_yrimmig %>%
          yr_fac = as.factor(yrimmig)) %>%
   # include only complete cases for regressions
   drop_na(prop_same_sex, distw, contig, comlang_off, comlang_ethno, colony,
-          wage_dif, unemp_dif, vdem, origin_score, bpld)
+          wage_dif, unemp_dif, vdem, origin_score, bpld) 
+
 
 
 # State-level analysis
@@ -624,7 +625,7 @@ acs_couple_policy <- acs_coupled_imms %>%
 write_rds(acs_couple_policy, here('data', 'acs_couple_policy.rds'))
 write_csv(acs_prop_yrimmig_policy, here('data', 'acs_prop_yrimmig_policy.csv'))
 write_csv(acs_dyad_policy, here('data', 'acs_dyad_policy.csv'))
-# write_csv(acs_dyad_policy_old, here('data', 'acs_dyad_policy_old.csv'))
+# write_csv(acs_dyad_policy_old, here('data'acs_prop_yrimmig_policy, 'acs_dyad_policy_old.csv'))
 
 
 # acs_prop_yrimmig_policy_old <- read_csv(here('data', 'acs_prop_yrimmig_policy_old.csv'))
