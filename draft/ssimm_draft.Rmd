@@ -141,10 +141,10 @@ set_flextable_defaults(font.family = 'Times New Roman',
 ```{r load, include = F}
 
 acs_wide <- read.csv(here('data', 'acs_wide.csv'))
-acs_couple_policy <- readRDS(here('data', 'acs_couple_policy.rds')) 
-acs_prop_yrimmig_policy <- read.csv(here('data', 'acs_prop_yrimmig_policy.csv')) %>%
+acs_ind <- readRDS(here('data', 'acs_couple_policy.rds')) 
+acs_prop <- read.csv(here('data', 'acs_prop_yrimmig_policy.csv')) %>%
   mutate(post_2013 = (yrimmig > 2013))
-acs_dyad_policy <- read.csv(here('data', 'acs_dyad_policy.csv'))
+acs_prop_state <- read.csv(here('data', 'acs_dyad_policy.csv'))
 
 # acs_oneimm <- read.csv(here('data', 'acs_oneimm.csv'))
 # acs_coupled_imms <- read.csv(here('data', 'acs_coupled_imms.csv'))
@@ -153,14 +153,14 @@ acs_dyad_policy <- read.csv(here('data', 'acs_dyad_policy.csv'))
 
 
 acs_wide_survey <- acs_wide %>% as_survey_design(ids = cluster, weights = hhwt)
-acs_ind_survey <- acs_couple_policy %>% as_survey_design(ids = cluster, weights = perwt)
+acs_ind_survey <- acs_ind %>% as_survey_design(ids = cluster, weights = perwt)
 
 # Smaller dataset for initial ordered logit analyses
 set.seed(1859)
-acs_couple_policy_small <- acs_couple_policy
-# acs_couple_policy_small <- bind_rows(
-#   filter(acs_couple_policy, same_sex == T, yrimmig >= 1991),
-#   sample_n(filter(acs_couple_policy, same_sex == F), 1e5)
+acs_ind_small <- acs_ind
+# acs_ind_small <- bind_rows(
+#   filter(acs_ind, same_sex == T, yrimmig >= 1991),
+#   sample_n(filter(acs_ind, same_sex == F), 1e5)
 # ) 
 
 total_df <- acs_wide_survey %>%
@@ -197,7 +197,7 @@ In 2013, the U.S. Supreme Court overturned the Defense of Marriage Act and requi
 
 The Supreme Court ruling occurred against a backdrop of rapidly changing laws concerning same-sex couples -- and LGB communities, generally -- both in the U.S. and abroad. As some countries expanded rights and social recognition, others imposed new forms of repression [@hadler_2018_world]. These varied dynamics raise an important question: How do changing policy environments influence the migration patterns of individuals in same-sex couples into and across the U.S.? Migration scholarship has begun to recognize the role of the state to shape both the aspirations and capabilities to migrate through social policies, even those unrelated to migration itself [@dehaas_2021; @fitzgerald_2014]. Moreover, while gender is increasingly recognized as an integral part of the migration process [@lutz_2010; @hondagneu-sotelo_2012], sexuality receives relatively scant attention. Emerging qualitative work has demonstrated that both sexuality and the policies governing it are highly salient factors influencing migration decisions to the U.S. [@ahmad_2013; @carrillo_2018; @mai_2009; @gorman-murray_2009]. Studying the migration of same-sex couples into and across the U.S. allows us to make broader inferences into how the interaction between sexuality and policy shape migration decisions, underscoring the importance of political and "lifestyle" considerations into understandings of migration [@benson_2012; @fitzgerald_2014].  
 
-To address our research question, we evaluate how LGB policies at country of origin and U.S. state of residence relate to the migratory patterns for immigrants cohabiting with a same-sex partner. We do so by integrating two types of data. First, we rely on American Community Survey (ACS) data from 2008 to 2019 [@ruggles_2021], which allows the identification of individuals in cohabiting same-sex couples as well as their country of origin, U.S. state of residence, and potentially confounding individual characteristics. Second, we harness original datasets indexing LGB policy changes in `r length(unique(acs_prop_yrimmig_policy$bpldid))` countries and all U.S. states from 1991 to 2019. We merge these two primary data sources with country- and state-level control variables from the UN, World Bank, U.S. government, and other sources.  
+To address our research question, we evaluate how LGB policies at country of origin and U.S. state of residence relate to the migratory patterns for immigrants cohabiting with a same-sex partner. We do so by integrating two types of data. First, we rely on American Community Survey (ACS) data from 2008 to 2019 [@ruggles_2021], which allows the identification of individuals in cohabiting same-sex couples as well as their country of origin, U.S. state of residence, and potentially confounding individual characteristics. Second, we harness original datasets indexing LGB policy changes in `r length(unique(acs_prop$bpldid))` countries and all U.S. states from 1991 to 2019. We merge these two primary data sources with country- and state-level control variables from the UN, World Bank, U.S. government, and other sources.  
 
 Our analytic strategy proceeds in four parts. First, we descriptively understand who these cohabiting LGB immigrants are. This first step is important because little is known about this growing population. Second, we focus on country-of-origin effects, modeling how representation of immigrants in same-sex partnerships changes over time in relation to the LGB policy context of the country of origin. Third, we factor in the role of changing state LGB policy context in models at the U.S. state level. Lastly, we shift our attention to the individual, assessing how being an immigrant in a same-sex couple, net of other individual factors, bears upon choice of LGB policy context by state. We also consider how this relationship is moderated by LGB policy context in the country of origin.
 
@@ -308,15 +308,15 @@ In sum, it is evident that sexuality and the policies governing it are salient f
 ## Identifying Same-Sex Couples in the ACS
 We merge individual-level data on immigrants in the U.S. with state- and country-level variables from a variety of datasets. The individual data come from the 2008 to 2019 ACS [@ruggles_2021]. Each year, the ACS surveys a 1-percent representative sample of the U.S. population about their education, occupation, income, family structure, immigration status, country of origin, location, and a variety of other individual and household attributes. It is important to note that the ACS is currently the only representative, public-use dataset to inquire about both partner sex and immigrant status which is, in part, why queer migration scholarship has been limited. We define a same-sex couple as two individuals of the same sex in the same household who report their relationship as "spouse" or "unmarried partner." We limit the sample to individuals who immigrated at the age of 18 or older and in 1991 or later.^[The exception is for for Figure \@ref(fig:total-pop), where we include those who immigrated in any year, at age 18 or older.] Hence this analysis considers four types of couples: (1) two-immigrant couples who came to the U.S. together; (2) two-immigrant couples that formed once in the U.S.; (3) mixed status couples where an immigrant migrated to be with their U.S.-born partner; and (4) mixed status couples that formed in the U.S. As shown in the Supplementary Material, results do not differ substantively for one- or two-immigrant couples. We are unable to differentiate between couples that partnered or married abroad and those that did so in the U.S. We elaborate on the implications of these scope conditions in the Discussion.  
 
-The 12 years of survey data contain `r nrow(filter(acs_wide, same_sex == T & (yrimmig_main >= 1991 | yrimmig_partner >= 1991)))` same-sex couples that include at least one immigrant, for a total of `r nrow(filter(acs_couple_policy, same_sex == T))` immigrants in same-sex couples with complete data. These immigrants are compared to `r nrow(filter (acs_wide, same_sex == F & (yrimmig_main >= 1991 | yrimmig_partner >= 1991)))` corresponding different-sex couples containing `r nrow(filter(acs_couple_policy, same_sex == F))` individual immigrants. Below, we outline how we use these data to construct dependent variables based on each analysis. All analyses incorporate ACS sampling weights.  
+The 12 years of survey data contain `r nrow(filter(acs_wide, same_sex == T & (yrimmig_main >= 1991 | yrimmig_partner >= 1991)))` same-sex couples that include at least one immigrant, for a total of `r nrow(filter(acs_ind, same_sex == T))` immigrants in same-sex couples with complete data. These immigrants are compared to `r nrow(filter (acs_wide, same_sex == F & (yrimmig_main >= 1991 | yrimmig_partner >= 1991)))` corresponding different-sex couples containing `r nrow(filter(acs_ind, same_sex == F))` individual immigrants. Below, we outline how we use these data to construct dependent variables based on each analysis. All analyses incorporate ACS sampling weights.  
 
-Measuring the prevalence of same-sex couples in the U.S. is difficult [@michaels_2013]. As in most nationally representative demographic work on same-sex couples [@baumle_2013; @baumle_2019], we are able to identify only LGB couples that cohabit; unpartnered LGB individuals and those who do not live with their partner are not included in the analysis [@baumle_2009, p. 6]. In addition, LGB individuals who do not feel comfortable with the partner labels of the ACS are not in the sample. Another pitfall is measurement error: Misreporting may result when different-sex couples accidentally misspecify the gender of one of the partners [@gates_2009; @goodnature_2021]. Beginning in 2008 the Census Bureau made changes to ACS gender and partnership questions in order to prevent such errors [@u.s.censusbureau_2013], so we rely on data only from 2008 onward, but difficulties remain. If even a small number of different-sex couples misreport one partner's sex, the counts of same-sex couples will be inflated. Following @gates_2009, we remove all respondents that had either their relationship or sex variable allocated by the Census Bureau, which results in dropping `r 7683 - sum(acs_couple_policy$same_sex == T)` immigrants in same-sex couples and `r 949775 - sum(acs_couple_policy$same_sex == F)` in different-sex couples, or `r round(1-nrow(acs_couple_policy) / 957458, 4) * 100` percent of the sample. This is the strategy used by most studies of same-sex couples in the ACS [e.g. @boertien_2019; @gates_2013; @goldberg_2021; @christafore_2019; @martell_2020]. We also include robustness checks to test the sensitivity of our results to high rates of misreporting.  
+Measuring the prevalence of same-sex couples in the U.S. is difficult [@michaels_2013]. As in most nationally representative demographic work on same-sex couples [@baumle_2013; @baumle_2019], we are able to identify only LGB couples that cohabit; unpartnered LGB individuals and those who do not live with their partner are not included in the analysis [@baumle_2009, p. 6]. In addition, LGB individuals who do not feel comfortable with the partner labels of the ACS are not in the sample. Another pitfall is measurement error: Misreporting may result when different-sex couples accidentally misspecify the gender of one of the partners [@gates_2009; @goodnature_2021]. Beginning in 2008 the Census Bureau made changes to ACS gender and partnership questions in order to prevent such errors [@u.s.censusbureau_2013], so we rely on data only from 2008 onward, but difficulties remain. If even a small number of different-sex couples misreport one partner's sex, the counts of same-sex couples will be inflated. Following @gates_2009, we remove all respondents that had either their relationship or sex variable allocated by the Census Bureau, which results in dropping `r 7683 - sum(acs_ind$same_sex == T)` immigrants in same-sex couples and `r 949775 - sum(acs_ind$same_sex == F)` in different-sex couples, or `r round(1-nrow(acs_ind) / 957458, 4) * 100` percent of the sample. This is the strategy used by most studies of same-sex couples in the ACS [e.g. @boertien_2019; @gates_2013; @goldberg_2021; @christafore_2019; @martell_2020]. We also include robustness checks to test the sensitivity of our results to high rates of misreporting.  
 
 
 ## Explanatory Variables
-Our variables of interest are the LGB policy contexts in country of origin and U.S. state of residence. To create the U.S. state policy index, we compile data from the Movement Advancement Project, a leading LGB organization in the U.S. that collects data on a number of relevant policies. Our state index encompasses both progressive policies (full marriage equality, state recognition of civil unions and domestic partnerships, ban on all employment and housing discrimination based on sexual orientation, hate crime protections based on sexual orientation, legal joint adoption by same-sex couples, and a ban on conversation therapy for minors) and regressive policies (criminalization of sodomy, state constitutional bans of marriage equality, religious freedom exemptions to discriminate against same-sex couples in adoption, and state-level bans on local non-discrimination ordinances encompassing sexual orientation). The state index ranges from `r min(acs_couple_policy$state_policy, na.rm = T)` to `r max(acs_couple_policy$state_policy, na.rm = T)`, and the mean score of country of origin for immigrants in our sample is `r mean(acs_couple_policy$state_policy, na.rm = T)`.
+Our variables of interest are the LGB policy contexts in country of origin and U.S. state of residence. To create the U.S. state policy index, we compile data from the Movement Advancement Project, a leading LGB organization in the U.S. that collects data on a number of relevant policies. Our state index encompasses both progressive policies (full marriage equality, state recognition of civil unions and domestic partnerships, ban on all employment and housing discrimination based on sexual orientation, hate crime protections based on sexual orientation, legal joint adoption by same-sex couples, and a ban on conversation therapy for minors) and regressive policies (criminalization of sodomy, state constitutional bans of marriage equality, religious freedom exemptions to discriminate against same-sex couples in adoption, and state-level bans on local non-discrimination ordinances encompassing sexual orientation). The state index ranges from `r min(acs_ind$state_policy, na.rm = T)` to `r max(acs_ind$state_policy, na.rm = T)`, and the mean score of country of origin for immigrants in our sample is `r mean(acs_ind$state_policy, na.rm = T)`.
 
-We measure the origin country policy environment using a modified LGBT Policy Index [@velasco_2018]. The index comprises 16 policies, many similar to those above, but including additional policies like the death penalty for homosexual acts, propaganda laws limiting free speech for LGB communities, and equal age of consent between same-sex and different-sex couples. We remove policies targeting gender identity and transgender communities from the original index. Both state and country indices are created by summing the net total of progressive policies (scored $+1$) over regressive policies (scored $-1$). For the `r length(unique(acs_prop_yrimmig_policy$bpldid))` countries of origin for our sample, country index ranges from `r min(acs_couple_policy$origin_score, na.rm = T)` to `r max(acs_couple_policy$origin_score, na.rm = T)`, and the mean score of country of origin for immigrants in our sample is `r mean(acs_couple_policy$origin_score, na.rm = T)`. Immigrants are assigned U.S. state index scores based on their state of residence as reported in the ACS, and they are assigned country-of-origin index scores based on their birthplace and year of immigration.  
+We measure the origin country policy environment using a modified LGBT Policy Index [@velasco_2018]. The index comprises 16 policies, many similar to those above, but including additional policies like the death penalty for homosexual acts, propaganda laws limiting free speech for LGB communities, and equal age of consent between same-sex and different-sex couples. We remove policies targeting gender identity and transgender communities from the original index. Both state and country indices are created by summing the net total of progressive policies (scored $+1$) over regressive policies (scored $-1$). For the `r length(unique(acs_prop$bpldid))` countries of origin for our sample, country index ranges from `r min(acs_ind$origin_score, na.rm = T)` to `r max(acs_ind$origin_score, na.rm = T)`, and the mean score of country of origin for immigrants in our sample is `r mean(acs_ind$origin_score, na.rm = T)`. Immigrants are assigned U.S. state index scores based on their state of residence as reported in the ACS, and they are assigned country-of-origin index scores based on their birthplace and year of immigration.  
 
 Aside from the country and state indices, we also include a binary variable to indicate the change in national policy environment within the U.S. following the overturning of DOMA. This represents an important shift opening up traditional pathways of immigration to same-sex couples. We also include an interaction term between this post-DOMA indicator and country-of-origin index because we theorize that the effects will be more pronounced following this period.
 
@@ -324,7 +324,7 @@ Aside from the country and state indices, we also include a binary variable to i
 ## Analytic Strategy 
 We construct three dependent variables: one for each set of analyses. Our first goal is to isolate the effects of country-of-origin LGB policy on the immigration of immigrants in same-sex couples. The ideal survey would follow potential immigrants over time and have information about sexual orientation, allowing us to estimate how the probability of migrating and choice of U.S. state of residence vary by sexual orientation. This ideal dataset does not exist, but we approximate it by conducting three sets of analyses, reshaping the data in different ways to test different aspects of our theory (see Table \@ref(tab:analytic)).  
 
-For the first set of analyses, we pool the 12 years of ACS data and take the (sampling-weighted) number of immigrants in same-sex couples from a given country and a given year of immigration and divide by the total number of immigrants from that country-year. We multiply each of these `r nrow(acs_prop_yrimmig_policy)` country-year observations by 100 to yield a percentage. In effect this transformation controls for aspects of the migration process common to all immigrants from a given country; if sending-country LGB policy has no effect on LGB immigrants, then we would expect these proportions to be similar across countries. We cluster standard errors by country of origin, and our preferred model includes country fixed effects and controls. 
+For the first set of analyses, we pool the 12 years of ACS data and take the (sampling-weighted) number of immigrants in same-sex couples from a given country and a given year of immigration and divide by the total number of immigrants from that country-year. We multiply each of these `r nrow(acs_prop)` country-year observations by 100 to yield a percentage. In effect this transformation controls for aspects of the migration process common to all immigrants from a given country; if sending-country LGB policy has no effect on LGB immigrants, then we would expect these proportions to be similar across countries. We cluster standard errors by country of origin, and our preferred model includes country fixed effects and controls. 
 <!-- However, even if proportions of immigrants in same-sex couples vary between countries, LGB policy may not be the cause; perhaps LGB immigrants respond idiosyncratically to migration-relevant variables that may covary with LGB policy, such as country income, unemployment, democratization, relationship to the U.S., and immigrant networks, so we control for these variables (described below) in our preferred model and estimate using ordinary least squares (OLS) regression.  -->
 <!-- In light of the 2013 Supreme Court decision on DOMA, we also add a dichotomous variable for whether the year of immigration was later than 2013, and we interact this variable with sending-country policy score. As discussed below, we test other possible years for this dichotomous variable and report the results in Section C of the Supplementary Material.   -->
 
@@ -333,13 +333,13 @@ For the first set of analyses, we pool the 12 years of ACS data and take the (sa
 
 
 
-Our second set of models address how differing LGB policy environments across U.S. states influence proportions of immigrants in same-sex couples. We reshape the data so that each observation is the proportion of individual immigrants in same-sex couples from country $x$ in state $y$ in year $z$, then multiply by 100. This results in `r nrow(acs_dyad_policy)` country-state-years. As in the previous set of models, this reshaping acts to control for aspects of migrant settlement common to immigrants from the same country. We regress the state-country-survey year proportion on state and sending-country policy scores and adjust for state and origin-country controls.
+Our second set of models address how differing LGB policy environments across U.S. states influence proportions of immigrants in same-sex couples. We reshape the data so that each observation is the proportion of individual immigrants in same-sex couples from country $x$ in state $y$ in year $z$, then multiply by 100. This results in `r nrow(acs_prop_state)` country-state-years. As in the previous set of models, this reshaping acts to control for aspects of migrant settlement common to immigrants from the same country. We regress the state-country-survey year proportion on state and sending-country policy scores and adjust for state and origin-country controls.
 <!-- We merge this by survey year to state-level measures of LGB policy and state controls -->
 <!-- per capita income, unemployment rate, -->
 <!-- and we merge with origin-country LGB policy and country-level controls using the mean year of immigration for each immigrant group.  -->
 State-level measures are linked to survey year, while origin-country LGB policy and controls are linked to the mean year of immigration for each immigrant group. We include state and country-of-origin fixed effects, and we cluster errors at the state and country levels.    
 
-Our third and final set of models turns toward the individual: Conditional on immigrating to the U.S., do immigrants in same-sex couples choose more LGB-friendly states to reside in? And how does sending-country LGB context moderate this relationship? This part of the analysis uses ordered logistic regression to predict the policy index of state of residence. Whereas the full U.S. state policy index ranges from `r min(acs_couple_policy$state_policy, na.rm = T)` to `r max(acs_couple_policy$state_policy, na.rm = T)`, we break up the index into three "bins": repressive (0 or less), neutral (1 or 2), and progressive (3 or greater). We regress this ordered categorical outcome on a same-sex indicator and country-of-origin policy score, interacting these variables in our preferred model. The interaction term estimates the possibly moderating effect of origin-country policy context. We also control for individual attributes that could possibly confound our results, interacting these with the same-sex indicator, and we include country-clustered standard errors. The final models also include state and country controls.
+Our third and final set of models turns toward the individual: Conditional on immigrating to the U.S., do immigrants in same-sex couples choose more LGB-friendly states to reside in? And how does sending-country LGB context moderate this relationship? This part of the analysis uses ordered logistic regression to predict the policy index of state of residence. Whereas the full U.S. state policy index ranges from `r min(acs_ind$state_policy, na.rm = T)` to `r max(acs_ind$state_policy, na.rm = T)`, we break up the index into three "bins": repressive (0 or less), neutral (1 or 2), and progressive (3 or greater). We regress this ordered categorical outcome on a same-sex indicator and country-of-origin policy score, interacting these variables in our preferred model. The interaction term estimates the possibly moderating effect of origin-country policy context. We also control for individual attributes that could possibly confound our results, interacting these with the same-sex indicator, and we include country-clustered standard errors. The final models also include state and country controls.
 
 
 
@@ -398,7 +398,7 @@ Figure \@ref(fig:country-map) shows the percentage of immigrants to the U.S. in 
 
 
 ```{r country-state-calc}
-country_tab <- acs_couple_policy %>%
+country_tab <- acs_ind %>%
   group_by(bpld, same_sex) %>%
   count(wt = perwt) %>%
   pivot_wider(names_from = 'same_sex', values_from = 'n') %>%
@@ -410,7 +410,7 @@ country_tab <- acs_couple_policy %>%
     nchar(prop_samesex) == 3 ~ paste0(prop_samesex, '0 %'),
     nchar(prop_samesex) == 1 ~ paste0(prop_samesex, '.00 %'))) %>%
   rownames_to_column() %>%
-  left_join(acs_couple_policy %>%
+  left_join(acs_ind %>%
               group_by(bpld) %>%
               summarize(`Mean policy score` = 
                           weighted.mean(origin_score, na.rm = T, w = perwt))) %>%
@@ -435,7 +435,7 @@ state_tab <- acs_wide %>%
     nchar(prop_samesex) == 4 ~ paste0(prop_samesex, ' %'),
     nchar(prop_samesex) == 3 ~ paste0(prop_samesex, '0 %'),
     nchar(prop_samesex) == 1 ~ paste0(prop_samesex, '.00 %'))) %>%
-  left_join(acs_couple_policy %>%
+  left_join(acs_ind %>%
               group_by(state) %>%
               summarize(`Mean policy score` = 
                           weighted.mean(state_policy, na.rm = T, w = perwt))) %>%
@@ -462,62 +462,62 @@ names(state_vec) <- state_tab$`State`
 ## Model Results
 ### Country-of-Origin Effects
 ```{r country-props-mods}
-# acs_prop_yrimmig_policy <- acs_prop_yrimmig_policy %>%
+# acs_prop <- acs_prop %>%
 #   filter(yrimmig >= 1992)
 
 # ag <- lm(I(log(n_same_sex+1)) ~ origin_score + I(log(n_total+1)), 
-#          data = acs_prop_yrimmig_policy) 
+#          data = acs_prop) 
 # 
 # 
 # ag_country_orig <- lm(I(log(n_same_sex+1))  ~ distw + contig + comlang_off + comlang_ethno + colony +
 #                    wage_dif + unemp_dif + vdem + origin_score + stock_prop+ I(log(n_total+1)), 
-#          data = acs_prop_yrimmig_policy)
+#          data = acs_prop)
 # 
 # ag_country_orig_fe <- lm(I(log(n_same_sex+1))  ~ distw + contig + comlang_off + comlang_ethno + colony +
 #                    wage_dif + unemp_dif + vdem + origin_score + stock_prop + bpld+ I(log(n_total+1)), 
-#          data = acs_prop_yrimmig_policy)
+#          data = acs_prop)
 
 
 
 ag <- lm(prop_same_sex ~ origin_score,
-         data = acs_prop_yrimmig_policy)
+         data = acs_prop)
 
 
 ag_country_orig <- lm(prop_same_sex ~ distw + contig + comlang_off + comlang_ethno + colony +
                    wage_dif + unemp_dif + vdem + origin_score + stock_prop,
-         data = acs_prop_yrimmig_policy)
+         data = acs_prop)
 
 ag_country_orig_fe <- lm(prop_same_sex ~ distw + contig + comlang_off + comlang_ethno + colony +
                    wage_dif + unemp_dif + vdem + origin_score + stock_prop + bpld,
-         data = acs_prop_yrimmig_policy)
+         data = acs_prop)
 
 
 # ag_country_orig_re <- lmerTest::lmer(prop_same_sex ~ distw + contig + comlang_off + comlang_ethno + colony +
 #                    wage_dif + unemp_dif + vdem + origin_score + stock_prop + (1|bpld),
-#          data = acs_prop_yrimmig_policy)
+#          data = acs_prop)
 
 # Add binary indicator for post-2013
 # ag_country_orig_2013 <- lm(prop_same_sex ~ distw + contig + comlang_off + comlang_ethno + colony +
 #                    wage_dif + unemp_dif + vdem + origin_score + stock_prop +
 #                      post_2013,
-#          data = mutate(acs_prop_yrimmig_policy, post_2013 = (yrimmig > 2013)))
+#          data = mutate(acs_prop, post_2013 = (yrimmig > 2013)))
 
 ag_country_orig_fe_2013 <- lm(prop_same_sex ~ distw + contig + comlang_off + comlang_ethno + colony +
                    wage_dif + unemp_dif + vdem + origin_score + stock_prop + bpld +
                      post_2013,
-         data = acs_prop_yrimmig_policy)
+         data = acs_prop)
 
 
 ag_2013_int_fe <- lm(prop_same_sex ~ distw + contig + comlang_off + comlang_ethno + colony +
                    wage_dif + unemp_dif + vdem  + stock_prop + bpld +
                      post_2013*origin_score,
-         data = acs_prop_yrimmig_policy)
+         data = acs_prop)
 
 
 
 ```
 
-Our first set of models predicts the percent of immigrants in same-sex couples by country of origin and year of immigration (Table \@ref(tab:country-props)). We present only coefficients of interest here, but Section D of the Supplementary Material contains full tables of regression coefficients. Model 1 regresses this proportion on only our variable of interest, LGB policy score in country of origin. We see that countries with more progressive LGB policies tend to send more immigrants to the U.S. who end up in same-sex couples. The average country-level proportion of immigrants in same-sex couples is only `r mean(acs_prop_yrimmig_policy$prop_same_sex, na.rm = T)` percent, so an increase of `r coef(ag)[[2]]` percent per point increase in LGB policy score represents a substantial effect. Models 2 and 3 in Table \@ref(tab:country-props) assess the robustness of this finding. Model 2 includes typical migration controls, including economic differentials, distance, immigrant networks, and democracy, and the coefficient for country score remains significant. Model 3 adds country-of-origin fixed effects. Although the size of the origin-score coefficient is comparable to Model 2, it is no longer significant. Examining only within-country variation in the fixed-effects model does not yield the same insights as the pooled Model 2. Hover, in the supplementary material (Table C.8), we obtain significant effects when we consider only immigrants who arrived the year prior to each ACS survey. In addition, Table C.9 demonstrates that restricting the analysis to only married couples yields a strong, significant coefficient; the access to marriage equality may enable migration capacities.  
+Our first set of models predicts the percent of immigrants in same-sex couples by country of origin and year of immigration (Table \@ref(tab:country-props)). We present only coefficients of interest here, but Section D of the Supplementary Material contains full tables of regression coefficients. Model 1 regresses this proportion on only our variable of interest, LGB policy score in country of origin. We see that countries with more progressive LGB policies tend to send more immigrants to the U.S. who end up in same-sex couples. The average country-level proportion of immigrants in same-sex couples is only `r mean(acs_prop$prop_same_sex, na.rm = T)` percent, so an increase of `r coef(ag)[[2]]` percent per point increase in LGB policy score represents a substantial effect. Models 2 and 3 in Table \@ref(tab:country-props) assess the robustness of this finding. Model 2 includes typical migration controls, including economic differentials, distance, immigrant networks, and democracy, and the coefficient for country score remains significant. Model 3 adds country-of-origin fixed effects. Although the size of the origin-score coefficient is comparable to Model 2, it is no longer significant. Examining only within-country variation in the fixed-effects model does not yield the same insights as the pooled Model 2. Hover, in the supplementary material (Table C.8), we obtain significant effects when we consider only immigrants who arrived the year prior to each ACS survey. In addition, Table C.9 demonstrates that restricting the analysis to only married couples yields a strong, significant coefficient; the access to marriage equality may enable migration capacities.  
 
 **[TABLE \@ref(tab:country-props) ABOUT HERE]**  
 
@@ -533,7 +533,7 @@ We see a more general strong effect in recent years. In light of the 2013 Suprem
 ag_2013_int <- lm(prop_same_sex ~ distw + contig + comlang_off + comlang_ethno + colony +
                    wage_dif + unemp_dif + vdem  + stock_prop +
                      post_2013*origin_score,
-         data = acs_prop_yrimmig_policy)
+         data = acs_prop)
 
 ## Simulation
 set.seed(185)
@@ -555,12 +555,12 @@ for (i in 1:sims) {
   pseudo_mod$coefficients <- theta[1:k]
   pseudo_mod$zeta <- theta[(k+1):length(theta)]
 
-  for(cat_loop in unique(acs_prop_yrimmig_policy$post_2013)){
-      var_vals <- seq(min(acs_prop_yrimmig_policy[,var]), 
-                      max(acs_prop_yrimmig_policy[,var]), 
+  for(cat_loop in unique(acs_prop$post_2013)){
+      var_vals <- seq(min(acs_prop[,var]), 
+                      max(acs_prop[,var]), 
                       length.out = 50)
       for(val in var_vals){
-          sim_dat <- acs_prop_yrimmig_policy %>%
+          sim_dat <- acs_prop %>%
             select(all.vars(formula(ag_2013_int)))
           sim_dat[, 'post_2013'] <- cat_loop
           sim_dat[, var] <- val
@@ -589,12 +589,12 @@ write_csv(sim_df, here('draft', 'sim_country.csv'))
 
 # sim <- list()
 # var <- 'origin_score'
-# for(cat_loop in unique(acs_prop_yrimmig_policy$post_2013)){
-#     var_vals <- seq(min(acs_prop_yrimmig_policy[,var]),
-#                     max(acs_prop_yrimmig_policy[,var]),
+# for(cat_loop in unique(acs_prop$post_2013)){
+#     var_vals <- seq(min(acs_prop[,var]),
+#                     max(acs_prop[,var]),
 #                     length.out = 50)
 #     for(val in var_vals){
-#         sim_dat <- acs_prop_yrimmig_policy
+#         sim_dat <- acs_prop
 #         sim_dat[, 'post_2013'] <- cat_loop
 #         sim_dat[, var] <- val
 # 
@@ -634,62 +634,62 @@ read_csv(here('draft', 'sim_country.csv')) %>%
 ### State Effects
 
 ```{r state-props-mods}
-state_prop <- lm(same_prop ~ state_policy, data = acs_dyad_policy)
+state_prop <- lm(prop_same_sex ~ state_policy, data = acs_prop_state)
 
-state_prop2 <- lm(same_prop ~ origin_score + state_policy, data = acs_dyad_policy)
+state_prop2 <- lm(prop_same_sex ~ origin_score + state_policy, data = acs_prop_state)
 
-# state_prop_fe <- lm(same_prop ~ state_unemploy + state_income + state + 
+# state_prop_fe <- lm(prop_same_sex ~ state_unemploy + state_income + state + 
 #                         origin_score + state_policy, 
-#                        data = acs_dyad_policy)
+#                        data = acs_prop_state)
 
-state_prop_fe <- lm(same_prop ~ state_policy + origin_score + distw + contig + 
+state_prop_fe <- lm(prop_same_sex ~ state_policy + origin_score + distw + contig + 
                           comlang_off + comlang_ethno + colony +
                           wage_dif + unemp_dif + vdem + stock_prop +
                            state_unemploy + state_income + Country + state, 
-                       data = acs_dyad_policy)
+                       data = acs_prop_state)
 
-state_prop_fe2 <- lm(same_prop ~ state_policy*origin_score + distw + contig + 
+state_prop_fe2 <- lm(prop_same_sex ~ state_policy*origin_score + distw + contig + 
                           comlang_off + comlang_ethno + colony +
                           wage_dif + unemp_dif + vdem + stock_prop +
                            state_unemploy + state_income + Country + state, 
-                       data = acs_dyad_policy)
+                       data = acs_prop_state)
 
-state_prop_2013 <- lm(same_prop ~ post_2013 + state_policy + origin_score + distw + contig + 
+state_prop_2013 <- lm(prop_same_sex ~ post_2013 + state_policy + origin_score + distw + contig + 
                           comlang_off + comlang_ethno + colony +
                           wage_dif + unemp_dif + vdem + stock_prop +
                            state_unemploy + state_income + Country + state, 
-                       data = mutate(acs_dyad_policy, post_2013 = (year > 2013)))
+                       data = mutate(acs_prop_state, post_2013 = (year > 2013)))
 
 
 
-state_prop_2013_int2 <- lm(same_prop ~ post_2013*state_policy + origin_score + distw + contig + 
+state_prop_2013_int2 <- lm(prop_same_sex ~ post_2013*state_policy + origin_score + distw + contig + 
                           comlang_off + comlang_ethno + colony +
                           wage_dif + unemp_dif + vdem + stock_prop +
                            state_unemploy + state_income + Country + state, 
-                       data = mutate(acs_dyad_policy, post_2013 = (year > 2013)))
+                       data = mutate(acs_prop_state, post_2013 = (year > 2013)))
 
-state_prop_2013_int <- lm(same_prop ~ post_2013*origin_score + state_policy + distw + contig + 
+state_prop_2013_int <- lm(prop_same_sex ~ post_2013*origin_score + state_policy + distw + contig + 
                           comlang_off + comlang_ethno + colony +
                           wage_dif + unemp_dif + vdem + stock_prop +
                            state_unemploy + state_income + Country + state, 
-                       data = mutate(acs_dyad_policy, post_2013 = (year > 2013)))
+                       data = mutate(acs_prop_state, post_2013 = (year > 2013)))
 
-# state_prop_2013 <- lm(same_prop ~ post_2013*(state_policy + origin_score), 
-#                        data = mutate(acs_dyad_policy, post_2013 = (year > 2013)))
-# state_prop_2013_2 <- lm(same_prop ~ post_2013*(state_policy + origin_score) + distw + contig + 
+# state_prop_2013 <- lm(prop_same_sex ~ post_2013*(state_policy + origin_score), 
+#                        data = mutate(acs_prop_state, post_2013 = (year > 2013)))
+# state_prop_2013_2 <- lm(prop_same_sex ~ post_2013*(state_policy + origin_score) + distw + contig + 
 #                           comlang_off + comlang_ethno + colony +
 #                           wage_dif + unemp_dif + vdem + 
 #                            state_unemploy + state_income + Country + state, 
-#                        data = mutate(acs_dyad_policy, post_2013 = (year > 2013)))
+#                        data = mutate(acs_prop_state, post_2013 = (year > 2013)))
 
 
-origin_effect <- sd(acs_couple_policy$origin_score, na.rm = T)*coef(state_prop2)[['origin_score']]
-state_effect <- sd(acs_couple_policy$state_policy, na.rm = T)*coef(state_prop2)[['state_policy']]
+origin_effect <- sd(acs_ind$origin_score, na.rm = T)*coef(state_prop2)[['origin_score']]
+state_effect <- sd(acs_ind$state_policy, na.rm = T)*coef(state_prop2)[['state_policy']]
 
 ```
 
 
-We next turn to the effects of U.S. state LGB policy. Table \@ref(tab:state-props) presents models of the U.S. state-level proportion of immigrants in same-sex couples, from a given country of origin in a given survey year. Model 1 contains only one predictor: U.S. state policy score in the survey year. We see that, on average, states with more friendly LGB policies have somewhat higher proportions of immigrants in same-sex couples. Model 2 adds a predictor for country-of-origin policy score at the mean year of immigration. Although the coefficient for country of origin score is more precisely estimated, the two variables have effects of roughly equal size. A one-standard deviation (`r sd(acs_couple_policy$origin_score, na.rm = T)`-point) increase origin score is associated with a `r origin_effect` percentage-point increase of immigrants in same-sex couples, whereas the corresponding state policy standard deviation increase of `r sd(acs_couple_policy$state_policy, na.rm = T)` points is `r state_effect` percentage points.   
+We next turn to the effects of U.S. state LGB policy. Table \@ref(tab:state-props) presents models of the U.S. state-level proportion of immigrants in same-sex couples, from a given country of origin in a given survey year. Model 1 contains only one predictor: U.S. state policy score in the survey year. We see that, on average, states with more friendly LGB policies have somewhat higher proportions of immigrants in same-sex couples. Model 2 adds a predictor for country-of-origin policy score at the mean year of immigration. Although the coefficient for country of origin score is more precisely estimated, the two variables have effects of roughly equal size. A one-standard deviation (`r sd(acs_ind$origin_score, na.rm = T)`-point) increase origin score is associated with a `r origin_effect` percentage-point increase of immigrants in same-sex couples, whereas the corresponding state policy standard deviation increase of `r sd(acs_ind$state_policy, na.rm = T)` points is `r state_effect` percentage points.   
 
 **[TABLE \@ref(tab:state-props) ABOUT HERE]**  
 
@@ -699,19 +699,19 @@ According to the descriptive analysis above, immigrants in same-sex couples tend
 
 
 ```{r state-sim, eval = F}
-state_prop_fe2 <- glm(same_prop ~ state_policy*origin_score + distw + contig + 
+state_prop_fe2 <- glm(prop_same_sex ~ state_policy*origin_score + distw + contig + 
                           comlang_off + comlang_ethno + colony +
                           wage_dif + unemp_dif + vdem + stock_prop +
                            state_unemploy + state_income + Country + state, 
-                       data = acs_dyad_policy, family = 'poisson')
+                       data = acs_prop_state, family = 'poisson')
 
 var1 <- 'state_policy'
 var <- 'origin_score'
 sim <- list()
-for(cat_loop in unique(acs_dyad_policy[,var1])){
-    var_vals <- c(min(acs_dyad_policy[,var]), max(acs_dyad_policy[,var]))
+for(cat_loop in unique(acs_prop_state[,var1])){
+    var_vals <- c(min(acs_prop_state[,var]), max(acs_prop_state[,var]))
     for(val in var_vals){
-        sim_dat <- acs_dyad_policy
+        sim_dat <- acs_prop_state
         sim_dat[, var1] <- cat_loop
         sim_dat[, var] <- val
 
@@ -739,10 +739,10 @@ bind_rows(sim) %>%
 var1 <- 'origin_score'
 var <- 'state_policy'
 sim <- list()
-for(cat_loop in unique(acs_dyad_policy[,var1])){
-    var_vals <- c(min(acs_dyad_policy[,var]), max(acs_dyad_policy[,var]))
+for(cat_loop in unique(acs_prop_state[,var1])){
+    var_vals <- c(min(acs_prop_state[,var]), max(acs_prop_state[,var]))
     for(val in var_vals){
-        sim_dat <- acs_dyad_policy
+        sim_dat <- acs_prop_state
         sim_dat[, var1] <- cat_loop
         sim_dat[, var] <- val
 
@@ -766,10 +766,10 @@ bind_rows(sim) %>%
 # var1 <- 'state_policy'
 # var <- 'origin_score'
 # sim <- list()
-# for(cat_loop in unique(acs_dyad_policy[,var1])){
-#     var_vals <- c(min(acs_dyad_policy[,var]), max(acs_dyad_policy[,var]))
+# for(cat_loop in unique(acs_prop_state[,var1])){
+#     var_vals <- c(min(acs_prop_state[,var]), max(acs_prop_state[,var]))
 #     for(val in var_vals){
-#         sim_dat <- acs_dyad_policy
+#         sim_dat <- acs_prop_state
 #         sim_dat[, var1] <- cat_loop
 #         sim_dat[, var] <- val
 # 
@@ -793,10 +793,10 @@ bind_rows(sim) %>%
 # var1 <- 'origin_score'
 # var <- 'state_policy'
 # sim <- list()
-# for(cat_loop in unique(acs_dyad_policy[,var1])){
-#     var_vals <- c(min(acs_dyad_policy[,var]), max(acs_dyad_policy[,var]))
+# for(cat_loop in unique(acs_prop_state[,var1])){
+#     var_vals <- c(min(acs_prop_state[,var]), max(acs_prop_state[,var]))
 #     for(val in var_vals){
-#         sim_dat <- acs_dyad_policy
+#         sim_dat <- acs_prop_state
 #         sim_dat[, var1] <- cat_loop
 #         sim_dat[, var] <- val
 # 
@@ -855,25 +855,25 @@ Finally, Model 5 includes a dichotomous variable for the post-2013 DOMA decision
 ```{r ord-1}
 
 # ord_basic <- polr(state_policy_binned ~ same_sex,
-#                 data = acs_couple_policy_small, Hess = T, weights = perwt/12)
+#                 data = acs_ind_small, Hess = T, weights = perwt/12)
 ord_basic_controls <- polr(state_policy_binned ~ same_sex + sex + age + educ + 
                    nchild + ihs_income + no_income + yrimmig,
-                 data = acs_couple_policy_small, Hess = T, weights = perwt/12)
+                 data = acs_ind_small, Hess = T, weights = perwt/12)
 
 # ord_orig <- polr(state_policy_binned ~ same_sex*origin_score,
-#                 data = acs_couple_policy_small, Hess = T, weights = perwt/12)
+#                 data = acs_ind_small, Hess = T, weights = perwt/12)
 
 ord_interact <- polr(state_policy_binned ~ 
                        same_sex*origin_score + sex + age + educ + 
                    nchild + ihs_income + no_income + yrimmig,
-                data = acs_couple_policy_small, Hess = T, weights = perwt/12)
+                data = acs_ind_small, Hess = T, weights = perwt/12)
 
 ord_interact_country <- polr(state_policy_binned ~ 
                                 same_sex*origin_score + sex + age + educ +
                      nchild + ihs_income + no_income + yrimmig +
                      distw + contig + comlang_off + comlang_ethno + colony +
                      wage_dif + unemp_dif + vdem + stock_prop, 
-                data = acs_couple_policy_small, Hess = T, weights = perwt/12)
+                data = acs_ind_small, Hess = T, weights = perwt/12)
 
 ord_interact_controls <- polr(state_policy_binned ~ 
                                 same_sex*origin_score + sex + age + educ +
@@ -881,7 +881,7 @@ ord_interact_controls <- polr(state_policy_binned ~
                      distw + contig + comlang_off + comlang_ethno + colony +
                      wage_dif + unemp_dif + vdem + stock_prop + #  bpld + state +
                      state_unemploy + state_income,
-                data = acs_couple_policy_small, Hess = T, weights = perwt/12)
+                data = acs_ind_small, Hess = T, weights = perwt/12)
 
 
 
@@ -891,7 +891,7 @@ ord_interact_controls <- polr(state_policy_binned ~
 #                                 same_sex*(origin_score + sex + age + educ +
 #                      nchild + ihs_income + no_income + yrimmig) +
 #                      state_unemploy + state_income,
-#                 data = acs_couple_policy_small, Hess = T, weights = perwt/12)
+#                 data = acs_ind_small, Hess = T, weights = perwt/12)
 
 
 
@@ -899,7 +899,7 @@ ord_interact_controls <- polr(state_policy_binned ~
 
 
 ord_probs <- bind_cols(predict(ord_basic_controls, type = 'probs'), 
-                   same_sex = acs_couple_policy_small$same_sex) %>%
+                   same_sex = acs_ind_small$same_sex) %>%
   group_by(same_sex) %>%
   summarize(Repressive = mean(Repressive),
             Neutral = mean(Neutral),
@@ -918,20 +918,20 @@ ord_probs <- bind_cols(predict(ord_basic_controls, type = 'probs'),
 
 # ord_basic_controls <- lm(state_policy ~ same_sex + sex + age + educ + 
 #                    nchild + ihs_income + no_income + yrimmig,
-#                  data = acs_couple_policy_small,  weights = perwt/12)
+#                  data = acs_ind_small,  weights = perwt/12)
 # 
 # 
 # ord_interact <- lm(state_policy ~ 
 #                        same_sex*(origin_score + sex + age + educ + 
 #                    nchild + ihs_income + no_income + yrimmig),
-#                 data = acs_couple_policy_small, weights = perwt/12)
+#                 data = acs_ind_small, weights = perwt/12)
 # 
 # ord_interact_country <- lm(state_policy ~ 
 #                                 same_sex*(origin_score + sex + age + educ +
 #                      nchild + ihs_income + no_income + yrimmig) +
 #                      distw + contig + comlang_off + comlang_ethno +
 #                      wage_dif + unemp_dif + vdem + stock_prop, 
-#                 data = acs_couple_policy_small,  weights = perwt/12)
+#                 data = acs_ind_small,  weights = perwt/12)
 # 
 # ord_interact_controls <- lm(state_policy ~ 
 #                                 same_sex*(origin_score + sex + age + educ +
@@ -939,7 +939,7 @@ ord_probs <- bind_cols(predict(ord_basic_controls, type = 'probs'),
 #                      distw + contig + comlang_off + comlang_ethno +
 #                      wage_dif + unemp_dif + vdem + stock_prop +  bpld + #state +
 #                      state_unemploy + state_income,
-#                 data = acs_couple_policy_small, weights = perwt/12)
+#                 data = acs_ind_small, weights = perwt/12)
 #
 # mod_list <- list(ord_basic_controls, ord_interact, ord_interact_country, ord_interact_controls)
 ```
@@ -958,16 +958,16 @@ Model 3 adds country controls. The same-sex indicator remains significant, and n
 
 ```{r sim1, eval = F}
 
-# acs_couple_policy_small %>%
+# acs_ind_small %>%
 #   group_by(same_sex, married, imm_couple) %>%
 #   summarize(mean(origin_score), sd = sd(origin_score), 
 #             lower = mean(origin_score) - 1.96*sd,
 #             upper = mean(origin_score) + 1.96*sd)
 
 set.seed(1859)
-acs_couple_policy_small <- bind_rows(
-  filter(acs_couple_policy, same_sex == T, yrimmig >= 1991),
-  sample_n(filter(acs_couple_policy, same_sex == F), 1e5)
+acs_ind_small <- bind_rows(
+  filter(acs_ind, same_sex == T, yrimmig >= 1991),
+  sample_n(filter(acs_ind, same_sex == F), 1e5)
 )
 
 ord_interact_controls <- polr(state_policy_binned ~ 
@@ -976,7 +976,7 @@ ord_interact_controls <- polr(state_policy_binned ~
                      distw + contig + comlang_off + comlang_ethno +
                      wage_dif + unemp_dif + vdem + stock_prop + #  bpld + state +
                      state_unemploy + state_income,
-                data = acs_couple_policy_small, Hess = T, weights = perwt/12)
+                data = acs_ind_small, Hess = T, weights = perwt/12)
 
 ## Simulation
 set.seed(185)
@@ -998,12 +998,12 @@ for (i in 1:sims) {
   pseudo_mod$coefficients <- theta[1:k]
   pseudo_mod$zeta <- theta[(k+1):length(theta)]
 
-  for(same_loop in unique(acs_couple_policy_small$same_sex)){
-      var_vals <- seq(min(acs_couple_policy_small[,var]), 
-                      max(acs_couple_policy_small[,var]), 
+  for(same_loop in unique(acs_ind_small$same_sex)){
+      var_vals <- seq(min(acs_ind_small[,var]), 
+                      max(acs_ind_small[,var]), 
                       length.out = 10)
       for(val in var_vals){
-          sim_dat <- acs_couple_policy_small %>%
+          sim_dat <- acs_ind_small %>%
             select(all.vars(formula(ord_interact_controls)))
           sim_dat[, 'same_sex'] <- same_loop
           sim_dat[, var] <- val
@@ -1035,9 +1035,9 @@ write_csv(sim_df, here('draft', 'sim_df.csv'))
 #   ux[which.max(tabulate(match(x, ux)))]
 # }
 # 
-# acs.means <- acs_couple_policy %>% 
+# acs.means <- acs_ind %>% 
 #   summarize(across(c(age, origin_score, yrimmig, nchild, ihs_income), mean, na.rm = T))
-# acs.modes <- acs_couple_policy %>% 
+# acs.modes <- acs_ind %>% 
 #   summarize(across(c(educ, no_income, sex), Mode))
 # 
 # #Make a dataframe that's the mode of the factor variables vs. mean - one row data frame
@@ -1262,13 +1262,13 @@ tibble(`Analytic Strategy` = c(1,2,3),
   fit_to_width(7.5)
   
 
-# acs_prop_yrimmig_policy %>%
+# acs_prop %>%
 #   filter(country == 'France', yrimmig == 2001) %>%
 #   select(prop_same_sex, n_dif_sex, n_same_sex)
 # 
-# acs_dyad_policy %>%
+# acs_prop_state %>%
 #   filter(country == 'France', year == 2015, state == 'New York') %>%
-#   select(same_prop, n_dif_sex, n_same_sex)
+#   select(prop_same_sex, n_dif_sex, n_same_sex)
 
 ```
 \newpage
@@ -1302,7 +1302,7 @@ country_tab %>%
 
 
 
-# acs_couple_policy %>%
+# acs_ind %>%
 #   filter(year == 2008) %>%
 #   group_by(bpld, same_sex) %>%
 #   count(wt = perwt) %>%
@@ -1310,7 +1310,7 @@ country_tab %>%
 #   arrange(desc(`TRUE`)) %>%
 #   .[1:10,] %>%
 #   rownames_to_column() %>%
-#   left_join(acs_couple_policy %>%
+#   left_join(acs_ind %>%
 #               filter(year == 2008) %>%
 #               group_by(bpld) %>%
 #               summarize(origin_score = mean(origin_score)) %>%
@@ -1462,7 +1462,7 @@ huxreg(robust_list,
        statistics = c('Observations' = 'nobs')) %>%
   insert_row(c('State controls and FEs?', 'no', 'no', rep('yes', 5)), after = nrow(.) - 2) %>%
   insert_row(c('Country controls and FEs?', 'no', 'no', rep('yes', 5)), after = nrow(.) - 2) %>%
-  huxtable::set_caption('Percent same-sex in by country of origin, U.S. state, and survey year.')
+  huxtable::set_caption('Percent same-sex in by country of origin, U.S. state, and survey year.') 
 
 
 
@@ -1534,8 +1534,8 @@ huxreg(robust_list,
   insert_row(c('State controls?', 'no', 'no', 'no', 'yes'), after = nrow(.) - 2) %>%
   huxtable::set_caption('Individual ordered logit analysis of three-category state LGB policy score.')
 
-# obs <- paste0(substr(nrow(acs_couple_policy_small), 1, 3), ',', 
-#               substr(nrow(acs_couple_policy_small), 4, 6))
+# obs <- paste0(substr(nrow(acs_ind_small), 1, 3), ',', 
+#               substr(nrow(acs_ind_small), 4, 6))
 
 # 
 # stargazer(mod_list,
@@ -1700,7 +1700,7 @@ bind_rows(origin_df, state_df) %>%
 \newpage
 
 ```{r country-map, fig.cap = 'Percentage of immigrants to the U.S. in same-sex couples by country of origin, averaging over years of immigration from 1991 to 2019.'}
-country_tab <- acs_couple_policy %>%
+country_tab <- acs_ind %>%
   mutate(bpld = ifelse(bpld == "United Kingdom, ns", "England", bpld),
          bpld = ifelse(bpldid == 46500, 'Russia', bpld),
          bpld = ifelse(bpldid == 46510, 'Belarus', bpld)) %>%
@@ -1829,7 +1829,7 @@ for(i in 1:nrow(mis_df)){
   sens_mod <- lm(prop_same_sex_adj2 ~ distw + contig + comlang_off + comlang_ethno + colony +
                    wage_dif + unemp_dif + vdem  + stock_prop + bpld +
                      post_2013*origin_score,
-         data = acs_prop_yrimmig_policy %>%
+         data = acs_prop %>%
            mutate(prop_same_sex_adj2 = (n_spouse_pre_2019_same_sex*(1-mis_df[i,1]) + 
                                          n_spouse_2019_same_sex + 
                                          n_partner_pre_2019_same_sex*(1-mis_df[i,2]) +
@@ -1839,7 +1839,7 @@ for(i in 1:nrow(mis_df)){
                           comlang_off + comlang_ethno + colony +
                           wage_dif + unemp_dif + vdem + stock_prop +
                            state_unemploy + state_income + Country + state, 
-                       data = acs_dyad_policy %>%
+                       data = acs_prop_state %>%
                     mutate(prop_same_sex_adj2 = (n_spouse_pre_2019_same_sex*(1-mis_df[i,1]) + 
                                          n_spouse_2019_same_sex + 
                                          n_partner_pre_2019_same_sex*(1-mis_df[i,2]) +
@@ -1873,7 +1873,7 @@ sens_df <- bind_rows(sens_df) %>%
 # for(i in 1:nrow(mis_df)){
 #   sens_mod <- lm(prop_same_sex_adj2 ~ distw + contig + comlang_off + comlang_ethno + colony +
 #                    wage_dif + unemp_dif + vdem + origin_score + stock_prop + bpld,
-#          data = acs_prop_yrimmig_policy %>%
+#          data = acs_prop %>%
 #                       mutate(prop_same_sex_adj2 = (prop_spouse_same_sex*(1-mis_df[i,1]) +
 #                                          prop_partner_same_sex*(1-mis_df[i,2]))))
 # 
@@ -1892,8 +1892,8 @@ sens_df <- bind_rows(sens_df) %>%
 
 
 
-n_spouse <- sum(with(acs_couple_policy, same_sex == T & married == T))
-n_partner <- sum(with(acs_couple_policy, same_sex == T & married == F))
+n_spouse <- sum(with(acs_ind, same_sex == T & married == T))
+n_partner <- sum(with(acs_ind, same_sex == T & married == F))
 
 add_global_label <- function(pwobj, Xlab = NULL, Ylab = NULL, Xgap = 0.03, Ygap = 0.03, ...) {
     ylabgrob <- patchwork::plot_spacer()
