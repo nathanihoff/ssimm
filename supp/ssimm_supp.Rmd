@@ -110,11 +110,13 @@ knitr::opts_chunk$set(error=TRUE)
 
 ```{r load, include = F}
 acs_wide <- read.csv(here('data', 'acs_wide.csv'))
-acs_couple_policy <- readRDS(here('data', 'acs_couple_policy.rds'))
-acs_prop_yrimmig_policy <- read.csv(here('data', 'acs_prop_yrimmig_policy.csv')) %>%
+acs_ind <- readRDS(here('data', 'acs_couple_policy.rds')) 
+acs_prop <- read.csv(here('data', 'acs_prop_yrimmig_policy.csv')) %>%
   mutate(post_2013 = (yrimmig > 2013),
          n_same_sex_coupled = n_spouse_same_sex + n_partner_same_sex)
-acs_dyad_policy <- read.csv(here('data', 'acs_dyad_policy.csv'))
+acs_prop_state <- read.csv(here('data', 'acs_dyad_policy.csv'))
+
+
 
 # acs_oneimm <- read.csv(here('data', 'acs_oneimm.csv'))
 # acs_coupled_imms <- read.csv(here('data', 'acs_coupled_imms.csv'))
@@ -125,19 +127,19 @@ acs_dyad_policy <- read.csv(here('data', 'acs_dyad_policy.csv'))
 
 
 acs_wide_survey <- acs_wide %>% as_survey_design(ids = cluster, weights = hhwt)
-acs_ind_survey <- acs_couple_policy %>% as_survey_design(ids = cluster, weights = perwt)
+acs_ind_survey <- acs_ind %>% as_survey_design(ids = cluster, weights = perwt)
 
 
 # Smaller dataset for initial ordered logit analyses
 set.seed(1859)
-# acs_couple_policy_small <- bind_rows(
-#   filter(acs_couple_policy, same_sex == T),
-#   sample_n(filter(acs_couple_policy, same_sex == F), 1e5)
+# acs_ind_small <- bind_rows(
+#   filter(acs_ind, same_sex == T),
+#   sample_n(filter(acs_ind, same_sex == F), 1e5)
 # )
-acs_couple_policy_small <- acs_couple_policy
-# acs_couple_policy_small <- bind_rows(
-#   filter(acs_couple_policy, same_sex == T, yrimmig >= 1991),
-#   sample_n(filter(acs_couple_policy, same_sex == F), 1e5)
+acs_ind_small <- acs_ind
+# acs_ind_small <- bind_rows(
+#   filter(acs_ind, same_sex == T, yrimmig >= 1991),
+#   sample_n(filter(acs_ind, same_sex == F), 1e5)
 # ) 
 
 ```
@@ -148,7 +150,7 @@ acs_couple_policy_small <- acs_couple_policy
 ```{r desc-table-country}
 theme_gtsummary_compact()
 
-acs_prop_yrimmig_policy %>%
+acs_prop %>%
   select(`Percent in same-sex couples` = prop_same_sex, `Country LGB policy score` = origin_score,
          `Distance (km)` = distw, 
          `Contiguous border` = contig, `Common official language` = comlang_off, 
@@ -164,8 +166,8 @@ acs_prop_yrimmig_policy %>%
 
 ```{r desc-table-state}
 
-acs_dyad_policy %>%
-  select(`Percent in same-sex couples` = same_prop, `State LGB policy score` = state_policy,
+acs_prop_state %>%
+  select(`Percent in same-sex couples` = prop_same_sex, `State LGB policy score` = state_policy,
          `Country LGB policy score` = origin_score,
          `Distance (km)` = distw, 
          `Contiguous border` = contig, `Common official language` = comlang_off, 
@@ -180,7 +182,7 @@ acs_dyad_policy %>%
 ```
 
 ```{r desc-table-ind}
-acs_couple_policy %>%
+acs_ind %>%
   labelled::remove_labels() %>%
   mutate(same_sex = ifelse(same_sex == T, 'Same-sex', 'Different-sex')) %>%
   select(`State LGB policy` = state_policy_binned, `Same-sex` = same_sex, 
@@ -207,13 +209,13 @@ acs_couple_policy %>%
 \newpage
 
 # Additional Descriptive Trends
-Figure \ref{fig:scatter-country} relies on the data used in the country-level models. The vertical axis represents the proportion of immigrants from each country in same-sex couples in each year of immigration, from 1991 to 2019, while the horizontal axis indicates the policy score of the country of origin in the year of immigration. The line shows the bivariate regression line. Percentages above 5 are not shown (hiding `r sum(acs_prop_yrimmig_policy$prop_same_sex > 5)` out of `r nrow(acs_prop_yrimmig_policy)` country-years).  
+Figure \ref{fig:scatter-country} relies on the data used in the country-level models. The vertical axis represents the proportion of immigrants from each country in same-sex couples in each year of immigration, from 1991 to 2019, while the horizontal axis indicates the policy score of the country of origin in the year of immigration. The line shows the bivariate regression line. Percentages above 5 are not shown (hiding `r sum(acs_prop$prop_same_sex > 5)` out of `r nrow(acs_prop)` country-years).  
 
 Figure \ref{fig:scatter-state} relies on the data used in the state-level models, with the vertical axis showing the proportion of immigrants from each country in same-sex couples in each state, in each survey year, from 2008 to 2019. In the left panel, the horizontal axis represents the origin country policy score in the mean year of immigration for that group, while the right panel's horizontal axis represents the state policy score in the survey year. The lines shows the bivariate regression lines.  
 
 ```{r scatter-country, fig.cap = "Proportion of immigrants from each country in same-sex couples in each year of immigration, from 1991 to 2019. The horizontal axis indicates the policy score of the country of origin in the year of immigration. Points are jittered for clarity, and percentages above 5 are not shown."}
 
-acs_prop_yrimmig_policy %>%
+acs_prop %>%
   filter(prop_same_sex <= 5) %>%
   ggplot(aes(x = origin_score, y = prop_same_sex, color = yrimmig)) +
   geom_jitter(alpha = .5) + 
@@ -231,18 +233,18 @@ acs_prop_yrimmig_policy %>%
 
 
 ```{r scatter-state, fig.cap = "Proportion of immigrants from each country in same-sex couples in each state, in each survey year, from 2008 to 2019. The left panel's horizontal axis represents the origin country policy score in the mean year of immigration for that group, while the right panel's horizontal axis represents the state policy score in the survey year. Points are jittered for clarity, and percentages above 5 are not shown."}
-state_plot_1 <- acs_dyad_policy %>%
-  filter(same_prop <= 5) %>%
-  ggplot(aes(x = state_policy, y = same_prop, color = year)) +
+state_plot_1 <- acs_prop_state %>%
+  filter(prop_same_sex <= 5) %>%
+  ggplot(aes(x = state_policy, y = prop_same_sex, color = year)) +
   geom_jitter(alpha = .5) +
   geom_smooth(method = "lm", color = 'black') +
   scale_color_continuous(low = 'black', high = 'green') +
     labs(x= 'LGB policy score for country of origin', 
         y = 'Percentage of immigrants in same-sex couples')
 
-state_plot_2 <- acs_dyad_policy %>%
-  filter(same_prop <= 5) %>%
-  ggplot(aes(x = origin_score, y = same_prop, color = mean_year_immig)) +
+state_plot_2 <- acs_prop_state %>%
+  filter(prop_same_sex <= 5) %>%
+  ggplot(aes(x = origin_score, y = prop_same_sex, color = mean_year_immig)) +
   geom_jitter(alpha = .5) +
   geom_smooth(method = "lm", color = 'black') +
   scale_color_continuous() +
@@ -256,7 +258,7 @@ state_plot_1 + state_plot_2
 ```
 
 ```{r desc-top1}
-acs_couple_policy %>%
+acs_ind %>%
   filter(same_sex == T) %>%
   group_by(bpld) %>%
   count() %>%
@@ -269,7 +271,7 @@ acs_couple_policy %>%
 ```
 
 ```{r desc-top2}
-acs_couple_policy %>%
+acs_ind %>%
   filter(same_sex == F)%>%
   group_by(bpld) %>%
   count() %>%
@@ -342,12 +344,12 @@ bind_rows(hwsei, nchild, years, distance, unemp, state_income) %>%
 
 Published papers using the ACS to study same-sex couples overwhelmingly use the method by @gates_2009 employed our main paper to adjust for misreporting. However here we implement a novel method to adjust proportions of estimated immigrants in same-sex couples, based on the estimated mismatch rates from two U.S. Census Bureau studies.  Beginning in 2019, the ACS provides explicit categories for "Opposite-sex husband/wife/spouse," "Opposite-sex unmarried partner," "Same-sex husband/wife/spouse," and "Same-sex unmarried partner" [@walker_2021], so sex misreporting in the 2019 data is unlikely. Hence in most sensitivity analyses below, 2019 estimates are not adjusted for misreporting.  
 
-In a Census Bureau working paper, @kreider_2015 use personal information such as names and addresses match same-sex couples from the 2010 ACS to Social Security administrative data. They find that 57 percent of married couples coded as same-sex in the ACS are coded as different-sex in the administrative data. The corresponding sex mismatch rate for unmarried same-sex couples is 7 percent. (Our data include `r sum(acs_wide$related_partner == 'Spouse' & acs_wide$same_sex == T)` married and `r sum(acs_wide$related_partner == 'Unmarried Partner' & acs_wide$same_sex == T)` unmarried same-sex immigrant couples.) A follow-up study [@kreider_2017] shows that these mismatch rates appear to have fallen: In a 2016 ACS test module that included explicit categories for different- and same-sex spouses and partners, 31 percent of married and 3 percent of unmarried same-sex couples had inconsistent sex responses. This decreasing mismatch rate may be due to the greater numbers of same-sex couples openly identifying themselves as well as the growing popularity of responding to the ACS via Internet (see Supplementary Material), a response mode introduced in 2013 which is now the default [@u.s.censusbureau_2017]. In the 2016 test of the ACS, the mismatch rate for mail-in responses was 47 and 6 percent for married and unmarried same-sex couples, respectively, whereas for Internet responses they were only 22 and 2.4 percent [@kreider_2017]. A computer-assisted telephone interviewing (CATI) or computer-assisted personal interviewing (CAPI) response mode is sometimes administered as well, but the 2016 study did not assess its error rate. In the 2010 ACS, @kreider_2015 find CATI/CAPI sex reporting mismatch for 46 and 13 percent for married and unmarried same-sex couples, respectively. In our sample of immigrants in same-sex couples, `r sum(acs_couple_policy$respmode == 'Mail' & acs_couple_policy$same_sex == T)` responded by mail, `r with(filter(acs_couple_policy, same_sex == T), sum(respmode == 'CATI/CAPI'))` responded by CAPI/CATI, and `r sum(acs_couple_policy$respmode == 'Internet' & acs_couple_policy$same_sex == T)` responded by Internet survey. Response mode proportions by couple type are shown in Table \ref{tab:respmode}.  
+In a Census Bureau working paper, @kreider_2015 use personal information such as names and addresses match same-sex couples from the 2010 ACS to Social Security administrative data. They find that 57 percent of married couples coded as same-sex in the ACS are coded as different-sex in the administrative data. The corresponding sex mismatch rate for unmarried same-sex couples is 7 percent. (Our data include `r sum(acs_wide$related_partner == 'Spouse' & acs_wide$same_sex == T)` married and `r sum(acs_wide$related_partner == 'Unmarried Partner' & acs_wide$same_sex == T)` unmarried same-sex immigrant couples.) A follow-up study [@kreider_2017] shows that these mismatch rates appear to have fallen: In a 2016 ACS test module that included explicit categories for different- and same-sex spouses and partners, 31 percent of married and 3 percent of unmarried same-sex couples had inconsistent sex responses. This decreasing mismatch rate may be due to the greater numbers of same-sex couples openly identifying themselves as well as the growing popularity of responding to the ACS via Internet (see Supplementary Material), a response mode introduced in 2013 which is now the default [@u.s.censusbureau_2017]. In the 2016 test of the ACS, the mismatch rate for mail-in responses was 47 and 6 percent for married and unmarried same-sex couples, respectively, whereas for Internet responses they were only 22 and 2.4 percent [@kreider_2017]. A computer-assisted telephone interviewing (CATI) or computer-assisted personal interviewing (CAPI) response mode is sometimes administered as well, but the 2016 study did not assess its error rate. In the 2010 ACS, @kreider_2015 find CATI/CAPI sex reporting mismatch for 46 and 13 percent for married and unmarried same-sex couples, respectively. In our sample of immigrants in same-sex couples, `r sum(acs_ind$respmode == 'Mail' & acs_ind$same_sex == T)` responded by mail, `r with(filter(acs_ind, same_sex == T), sum(respmode == 'CATI/CAPI'))` responded by CAPI/CATI, and `r sum(acs_ind$respmode == 'Internet' & acs_ind$same_sex == T)` responded by Internet survey. Response mode proportions by couple type are shown in Table \ref{tab:respmode}.  
 
 Table \ref{tab:mismatch} shows the mismatch rates estimated by @kreider_2015 and @kreider_2015. In the supplemental analysis below (Table \ref{tab:country-props-adj}), we use these apparent mismatch rates to adjust proportions used in models in Table 3 of the main paper. Each proportion is adjusted separately by marital status and response mode. For example, all internet respondents coded as being in married same-sex couples have their final proportion reduced by 22.5%. For mail-in responses, the proportions are reduced by the average between the two studies (`r (59+47.4)/2` percent for married and `r (7+5.6)/2` percent for unmarried couples). 
 
 ```{r respmode}
-tabyl(acs_couple_policy, respmode, year, same_sex) %>%
+tabyl(acs_ind, respmode, year, same_sex) %>%
   adorn_percentages('col') %>%
   bind_rows() %>%
   mutate(same_sex = c(F, F, F, T, T, T)) %>%
@@ -376,29 +378,29 @@ tibble(`Study Year` = c(2010, 2010, 2016, 2016),
 
 ```{r country-props-adj}
 ag <- lm(prop_same_sex_adj ~ origin_score,
-         data = acs_prop_yrimmig_policy)
+         data = acs_prop)
 
 
 ag_country_orig <- lm(prop_same_sex_adj ~ distw + contig + comlang_off + comlang_ethno + colony +
                    wage_dif + unemp_dif + vdem + origin_score + stock_prop,
-         data = acs_prop_yrimmig_policy)
+         data = acs_prop)
 
 ag_country_orig_fe <- lm(prop_same_sex_adj ~ distw + contig + comlang_off + comlang_ethno + colony +
                    wage_dif + unemp_dif + vdem + origin_score + stock_prop + bpld,
-         data = acs_prop_yrimmig_policy)
+         data = acs_prop)
 
 
 
 ag_country_orig_fe_2013 <- lm(prop_same_sex_adj ~ distw + contig + comlang_off + comlang_ethno + colony +
                    wage_dif + unemp_dif + vdem + origin_score + stock_prop + bpld +
                      post_2013,
-         data = acs_prop_yrimmig_policy)
+         data = acs_prop)
 
 
 ag_2013_int_fe <- lm(prop_same_sex_adj ~ distw + contig + comlang_off + comlang_ethno + colony +
                    wage_dif + unemp_dif + vdem  + stock_prop + bpld +
                      post_2013*origin_score,
-         data = acs_prop_yrimmig_policy)
+         data = acs_prop)
 
 
 mod_list <- list(ag, ag_country_orig, ag_country_orig_fe,
@@ -439,39 +441,39 @@ stargazer(mod_list,
 
 ```{r state-props-adj}
 
-state_prop <- lm(prop_same_sex_adj ~ state_policy, data = acs_dyad_policy)
+state_prop <- lm(prop_same_sex_adj ~ state_policy, data = acs_prop_state)
 
-state_prop2 <- lm(prop_same_sex_adj ~ origin_score + state_policy, data = acs_dyad_policy)
+state_prop2 <- lm(prop_same_sex_adj ~ origin_score + state_policy, data = acs_prop_state)
 
 state_prop_fe <- lm(prop_same_sex_adj ~ state_policy + origin_score + distw + contig + 
                           comlang_off + comlang_ethno + colony +
                           wage_dif + unemp_dif + vdem + stock_prop +
                            state_unemploy + state_income + Country + state, 
-                       data = acs_dyad_policy)
+                       data = acs_prop_state)
 
 state_prop_fe2 <- lm(prop_same_sex_adj ~ state_policy*origin_score + distw + contig + 
                           comlang_off + comlang_ethno + colony +
                           wage_dif + unemp_dif + vdem + stock_prop +
                            state_unemploy + state_income + Country + state, 
-                       data = acs_dyad_policy)
+                       data = acs_prop_state)
 
 state_prop_2013 <- lm(prop_same_sex_adj ~ post_2013 + state_policy + origin_score + distw + contig + 
                           comlang_off + comlang_ethno + colony +
                           wage_dif + unemp_dif + vdem + stock_prop +
                            state_unemploy + state_income + Country + state, 
-                       data = mutate(acs_dyad_policy, post_2013 = (year > 2013)))
+                       data = mutate(acs_prop_state, post_2013 = (year > 2013)))
 
 state_prop_2013_int <- lm(prop_same_sex_adj ~ post_2013*origin_score + state_policy + distw + contig + 
                           comlang_off + comlang_ethno + colony +
                           wage_dif + unemp_dif + vdem + stock_prop +
                            state_unemploy + state_income + Country + state, 
-                       data = mutate(acs_dyad_policy, post_2013 = (year > 2013)))
+                       data = mutate(acs_prop_state, post_2013 = (year > 2013)))
 
 state_prop_2013_int2 <- lm(prop_same_sex_adj ~ post_2013*state_policy + origin_score + distw + contig + 
                           comlang_off + comlang_ethno + colony +
                           wage_dif + unemp_dif + vdem + stock_prop +
                            state_unemploy + state_income + Country + state, 
-                       data = mutate(acs_dyad_policy, post_2013 = (year > 2013)))
+                       data = mutate(acs_prop_state, post_2013 = (year > 2013)))
 
 
 mod_list <- list(state_prop, state_prop2, state_prop_fe, state_prop_fe2, 
@@ -523,28 +525,28 @@ stargazer(mod_list,
 We perform the same regressions with proportion in same-sex couples by country or state, but weighted by the relative size of the immigrant stock.
 ```{r country-weights}
 ag <- lm(prop_same_sex ~ origin_score,
-         data = acs_prop_yrimmig_policy, weights = stock_prop)
+         data = acs_prop, weights = stock_prop)
 
 ag_country_orig <- lm(prop_same_sex ~ distw + contig + comlang_off + comlang_ethno + colony +
                    wage_dif + unemp_dif + vdem + origin_score + stock_prop,
-         data = acs_prop_yrimmig_policy, weights = stock_prop)
+         data = acs_prop, weights = stock_prop)
 
 ag_country_orig_fe <- lm(prop_same_sex ~ distw + contig + comlang_off + comlang_ethno + colony +
                    wage_dif + unemp_dif + vdem + origin_score + stock_prop + bpld,
-         data = acs_prop_yrimmig_policy, weights = stock_prop)
+         data = acs_prop, weights = stock_prop)
 
 
 
 ag_country_orig_fe_2013 <- lm(prop_same_sex ~ distw + contig + comlang_off + comlang_ethno + colony +
                    wage_dif + unemp_dif + vdem + origin_score + stock_prop + bpld +
                      post_2013,
-         data = mutate(acs_prop_yrimmig_policy, post_2013 = (yrimmig > 2013)), weights = stock_prop)
+         data = mutate(acs_prop, post_2013 = (yrimmig > 2013)), weights = stock_prop)
 
 
 ag_2013_int_fe <- lm(prop_same_sex ~ distw + contig + comlang_off + comlang_ethno + colony +
                    wage_dif + unemp_dif + vdem  + stock_prop + bpld +
                      post_2013*origin_score,
-         data = mutate(acs_prop_yrimmig_policy, post_2013 = (yrimmig > 2013)), weights = stock_prop)
+         data = mutate(acs_prop, post_2013 = (yrimmig > 2013)), weights = stock_prop)
 
 
 
@@ -587,28 +589,28 @@ stargazer(mod_list,
 
 ```{r country-n, eval = F}
 ag <- lm(n_same_sex_coupled ~ origin_score,
-         data = acs_prop_yrimmig_policy)
+         data = acs_prop)
 
 ag_country_orig <- lm(n_same_sex_coupled ~ distw + contig + comlang_off + comlang_ethno + colony +
                    wage_dif + unemp_dif + vdem + origin_score + stock_prop,
-         data = acs_prop_yrimmig_policy)
+         data = acs_prop)
 
 ag_country_orig_fe <- lm(n_same_sex_coupled ~ distw + contig + comlang_off + comlang_ethno + colony +
                    wage_dif + unemp_dif + vdem + origin_score + stock_prop + bpld,
-         data = acs_prop_yrimmig_policy)
+         data = acs_prop)
 
 
 
 ag_country_orig_fe_2013 <- lm(n_same_sex_coupled ~ distw + contig + comlang_off + comlang_ethno + colony +
                    wage_dif + unemp_dif + vdem + origin_score + stock_prop + bpld +
                      post_2013,
-         data = mutate(acs_prop_yrimmig_policy, post_2013 = (yrimmig > 2013)))
+         data = mutate(acs_prop, post_2013 = (yrimmig > 2013)))
 
 
 ag_2013_int_fe <- lm(n_same_sex_coupled ~ distw + contig + comlang_off + comlang_ethno + colony +
                    wage_dif + unemp_dif + vdem  + stock_prop + bpld +
                      post_2013*origin_score,
-         data = mutate(acs_prop_yrimmig_policy, post_2013 = (yrimmig > 2013)))
+         data = mutate(acs_prop, post_2013 = (yrimmig > 2013)))
 
 
 
@@ -650,31 +652,31 @@ stargazer(mod_list,
 
 
 ```{r state-weights}
-state_prop <- lm(same_prop ~ state_policy, data = acs_dyad_policy, weights = stock_prop)
+state_prop <- lm(prop_same_sex ~ state_policy, data = acs_prop_state, weights = stock_prop)
 
-state_prop2 <- lm(same_prop ~ origin_score + state_policy, data = acs_dyad_policy, weights = stock_prop)
+state_prop2 <- lm(prop_same_sex ~ origin_score + state_policy, data = acs_prop_state, weights = stock_prop)
 
-state_prop_fe <- lm(same_prop ~ state_unemploy + state_income + state + 
+state_prop_fe <- lm(prop_same_sex ~ state_unemploy + state_income + state + 
                         origin_score + state_policy, 
-                       data = acs_dyad_policy, weights = stock_prop)
+                       data = acs_prop_state, weights = stock_prop)
 
-state_prop_fe2 <- lm(same_prop ~ state_policy + origin_score + distw + contig + 
+state_prop_fe2 <- lm(prop_same_sex ~ state_policy + origin_score + distw + contig + 
                           comlang_off + comlang_ethno + colony +
                           wage_dif + unemp_dif + vdem + stock_prop +
                            state_unemploy + state_income + Country + state, 
-                       data = acs_dyad_policy, weights = stock_prop)
+                       data = acs_prop_state, weights = stock_prop)
 
-state_prop_2013 <- lm(same_prop ~ post_2013 + state_policy + origin_score + distw + contig + 
+state_prop_2013 <- lm(prop_same_sex ~ post_2013 + state_policy + origin_score + distw + contig + 
                           comlang_off + comlang_ethno + colony +
                           wage_dif + unemp_dif + vdem + stock_prop +
                            state_unemploy + state_income + Country + state, 
-                       data = mutate(acs_dyad_policy, post_2013 = (year > 2013)), weights = stock_prop)
+                       data = mutate(acs_prop_state, post_2013 = (year > 2013)), weights = stock_prop)
 
-state_prop_2013_int <- lm(same_prop ~ post_2013*origin_score + state_policy + distw + contig + 
+state_prop_2013_int <- lm(prop_same_sex ~ post_2013*origin_score + state_policy + distw + contig + 
                           comlang_off + comlang_ethno + colony +
                           wage_dif + unemp_dif + vdem + stock_prop +
                            state_unemploy + state_income + Country + state, 
-                       data = mutate(acs_dyad_policy, post_2013 = (year > 2013)), weights = stock_prop)
+                       data = mutate(acs_prop_state, post_2013 = (year > 2013)), weights = stock_prop)
 
 
 
@@ -723,28 +725,28 @@ stargazer(mod_list,
 ag_2013_spouse1 <- lm(prop_spouse_same_sex ~ distw + contig + comlang_off + 
                         comlang_ethno + colony +
                    wage_dif + unemp_dif + vdem + origin_score + stock_prop + bpld,
-         data = acs_prop_yrimmig_policy)
+         data = acs_prop)
 
 # Spouse, + 2013
 ag_2013_spouse2 <- lm(prop_spouse_same_sex ~ distw + contig + comlang_off + 
                         comlang_ethno + colony +
                    wage_dif + unemp_dif + vdem + origin_score + stock_prop + bpld +
                      post_2013,
-         data = acs_prop_yrimmig_policy)
+         data = acs_prop)
 
 # Spouse + interaction
 ag_2013_spouse_int <- lm(prop_spouse_same_sex ~ distw + contig + comlang_off + 
                            comlang_ethno + colony + bpld +
                    wage_dif + unemp_dif + vdem  + stock_prop +
                      post_2013*origin_score,
-         data = acs_prop_yrimmig_policy)
+         data = acs_prop)
 
 # Quadratic
 ag_2013_quad1 <- lm(prop_same_sex ~ distw + contig + comlang_off + 
                         comlang_ethno + colony +
                    wage_dif + unemp_dif + vdem + origin_score + 
                      origin_squared + stock_prop + bpld,
-         data = mutate(acs_prop_yrimmig_policy, 
+         data = mutate(acs_prop, 
                        post_2013 = (yrimmig > 2013),
                        origin_squared = origin_score^2))
 
@@ -757,7 +759,7 @@ ag_2013_quad2 <- lm(prop_same_sex ~ distw + contig + comlang_off +
                    wage_dif + unemp_dif + vdem + origin_score + origin_squared + 
                      stock_prop + bpld +
                      post_2013,
-         data = mutate(acs_prop_yrimmig_policy, 
+         data = mutate(acs_prop, 
                        post_2013 = (yrimmig > 2013),
                        origin_squared = origin_score^2))
 
@@ -766,7 +768,7 @@ ag_2013_quad2 <- lm(prop_same_sex ~ distw + contig + comlang_off +
 #                            comlang_ethno + colony + bpld +
 #                    wage_dif + unemp_dif + vdem  + stock_prop +
 #                      post_2013*origin_score + I(origin_score^2),
-#          data = acs_prop_yrimmig_policy)
+#          data = acs_prop)
 
 
 mod_list <- list(#ag_2013_quad1, ag_2013_quad2,
@@ -811,12 +813,12 @@ stargazer(mod_list,
 ```{r fit, eval = F}
 ag_country_orig_fe <- lm(prop_same_sex ~ distw + contig + comlang_off + comlang_ethno + colony +
                    wage_dif + unemp_dif + vdem + origin_score + stock_prop + bpld,
-         data = acs_prop_yrimmig_policy)
+         data = acs_prop)
 
 ag_country_orig_fe_2013 <- lm(prop_same_sex ~ distw + contig + comlang_off + comlang_ethno + colony +
                    wage_dif + unemp_dif + vdem + origin_score + stock_prop + bpld +
                      post_2013,
-         data = acs_prop_yrimmig_policy)
+         data = acs_prop)
 
 tibble(Model = c('Country proportions, linear', 'Country proportions, quadratic',
                      '+2013, linear', '+2013, quadratic'),
@@ -833,25 +835,25 @@ tibble(Model = c('Country proportions, linear', 'Country proportions, quadratic'
 
 ```{r country-props-recent}
 ag <- lm(prop_same_sex_recent ~ origin_score,
-         data = acs_prop_yrimmig_policy)
+         data = acs_prop)
 
 ag_country_orig <- lm(prop_same_sex_recent ~ distw + contig + comlang_off + comlang_ethno + colony +
                    wage_dif + unemp_dif + vdem + origin_score + stock_prop,
-         data = acs_prop_yrimmig_policy)
+         data = acs_prop)
 
 ag_country_orig_fe <- lm(prop_same_sex_recent ~ distw + contig + comlang_off + comlang_ethno + colony +
                    wage_dif + unemp_dif + vdem + origin_score + stock_prop + bpld,
-         data = acs_prop_yrimmig_policy)
+         data = acs_prop)
 
 ag_country_orig_fe_2013 <- lm(prop_same_sex_recent ~ distw + contig + comlang_off + comlang_ethno + colony +
                    wage_dif + unemp_dif + vdem + origin_score + stock_prop + bpld +
                      post_2013,
-         data = mutate(acs_prop_yrimmig_policy, post_2013 = (yrimmig > 2013)))
+         data = mutate(acs_prop, post_2013 = (yrimmig > 2013)))
 
 ag_2013_int_fe <- lm(prop_same_sex_recent ~ distw + contig + comlang_off + comlang_ethno + colony +
                    wage_dif + unemp_dif + vdem  + stock_prop + bpld +
                      post_2013*origin_score,
-         data = mutate(acs_prop_yrimmig_policy, post_2013 = (yrimmig > 2013)))
+         data = mutate(acs_prop, post_2013 = (yrimmig > 2013)))
 
 mod_list <- list(ag, ag_country_orig, ag_country_orig_fe,
                  ag_country_orig_fe_2013, ag_2013_int_fe)
@@ -891,35 +893,35 @@ stargazer(mod_list,
 # One immigrant
 ag_oneimm <- lm(prop_same_sex_oneimm ~ distw + contig + comlang_off + comlang_ethno + colony +
                    wage_dif + unemp_dif + vdem + origin_score + stock_prop + bpld,
-         data = acs_prop_yrimmig_policy)
+         data = acs_prop)
 
 ag_oneimm_2013 <- lm(prop_same_sex_oneimm ~ distw + contig + comlang_off + comlang_ethno + colony +
                    wage_dif + unemp_dif + vdem + stock_prop + bpld + 
                      post_2013 + origin_score,
-         data = acs_prop_yrimmig_policy)
+         data = acs_prop)
 
 ag_oneimm_2013_int <- lm(prop_same_sex_oneimm ~ distw + contig + comlang_off + 
                            comlang_ethno + colony +
                    wage_dif + unemp_dif + vdem + stock_prop + bpld + 
                      post_2013*origin_score,
-         data = acs_prop_yrimmig_policy)
+         data = acs_prop)
 
 
 # Two immigrants
 ag_twoimm <- lm(prop_same_sex_twoimm ~ distw + contig + comlang_off + comlang_ethno + colony +
                    wage_dif + unemp_dif + vdem + origin_score + stock_prop + bpld,
-         data = acs_prop_yrimmig_policy)
+         data = acs_prop)
 
 ag_twoimm_2013 <- lm(prop_same_sex_twoimm ~ distw + contig + comlang_off + comlang_ethno + colony +
                    wage_dif + unemp_dif + vdem + stock_prop + bpld +
                      post_2013 + origin_score,
-         data = acs_prop_yrimmig_policy)
+         data = acs_prop)
 
 ag_twoimm_2013_int <- lm(prop_same_sex_twoimm ~ distw + contig + comlang_off +
                            comlang_ethno + colony +
                    wage_dif + unemp_dif + vdem + stock_prop + bpld +
                      post_2013*origin_score,
-         data = acs_prop_yrimmig_policy)
+         data = acs_prop)
 
 
 
@@ -969,20 +971,20 @@ stargazer(mod_list,
 ```{r ols-ind, eval = F}
 
 ols_basic <- lm(state_policy ~ same_sex,
-                data = acs_couple_policy_small)
+                data = acs_ind_small)
 ols_orig <- lm(state_policy ~ same_sex*origin_score,
-                data = acs_couple_policy_small)
+                data = acs_ind_small)
 ols_interact <- lm(state_policy ~ 
                        same_sex*(origin_score + gender + age + educ + 
                    nchild + ihs_income + no_income + yrimmig),
-                data = rename(acs_couple_policy_small, gender = sex))
+                data = rename(acs_ind_small, gender = sex))
 
 ols_interact_controls <- lm(state_policy ~ same_sex*(origin_score + gender + age + educ +
                      nchild + ihs_income + no_income + yrimmig) +
                      distw + contig + comlang_off + comlang_ethno +
                      wage_dif + unemp_dif + vdem + stock_prop +  #bpld + state +
                      state_unemploy + state_income ,
-                data = rename(acs_couple_policy_small, gender = sex))
+                data = rename(acs_ind_small, gender = sex))
 
 se_list <- list()
 mod_list <- list(ols_basic, ols_orig, ols_interact, ols_interact_controls)
@@ -1042,12 +1044,12 @@ for (i in 1:sims) {
   pseudeo_mod$coefficients <- theta[1:k]
   pseudeo_mod$zeta <- theta[(k+1):length(theta)]
 
-  for(same_loop in unique(acs_couple_policy_small$same_sex)){
-      var_vals <- seq(min(acs_couple_policy_small[,var]), 
-                      max(acs_couple_policy_small[,var]), 
+  for(same_loop in unique(acs_ind_small$same_sex)){
+      var_vals <- seq(min(acs_ind_small[,var]), 
+                      max(acs_ind_small[,var]), 
                       length.out = 10)
       for(val in var_vals){
-          sim_dat <- acs_couple_policy_small %>%
+          sim_dat <- acs_ind_small %>%
             rename(gender = sex) %>%
             select(all.vars(formula(ols_interact_controls)))
           sim_dat[, 'same_sex'] <- same_loop
@@ -1099,7 +1101,7 @@ for(year_loop in 1991:2018){
   placebo_list[[paste0(year_loop, 'simple')]] <- 
     lm(prop_same_sex ~ distw + contig + comlang_off + comlang_ethno + colony +
                      wage_dif + unemp_dif + vdem + origin_score + stock_prop + post_year + bpld,
-           data = mutate(acs_prop_yrimmig_policy, post_year = (yrimmig > year_loop))) %>%
+           data = mutate(acs_prop, post_year = (yrimmig > year_loop))) %>%
     coeftest(vcov = vcovCL(., cluster = ~ bpld)) %>%
     tidy() %>% 
     filter(term %in% c('post_yearTRUE', 'post_yearTRUE:origin_score')) %>%
@@ -1109,7 +1111,7 @@ for(year_loop in 1991:2018){
     lm(prop_same_sex ~ distw + contig + comlang_off + comlang_ethno + colony +
                      wage_dif + unemp_dif + vdem  + stock_prop + bpld +
                        post_year*origin_score,
-           data = mutate(acs_prop_yrimmig_policy, post_year = (yrimmig > year_loop)))%>%
+           data = mutate(acs_prop, post_year = (yrimmig > year_loop)))%>%
       coeftest(vcov = vcovCL(., cluster = ~ bpld)) %>%
     tidy() %>%
     filter(term %in% c('post_yearTRUE', 'post_yearTRUE:origin_score')) %>%
@@ -1139,33 +1141,33 @@ placebo_list <- list()
 
 for(year_loop in 2008:2018){
   placebo_list[[paste0(year_loop, 'simple')]]  <- 
-    lm(same_prop ~ post_year + state_policy + origin_score + distw + contig + 
+    lm(prop_same_sex ~ post_year + state_policy + origin_score + distw + contig + 
                           comlang_off + comlang_ethno + colony +
                           wage_dif + unemp_dif + vdem + stock_prop +
                            state_unemploy + state_income + Country + state, 
-                       data = mutate(acs_dyad_policy, post_year = (year > year_loop))) %>%
+                       data = mutate(acs_prop_state, post_year = (year > year_loop))) %>%
       coeftest(vcov = vcovCL(., cluster = ~ state + Country)) %>%
       tidy() %>% 
       filter(term %in% c('post_yearTRUE', 'post_yearTRUE:origin_score', 'post_yearTRUE:state_policy')) %>%
       mutate(model = '5: Simple', year = year_loop)
 
   placebo_list[[paste0(year_loop, 'int1')]]  <- 
-    lm(same_prop ~ post_year*state_policy + origin_score + distw + contig + 
+    lm(prop_same_sex ~ post_year*state_policy + origin_score + distw + contig + 
                             comlang_off + comlang_ethno + colony +
                             wage_dif + unemp_dif + vdem + stock_prop +
                              state_unemploy + state_income + Country + state, 
-                         data = mutate(acs_dyad_policy, post_year = (year > year_loop))) %>%
+                         data = mutate(acs_prop_state, post_year = (year > year_loop))) %>%
       coeftest(vcov = vcovCL(., cluster = ~ state + Country)) %>%
       tidy() %>% 
       filter(term %in% c('post_yearTRUE', 'post_yearTRUE:origin_score', 'post_yearTRUE:state_policy')) %>%
       mutate(model = '6: State Interaction', year = year_loop)
   
   placebo_list[[paste0(year_loop, 'int2')]]  <- 
-    lm(same_prop ~ post_year*origin_score + state_policy + distw + contig + 
+    lm(prop_same_sex ~ post_year*origin_score + state_policy + distw + contig + 
                             comlang_off + comlang_ethno + colony +
                             wage_dif + unemp_dif + vdem + stock_prop +
                              state_unemploy + state_income + Country + state, 
-                         data = mutate(acs_dyad_policy, post_year = (year > year_loop))) %>%
+                         data = mutate(acs_prop_state, post_year = (year > year_loop))) %>%
       summary(cluster = c("bpld")) %>%
       tidy() %>% 
       filter(term %in% c('post_yearTRUE', 'post_yearTRUE:origin_score', 'post_yearTRUE:state_policy')) %>%
@@ -1206,27 +1208,27 @@ placebo_df2 %>%
 # Full Regression Tables
 ```{r country-props-full}
 ag <- lm(prop_same_sex ~ origin_score,
-         data = acs_prop_yrimmig_policy)
+         data = acs_prop)
 
 
 ag_country_orig <- lm(prop_same_sex ~ distw + contig + comlang_off + comlang_ethno + colony +
                    wage_dif + unemp_dif + vdem + origin_score + stock_prop,
-         data = acs_prop_yrimmig_policy)
+         data = acs_prop)
 
 ag_country_orig_fe <- lm(prop_same_sex ~ distw + contig + comlang_off + comlang_ethno + colony +
                    wage_dif + unemp_dif + vdem + origin_score + stock_prop + bpld,
-         data = acs_prop_yrimmig_policy)
+         data = acs_prop)
 
 ag_country_orig_fe_2013 <- lm(prop_same_sex ~ distw + contig + comlang_off + comlang_ethno + colony +
                    wage_dif + unemp_dif + vdem + origin_score + stock_prop + bpld +
                      post_2013,
-         data = acs_prop_yrimmig_policy)
+         data = acs_prop)
 
 
 ag_2013_int_fe <- lm(prop_same_sex ~ distw + contig + comlang_off + comlang_ethno + colony +
                    wage_dif + unemp_dif + vdem  + stock_prop + bpld +
                      post_2013*origin_score,
-         data = acs_prop_yrimmig_policy)
+         data = acs_prop)
 
 
 mod_list <- list(ag, ag_country_orig, ag_country_orig_fe,
@@ -1280,41 +1282,41 @@ stargazer(mod_list,
 
 
 ```{r state-props-full}
-state_prop <- lm(same_prop ~ state_policy, data = acs_dyad_policy)
+state_prop <- lm(prop_same_sex ~ state_policy, data = acs_prop_state)
 
-state_prop2 <- lm(same_prop ~ origin_score + state_policy, data = acs_dyad_policy)
+state_prop2 <- lm(prop_same_sex ~ origin_score + state_policy, data = acs_prop_state)
 
 
 
-state_prop_fe <- lm(same_prop ~ state_policy + origin_score + distw + contig + 
+state_prop_fe <- lm(prop_same_sex ~ state_policy + origin_score + distw + contig + 
                           comlang_off + comlang_ethno + colony +
                           wage_dif + unemp_dif + vdem + stock_prop +
                            state_unemploy + state_income + bpld + sname, 
-                       data = mutate(acs_dyad_policy, bpld = Country, sname = state))
+                       data = mutate(acs_prop_state, bpld = Country, sname = state))
 
-state_prop_fe2 <- lm(same_prop ~ state_policy*origin_score + distw + contig + 
+state_prop_fe2 <- lm(prop_same_sex ~ state_policy*origin_score + distw + contig + 
                           comlang_off + comlang_ethno + colony +
                           wage_dif + unemp_dif + vdem + stock_prop +
                            state_unemploy + state_income + bpld + sname, 
-                       data = mutate(acs_dyad_policy, bpld = Country, sname = state))
+                       data = mutate(acs_prop_state, bpld = Country, sname = state))
 
-state_prop_2013 <- lm(same_prop ~ post_2013 + state_policy + origin_score + distw + contig + 
+state_prop_2013 <- lm(prop_same_sex ~ post_2013 + state_policy + origin_score + distw + contig + 
                           comlang_off + comlang_ethno + colony +
                           wage_dif + unemp_dif + vdem + stock_prop +
                            state_unemploy + state_income + bpld + sname, 
-                       data = mutate(acs_dyad_policy, post_2013 = (year > 2013),bpld = Country, sname = state))
+                       data = mutate(acs_prop_state, post_2013 = (year > 2013),bpld = Country, sname = state))
 
-state_prop_2013_int <- lm(same_prop ~ post_2013*origin_score + state_policy + distw + contig + 
+state_prop_2013_int <- lm(prop_same_sex ~ post_2013*origin_score + state_policy + distw + contig + 
                           comlang_off + comlang_ethno + colony +
                           wage_dif + unemp_dif + vdem + stock_prop +
                            state_unemploy + state_income + bpld + sname, 
-                       data = mutate(acs_dyad_policy, post_2013 = (year > 2013),bpld = Country, sname = state))
+                       data = mutate(acs_prop_state, post_2013 = (year > 2013),bpld = Country, sname = state))
 
-state_prop_2013_int2 <- lm(same_prop ~ post_2013*state_policy + origin_score + distw + contig + 
+state_prop_2013_int2 <- lm(prop_same_sex ~ post_2013*state_policy + origin_score + distw + contig + 
                           comlang_off + comlang_ethno + colony +
                           wage_dif + unemp_dif + vdem + stock_prop +
                            state_unemploy + state_income + bpld + sname, 
-                       data = mutate(acs_dyad_policy, post_2013 = (year > 2013), bpld = Country, sname = state))
+                       data = mutate(acs_prop_state, post_2013 = (year > 2013), bpld = Country, sname = state))
 
 
 
@@ -1377,25 +1379,25 @@ stargazer(mod_list,
 ```{r ord-full}
 
 # ord_basic <- polr(state_policy_binned ~ same_sex,
-#                 data = acs_couple_policy_small, Hess = T, weights = perwt/12)
+#                 data = acs_ind_small, Hess = T, weights = perwt/12)
 ord_basic_controls <- polr(state_policy_binned ~ same_sex + sex + age + educ + 
                    nchild + ihs_income + no_income + yrimmig,
-                 data = acs_couple_policy_small, Hess = T, weights = perwt/12)
+                 data = acs_ind_small, Hess = T, weights = perwt/12)
 
 # ord_orig <- polr(state_policy_binned ~ same_sex*origin_score,
-#                 data = acs_couple_policy_small, Hess = T, weights = perwt/12)
+#                 data = acs_ind_small, Hess = T, weights = perwt/12)
 
 ord_interact <- polr(state_policy_binned ~ 
                        same_sex*origin_score + sex + age + educ + 
                    nchild + ihs_income + no_income + yrimmig,
-                data = acs_couple_policy_small, Hess = T, weights = perwt/12)
+                data = acs_ind_small, Hess = T, weights = perwt/12)
 
 ord_interact_country <- polr(state_policy_binned ~ 
                                 same_sex*origin_score + sex + age + educ +
                      nchild + ihs_income + no_income + yrimmig +
                      distw + contig + comlang_off + comlang_ethno + colony +
                      wage_dif + unemp_dif + vdem + stock_prop, 
-                data = acs_couple_policy_small, Hess = T, weights = perwt/12)
+                data = acs_ind_small, Hess = T, weights = perwt/12)
 
 ord_interact_controls <- polr(state_policy_binned ~ 
                                 same_sex*origin_score + sex + age + educ +
@@ -1403,13 +1405,13 @@ ord_interact_controls <- polr(state_policy_binned ~
                      distw + contig + comlang_off + comlang_ethno + colony +
                      wage_dif + unemp_dif + vdem + stock_prop + #  bpld + state +
                      state_unemploy + state_income,
-                data = acs_couple_policy_small, Hess = T, weights = perwt/12)
+                data = acs_ind_small, Hess = T, weights = perwt/12)
 
 # ord_interact_state <- polr(state_policy_binned ~ 
 #                                 same_sex*(origin_score + sex + age + educ +
 #                      nchild + ihs_income + no_income + yrimmig) +
 #                      state_unemploy + state_income,
-#                 data = acs_couple_policy_small, Hess = T, weights = perwt/12)
+#                 data = acs_ind_small, Hess = T, weights = perwt/12)
 
 
 
@@ -1424,8 +1426,8 @@ for(mod_num in 1:length(mod_list)){
 }
 
 
-obs <- paste0(substr(nrow(acs_couple_policy_small), 1, 3), ',', 
-              substr(nrow(acs_couple_policy_small), 4, 6))
+obs <- paste0(substr(nrow(acs_ind_small), 1, 3), ',', 
+              substr(nrow(acs_ind_small), 4, 6))
 
 stargazer(mod_list,
           header = F, 

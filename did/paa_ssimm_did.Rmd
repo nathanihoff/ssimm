@@ -1,0 +1,428 @@
+---
+output:
+  bookdown::pdf_document2:
+  # bookdown::word_document2:
+  #   reference_docx: "word-template.docx"
+    toc: no
+    number_sections: no
+    pandoc_args: !expr rmdfiltr::add_wordcount_filter(rmdfiltr::add_citeproc_filter(args = NULL))
+    latex_engine: xelatex
+    keep_tex: yes
+    #template: svm-latex-ms.tex
+# output: 
+#   pdf_document:
+#     citation_package: natbib
+#     keep_tex: true
+#     fig_caption: true
+#     latex_engine: pdflatex
+#     template: svm-latex-ms.tex
+header-includes:
+  # - \usepackage{setspace}\doublespace
+  # - \usepackage{endnotes}
+  #- \let\footnote=\endnote
+  #- \usepackage{endfloat}
+  # - \usepackage{fancyhdr}
+  # - \pagestyle{fancy}
+  # - \setlength{\headheight}{13.6pt}
+  # - \rhead{\textit{Hoffmann and Velasco}}
+  # - \lhead{\textit{`r format(Sys.time(), '%B %e, %Y')`}}
+
+editor_options: 
+  chunk_output_type: console
+  
+citeproc: no
+# fontfamily: mathpazo
+mainfont: "Times New Roman"
+fontsize: 12pt
+geometry: margin=1in
+indent: yes
+link-citations: no
+linkcolor: black
+# bibliography: zotero.bib  
+# csl: apa.csl
+
+
+title: "DiD Analysis of immigrants in mixed-citizenship couples"
+date: "`r format(Sys.time(), '%B %e, %Y')`"
+
+
+# author:
+# - name: Nathan I. Hoffmann
+#   affiliation: Department of Sociology, University of California, Los Angeles
+# - name: Kristopher Velasco
+#   affiliation: Department of Sociology, Princeton University
+ 
+# author:
+# - Nathan I. Hoffmann, Department of Sociology, University of California, Los Angeles
+# - Kristopher Velasco, Department of Sociology, Princeton University
+
+
+---
+
+<!-- Turn off hyphenation -->
+<!-- \usepackage[none]{hyphenat} -->
+
+
+```{r setup, include=F}
+library(knitr)
+library(broom)
+library(huxtable)
+library(sandwich)
+library(lmtest)
+library(here)
+library(stargazer)
+library(patchwork)
+library(flextable)
+library(tidyverse)
+library(kableExtra)
+
+knitr::opts_chunk$set(echo = F, warning = F, message = F, cache = T, # results = 'asis',
+                      cache.lazy = F, dpi = 600)
+
+# knitr::opts_chunk$set(error=TRUE) 
+
+options("yaml.eval.expr" = TRUE)
+
+uclablue = '#2774AE'
+gray = '#808080'
+black = '#000000'
+uclagold = '#FFB81C'
+ucla_palette = c(uclablue, black, gray)
+
+# theme_set(theme_cowplot(font_family = 'Palatino') + 
+theme_set(theme_classic(base_family = 'Palatino') + 
+            theme(legend.title=element_blank(), 
+                  panel.grid.major.y = element_line('grey80'),
+                  legend.background = element_rect(fill = "transparent")))
+# ggplot <- function(...) ggplot2::ggplot(...) + scale_color_manual(values = ucla_palette) +
+#   scale_fill_manual(values = ucla_palette)
+ggplot <- function(...) ggplot2::ggplot(...) + scale_color_brewer(palette="Dark2") +
+  scale_fill_brewer(palette="Dark2")
+
+# library(colorspace)
+# colorspace_palette = 'RdPu'
+# ggplot <- function(...) ggplot2::ggplot(...) +
+#   scale_color_discrete_sequential(palette=colorspace_palette) +
+#   scale_fill_discrete_sequential(palette=colorspace_palette)
+
+options(scipen=1, digits=2)
+knit_hooks$set(inline = function(x) {
+  prettyNum(x, big.mark=",")
+})
+knitr::opts_chunk$set(error=TRUE) 
+
+set_flextable_defaults(font.family = 'Times New Roman',
+                       padding.bottom = 1,
+                       padding.top = 1,
+                       padding.left = 3,
+                       padding.right = 1,
+                       theme_fun = 'theme_booktabs',
+                       digits = 3, 
+                       big.mark = ',',
+                       line_spacing = 1)
+```
+
+```{r load, include = F}
+acs_count_mixed <- read_csv(here('data', 'acs_count_mixed.csv')) %>%
+  group_by(state, year, same_sex, mixed) %>%
+  summarize(n = sum(n), 
+            n_unweighted = sum(n_unweighted),
+            n_ar = sum(n_ar), 
+            n_unweighted_ar = sum(n_unweighted_ar)) %>%
+  mutate(post_2013 = year > 2013,
+         group_fe = paste(state, same_sex, mixed, sep = '_')) 
+
+acs_prop <- read.csv(here('data', 'acs_prop_yrimmig_policy.csv')) %>%
+  mutate(post_2013 = (yrimmig > 2013))
+acs_prop_state <- read.csv(here('data', 'acs_dyad_policy.csv'))
+
+acs_ind <- read_rds(here('data', 'acs_couple_policy.rds')) 
+acs_count_mixed_bpld <- read_csv(here('data', 'acs_count_mixed.csv'))  %>%
+  left_join(
+    acs_ind %>%
+  group_by(year, state, bpld, same_sex) %>%
+  summarize(origin_score = mean(origin_score))) 
+```
+
+# Introduction
+
+@redpath_2021_spousal demonstrates convincingly that the 2013 repeal of the Defense of Marriage Act (DOMA) results in a significant increase in unions between mixed-citizenship, same-sex couples. We extend his differences-in-differences-in-differences (DDD) design to examine an important moderator of this effect: the policy environment of the origin country.  
+
+As show in Figure \@ref(fig:desc), this rapid increase after 2013 was not uniform across immigrants from all countries. For those hailing from countries with progressive LGB policies, the increase was indeed rapid after 2013. However, from those with repressive LGB policies, no increase occured. (See below for more on our LGB policy index.)
+
+
+```{r desc, fig.height = 3, fig.cap = 'Estimated counts of individuals in mixed-citizenship, same-same couples from the American Community Survey. The "Repressive" sample includes only countries with a LGB policy score less than 0, and the "Progressive" sample includes only those with a score greater than 3.'}
+# acs_count_mixed %>%
+#   group_by(same_sex, mixed, year) %>%
+#   summarize(log_n = log(sum(n))) %>%
+#   ggplot(aes(x = year, y = log_n, color = same_sex, linetype = mixed)) +
+#   geom_line()
+# 
+# acs_count_mixed %>%
+#   mutate(year = floor(year/2)*2) %>%
+#   group_by(same_sex, mixed, year) %>%
+#   summarize(n = sum(n)) %>%
+#   mutate(n_per_change = (n - lag(n))/lag(n)) %>%
+#   ggplot(aes(x = year, y = n_per_change, color = same_sex, linetype = mixed)) +
+#   geom_line()
+
+bind_rows(
+  acs_count_mixed_bpld %>%
+    mutate(cat = case_when(origin_score > 3 ~ 'Progressive',
+                           origin_score < 0 ~ 'Repressive')) %>%
+    filter(!is.na(cat) & mixed == T & same_sex == T) %>%
+    group_by(year, cat) %>%
+    summarize(n = sum(n)),
+   acs_count_mixed_bpld %>%
+    filter(mixed == T & same_sex == T) %>%
+    group_by(year) %>%
+    summarize(n = sum(n)) %>%
+    mutate(cat = 'Full sample')
+) %>% 
+  ggplot(aes(x = year, y = n, color = cat, linetype = cat)) +
+  geom_line() +
+  geom_vline(xintercept = 2013, linetype = 2) 
+  
+```
+
+# Background
+blah blah Kris
+
+
+# Data and Methods
+
+Due to the large number of 0 counts in our sample, a typical Poisson model is not appropriate. We use quasi-maximum likelihood estimation (QMLE) to identify the effect of DOMA's repeal.
+
+
+# Preliminary Results
+```{r mod-tab}
+mod_mixed <- acs_count_mixed %>%
+  glm(n ~ I(post_2013*same_sex*mixed) + I(post_2013*same_sex) + I(post_2013*mixed) + post_2013 + group_fe + as.factor(year), 
+                        data = ., 
+                        family = 'quasipoisson') %>%
+coeftest(., vcov = vcovCL(., cluster = ~group_fe))
+
+count_origin_high <- acs_count_mixed_bpld %>%
+  filter(origin_score > 3 | is.na(origin_score)) %>%
+  group_by(state, year, same_sex, mixed, post_2013, group_fe) %>%
+  summarize(n = sum(n)) %>% 
+  ungroup() 
+
+mod_os_high <- glm(n ~  I(post_2013*same_sex*mixed) + 
+                        I(post_2013*same_sex) + 
+                        I(post_2013*mixed) + 
+                        post_2013 + 
+                        group_fe + as.factor(year), 
+                        data = count_origin_high, 
+                        family = 'quasipoisson') %>%
+coeftest(., vcov = vcovCL(., cluster = ~group_fe))
+
+count_origin_low <- acs_count_mixed_bpld %>%
+  filter(origin_score < 0 | is.na(origin_score)) %>%
+  group_by(state, year, same_sex, mixed, post_2013, group_fe) %>%
+  summarize(n = sum(n)) %>% 
+  ungroup() 
+
+mod_os_low <- glm(n ~  I(post_2013*same_sex*mixed) + 
+                        I(post_2013*same_sex) + 
+                        I(post_2013*mixed) + 
+                        post_2013 + 
+                        group_fe + as.factor(year), 
+                        data = count_origin_low, 
+                        family = 'quasipoisson') %>%
+coeftest(., vcov = vcovCL(., cluster = ~group_fe)) 
+
+
+huxreg(list('Full sample' = mod_mixed, 'Repressive' = mod_os_low, 'Progressive' = mod_os_high),
+       coefs = c('Post-2013 × Same-sex × Mixed-citizenship' = 'I(post_2013 * same_sex * mixed)',
+                'Post-2013 × Same-sex'  = 'I(post_2013 * same_sex)',
+                'Post-2013 × Mixed-citizenship'  = 'I(post_2013 * mixed)',
+                'Post-2013' = 'post_2013TRUE'),
+  note = '{stars}. The "Repressive" sample includes only countries with a LGB policy score less than 0, and the "Progressive" sample includes only those with a score greater than 3. Group-clustered standard errors shown in parentheses. Source: American Community Survey 2008-2019.',
+       stars = c(`†` = 0.1, `*` = 0.05, `**` = 0.01, `***` = 0.001),
+       statistics = c('Observations' = 'nobs')) %>%
+  huxtable::set_width(1) %>%
+  set_wrap(T) %>%
+  huxtable::set_caption('Quasi-Poisson DDD regressions of counts of 
+                        mixed-citizenship same-sex couples')
+  # theme_compact()
+
+base_effect <- tidy(mod_mixed) %>%
+  filter(term == 'I(post_2013 * same_sex * mixed)') %>%
+  pull(estimate) 
+
+```
+
+Table \@ref(tab:mod-tab) presents results from our DDD specifications. For the full sample, the incidence of individuals in mixed-citizenship, same-sex couples grew by $100 \times [\exp(`r base_effect`) -1] =$ `r 100*(exp(base_effect) - 1)` percent after 2013, relative to those in couples that were not same-sex or mixed-citizenship.
+
+
+
+
+```{r lag-plot, fig.height = 3.5, fig.cap = 'Lag-lead specification of quasi-poisson TWFE DDD regression'}
+base_plot <- acs_count_mixed %>%
+  mutate(year = floor(year/2)*2) %>%
+  group_by(state, year, same_sex, mixed, group_fe) %>%
+  summarize(n = sum(n)) %>%
+  ungroup() %>%
+  mutate(year = factor(floor(year/2)*2, 
+            levels = c('2018', '2016', '2014', '2012', '2010', '2008'))) %>%
+  glm(n ~ as.factor(year):same_sex:mixed + 
+                        as.factor(year):same_sex + 
+                        as.factor(year):mixed + 
+                        as.factor(year) + group_fe,
+                        data = ., 
+                        family = 'quasipoisson') %>%
+  coeftest(., vcov = vcovCL(., cluster = ~group_fe)) %>%
+  tidy(conf.int = T) %>% 
+  filter(str_detect(term, ':same_sexTRUE:mixedTRUE')) %>%
+  mutate(term = str_extract(term, '\\d\\d\\d\\d'),
+         year = as.numeric(term)) %>%
+  ggplot(aes(x = year, y = estimate)) +
+    geom_pointrange(aes(ymin = conf.low, ymax = conf.high)) +
+    geom_hline(yintercept = 0) +
+    geom_vline(xintercept = 2013, linetype = 2) +
+    theme(legend.position = "none") +
+    ggtitle('Full sample')
+
+
+
+extra_pois_mixed_high <- glm(n ~ as.factor(year):same_sex:mixed + 
+                        as.factor(year):same_sex + 
+                        as.factor(year):mixed + 
+                        as.factor(year) + group_fe,
+                        data = mutate(count_origin_high, 
+                                      year = factor(floor(year/2)*2, 
+                                                    levels = c('2018', '2016', '2014', '2012', '2010', '2008'))), 
+                        family = 'quasipoisson')
+
+extra_pois_mixed_low <- glm(n ~ as.factor(year):same_sex:mixed + 
+                        as.factor(year):same_sex + 
+                        as.factor(year):mixed + 
+                        as.factor(year) + group_fe,
+                        data = mutate(count_origin_low, 
+                                      year = factor(floor(year/2)*2, 
+                                                    levels = c('2018', '2016', '2014', '2012', '2010', '2008'))), 
+                        family = 'quasipoisson')
+
+strat_plot <- bind_rows(
+  extra_pois_mixed_high %>%
+    coeftest(., vcov = vcovCL(., cluster = ~group_fe)) %>%
+    tidy(conf.int = T) %>% 
+    filter(str_detect(term, ':same_sexTRUE:mixedTRUE')) %>%
+    mutate(year = as.numeric(str_extract(term, '\\d\\d\\d\\d')),
+           mod = 'Score > 3'),
+  extra_pois_mixed_low %>%
+    coeftest(., vcov = vcovCL(., cluster = ~group_fe)) %>%
+    tidy(conf.int = T) %>%  
+    filter(str_detect(term, ':same_sexTRUE:mixedTRUE')) %>%
+    mutate(year = as.numeric(str_extract(term, '\\d\\d\\d\\d')),
+           mod = 'Score < 0')) %>%
+  ggplot(aes(x = year, y = estimate, color = mod, shape = mod)) +
+  geom_pointrange(aes(ymin = conf.low, ymax = conf.high), position=position_dodge(width=.5)) +
+  geom_hline(yintercept = 0) +
+  geom_vline(xintercept = 2013, linetype = 2)  + 
+  theme(legend.position=c(.18,.9)) +
+  ggtitle('Stratified')
+
+
+
+p_combined <- base_plot + strat_plot
+p_ranges_y <- c(ggplot_build(p_combined[[1]])$layout$panel_scales_y[[1]]$range$range,
+                ggplot_build(p_combined[[2]])$layout$panel_scales_y[[1]]$range$range)
+p_combined & 
+  ylim(min(p_ranges_y), max(p_ranges_y))
+```
+
+
+
+```{r stratified-mixed, fig.cap = 'Predicted numbers of individuals in mixed-citizenship couples, stratified by LGBT policy score of origin country', eval = F}
+
+extra_pois_mixed_high <- glm(n ~ as.factor(year):same_sex:mixed + 
+                        as.factor(year):same_sex + 
+                        as.factor(year):mixed + 
+                        as.factor(year) + group_fe,
+                        data = count_origin_high, 
+                        family = 'quasipoisson')
+
+extra_pois_mixed_low <- glm(n ~ as.factor(year):same_sex:mixed + 
+                        as.factor(year):same_sex + 
+                        as.factor(year):mixed + 
+                        as.factor(year) + group_fe,
+                        data = count_origin_low, 
+                        family = 'quasipoisson')
+
+bind_rows(
+  count_origin_high %>%
+    filter(mixed == T, same_sex == T) %>%
+    cbind(., n_fit = predict(extra_pois_mixed_high, newdata = ., type = 'response')) %>% 
+    group_by(year) %>%
+    summarize(n_fit = sum(n_fit)) %>%
+    mutate(mod = 'Score > 3'),
+  count_origin_low %>%
+    filter(mixed == T, same_sex == T) %>%
+    cbind(., n_fit = predict(extra_pois_mixed_low, newdata = ., type = 'response')) %>% 
+    group_by(year) %>%
+    summarize(n_fit = sum(n_fit)) %>%
+    mutate(mod = 'Score < 0')) %>%
+  ggplot(aes(x = year, y = n_fit, color = mod)) +
+  geom_line() +
+  geom_vline(xintercept = 2013, linetype = 2)
+```
+
+
+\newpage
+
+# Appendix
+
+```{r}
+
+count_origin_high <- acs_count_mixed_bpld %>%
+  filter(origin_score > 5 | is.na(origin_score)) %>%
+  group_by(state, year, same_sex, mixed, post_2013, group_fe) %>%
+  summarize(n = sum(n)) %>% 
+  ungroup() 
+
+count_origin_low <- acs_count_mixed_bpld %>%
+  filter(origin_score < -1 | is.na(origin_score)) %>%
+  group_by(state, year, same_sex, mixed, post_2013, group_fe) %>%
+  summarize(n = sum(n)) %>% 
+  ungroup() 
+
+extra_pois_mixed_high <- glm(n ~ as.factor(year):same_sex:mixed + 
+                        as.factor(year):same_sex + 
+                        as.factor(year):mixed + 
+                        as.factor(year) + group_fe,
+                        data = mutate(count_origin_high, 
+                                      year = factor(floor(year/2)*2, 
+                                                    levels = c('2018', '2016', '2014', '2012', '2010', '2008'))), 
+                        family = 'quasipoisson')
+
+extra_pois_mixed_low <- glm(n ~ as.factor(year):same_sex:mixed + 
+                        as.factor(year):same_sex + 
+                        as.factor(year):mixed + 
+                        as.factor(year) + group_fe,
+                        data = mutate(count_origin_low, 
+                                      year = factor(floor(year/2)*2, 
+                                                    levels = c('2018', '2016', '2014', '2012', '2010', '2008'))), 
+                        family = 'quasipoisson')
+
+bind_rows(
+  extra_pois_mixed_high %>%
+    coeftest(., vcov = vcovCL(., cluster = ~group_fe)) %>%
+    tidy(conf.int = T) %>% 
+    filter(str_detect(term, ':same_sexTRUE:mixedTRUE')) %>%
+    mutate(year = as.numeric(str_extract(term, '\\d\\d\\d\\d')),
+           mod = 'origin_score > 5'),
+  extra_pois_mixed_low %>%
+    coeftest(., vcov = vcovCL(., cluster = ~group_fe)) %>%
+    tidy(conf.int = T) %>%  
+    filter(str_detect(term, ':same_sexTRUE:mixedTRUE')) %>%
+    mutate(year = as.numeric(str_extract(term, '\\d\\d\\d\\d')),
+           mod = 'origin_score < -1')) %>%
+  ggplot(aes(x = year, y = estimate, color = mod)) +
+  geom_pointrange(aes(ymin = conf.low, ymax = conf.high), position=position_dodge(width=.5)) +
+  geom_hline(yintercept = 0) +
+  geom_vline(xintercept = 2013, linetype = 2)  + 
+  ggtitle('Mixed citizenship')
+
+```

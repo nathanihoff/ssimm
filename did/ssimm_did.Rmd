@@ -1,0 +1,1710 @@
+---
+output:
+  # bookdown::pdf_document2:
+  bookdown::word_document2:
+    reference_docx: "word-template.docx"
+    toc: no
+    number_sections: no
+    pandoc_args: !expr rmdfiltr::add_wordcount_filter(rmdfiltr::add_citeproc_filter(args = NULL))
+    latex_engine: xelatex
+    keep_tex: yes
+    #template: svm-latex-ms.tex
+# output: 
+#   pdf_document:
+#     citation_package: natbib
+#     keep_tex: true
+#     fig_caption: true
+#     latex_engine: pdflatex
+#     template: svm-latex-ms.tex
+header-includes:
+  # - \usepackage{setspace}\doublespace
+  # - \usepackage{endnotes}
+  #- \let\footnote=\endnote
+  #- \usepackage{endfloat}
+  # - \usepackage{fancyhdr}
+  # - \pagestyle{fancy}
+  # - \setlength{\headheight}{13.6pt}
+  # - \rhead{\textit{Hoffmann and Velasco}}
+  # - \lhead{\textit{`r format(Sys.time(), '%B %e, %Y')`}}
+
+editor_options: 
+  chunk_output_type: console
+  
+citeproc: no
+# fontfamily: mathpazo
+mainfont: "Times New Roman"
+fontsize: 12pt
+geometry: margin=1in
+indent: yes
+link-citations: no
+linkcolor: black
+# bibliography: zotero.bib  
+# csl: apa.csl
+
+
+title: "DID Analysis of immigrants in same-sex couples"
+date: "`r format(Sys.time(), '%B %e, %Y')`"
+
+
+# author:
+# - name: Nathan I. Hoffmann
+#   affiliation: Department of Sociology, University of California, Los Angeles
+# - name: Kristopher Velasco
+#   affiliation: Department of Sociology, Princeton University
+ 
+# author:
+# - Nathan I. Hoffmann, Department of Sociology, University of California, Los Angeles
+# - Kristopher Velasco, Department of Sociology, Princeton University
+
+
+---
+
+<!-- Turn off hyphenation -->
+<!-- \usepackage[none]{hyphenat} -->
+
+
+```{r setup, include=F}
+knitr::opts_chunk$set(echo = F, warning = F, message = F, cache = T, # results = 'asis',
+                      cache.lazy = F, dpi = 600)
+
+
+library(MASS, exclude = 'select')
+library(janitor)
+library(priceR)
+library(kableExtra)
+library(huxtable)
+library(jtools)
+library(sjstats)
+library(imputeTS)
+library(mvtnorm)
+library(ordinal)
+library(lme4)
+library(countrycode)
+library(knitr)
+library(RColorBrewer)
+library(haven)
+library(cowplot)
+library(srvyr)
+library(lmtest)
+library(sandwich)
+library(here)
+library(plm)
+library(stargazer)
+library(patchwork)
+library(rworldmap)
+require(maps)
+library(flextable)
+library(tidyverse)
+
+# knitr::opts_chunk$set(error=TRUE) 
+
+options("yaml.eval.expr" = TRUE)
+
+uclablue = '#2774AE'
+gray = '#808080'
+black = '#000000'
+uclagold = '#FFB81C'
+ucla_palette = c(uclablue, black, gray)
+
+# theme_set(theme_cowplot(font_family = 'Palatino') + 
+theme_set(theme_classic(base_family = 'Palatino') + 
+            theme(legend.title=element_blank(), 
+                  panel.grid.major.y = element_line('grey80'),
+                  legend.background = element_rect(fill = "transparent")))
+ggplot <- function(...) ggplot2::ggplot(...) + scale_color_manual(values = ucla_palette) +
+  scale_fill_manual(values = ucla_palette)
+# ggplot <- function(...) ggplot2::ggplot(...) + scale_color_brewer(palette="Dark2") +
+#   scale_fill_brewer(palette="Dark2")
+
+# library(colorspace)
+# colorspace_palette = 'RdPu'
+# ggplot <- function(...) ggplot2::ggplot(...) +
+#   scale_color_discrete_sequential(palette=colorspace_palette) +
+#   scale_fill_discrete_sequential(palette=colorspace_palette)
+
+options(scipen=1, digits=2)
+knit_hooks$set(inline = function(x) {
+  prettyNum(x, big.mark=",")
+})
+knitr::opts_chunk$set(error=TRUE) 
+
+set_flextable_defaults(font.family = 'Times New Roman',
+                       padding.bottom = 1,
+                       padding.top = 1,
+                       padding.left = 3,
+                       padding.right = 1,
+                       theme_fun = 'theme_booktabs',
+                       digits = 3, 
+                       big.mark = ',',
+                       line_spacing = 1)
+```
+
+```{r load, include = F}
+acs_count <- read_csv(here('data', 'acs_count.csv')) 
+acs_count_mixed <- read_csv(here('data', 'acs_count_mixed.csv')) %>%
+  group_by(state, year, same_sex, mixed) %>%
+  summarize(n = sum(n), 
+            n_unweighted = sum(n_unweighted),
+            n_ar = sum(n_ar), 
+            n_unweighted_ar = sum(n_unweighted_ar))
+
+acs_prop <- read_csv(here('data', 'acs_prop_yrimmig_policy.csv')) %>%
+  mutate(post_2013 = (yrimmig > 2013))
+acs_prop_state <- read_csv(here('data', 'acs_dyad_policy.csv'))
+acs_ind <- read_rds(here('data', 'acs_couple_policy.rds')) 
+
+
+  
+
+acs_count_mixed_bpld <- read_csv(here('data', 'acs_count_mixed.csv'))  %>%
+  left_join(
+    acs_ind %>%
+  group_by(year, state, bpld, same_sex) %>%
+  summarize(origin_score = mean(origin_score))) 
+
+
+
+
+acs_count_imm <- read_csv(here('data', 'acs_count_imm.csv')) 
+```
+
+# Replicating Redpath (2021)
+
+```{r}
+# Replicating Redpath 2021
+acs_count_mixed %>%
+  group_by(state, year, same_sex, mixed, post_2013, group_fe) %>%
+  summarize(n = sum(n),
+            n_ar = sum(n_ar),
+            n_unweighted = sum(n_unweighted),
+            n_unweighted_ar = sum(n_unweighted_ar)) %>%
+  glm(n ~ I(post_2013*same_sex*mixed) + I(post_2013*same_sex) + I(post_2013*mixed) + post_2013 + group_fe + as.factor(year), 
+                        data = ., 
+                        family = 'quasipoisson') %>%
+coeftest(., vcov = vcovCL(., cluster = ~group_fe)) %>%
+  tidy() %>%
+  filter(!str_detect(term, 'group|year'))
+
+
+# Exclude two-immigrant couples
+acs_count %>%
+  filter(imm_couple != 'two') %>%
+  mutate(mixed = imm_couple == 'one') %>% 
+  glm(n ~ I(post_2013*same_sex*mixed) + I(post_2013*same_sex) + I(post_2013*mixed) + post_2013 +
+        group_fe + as.factor(year), 
+                        data = ., 
+                        family = 'quasipoisson') %>%
+  tidy() %>%
+  filter(!str_detect(term, 'group|year'))
+
+extra_pois_mixed2 <- glm(n ~ post_2013*mixed*same_sex + group_fe + as.factor(year), 
+                        data = acs_count_mixed, 
+                        family = 'quasipoisson')
+tidy(extra_pois_mixed2) %>%
+  filter(!str_detect(term, 'group|year'))
+
+
+extra_pois <- glm(n ~ post_2013*same_sex*imm_couple + state + as.factor(year), data = acs_count, family = 'quasipoisson')
+tidy(extra_pois) %>%
+  filter(!str_detect(term, 'group|year'))
+
+
+
+
+## Grouping immigrants together
+extra_pois_imm <- glm(n ~ I(post_2013*same_sex*immigrant) + 
+                        I(post_2013*same_sex) + 
+                        I(post_2013*immigrant) + 
+                        post_2013 + 
+                        group_fe + as.factor(year), 
+                        data = acs_count_imm, 
+                        family = 'quasipoisson')
+coeftest(extra_pois_imm, vcov = vcovCL(extra_pois_imm, cluster = acs_count_imm$group_fe)) %>%
+  tidy() %>%
+  filter(!str_detect(term, 'group|year'))
+
+# Full interactions
+extra_pois_imm <- glm(n ~ post_2013*same_sex*immigrant+
+                        group_fe + as.factor(year), 
+                        data = acs_count_imm, 
+                        family = 'quasipoisson')
+coeftest(extra_pois_imm, vcov = vcovCL(extra_pois_imm, cluster = acs_count_imm$group_fe)) %>%
+  tidy() %>%
+  filter(!str_detect(term, 'group|year'))
+
+# Lead-lag
+# extra_pois_imm <- glm(n ~ I(same_sex*immigrant)*year+
+#                         I(paste0(year,same_sex, 'ss')) + 
+#                         I(paste0(year,immigrant, 'imm')) +
+#                         year +
+#                         group_fe, 
+#                         data = mutate(acs_count_imm, year = as.factor(year)), 
+#                         family = 'quasipoisson')
+# extra_pois_imm <- coeftest(extra_pois_imm, 
+#                            vcov = vcovCL(extra_pois_imm, cluster = acs_count_imm$group_fe)) 
+# 
+# tidy(extra_pois_imm) %>%
+#   filter(str_detect(term, ':year')) %>%
+#   mutate(term = str_extract(term, '\\d\\d\\d\\d')) %>%
+#   ggplot(aes(x = term, y = estimate)) +
+#   geom_pointrange(aes(ymin = estimate - 1.96*std.error, ymax = estimate + 1.96*std.error)) +
+#   geom_hline(yintercept = 0) +
+#   geom_vline(xintercept = '2013', linetype = 2)
+
+
+## Figures ####
+extra_pois_imm <- glm(n ~ same_sex*immigrant*year+
+                        group_fe, 
+                        data = mutate(acs_count_imm, year = as.factor(year)), 
+                        family = 'quasipoisson')
+extra_pois_imm <- coeftest(extra_pois_imm, 
+                           vcov = vcovCL(extra_pois_imm, cluster = acs_count_imm$group_fe)) 
+
+imm_plot <- tidy(extra_pois_imm) %>%
+  filter(str_detect(term, 'same_sexTRUE:immigrantTRUE:year')) %>%
+  mutate(term = str_extract(term, '\\d\\d\\d\\d')) %>%
+  ggplot(aes(x = term, y = estimate)) +
+  geom_pointrange(aes(ymin = estimate - 1.96*std.error, ymax = estimate + 1.96*std.error)) +
+  geom_hline(yintercept = 0) +
+  geom_vline(xintercept = '2013', linetype = 2)+
+  ggtitle('Immigrant-Containing * Same-Sex * Year')
+
+
+extra_pois_mixed <- glm(n ~ same_sex*mixed*year+
+                        group_fe, 
+                        data = mutate(acs_count_mixed, year = as.factor(year)), 
+                        family = 'quasipoisson')
+extra_pois_mixed <- coeftest(extra_pois_mixed, 
+                           vcov = vcovCL(extra_pois_mixed, cluster = extra_pois_mixed$group_fe)) 
+
+mixed_plot <- tidy(extra_pois_mixed) %>% 
+  filter(str_detect(term, 'same_sexTRUE:mixedTRUE:year')) %>%
+  mutate(term = str_extract(term, '\\d\\d\\d\\d')) %>%
+  ggplot(aes(x = term, y = estimate)) +
+  geom_pointrange(aes(ymin = estimate - 1.96*std.error, ymax = estimate + 1.96*std.error)) +
+  geom_hline(yintercept = 0) +
+  geom_vline(xintercept = '2013', linetype = 2) +
+  ggtitle('Mixed-Citizenship * Same-Sex * Year')
+
+mixed_plot + imm_plot
+
+# Exclude two-immigrant
+glm(n ~ same_sex*mixed*year+
+                        group_fe, 
+                        data = mutate(acs_count, 
+                                      year = as.factor(year),
+                                      mixed = case_when(imm_couple == 'one' ~ T,
+                                                        imm_couple == 'none' ~ F)) , 
+                        family = 'quasipoisson') %>%
+coeftest(., vcov = vcovCL(., cluster = ~group_fe)) %>%
+  tidy() %>% 
+  filter(str_detect(term, 'same_sexTRUE:mixedTRUE:year')) %>%
+  mutate(term = str_extract(term, '\\d\\d\\d\\d')) %>%
+  ggplot(aes(x = term, y = estimate)) +
+  geom_pointrange(aes(ymin = estimate - 1.96*std.error, ymax = estimate + 1.96*std.error)) +
+  geom_hline(yintercept = 0) +
+  geom_vline(xintercept = '2013', linetype = 2) +
+  ggtitle('One-immigrant (vs. no-immigrant) * Same-Sex * Year')
+
+
+# Aggregating years
+mixed_plot <- acs_count_mixed %>%
+  mutate(year_pair = floor(year/2)*2) %>%
+  group_by(state, year_pair, same_sex, mixed, group_fe) %>%
+  summarize(n = sum(n)) %>%
+  ungroup() %>%
+  mutate(year = as.factor(year_pair)) %>%
+  glm(n ~ same_sex*mixed*year+
+                        group_fe, 
+                        data = ., 
+                        family = 'quasipoisson')%>%
+  coeftest(., vcov = vcovCL(., cluster = ~group_fe)) %>%
+  tidy(conf.int = T) %>% 
+  filter(str_detect(term, 'same_sexTRUE:mixedTRUE:year')) %>%
+  mutate(term = str_extract(term, '\\d\\d\\d\\d'),
+         year = as.numeric(term)) %>%
+  ggplot(aes(x = year, y = estimate)) +
+  geom_pointrange(aes(ymin = estimate - 1.96*std.error, ymax = estimate + 1.96*std.error)) +
+  geom_hline(yintercept = 0) +
+  geom_vline(xintercept = 2013, linetype = 2) +
+  ggtitle('Mixed-Citizenship * Same-Sex * Year')
+
+imm_plot <- acs_count_imm %>%
+  mutate(year_pair = floor(year/2)*2) %>%
+  group_by(state, year_pair, same_sex, immigrant, group_fe) %>%
+  summarize(n = sum(n)) %>%
+  ungroup() %>%
+  mutate(year = as.factor(year_pair)) %>%
+  glm(n ~ same_sex*immigrant*year+
+                        group_fe, 
+                        data = ., 
+                        family = 'quasipoisson')%>%
+  coeftest(., vcov = vcovCL(., cluster = ~group_fe)) %>%
+  tidy(conf.int = T) %>% 
+  # mutate(across(c('estimate', 'conf.low', 'conf.high'), exp)) %>%
+  filter(str_detect(term, 'same_sexTRUE:immigrantTRUE:year')) %>%
+  mutate(term = str_extract(term, '\\d\\d\\d\\d'),
+         year = as.numeric(term)) %>%
+  ggplot(aes(x = year, y = estimate)) +
+  geom_pointrange(aes(ymin = conf.low, ymax = conf.high)) +
+  geom_hline(yintercept = 0) +
+  geom_vline(xintercept = 2013, linetype = 2) +
+  ggtitle('Immigrant-Containing * Same-Sex * Year') 
+
+mixed_plot + imm_plot
+
+
+
+```
+
+
+# DiD with proportions
+```{r did-prop}
+## Tables
+# survey year with state data
+acs_prop_state %>%
+  pivot_longer(c(n_same_sex, n_dif_sex), names_to = 'same_sex', values_to = 'n') %>%
+  mutate(same_sex = same_sex == 'n_same_sex',
+         origin_score_high = origin_score > mean(origin_score),
+         group_fe = paste0(state, same_sex),
+         post_2013 = year > 2013) %>%
+  group_by(state, year, same_sex, origin_score_high, group_fe, post_2013) %>%
+  summarize(n = sum(n)) %>%
+   glm(n ~ origin_score_high*same_sex*post_2013 + group_fe + as.factor(year),
+                        data = ., 
+                        family = 'quasipoisson')%>%
+  coeftest(., vcov = vcovCL(., cluster = ~group_fe)) %>%
+  tidy(conf.int = T) %>%  
+  filter(!str_detect(term, 'group|year')) 
+
+# putting reference groups into intercept
+acs_prop_state %>%
+  pivot_longer(c(n_same_sex, n_dif_sex), names_to = 'same_sex', values_to = 'n') %>%
+  mutate(same_sex = same_sex == 'n_same_sex',
+         origin_score_high = origin_score > mean(origin_score),
+         group_fe = paste0(state, same_sex)) %>%
+  group_by(state, year, same_sex, origin_score_high, group_fe) %>%
+  summarize(n = sum(n)) %>%
+  mutate(post_2013 = year > 2013) %>%
+   glm(n ~ I(post_2013*same_sex*origin_score_high) + 
+         I(post_2013*same_sex) + 
+         I(post_2013*origin_score_high) + post_2013
+       + as.factor(year) + group_fe,
+                        data = ., 
+                        family = 'quasipoisson')%>%
+  coeftest(., vcov = vcovCL(., cluster = ~group_fe)) %>%
+  tidy(conf.int = T) %>%  
+  filter(!str_detect(term, 'group|year'))
+
+# origin score continuous
+acs_prop_state %>%
+  pivot_longer(c(n_same_sex, n_dif_sex), names_to = 'same_sex', values_to = 'n') %>%
+  mutate(same_sex = same_sex == 'n_same_sex',
+         group_fe = paste0(state, same_sex)) %>%
+  group_by(state, year, same_sex, origin_score, group_fe) %>%
+  summarize(n = sum(n)) %>%
+  mutate(post_2013 = year > 2013) %>%
+   glm(n ~ I(post_2013*same_sex*origin_score) + 
+         I(post_2013*same_sex) + 
+         I(post_2013*origin_score) + post_2013
+       + as.factor(year) + group_fe,
+                        data = ., 
+                        family = 'quasipoisson')%>%
+  coeftest(., vcov = vcovCL(., cluster = ~group_fe)) %>%
+  tidy(conf.int = T) %>%  
+  filter(!str_detect(term, 'group|year'))
+
+# year of immigration with origin FEs
+acs_prop %>%
+  pivot_longer(c(n_same_sex, n_dif_sex), names_to = 'same_sex', values_to = 'n') %>%
+  mutate(same_sex = same_sex == 'n_same_sex',
+         origin_score_high = origin_score > mean(acs_prop$origin_score),
+         group_fe = paste0(bpld, same_sex)) %>%
+  group_by(yrimmig, same_sex, origin_score_high, group_fe, post_2013) %>%
+  summarize(n = sum(n)) %>%
+   glm(n ~ I(post_2013*same_sex*origin_score_high) + 
+         I(post_2013*same_sex) + 
+         I(post_2013*origin_score_high)+
+         post_2013 + 
+         as.factor(yrimmig) + group_fe,
+                        data = ., 
+                        family = 'quasipoisson')%>%
+  coeftest(., vcov = vcovCL(., cluster = ~group_fe)) %>%
+  tidy(conf.int = T) %>%  
+  filter(!str_detect(term, 'group|yrimmig'))
+
+
+## Figures
+acs_prop_state %>%
+  group_by(state, year) %>%
+  summarize(n_same_sex = sum(n_same_sex),
+            n_dif_sex = sum(n_dif_sex)) %>%
+  ungroup() %>%
+  pivot_longer(c(n_same_sex, n_dif_sex), names_to = 'same_sex', values_to = 'n') %>%
+  mutate(same_sex = same_sex == 'n_same_sex',
+         group_fe = paste0(state, same_sex)) %>%
+   glm(n ~ same_sex*as.factor(year)+
+                        group_fe, 
+                        data = ., 
+                        family = 'quasipoisson')%>%
+  coeftest(., vcov = vcovCL(., cluster = ~group_fe)) %>%
+  tidy(conf.int = T) %>% 
+  # mutate(across(c('estimate', 'conf.low', 'conf.high'), exp)) %>%
+  filter(str_detect(term, 'same_sexTRUE:as.factor')) %>%
+  mutate(term = str_extract(term, '\\d\\d\\d\\d'),
+         year = as.numeric(term)) %>%
+  ggplot(aes(x = year, y = estimate)) +
+  geom_pointrange(aes(ymin = conf.low, ymax = conf.high)) +
+  geom_hline(yintercept = 0) +
+  geom_vline(xintercept = 2013, linetype = 2) +
+  ggtitle('Only People in Immigrant-Containing Couples: Same-Sex * Year') 
+
+
+origin_score_high_mod <- acs_prop_state %>%
+  pivot_longer(c(n_same_sex, n_dif_sex), names_to = 'same_sex', values_to = 'n') %>%
+  mutate(same_sex = same_sex == 'n_same_sex',
+         #origin_score_high = origin_score > mean(origin_score),
+         origin_score_high = origin_score >= 3,
+         group_fe = paste0(state, same_sex)) %>%
+  group_by(state, year, same_sex, origin_score_high, group_fe) %>%
+  summarize(n = sum(n)) %>%
+  mutate(post_2013 = year > 2013,
+         year = as.factor(year)) %>%
+   glm(n ~ year:same_sex:origin_score_high + 
+         year:same_sex + 
+         year:origin_score_high
+       + year + group_fe,
+                        data = ., 
+                        family = 'quasipoisson')
+origin_score_high_mod %>%
+  coeftest(., vcov = vcovCL(., cluster = ~group_fe)) %>%
+  tidy(conf.int = T) %>%   
+  filter(str_detect(term, ':same_sexTRUE:origin_score')) %>%
+    mutate(year = as.numeric(str_extract(term, '\\d\\d\\d\\d'))
+         # origin_score = str_detect(term, 'origin_score_highTRUE'),
+         # origin_score = ifelse(origin_score == T, 'High Origin Score', 'Low Origin Score')
+         ) %>%
+  ggplot(aes(x = year, y = estimate)) +
+  geom_pointrange(aes(ymin = conf.low, ymax = conf.high)) +
+  geom_hline(yintercept = 0) +
+  geom_vline(xintercept = 2013, linetype = 2) +
+  ggtitle('Only People in Immigrant-Containing Couples: Same-Sex * Year * Origin Score') 
+  
+
+# Predicted 
+cbind(origin_score_high_mod$data, n_fit = predict(origin_score_high_mod, type = 'response')) %>%
+  filter(same_sex == T) %>%
+  group_by(origin_score_high) %>%
+  summarize(n_fit = mean(n_fit))
+
+
+
+
+
+
+# Origin country score
+acs_prop_state %>%
+  # mutate(origin_score_high = origin_score > mean(origin_score)) %>%
+  mutate(origin_score_high = case_when(origin_score >= 3 ~ T, origin_score <= 0 ~ F)) %>%
+  pivot_longer(c(n_same_sex, n_dif_sex), names_to = 'same_sex', values_to = 'n') %>%
+  mutate(same_sex = same_sex == 'n_same_sex',
+         group_fe = paste0(state, same_sex)) %>%
+  group_by(state, year, same_sex, origin_score_high, group_fe) %>%
+  summarize(n = sum(n)) %>%
+   glm(n ~ origin_score_high*same_sex*as.factor(year) + group_fe,
+                        data = ., 
+                        family = 'quasipoisson')%>%
+  coeftest(., vcov = vcovCL(., cluster = ~group_fe)) %>%
+  tidy(conf.int = T) %>%  
+    filter(!str_detect(term, 'group')) %>% 
+  # mutate(across(c('estimate', 'conf.low', 'conf.high'), exp)) %>%
+  filter(str_detect(term, 'origin_score_highTRUE:same_sexTRUE:as.factor')) %>%
+  mutate(year = as.numeric(str_extract(term, '\\d\\d\\d\\d'))) %>%
+  ggplot(aes(x = year, y = estimate)) +
+  geom_pointrange(aes(ymin = conf.low, ymax = conf.high)) +
+  geom_hline(yintercept = 0) +
+  geom_vline(xintercept = 2013, linetype = 2) +
+  ggtitle('Only People in Immigrant-Containing Couples: Same-Sex * Year * Origin Score') 
+
+# More like Redpath formulation
+acs_prop_state %>%
+  # mutate(origin_score_high = origin_score > mean(origin_score)) %>%
+  mutate(origin_score_high = origin_score >= 3) %>% #case_when(origin_score >= 3 ~ T, origin_score <= 0 ~ F)) %>%
+  pivot_longer(c(n_same_sex, n_dif_sex), names_to = 'same_sex', values_to = 'n') %>%
+  mutate(same_sex = same_sex == 'n_same_sex',
+         group_fe = paste0(state, same_sex)) %>%
+  group_by(state, year, same_sex, origin_score_high, group_fe) %>%
+  summarize(n = sum(n)) %>%
+   glm(n ~ origin_score_high:same_sex:as.factor(year) +
+         as.factor(year):same_sex +
+         as.factor(year):origin_score_high +
+         as.factor(year) +
+         group_fe,
+                        data = ., 
+                        family = 'quasipoisson') %>%
+  coeftest(., vcov = vcovCL(., cluster = ~group_fe)) %>%
+  tidy(conf.int = T) %>%  
+  # mutate(across(c('estimate', 'conf.low', 'conf.high'), exp)) %>%
+  filter(str_detect(term, 'origin_score_highTRUE:same_sexTRUE:as.factor')) %>%
+  mutate(year = as.numeric(str_extract(term, '\\d\\d\\d\\d'))) %>%
+         # origin_score = str_detect(term, 'origin_score_highTRUE'),
+         # origin_score = ifelse(origin_score == T, 'High Origin Score', 'Low Origin Score')) %>%
+  ggplot(aes(x = year, y = estimate)) +
+  geom_pointrange(aes(ymin = conf.low, ymax = conf.high)) +
+  geom_hline(yintercept = 0) +
+  geom_vline(xintercept = 2013, linetype = 2) +
+  ggtitle('Only People in Immigrant-Containing Couples: Same-Sex * Year * Origin Score') 
+
+
+
+
+
+
+# State score
+acs_prop_state %>%
+  mutate(state_policy_high = state_policy > mean(state_policy)) %>%
+  pivot_longer(c(n_same_sex, n_dif_sex), names_to = 'same_sex', values_to = 'n') %>%
+  mutate(same_sex = same_sex == 'n_same_sex',
+         group_fe = paste0(state, same_sex)) %>%
+  group_by(state, year, same_sex, state_policy_high, group_fe) %>%
+  summarize(n = sum(n)) %>% 
+   glm(n ~ state_policy_high*same_sex*as.factor(year) + group_fe,
+                        data = ., 
+                        family = 'quasipoisson')%>%
+  coeftest(., vcov = vcovCL(., cluster = ~group_fe)) %>%
+  tidy(conf.int = T) %>%  
+  # mutate(across(c('estimate', 'conf.low', 'conf.high'), exp)) %>%
+  filter(str_detect(term, 'same_sexTRUE:as.factor')) %>%
+  mutate(year = as.numeric(str_extract(term, '\\d\\d\\d\\d')),
+         state_policy = str_detect(term, 'state_policy_highTRUE'),
+         state_policy = ifelse(state_policy == T, 'High State Score', 'Low State Score')) %>%
+  ggplot(aes(x = year, y = estimate, color = state_policy)) +
+  geom_pointrange(aes(ymin = conf.low, ymax = conf.high)) +
+  geom_hline(yintercept = 0) +
+  geom_vline(xintercept = 2013, linetype = 2) +
+  ggtitle('Only People in Immigrant-Containing Couples: Same-Sex * Year * State Score') 
+
+
+
+
+  
+
+
+
+acs_prop %>%
+  mutate(origin_score_high = case_when(origin_score >= 3 ~ T, origin_score <= 0 ~ F)) %>%
+  # mutate(origin_score_high = origin_score > mean(origin_score)) %>%
+  pivot_longer(c(n_same_sex, n_dif_sex), names_to = 'same_sex', values_to = 'n') %>%
+  mutate(same_sex = same_sex == 'n_same_sex',
+         group_fe = paste0(bpld, same_sex)) %>%
+  # group_by(state, year, same_sex, origin_score_high, group_fe) %>%
+  # summarize(n = sum(n)) %>%
+   glm(n ~ origin_score_high*same_sex*as.factor(yrimmig) + group_fe,
+                        data = ., 
+                        family = 'quasipoisson')%>%
+  coeftest(., vcov = vcovCL(., cluster = ~group_fe)) %>%
+  tidy(conf.int = T) %>%  
+  # mutate(across(c('estimate', 'conf.low', 'conf.high'), exp)) %>%
+  filter(str_detect(term, 'same_sexTRUE:as.factor')) %>%
+  mutate(yrimmig = as.numeric(str_extract(term, '\\d\\d\\d\\d')),
+         origin_score = str_detect(term, 'origin_score_highTRUE'),
+         origin_score = ifelse(origin_score == T, 'High Origin Score', 'Low Origin Score')) %>%
+  ggplot(aes(x = yrimmig, y = estimate, color = origin_score)) +
+  geom_pointrange(aes(ymin = conf.low, ymax = conf.high)) +
+  geom_hline(yintercept = 0) +
+  geom_vline(xintercept = 2013, linetype = 2) +
+  ggtitle('Only People in Immigrant-Containing Couples: Same-Sex * Year of immigration * Origin Score') 
+
+
+acs_prop %>%
+  mutate(origin_score_high = case_when(origin_score >= 3 ~ T, origin_score <= 0 ~ F)) %>%
+  pivot_longer(c(n_same_sex, n_dif_sex), names_to = 'same_sex', values_to = 'n') %>%
+  mutate(same_sex = same_sex == 'n_same_sex',
+         group_fe = paste0(bpld, same_sex)) %>%
+  mutate(yrimmig = floor(yrimmig/2)*2) %>%
+  group_by(bpld, origin_score_high, yrimmig, same_sex, group_fe) %>%
+  summarize(n = sum(n)) %>%
+  # group_by(state, year, same_sex, origin_score_high, group_fe) %>%
+  # summarize(n = sum(n)) %>%
+   glm(n ~ origin_score_high*same_sex*as.factor(yrimmig) + group_fe,
+                        data = ., 
+                        family = 'quasipoisson')%>%
+  coeftest(., vcov = vcovCL(., cluster = ~group_fe)) %>%
+  tidy(conf.int = T) %>%  
+  # mutate(across(c('estimate', 'conf.low', 'conf.high'), exp)) %>%
+  filter(str_detect(term, 'same_sexTRUE:as.factor')) %>% View()
+  mutate(yrimmig = as.numeric(str_extract(term, '\\d\\d\\d\\d')),
+         origin_score = str_detect(term, 'origin_score_highTRUE'),
+         origin_score = ifelse(origin_score == T, 'High Origin Score', 'Low Origin Score')) %>%
+  ggplot(aes(x = yrimmig, y = estimate, color = origin_score)) +
+  geom_pointrange(aes(ymin = conf.low, ymax = conf.high)) +
+  geom_hline(yintercept = 0) +
+  geom_vline(xintercept = 2013, linetype = 2) +
+  ggtitle('Only People in Immigrant-Containing Couples: Same-Sex * Year of immigration * Origin Score') 
+
+
+```
+# Interaction with origin score
+```{r did-prop}
+# Only immigrants, origin score binary
+state_origin_score_binary <- acs_prop_state %>%
+  mutate(origin_score_high = origin_score > 3) %>% #mean(origin_score)) %>%
+  #mutate(origin_score_high = case_when(origin_score >= 3 ~ T, origin_score <= 0 ~ F)) %>%
+  pivot_longer(c(n_same_sex, n_dif_sex), names_to = 'same_sex', values_to = 'n') %>%
+  mutate(same_sex = same_sex == 'n_same_sex',
+         group_fe = paste0(state, same_sex)) %>%
+  group_by(state, year, same_sex, origin_score_high, group_fe) %>%
+  summarize(n = sum(n)) %>%
+  mutate(post_2013 = year > 2013) %>%
+   glm(n ~I(post_2013*same_sex*origin_score_high) + 
+          I(post_2013*same_sex) + 
+          I(post_2013*origin_score_high)  +
+         post_2013 + as.factor(year) +
+         group_fe,
+                        data = ., 
+                        family = 'quasipoisson')
+state_origin_score_binary %>%
+  coeftest(., vcov = vcovCL(., cluster = ~group_fe)) %>%
+  tidy() %>%
+  filter(!str_detect(term, 'group|year'))
+
+
+cbind(state_origin_score_binary$data, n_fit = predict(state_origin_score_binary, type = 'response')) %>%
+  filter(same_sex == T) %>%
+  group_by(origin_score_high) %>%
+  summarize(n_fit = mean(n_fit))
+
+
+cbind(state_origin_score_binary$data, 
+      n_fit_high = predict(state_origin_score_binary, type = 'response', 
+                      newdata = state_origin_score_binary$data %>%
+                        mutate(same_sex = T, origin_score_high = T)),
+      n_fit_low = predict(state_origin_score_binary, type = 'response', 
+                      newdata = state_origin_score_binary$data %>%
+                        mutate(same_sex = T, origin_score_high = F)))%>%
+  ungroup() %>%
+  group_by(year) %>%
+  summarize(n_fit_high = mean(n_fit_high),
+            n_fit_low= mean(n_fit_low))
+
+
+
+
+# origin score continuous
+state_origin_score_cont <- acs_prop_state %>%
+  pivot_longer(c(n_same_sex, n_dif_sex), names_to = 'same_sex', values_to = 'n') %>%
+  mutate(same_sex = same_sex == 'n_same_sex',
+         group_fe = paste0(state, same_sex)) %>%
+  group_by(state, year, same_sex, origin_score, group_fe) %>%
+  summarize(n = sum(n)) %>%
+  mutate(post_2013 = year > 2013) %>%
+   glm(n ~ I(post_2013*same_sex*origin_score) + 
+         I(post_2013*same_sex) + 
+         I(post_2013*origin_score) + post_2013
+       + as.factor(year) + group_fe,
+                        data = ., 
+                        family = 'quasipoisson')
+state_origin_score_cont %>%
+  coeftest(., vcov = vcovCL(., cluster = ~group_fe)) %>%
+  tidy(conf.int = T) %>%  
+  filter(!str_detect(term, 'group|year'))
+
+cbind(state_origin_score_cont$data, 
+      n_fit_high = predict(state_origin_score_cont, type = 'response', 
+                      newdata = state_origin_score_cont$data %>%
+                        mutate(same_sex = T, origin_score = 8)),
+      n_fit_low = predict(state_origin_score_cont, type = 'response', 
+                      newdata = state_origin_score_cont$data %>%
+                        mutate(same_sex = T, origin_score = -3)))%>%
+  ungroup() %>%
+  group_by(year) %>%
+  summarize(n_fit_high = mean(n_fit_high),
+            n_fit_low= mean(n_fit_low)) %>%
+  pivot_longer(-year, values_to = 'n') %>%
+  ggplot(aes(x = year, y = n, color = name)) +
+  geom_line()
+
+# flexible year
+state_origin_score_cont <- acs_prop_state %>%
+  pivot_longer(c(n_same_sex, n_dif_sex), names_to = 'same_sex', values_to = 'n') %>%
+  mutate(same_sex = same_sex == 'n_same_sex',
+         group_fe = paste0(state, same_sex)) %>%
+  group_by(state, year, same_sex, origin_score, group_fe) %>%
+  summarize(n = sum(n)) %>%
+  mutate(post_2013 = year > 2013) %>%
+   glm(n ~ as.factor(year):same_sex:origin_score + 
+         as.factor(year):same_sex + 
+         as.factor(year):same_sex + 
+       + as.factor(year) + group_fe,
+                        data = ., 
+                        family = 'quasipoisson')
+
+
+rbind(
+  state_origin_score_cont$data %>%
+    filter(same_sex == T) %>%
+    mutate(origin_score = 8) %>%
+    cbind(., n_fit = predict(state_origin_score_cont, newdata = ., type = 'response')),
+  state_origin_score_cont$data %>%
+    filter(same_sex == T) %>%
+    mutate(origin_score = -3) %>%
+    cbind(., n_fit = predict(state_origin_score_cont, newdata = ., type = 'response'))
+) %>%
+  group_by(year, origin_score) %>%
+  summarize(n_fit = sum(n_fit)) %>%
+  ggplot(aes(x = year, y = n_fit, color = as.factor(origin_score))) +
+  geom_line()
+
+
+
+# year of immigration with origin FEs
+yrimmig_mod_bin <- acs_prop %>%
+  pivot_longer(c(n_same_sex, n_dif_sex), names_to = 'same_sex', values_to = 'n') %>%
+  mutate(same_sex = same_sex == 'n_same_sex',
+         origin_score_high = origin_score > 3, # mean(acs_prop$origin_score),
+         group_fe = paste0(bpld, same_sex)) %>%
+  group_by(yrimmig, same_sex, origin_score_high, group_fe, post_2013) %>%
+  summarize(n = sum(n)) %>%
+   glm(n ~ I(post_2013*same_sex*origin_score_high) + 
+         I(post_2013*same_sex) + 
+         I(post_2013*origin_score_high)+
+         post_2013 + 
+         as.factor(yrimmig) + group_fe,
+                        data = ., 
+                        family = 'quasipoisson')
+yrimmig_mod_bin %>%
+  coeftest(., vcov = vcovCL(., cluster = ~group_fe)) %>%
+  tidy(conf.int = T) %>%  
+  filter(!str_detect(term, 'group|yrimmig'))
+
+cbind(yrimmig_mod_bin$data, 
+      n_fit_high = predict(yrimmig_mod_bin, type = 'response', 
+                      newdata = yrimmig_mod_bin$data %>%
+                        mutate(same_sex = T, origin_score_high = T)),
+      n_fit_low = predict(yrimmig_mod_bin, type = 'response', 
+                      newdata = yrimmig_mod_bin$data %>%
+                        mutate(same_sex = T, origin_score_high = F)))%>%
+  ungroup() %>%
+  group_by(yrimmig) %>%
+  summarize(n_fit_high = mean(n_fit_high),
+            n_fit_low= mean(n_fit_low)) %>% 
+  pivot_longer(-yrimmig, values_to = 'n') %>%
+  ggplot(aes(x = yrimmig, y = n, color = name)) +
+  geom_line()
+
+# continuous origin score
+yrimmig_mod_cont <- acs_prop %>%
+  pivot_longer(c(n_same_sex, n_dif_sex), names_to = 'same_sex', values_to = 'n') %>%
+  mutate(same_sex = same_sex == 'n_same_sex',
+         group_fe = paste0(bpld, same_sex)) %>%
+  group_by(yrimmig, same_sex, origin_score, group_fe, post_2013) %>%
+  summarize(n = sum(n)) %>%
+   glm(n ~ I(post_2013*same_sex*origin_score) + 
+         I(post_2013*same_sex) + 
+         I(post_2013*origin_score)+
+         post_2013 + 
+         as.factor(yrimmig) + group_fe,
+                        data = ., 
+                        family = 'quasipoisson')
+yrimmig_mod_cont %>%
+  coeftest(., vcov = vcovCL(., cluster = ~group_fe)) %>%
+  tidy(conf.int = T) %>%  
+  filter(!str_detect(term, 'group|yrimmig'))
+
+cbind(yrimmig_mod_cont$data, 
+      n_fit_high = predict(yrimmig_mod_cont, type = 'response', 
+                      newdata = yrimmig_mod_cont$data %>%
+                        mutate(same_sex = T, origin_score = 8)),
+      n_fit_low = predict(yrimmig_mod_cont, type = 'response', 
+                      newdata = yrimmig_mod_cont$data %>%
+                        mutate(same_sex = T, origin_score = -3)))%>%
+  ungroup() %>%
+  group_by(yrimmig) %>%
+  summarize(n_fit_high = mean(n_fit_high),
+            n_fit_low= mean(n_fit_low)) %>% 
+  pivot_longer(-yrimmig, values_to = 'n') %>%
+  ggplot(aes(x = yrimmig, y = n, color = name)) +
+  geom_line()
+
+
+# separate year effects
+yrimmig_mod_cont <- acs_prop %>%
+  pivot_longer(c(n_same_sex, n_dif_sex), names_to = 'same_sex', values_to = 'n') %>%
+  mutate(same_sex = same_sex == 'n_same_sex',
+         group_fe = paste0(bpld, same_sex)) %>%
+  group_by(yrimmig, same_sex, origin_score, group_fe, post_2013) %>%
+  summarize(n = sum(n)) %>%
+   glm(n ~ as.factor(yrimmig)*same_sex*origin_score + 
+       #   as.factor(yrimmig):same_sex + 
+       #   as.factor(yrimmig):same_sex + 
+       # + as.factor(yrimmig) + 
+         group_fe,
+                        data = ., 
+                        family = 'quasipoisson')
+yrimmig_mod_cont %>%
+  coeftest(., vcov = vcovCL(., cluster = ~group_fe)) %>%
+  tidy(conf.int = T) %>%  
+  filter(!str_detect(term, 'group|yrimmig'))
+
+cbind(yrimmig_mod_cont$data, 
+      n_fit_high = predict(yrimmig_mod_cont, type = 'response', 
+                      newdata = yrimmig_mod_cont$data %>%
+                        mutate(same_sex = T, origin_score = 8)),
+      n_fit_low = predict(yrimmig_mod_cont, type = 'response', 
+                      newdata = yrimmig_mod_cont$data %>%
+                        mutate(same_sex = T, origin_score = -3)))%>%
+  ungroup() %>%
+  group_by(yrimmig) %>%
+  summarize(n_fit_high = mean(n_fit_high),
+            n_fit_low= mean(n_fit_low)) %>% 
+  pivot_longer(-yrimmig, values_to = 'n') %>%
+  ggplot(aes(x = yrimmig, y = n, color = name)) +
+  geom_line()
+
+
+rbind(
+  yrimmig_mod_cont$data %>%
+    filter(same_sex == T) %>%
+    mutate(origin_score = 8) %>%
+    cbind(., n_fit = predict(yrimmig_mod_cont, newdata = ., type = 'response')),
+  yrimmig_mod_cont$data %>%
+    filter(same_sex == T) %>%
+    mutate(origin_score = -3) %>%
+    cbind(., n_fit = predict(yrimmig_mod_cont, newdata = ., type = 'response'))
+) %>%
+  group_by(yrimmig, origin_score) %>%
+  summarize(n_fit = sum(n_fit)) %>%
+  ggplot(aes(x = yrimmig, y = n_fit, color = as.factor(origin_score))) +
+  geom_line()
+
+```
+
+# DID with only immigrants from progressive countries
+```{r, eval = T}
+count_origin_high <- acs_prop_state %>%
+  pivot_longer(c(n_same_sex, n_dif_sex), names_to = 'same_sex', values_to = 'n') %>%
+  mutate(same_sex = same_sex == 'n_same_sex',
+         group_fe = paste0(state, same_sex)) %>%
+  filter(origin_score >= 3) %>%
+  group_by(state, year, same_sex) %>%
+  summarize(n = sum(n)) %>% 
+  ungroup() %>%
+  mutate(immigrant = T,
+         group_fe = paste(state, same_sex, immigrant, sep = '_'),
+         post_2013 = year > 2013) %>%
+  bind_rows(acs_count_imm %>%
+  filter(immigrant == F))
+
+extra_pois_imm_high <- glm(n ~ as.factor(year):same_sex:immigrant + 
+                        as.factor(year):same_sex + 
+                        as.factor(year):immigrant + 
+                        as.factor(year) + group_fe,
+                        data = count_origin_high, 
+                        family = 'quasipoisson')
+
+glm(n ~  I(post_2013*same_sex*immigrant) + 
+                        I(post_2013*same_sex) + 
+                        I(post_2013*immigrant) + 
+                        post_2013 + 
+                        group_fe + as.factor(year), 
+                        data = count_origin_high, 
+                        family = 'quasipoisson') %>%
+coeftest(., vcov = vcovCL(., cluster = ~group_fe)) %>%
+  tidy() %>%
+  filter(!str_detect(term, 'group|year'))
+
+
+count_origin_low <- acs_prop_state %>%
+  pivot_longer(c(n_same_sex, n_dif_sex), names_to = 'same_sex', values_to = 'n') %>%
+  mutate(same_sex = same_sex == 'n_same_sex',
+         group_fe = paste0(state, same_sex)) %>%
+  filter(origin_score <= 0) %>%
+  group_by(state, year, same_sex) %>%
+  summarize(n = sum(n)) %>% 
+  ungroup() %>%
+  mutate(immigrant = T,
+         group_fe = paste(state, same_sex, immigrant, sep = '_'),
+         post_2013 = year > 2013) %>%
+  bind_rows(acs_count_imm %>%
+  filter(immigrant == F))
+
+extra_pois_imm_low <- glm(n ~ as.factor(year):same_sex:immigrant + 
+                        as.factor(year):same_sex + 
+                        as.factor(year):immigrant + 
+                        as.factor(year) + group_fe,
+                        data = count_origin_low, 
+                        family = 'quasipoisson')
+
+glm(n ~  I(post_2013*same_sex*immigrant) + 
+                        I(post_2013*same_sex) + 
+                        I(post_2013*immigrant) + 
+                        post_2013 + 
+                        group_fe + as.factor(year), 
+                        data = count_origin_low, 
+                        family = 'quasipoisson') %>%
+coeftest(., vcov = vcovCL(., cluster = ~group_fe)) %>%
+  tidy() %>%
+  filter(!str_detect(term, 'group|year'))
+
+
+bind_rows(
+  count_origin_high %>%
+    filter(immigrant == T, same_sex == T) %>%
+    cbind(., n_fit = predict(extra_pois_imm_high, newdata = ., type = 'response')) %>% 
+    group_by(year) %>%
+    summarize(n_fit = sum(n_fit)) %>%
+    mutate(mod = 'origin_score >= 3'),
+  count_origin_low %>%
+    filter(immigrant == T, same_sex == T) %>%
+    cbind(., n_fit = predict(extra_pois_imm_low, newdata = ., type = 'response')) %>% 
+    group_by(year) %>%
+    summarize(n_fit = sum(n_fit)) %>%
+    mutate(mod = 'origin_score <= 0')) %>%
+  ggplot(aes(x = year, y = n_fit, color = mod)) +
+  geom_line() +
+  geom_vline(xintercept = 2013, linetype = 2)
+
+
+
+# aggregate year pairs
+extra_pois_imm_low <- count_origin_low %>%
+ # mutate(year = factor(year, levels = as.character(2018:2008))) %>%
+ mutate(year = factor(floor(year/2)*2,
+                      levels = c('2018', '2016', '2014', '2012', '2010', '2008'))) %>%
+  group_by(state, year, same_sex, immigrant, group_fe) %>%
+  summarize(n = sum(n)) %>%
+  ungroup() %>%
+  glm(n ~ same_sex:immigrant:as.factor(year) + 
+        same_sex:as.factor(year) +
+        immigrant:as.factor(year) +
+        as.factor(year) +
+                        group_fe,
+                        data = ., 
+                        family = 'quasipoisson')
+
+extra_pois_imm_high <- count_origin_high %>%
+  # mutate(year = factor(year, levels = as.character(2018:2008))) %>%
+  mutate(year = factor(floor(year/2)*2,
+                      levels = c('2018', '2016', '2014', '2012', '2010', '2008'))) %>%
+  group_by(state, year, same_sex, immigrant, group_fe) %>%
+  summarize(n = sum(n)) %>%
+  ungroup() %>%
+  glm(n ~ same_sex:immigrant:as.factor(year) + 
+        same_sex:as.factor(year) +
+        immigrant:as.factor(year) +
+        as.factor(year) +group_fe,
+                        data = ., 
+                        family = 'quasipoisson')
+
+bind_rows(
+  extra_pois_imm_high %>%
+    coeftest(., vcov = vcovCL(., cluster = ~group_fe)) %>%
+    tidy(conf.int = T) %>%  
+    filter(str_detect(term, 'same_sexTRUE:immigrantTRUE:')) %>%
+    mutate(year = as.numeric(str_extract(term, '\\d\\d\\d\\d')),
+           mod = 'origin_score >= 3'),
+  extra_pois_imm_low %>%
+    coeftest(., vcov = vcovCL(., cluster = ~group_fe)) %>%
+    tidy(conf.int = T) %>%  
+    filter(str_detect(term, 'same_sexTRUE:immigrantTRUE:')) %>%
+    mutate(year = as.numeric(str_extract(term, '\\d\\d\\d\\d')),
+           mod = 'origin_score <= 0'),
+  mutate(imm_plot, mod = 'full sample')) %>%
+  ggplot(aes(x = year, y = estimate, color = mod)) +
+  geom_pointrange(aes(ymin = conf.low, ymax = conf.high), position=position_dodge(width=.5)) +
+  geom_hline(yintercept = 0) +
+  geom_vline(xintercept = 2013, linetype = 2) 
+```
+
+# Old PAA analyses
+```{r load, include = F}
+acs_count <- read_csv(here('data', 'acs_count.csv')) 
+acs_count_mixed <- read_csv(here('data', 'acs_count_mixed.csv')) %>%
+  group_by(state, year, same_sex, mixed) %>%
+  summarize(n = sum(n), 
+            n_unweighted = sum(n_unweighted),
+            n_ar = sum(n_ar), 
+            n_unweighted_ar = sum(n_unweighted_ar)) %>%
+  mutate(post_2013 = year > 2013,
+         group_fe = paste(state, same_sex, mixed, sep = '_')) 
+
+acs_count_imm <- read_csv(here('data', 'acs_count_imm.csv'))  %>%
+  group_by(state, year, same_sex, immigrant) %>%
+  summarize(n = sum(n), 
+            n_unweighted = sum(n_unweighted),
+            n_ar = sum(n_ar), 
+            n_unweighted_ar = sum(n_unweighted_ar)) %>%
+  mutate(post_2013 = year > 2013,
+         group_fe = paste(state, same_sex, immigrant, sep = '_')) 
+
+acs_count_noncit <- read_csv(here('data', 'acs_count_noncit.csv'))  %>%
+  group_by(state, year, same_sex, noncit) %>%
+  summarize(n = sum(n), 
+            n_unweighted = sum(n_unweighted),
+            n_ar = sum(n_ar), 
+            n_unweighted_ar = sum(n_unweighted_ar)) %>%
+  mutate(post_2013 = year > 2013,
+         group_fe = paste(state, same_sex, noncit, sep = '_')) %>%
+  rename(noncit = noncit)
+
+acs_prop <- read.csv(here('data', 'acs_prop_yrimmig_policy.csv')) %>%
+  mutate(post_2013 = (yrimmig > 2013))
+acs_prop_state <- read.csv(here('data', 'acs_dyad_policy.csv'))
+
+acs_ind <- read_rds(here('data', 'acs_couple_policy.rds')) 
+acs_count_mixed_bpld <- read_csv(here('data', 'acs_count_mixed.csv'))  %>%
+  left_join(
+    acs_ind %>%
+  group_by(year, state, bpld, same_sex) %>%
+  summarize(origin_score = mean(origin_score))) 
+acs_count_imm_bpld <- read_csv(here('data', 'acs_count_imm.csv'))  %>%
+ left_join(
+    acs_ind %>%
+  group_by(year, state, bpld, same_sex) %>%
+  summarize(origin_score = mean(origin_score))) 
+acs_count_noncit_bpld <- read_csv(here('data', 'acs_count_noncit.csv')) %>%
+ left_join(
+    acs_ind %>%
+  group_by(year, state, bpld, same_sex) %>%
+  summarize(origin_score = mean(origin_score))) 
+```
+
+
+# Effect of 2013 DOMA Repeal
+
+```{r base-mods}
+acs_count_mixed %>%
+  glm(n ~ I(post_2013*same_sex*mixed) + I(post_2013*same_sex) + I(post_2013*mixed) + post_2013 + group_fe + as.factor(year), 
+                        data = ., 
+                        family = 'quasipoisson') %>%
+coeftest(., vcov = vcovCL(., cluster = ~group_fe)) %>%
+  tidy() %>%
+  filter(!str_detect(term, 'group|year'))
+
+## Grouping immigrants together
+acs_count_imm %>%
+  glm(n ~ I(post_2013*same_sex*immigrant) + 
+                        I(post_2013*same_sex) + 
+                        I(post_2013*immigrant) + 
+                        post_2013 + 
+                        group_fe + as.factor(year), 
+                        data = ., 
+                        family = 'quasipoisson') %>%
+coeftest(., vcov = vcovCL(., cluster = ~group_fe)) %>%
+  tidy() %>%
+  filter(!str_detect(term, 'group|year'))
+
+## Noncitizen-containing couples
+acs_count_noncit %>%
+  glm(n ~ I(post_2013*same_sex*noncit) + 
+                        I(post_2013*same_sex) + 
+                        I(post_2013*noncit) + 
+                        post_2013 + 
+                        group_fe + as.factor(year), 
+                        data = ., 
+                        family = 'quasipoisson') %>%
+coeftest(., vcov = vcovCL(., cluster = ~group_fe)) %>%
+  tidy() %>%
+  filter(!str_detect(term, 'group|year'))
+
+
+# Aggregating years
+mixed_plot <- acs_count_mixed %>%
+  mutate(year_pair = floor(year/2)*2) %>%
+  group_by(state, year_pair, same_sex, mixed, group_fe) %>%
+  summarize(n = sum(n)) %>%
+  ungroup() %>%
+  mutate(year = as.factor(year_pair)) %>%
+  glm(n ~ same_sex*mixed*year+ group_fe, 
+                        data = ., 
+                        family = 'quasipoisson')%>%
+  coeftest(., vcov = vcovCL(., cluster = ~group_fe)) %>%
+  tidy(conf.int = T) %>% 
+  filter(str_detect(term, 'same_sexTRUE:mixedTRUE:year')) %>%
+  mutate(term = str_extract(term, '\\d\\d\\d\\d'),
+         year = as.numeric(term))
+
+
+noncit_plot <- acs_count_noncit %>%
+  mutate(year_pair = floor(year/2)*2) %>%
+  group_by(state, year_pair, same_sex, noncit, group_fe) %>%
+  summarize(n = sum(n)) %>%
+  ungroup() %>%
+  mutate(year = as.factor(year_pair)) %>%
+  glm(n ~ same_sex*noncit*year+ group_fe, 
+                        data = ., 
+                        family = 'quasipoisson')%>%
+  coeftest(., vcov = vcovCL(., cluster = ~group_fe)) %>%
+  tidy(conf.int = T) %>% 
+  filter(str_detect(term, 'same_sexTRUE:noncitTRUE:year')) %>%
+  mutate(term = str_extract(term, '\\d\\d\\d\\d'),
+         year = as.numeric(term))
+
+imm_plot <- acs_count_imm %>%
+  mutate(year_pair = floor(year/2)*2) %>%
+  group_by(state, year_pair, same_sex, immigrant, group_fe) %>%
+  summarize(n = sum(n)) %>%
+  ungroup() %>%
+  mutate(year = as.factor(year_pair)) %>%
+  glm(n ~ same_sex*immigrant*year+
+                        group_fe, 
+                        data = ., 
+                        family = 'quasipoisson')%>%
+  coeftest(., vcov = vcovCL(., cluster = ~group_fe)) %>%
+  tidy(conf.int = T) %>% 
+  # mutate(across(c('estimate', 'conf.low', 'conf.high'), exp)) %>%
+  filter(str_detect(term, 'same_sexTRUE:immigrantTRUE:year')) %>%
+  mutate(term = str_extract(term, '\\d\\d\\d\\d'),
+         year = as.numeric(term))
+
+# 
+#   ggplot(aes(x = year, y = estimate)) +
+#   geom_pointrange(aes(ymin = conf.low, ymax = conf.high)) +
+#   geom_hline(yintercept = 0) +
+#   geom_vline(xintercept = 2013, linetype = 2) +
+#   ggtitle('Immigrant-Containing * Same-Sex * Year') 
+
+bind_rows(
+    mutate(mixed_plot, model = 'Mixed-Citizenship'),
+    mutate(imm_plot, model = 'Immigrant-Containing'),
+    mutate(noncit_plot, model = 'Noncitizen-Containing')) %>%
+  ggplot(aes(x = year, y = estimate, color = model)) +
+  geom_pointrange(aes(ymin = conf.low, ymax = conf.high)) +
+  geom_hline(yintercept = 0) +
+  geom_vline(xintercept = 2013, linetype = 2) +
+  facet_wrap(~model) + 
+  theme(legend.position = "none")
+
+
+
+```
+
+
+\newpage
+
+# Stratified DDD (immigrant-containing)
+```{r stratified-imm}
+count_origin_high <- acs_prop_state %>%
+  pivot_longer(c(n_same_sex, n_dif_sex), names_to = 'same_sex', values_to = 'n') %>%
+  mutate(same_sex = same_sex == 'n_same_sex',
+         group_fe = paste0(state, same_sex)) %>%
+  filter(origin_score > 3 | is.na(origin_score)) %>%
+  group_by(state, year, same_sex) %>%
+  summarize(n = sum(n)) %>% 
+  ungroup() %>%
+  mutate(immigrant = T,
+         group_fe = paste(state, same_sex, immigrant, sep = '_'),
+         post_2013 = year > 2013) %>%
+  bind_rows(acs_count_imm %>%
+  filter(immigrant == F))
+
+extra_pois_imm_high <- glm(n ~ as.factor(year):same_sex:immigrant + 
+                        as.factor(year):same_sex + 
+                        as.factor(year):immigrant + 
+                        as.factor(year) + group_fe,
+                        data = count_origin_high, 
+                        family = 'quasipoisson')
+
+glm(n ~  I(post_2013*same_sex*immigrant) + 
+                        I(post_2013*same_sex) + 
+                        I(post_2013*immigrant) + 
+                        post_2013 + 
+                        group_fe + as.factor(year), 
+                        data = count_origin_high, 
+                        family = 'quasipoisson') %>%
+coeftest(., vcov = vcovCL(., cluster = ~group_fe)) %>%
+  tidy() %>%
+  filter(!str_detect(term, 'group|year')) %>%
+  kable(booktabs = T, caption = 'Origin score > 3') %>%
+  kable_styling(latex_options = 'hold_position')
+
+
+count_origin_low <- acs_prop_state %>%
+  pivot_longer(c(n_same_sex, n_dif_sex), names_to = 'same_sex', values_to = 'n') %>%
+  mutate(same_sex = same_sex == 'n_same_sex',
+         group_fe = paste0(state, same_sex)) %>%
+  filter(origin_score < 0 | is.na(origin_score)) %>%
+  group_by(state, year, same_sex) %>%
+  summarize(n = sum(n)) %>% 
+  ungroup() %>%
+  mutate(immigrant = T,
+         group_fe = paste(state, same_sex, immigrant, sep = '_'),
+         post_2013 = year > 2013) %>%
+  bind_rows(acs_count_imm %>%
+  filter(immigrant == F))
+
+extra_pois_imm_low <- glm(n ~ as.factor(year):same_sex:immigrant + 
+                        as.factor(year):same_sex + 
+                        as.factor(year):immigrant + 
+                        as.factor(year) + group_fe,
+                        data = count_origin_low, 
+                        family = 'quasipoisson')
+
+glm(n ~  I(post_2013*same_sex*immigrant) + 
+                        I(post_2013*same_sex) + 
+                        I(post_2013*immigrant) + 
+                        post_2013 + 
+                        group_fe + as.factor(year), 
+                        data = count_origin_low, 
+                        family = 'quasipoisson') %>%
+coeftest(., vcov = vcovCL(., cluster = ~group_fe)) %>%
+  tidy() %>%
+  filter(!str_detect(term, 'group|year')) %>%
+  kable(booktabs = T, caption = 'Origin score < 0') %>%
+  kable_styling(latex_options = 'hold_position')
+
+
+bind_rows(
+  count_origin_high %>%
+    filter(immigrant == T, same_sex == T) %>%
+    cbind(., n_fit = predict(extra_pois_imm_high, newdata = ., type = 'response')) %>% 
+    group_by(year) %>%
+    summarize(n_fit = sum(n_fit)) %>%
+    mutate(mod = 'origin_score > 3'),
+  count_origin_low %>%
+    filter(immigrant == T, same_sex == T) %>%
+    cbind(., n_fit = predict(extra_pois_imm_low, newdata = ., type = 'response')) %>% 
+    group_by(year) %>%
+    summarize(n_fit = sum(n_fit)) %>%
+    mutate(mod = 'origin_score < 0')) %>%
+  ggplot(aes(x = year, y = n_fit, color = mod)) +
+  geom_line() +
+  geom_vline(xintercept = 2013, linetype = 2) + 
+  ggtitle('Immigrant-containing')
+
+
+```
+
+```{r}
+extra_pois_imm_high <- glm(n ~ as.factor(year):same_sex:immigrant + 
+                        as.factor(year):same_sex + 
+                        as.factor(year):immigrant + 
+                        as.factor(year) + group_fe,
+                        data = mutate(count_origin_high, 
+                                      year = factor(floor(year/2)*2, 
+                                                    levels = c('2018', '2016', '2014', '2012', '2010', '2008'))), 
+                        family = 'quasipoisson')
+
+extra_pois_imm_low <- glm(n ~ as.factor(year):same_sex:immigrant + 
+                        as.factor(year):same_sex + 
+                        as.factor(year):immigrant + 
+                        as.factor(year) + group_fe,
+                        data = mutate(count_origin_low, 
+                                      year = factor(floor(year/2)*2, 
+                                                    levels = c('2018', '2016', '2014', '2012', '2010', '2008'))), 
+                        family = 'quasipoisson')
+
+bind_rows(
+  extra_pois_imm_high %>%
+    coeftest(., vcov = vcovCL(., cluster = ~group_fe)) %>%
+    tidy(conf.int = T) %>% 
+    filter(str_detect(term, ':same_sexTRUE:immigrantTRUE')) %>%
+    mutate(year = as.numeric(str_extract(term, '\\d\\d\\d\\d')),
+           mod = 'origin_score > 3'),
+  extra_pois_imm_low %>%
+    coeftest(., vcov = vcovCL(., cluster = ~group_fe)) %>%
+    tidy(conf.int = T) %>%  
+    filter(str_detect(term, ':same_sexTRUE:immigrantTRUE')) %>%
+    mutate(year = as.numeric(str_extract(term, '\\d\\d\\d\\d')),
+           mod = 'origin_score < 0')) %>%
+  ggplot(aes(x = year, y = estimate, color = mod)) +
+  geom_pointrange(aes(ymin = conf.low, ymax = conf.high), position=position_dodge(width=.5)) +
+  geom_hline(yintercept = 0) +
+  geom_vline(xintercept = 2013, linetype = 2) + 
+  ggtitle('Immigrant-containing')
+
+```
+
+```{r}
+
+count_origin_high <- acs_count_imm_bpld %>%
+  filter(origin_score > 5 | is.na(origin_score)) %>%
+  group_by(state, year, same_sex, immigrant, post_2013, group_fe) %>%
+  summarize(n = sum(n)) %>% 
+  ungroup() 
+
+count_origin_low <- acs_count_imm_bpld %>%
+  filter(origin_score < -1 | is.na(origin_score)) %>%
+  group_by(state, year, same_sex, immigrant, post_2013, group_fe) %>%
+  summarize(n = sum(n)) %>% 
+  ungroup() 
+
+extra_pois_imm_high <- glm(n ~ as.factor(year):same_sex:immigrant + 
+                        as.factor(year):same_sex + 
+                        as.factor(year):immigrant + 
+                        as.factor(year) + group_fe,
+                        data = mutate(count_origin_high, 
+                                      year = factor(floor(year/2)*2, 
+                                                    levels = c('2018', '2016', '2014', '2012', '2010', '2008'))), 
+                        family = 'quasipoisson')
+
+extra_pois_imm_low <- glm(n ~ as.factor(year):same_sex:immigrant + 
+                        as.factor(year):same_sex + 
+                        as.factor(year):immigrant + 
+                        as.factor(year) + group_fe,
+                        data = mutate(count_origin_low, 
+                                      year = factor(floor(year/2)*2, 
+                                                    levels = c('2018', '2016', '2014', '2012', '2010', '2008'))), 
+                        family = 'quasipoisson')
+
+bind_rows(
+  extra_pois_imm_high %>%
+    coeftest(., vcov = vcovCL(., cluster = ~group_fe)) %>%
+    tidy(conf.int = T) %>% 
+    filter(str_detect(term, ':same_sexTRUE:immigrantTRUE')) %>%
+    mutate(year = as.numeric(str_extract(term, '\\d\\d\\d\\d')),
+           mod = 'origin_score > 5'),
+  extra_pois_imm_low %>%
+    coeftest(., vcov = vcovCL(., cluster = ~group_fe)) %>%
+    tidy(conf.int = T) %>%  
+    filter(str_detect(term, ':same_sexTRUE:immigrantTRUE')) %>%
+    mutate(year = as.numeric(str_extract(term, '\\d\\d\\d\\d')),
+           mod = 'origin_score < -1')) %>%
+  ggplot(aes(x = year, y = estimate, color = mod)) +
+  geom_pointrange(aes(ymin = conf.low, ymax = conf.high), position=position_dodge(width=.5)) +
+  geom_hline(yintercept = 0) +
+  geom_vline(xintercept = 2013, linetype = 2)  + 
+  ggtitle('Immigrant-containing')
+
+```
+
+\newpage
+
+# Stratified (noncitizen-containing)
+```{r stratified-noncit}
+count_origin_high <- acs_count_noncit_bpld %>%
+  filter(origin_score > 3 | is.na(origin_score)) %>%
+  group_by(state, year, same_sex, noncit, post_2013, group_fe) %>%
+  summarize(n = sum(n)) %>% 
+  ungroup() 
+
+extra_pois_noncit_high <- glm(n ~ as.factor(year):same_sex:noncit + 
+                        as.factor(year):same_sex + 
+                        as.factor(year):noncit + 
+                        as.factor(year) + group_fe,
+                        data = count_origin_high, 
+                        family = 'quasipoisson')
+
+glm(n ~  I(post_2013*same_sex*noncit) + 
+                        I(post_2013*same_sex) + 
+                        I(post_2013*noncit) + 
+                        post_2013 + 
+                        group_fe + as.factor(year), 
+                        data = count_origin_high, 
+                        family = 'quasipoisson') %>%
+coeftest(., vcov = vcovCL(., cluster = ~group_fe)) %>%
+  tidy() %>%
+  filter(!str_detect(term, 'group|year')) %>%
+  kable(booktabs = T, caption = 'Origin score > 3') %>%
+  kable_styling(latex_options = 'hold_position')
+
+
+count_origin_low <- acs_count_noncit_bpld %>%
+  filter(origin_score < 0 | is.na(origin_score)) %>%
+  group_by(state, year, same_sex, noncit, post_2013, group_fe) %>%
+  summarize(n = sum(n)) %>% 
+  ungroup() 
+
+extra_pois_noncit_low <- glm(n ~ as.factor(year):same_sex:noncit + 
+                        as.factor(year):same_sex + 
+                        as.factor(year):noncit + 
+                        as.factor(year) + group_fe,
+                        data = count_origin_low, 
+                        family = 'quasipoisson')
+
+glm(n ~  I(post_2013*same_sex*noncit) + 
+                        I(post_2013*same_sex) + 
+                        I(post_2013*noncit) + 
+                        post_2013 + 
+                        group_fe + as.factor(year), 
+                        data = count_origin_low, 
+                        family = 'quasipoisson') %>%
+coeftest(., vcov = vcovCL(., cluster = ~group_fe)) %>%
+  tidy() %>%
+  filter(!str_detect(term, 'group|year')) %>%
+  kable(booktabs = T, caption = 'Origin score < 0') %>%
+  kable_styling(latex_options = 'hold_position')
+
+
+bind_rows(
+  count_origin_high %>%
+    filter(noncit == T, same_sex == T) %>%
+    cbind(., n_fit = predict(extra_pois_noncit_high, newdata = ., type = 'response')) %>% 
+    group_by(year) %>%
+    summarize(n_fit = sum(n_fit)) %>%
+    mutate(mod = 'origin_score > 3'),
+  count_origin_low %>%
+    filter(noncit == T, same_sex == T) %>%
+    cbind(., n_fit = predict(extra_pois_noncit_low, newdata = ., type = 'response')) %>% 
+    group_by(year) %>%
+    summarize(n_fit = sum(n_fit)) %>%
+    mutate(mod = 'origin_score < 0')) %>%
+  ggplot(aes(x = year, y = n_fit, color = mod)) +
+  geom_line() +
+  geom_vline(xintercept = 2013, linetype = 2) + 
+  ggtitle('Noncitizen-containing')
+```
+
+```{r}
+extra_pois_noncit_high <- glm(n ~ as.factor(year):same_sex:noncit + 
+                        as.factor(year):same_sex + 
+                        as.factor(year):noncit + 
+                        as.factor(year) + group_fe,
+                        data = mutate(count_origin_high, 
+                                      year = factor(floor(year/2)*2, 
+                                                    levels = c('2018', '2016', '2014', '2012', '2010', '2008'))), 
+                        family = 'quasipoisson')
+
+extra_pois_noncit_low <- glm(n ~ as.factor(year):same_sex:noncit + 
+                        as.factor(year):same_sex + 
+                        as.factor(year):noncit + 
+                        as.factor(year) + group_fe,
+                        data = mutate(count_origin_low, 
+                                      year = factor(floor(year/2)*2, 
+                                                    levels = c('2018', '2016', '2014', '2012', '2010', '2008'))), 
+                        family = 'quasipoisson')
+
+bind_rows(
+  extra_pois_noncit_high %>%
+    coeftest(., vcov = vcovCL(., cluster = ~group_fe)) %>%
+    tidy(conf.int = T) %>% 
+    filter(str_detect(term, ':same_sexTRUE:noncitTRUE')) %>%
+    mutate(year = as.numeric(str_extract(term, '\\d\\d\\d\\d')),
+           mod = 'origin_score > 3'),
+  extra_pois_noncit_low %>%
+    coeftest(., vcov = vcovCL(., cluster = ~group_fe)) %>%
+    tidy(conf.int = T) %>%  
+    filter(str_detect(term, ':same_sexTRUE:noncitTRUE')) %>%
+    mutate(year = as.numeric(str_extract(term, '\\d\\d\\d\\d')),
+           mod = 'origin_score < 0')) %>%
+  ggplot(aes(x = year, y = estimate, color = mod)) +
+  geom_pointrange(aes(ymin = conf.low, ymax = conf.high), position=position_dodge(width=.5)) +
+  geom_hline(yintercept = 0) +
+  geom_vline(xintercept = 2013, linetype = 2)  + 
+  ggtitle('Noncitizen-containing')
+
+```
+
+```{r}
+
+count_origin_high <- acs_count_noncit_bpld %>%
+  filter(origin_score > 5 | is.na(origin_score)) %>%
+  group_by(state, year, same_sex, noncit, post_2013, group_fe) %>%
+  summarize(n = sum(n)) %>% 
+  ungroup() 
+
+count_origin_low <- acs_count_noncit_bpld %>%
+  filter(origin_score < -1 | is.na(origin_score)) %>%
+  group_by(state, year, same_sex, noncit, post_2013, group_fe) %>%
+  summarize(n = sum(n)) %>% 
+  ungroup() 
+
+extra_pois_noncit_high <- glm(n ~ as.factor(year):same_sex:noncit + 
+                        as.factor(year):same_sex + 
+                        as.factor(year):noncit + 
+                        as.factor(year) + group_fe,
+                        data = mutate(count_origin_high, 
+                                      year = factor(floor(year/2)*2, 
+                                                    levels = c('2018', '2016', '2014', '2012', '2010', '2008'))), 
+                        family = 'quasipoisson')
+
+extra_pois_noncit_low <- glm(n ~ as.factor(year):same_sex:noncit + 
+                        as.factor(year):same_sex + 
+                        as.factor(year):noncit + 
+                        as.factor(year) + group_fe,
+                        data = mutate(count_origin_low, 
+                                      year = factor(floor(year/2)*2, 
+                                                    levels = c('2018', '2016', '2014', '2012', '2010', '2008'))), 
+                        family = 'quasipoisson')
+
+bind_rows(
+  extra_pois_noncit_high %>%
+    coeftest(., vcov = vcovCL(., cluster = ~group_fe)) %>%
+    tidy(conf.int = T) %>% 
+    filter(str_detect(term, ':same_sexTRUE:noncitTRUE')) %>%
+    mutate(year = as.numeric(str_extract(term, '\\d\\d\\d\\d')),
+           mod = 'origin_score > 5'),
+  extra_pois_noncit_low %>%
+    coeftest(., vcov = vcovCL(., cluster = ~group_fe)) %>%
+    tidy(conf.int = T) %>%  
+    filter(str_detect(term, ':same_sexTRUE:noncitTRUE')) %>%
+    mutate(year = as.numeric(str_extract(term, '\\d\\d\\d\\d')),
+           mod = 'origin_score < -1')) %>%
+  ggplot(aes(x = year, y = estimate, color = mod)) +
+  geom_pointrange(aes(ymin = conf.low, ymax = conf.high), position=position_dodge(width=.5)) +
+  geom_hline(yintercept = 0) +
+  geom_vline(xintercept = 2013, linetype = 2)  + 
+  ggtitle('Noncitizen-containing')
+
+```
+
+
+\newpage
+
+# Stratified DDD (mixed citizenship)
+```{r stratified-mixed}
+count_origin_high <- acs_count_mixed_bpld %>%
+  filter(origin_score > 3 | is.na(origin_score)) %>%
+  group_by(state, year, same_sex, mixed, post_2013, group_fe) %>%
+  summarize(n = sum(n)) %>% 
+  ungroup() 
+
+extra_pois_mixed_high <- glm(n ~ as.factor(year):same_sex:mixed + 
+                        as.factor(year):same_sex + 
+                        as.factor(year):mixed + 
+                        as.factor(year) + group_fe,
+                        data = count_origin_high, 
+                        family = 'quasipoisson')
+
+glm(n ~  I(post_2013*same_sex*mixed) + 
+                        I(post_2013*same_sex) + 
+                        I(post_2013*mixed) + 
+                        post_2013 + 
+                        group_fe + as.factor(year), 
+                        data = count_origin_high, 
+                        family = 'quasipoisson') %>%
+coeftest(., vcov = vcovCL(., cluster = ~group_fe)) %>%
+  tidy() %>%
+  filter(!str_detect(term, 'group|year')) 
+  # kable(booktabs = T, caption = 'Origin score > 3') %>%
+  # kable_styling(latex_options = 'hold_position')
+
+
+count_origin_low <- acs_count_mixed_bpld %>%
+  filter(origin_score < 0 | is.na(origin_score)) %>%
+  group_by(state, year, same_sex, mixed, post_2013, group_fe) %>%
+  summarize(n = sum(n)) %>% 
+  ungroup() 
+
+extra_pois_mixed_low <- glm(n ~ as.factor(year):same_sex:mixed + 
+                        as.factor(year):same_sex + 
+                        as.factor(year):mixed + 
+                        as.factor(year) + group_fe,
+                        data = count_origin_low, 
+                        family = 'quasipoisson')
+
+glm(n ~  I(post_2013*same_sex*mixed) + 
+                        I(post_2013*same_sex) + 
+                        I(post_2013*mixed) + 
+                        post_2013 + 
+                        group_fe + as.factor(year), 
+                        data = count_origin_low, 
+                        family = 'quasipoisson') %>%
+coeftest(., vcov = vcovCL(., cluster = ~group_fe)) %>%
+  tidy() %>%
+  filter(!str_detect(term, 'group|year')) 
+  # kable(booktabs = T, caption = 'Origin score < 0') %>%
+  # kable_styling(latex_options = 'hold_position')
+
+
+bind_rows(
+  count_origin_high %>%
+    filter(mixed == T, same_sex == T) %>%
+    cbind(., n_fit = predict(extra_pois_mixed_high, newdata = ., type = 'response')) %>% 
+    group_by(year) %>%
+    summarize(n_fit = sum(n_fit)) %>%
+    mutate(mod = 'origin_score > 3'),
+  count_origin_low %>%
+    filter(mixed == T, same_sex == T) %>%
+    cbind(., n_fit = predict(extra_pois_mixed_low, newdata = ., type = 'response')) %>% 
+    group_by(year) %>%
+    summarize(n_fit = sum(n_fit)) %>%
+    mutate(mod = 'origin_score < 0')) %>%
+  ggplot(aes(x = year, y = n_fit, color = mod)) +
+  geom_line() +
+  geom_vline(xintercept = 2013, linetype = 2) + 
+  ggtitle('Mixed citizenship')
+```
+
+```{r}
+extra_pois_mixed_high <- glm(n ~ as.factor(year):same_sex:mixed + 
+                        as.factor(year):same_sex + 
+                        as.factor(year):mixed + 
+                        as.factor(year) + group_fe,
+                        data = mutate(count_origin_high, 
+                                      year = factor(floor(year/2)*2, 
+                                                    levels = c('2018', '2016', '2014', '2012', '2010', '2008'))), 
+                        family = 'quasipoisson')
+
+extra_pois_mixed_low <- glm(n ~ as.factor(year):same_sex:mixed + 
+                        as.factor(year):same_sex + 
+                        as.factor(year):mixed + 
+                        as.factor(year) + group_fe,
+                        data = mutate(count_origin_low, 
+                                      year = factor(floor(year/2)*2, 
+                                                    levels = c('2018', '2016', '2014', '2012', '2010', '2008'))), 
+                        family = 'quasipoisson')
+
+bind_rows(
+  extra_pois_mixed_high %>%
+    coeftest(., vcov = vcovCL(., cluster = ~group_fe)) %>%
+    tidy(conf.int = T) %>% 
+    filter(str_detect(term, ':same_sexTRUE:mixedTRUE')) %>%
+    mutate(year = as.numeric(str_extract(term, '\\d\\d\\d\\d')),
+           mod = 'origin_score > 3'),
+  extra_pois_mixed_low %>%
+    coeftest(., vcov = vcovCL(., cluster = ~group_fe)) %>%
+    tidy(conf.int = T) %>%  
+    filter(str_detect(term, ':same_sexTRUE:mixedTRUE')) %>%
+    mutate(year = as.numeric(str_extract(term, '\\d\\d\\d\\d')),
+           mod = 'origin_score < 0')) %>%
+  ggplot(aes(x = year, y = estimate, color = mod)) +
+  geom_pointrange(aes(ymin = conf.low, ymax = conf.high), position=position_dodge(width=.5)) +
+  geom_hline(yintercept = 0) +
+  geom_vline(xintercept = 2013, linetype = 2)  + 
+  ggtitle('Mixed citizenship')
+
+```
+
+```{r}
+
+count_origin_high <- acs_count_mixed_bpld %>%
+  filter(origin_score > 5 | is.na(origin_score)) %>%
+  group_by(state, year, same_sex, mixed, post_2013, group_fe) %>%
+  summarize(n = sum(n)) %>% 
+  ungroup() 
+
+count_origin_low <- acs_count_mixed_bpld %>%
+  filter(origin_score < -1 | is.na(origin_score)) %>%
+  group_by(state, year, same_sex, mixed, post_2013, group_fe) %>%
+  summarize(n = sum(n)) %>% 
+  ungroup() 
+
+extra_pois_mixed_high <- glm(n ~ as.factor(year):same_sex:mixed + 
+                        as.factor(year):same_sex + 
+                        as.factor(year):mixed + 
+                        as.factor(year) + group_fe,
+                        data = mutate(count_origin_high, 
+                                      year = factor(floor(year/2)*2, 
+                                                    levels = c('2018', '2016', '2014', '2012', '2010', '2008'))), 
+                        family = 'quasipoisson')
+
+extra_pois_mixed_low <- glm(n ~ as.factor(year):same_sex:mixed + 
+                        as.factor(year):same_sex + 
+                        as.factor(year):mixed + 
+                        as.factor(year) + group_fe,
+                        data = mutate(count_origin_low, 
+                                      year = factor(floor(year/2)*2, 
+                                                    levels = c('2018', '2016', '2014', '2012', '2010', '2008'))), 
+                        family = 'quasipoisson')
+
+bind_rows(
+  extra_pois_mixed_high %>%
+    coeftest(., vcov = vcovCL(., cluster = ~group_fe)) %>%
+    tidy(conf.int = T) %>% 
+    filter(str_detect(term, ':same_sexTRUE:mixedTRUE')) %>%
+    mutate(year = as.numeric(str_extract(term, '\\d\\d\\d\\d')),
+           mod = 'origin_score > 5'),
+  extra_pois_mixed_low %>%
+    coeftest(., vcov = vcovCL(., cluster = ~group_fe)) %>%
+    tidy(conf.int = T) %>%  
+    filter(str_detect(term, ':same_sexTRUE:mixedTRUE')) %>%
+    mutate(year = as.numeric(str_extract(term, '\\d\\d\\d\\d')),
+           mod = 'origin_score < -1')) %>%
+  ggplot(aes(x = year, y = estimate, color = mod)) +
+  geom_pointrange(aes(ymin = conf.low, ymax = conf.high), position=position_dodge(width=.5)) +
+  geom_hline(yintercept = 0) +
+  geom_vline(xintercept = 2013, linetype = 2)  + 
+  ggtitle('Mixed citizenship')
+
+```
