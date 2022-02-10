@@ -150,6 +150,11 @@ acs_count_mixed_bpld <- read_csv(here('data', 'acs_count_mixed.csv'))  %>%
 
 As show in Figure \@ref(fig:desc), this rapid increase after 2013 was not uniform across immigrants from all countries. For those hailing from countries with progressive LGB policies, the increase was indeed rapid after 2013. However, from those with repressive LGB policies, no increase occured. (See below for more on our LGB policy index.)
 
+# Research Questions
+1. How does LGB policy at country of origin moderate the effect of the repeal of DOMA on union formation of same-sex mixed-citizenship couples in the U.S.?  
+
+
+
 
 ```{r desc, fig.height = 3, fig.cap = 'Estimated counts of individuals in mixed-citizenship, same-same couples from the American Community Survey. The "Repressive" sample includes only countries with a LGB policy score less than 0, and the "Progressive" sample includes only those with a score greater than 3.'}
 # acs_count_mixed %>%
