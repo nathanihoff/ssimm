@@ -38,12 +38,13 @@ geometry: margin=1in
 indent: yes
 link-citations: no
 linkcolor: black
-# bibliography: zotero.bib  
+bibliography: "Same-Sex Immigration.bib"
 # csl: apa.csl
 
 
-title: "DiD Analysis of immigrants in mixed-citizenship couples"
-date: "`r format(Sys.time(), '%B %e, %Y')`"
+title: "Political Dimensions of Entry into Mixed-Citizenship, Same-Sex Couples: A DDD Analysis"
+subtitle: "ASA 2022 Submission"
+# date: "`r format(Sys.time(), '%B %e, %Y')`"
 
 
 # author:
@@ -52,9 +53,9 @@ date: "`r format(Sys.time(), '%B %e, %Y')`"
 # - name: Kristopher Velasco
 #   affiliation: Department of Sociology, Princeton University
  
-# author:
-# - Nathan I. Hoffmann, Department of Sociology, University of California, Los Angeles
-# - Kristopher Velasco, Department of Sociology, Princeton University
+author:
+- Nathan I. Hoffmann, Department of Sociology, University of California, Los Angeles
+- Kristopher Velasco, Department of Sociology, Princeton University
 
 
 ---
@@ -150,8 +151,7 @@ acs_count_mixed_bpld <- read_csv(here('data', 'acs_count_mixed.csv'))  %>%
 
 As show in Figure \@ref(fig:desc), this rapid increase after 2013 was not uniform across immigrants from all countries. For those hailing from countries with progressive LGB policies, the increase was indeed rapid after 2013. However, from those with repressive LGB policies, no increase occured. (See below for more on our LGB policy index.)
 
-# Research Questions
-1. How does LGB policy at country of origin moderate the effect of the repeal of DOMA on union formation of same-sex mixed-citizenship couples in the U.S.?  
+
 
 
 
@@ -190,13 +190,33 @@ bind_rows(
   
 ```
 
+# Research Questions
+1. How does LGB policy at country of origin moderate the effect of the repeal of DOMA on union formation of same-sex mixed-citizenship couples in the U.S.?  
+
 # Background
 blah blah Kris
 
 
 # Data and Methods
 
-Due to the large number of 0 counts in our sample, a typical Poisson model is not appropriate. We use quasi-maximum likelihood estimation (QMLE) to identify the effect of DOMA's repeal.
+
+
+We employ data from the 2008 to 2019 ACS [@ruggles_2021]. Each year, the ACS surveys a 1-percent representative sample of the U.S. population about a variety of other individual and household attributes. We focus on counts of individuals in mixed-citizenship same-sex couples, comparing to those in same-citizenship or different-sex couples. Our counts include only cohabiting individuals who identify themselves as spouses or unmarried partners, since the ACS does not allow identification of same-sex couples that do not reside together. "Mixed-citizenship" couples include either two citizens or two non-citizens, and "same-sex" couples include two individuals who report the same sex and are related as either. We exclude individuals who immigrated before the age of 18 as well as those younger than 18 or older than 64 in each survey year.    
+
+Beginning in 2008 the Census Bureau made changes to ACS gender and partnership questions in order to prevent such errors [@u.s.censusbureau_2013], so we rely on data only from 2008 onward. In addition, following @gates_2009, we remove all respondents that had either their relationship or sex variable imputed by the Census Bureau. See Table \@ref(tab:data-tab) for sample sizes.  
+
+```{r data-tab}
+acs_count_mixed %>%
+  group_by(`Same-sex` = same_sex, `Mixed-citizenship` = mixed) %>%
+  summarize(`n (unweighted)` = sum(n_unweighted),
+            `n (weighted)` = sum(n)) %>%
+  flextable() %>%
+  flextable::set_caption('Unweighted and weighted sample sizes from American Community Survey (ACS) data, 2008-2019')
+```
+
+To isolate the effect of the 2013 DOMA repeal, we employ a difference-in-differences-in-differences (DDD) Poisson design [@hausman_1984_econometric]. We model counts as coming from a Poisson distribution, but estimate our model more flexibly by using quasi-maximum likelihood estimation (QMLE). Unlike Poisson estimated by Maximum Likelihood Estimation (MLE), this estimation method does not assume the mean and variance of the distribution are equal, adjusting standard errors accordingly [@cameron_2005_microeconometrics]. We include two-way fixed effects, with indicators for survey year and state-group, and cluster standard errors at the state-group level.  
+
+Our estimand is the relative change in incidence of individual in mixed-citizenship, same-sex couples following the repeal of DOMA in 2013. We focus on heterogeneity of this effect: how it varies by the LGB policy context of non-citizens' country of origin. We measure the origin country policy environment using a modified LGBT Policy Index [@velasco_2018] for 1991 to 2019. The index is created by summing the net total of progressive policies (scored $+1$) over regressive policies (scored $-1$). The country index ranges from `r min(acs_count_mixed_bpld$origin_score, na.rm = T)` to `r max(acs_count_mixed_bpld$origin_score, na.rm = T)`, with a mean of `r mean(acs_count_mixed_bpld$origin_score, na.rm = T)`. Group-state-year-country cells are assigned the average score in the year of immigration for non-citizen individuals in that cell.
 
 
 # Preliminary Results
@@ -248,6 +268,7 @@ huxreg(list('Full sample' = mod_mixed, 'Repressive' = mod_os_low, 'Progressive' 
        statistics = c('Observations' = 'nobs')) %>%
   huxtable::set_width(1) %>%
   set_wrap(T) %>%
+  set_all_padding(0) %>%
   huxtable::set_caption('Quasi-Poisson DDD regressions of counts of 
                         mixed-citizenship same-sex couples')
   # theme_compact()
@@ -374,60 +395,4 @@ bind_rows(
   geom_vline(xintercept = 2013, linetype = 2)
 ```
 
-
-\newpage
-
-# Appendix
-
-```{r}
-
-count_origin_high <- acs_count_mixed_bpld %>%
-  filter(origin_score > 5 | is.na(origin_score)) %>%
-  group_by(state, year, same_sex, mixed, post_2013, group_fe) %>%
-  summarize(n = sum(n)) %>% 
-  ungroup() 
-
-count_origin_low <- acs_count_mixed_bpld %>%
-  filter(origin_score < -1 | is.na(origin_score)) %>%
-  group_by(state, year, same_sex, mixed, post_2013, group_fe) %>%
-  summarize(n = sum(n)) %>% 
-  ungroup() 
-
-extra_pois_mixed_high <- glm(n ~ as.factor(year):same_sex:mixed + 
-                        as.factor(year):same_sex + 
-                        as.factor(year):mixed + 
-                        as.factor(year) + group_fe,
-                        data = mutate(count_origin_high, 
-                                      year = factor(floor(year/2)*2, 
-                                                    levels = c('2018', '2016', '2014', '2012', '2010', '2008'))), 
-                        family = 'quasipoisson')
-
-extra_pois_mixed_low <- glm(n ~ as.factor(year):same_sex:mixed + 
-                        as.factor(year):same_sex + 
-                        as.factor(year):mixed + 
-                        as.factor(year) + group_fe,
-                        data = mutate(count_origin_low, 
-                                      year = factor(floor(year/2)*2, 
-                                                    levels = c('2018', '2016', '2014', '2012', '2010', '2008'))), 
-                        family = 'quasipoisson')
-
-bind_rows(
-  extra_pois_mixed_high %>%
-    coeftest(., vcov = vcovCL(., cluster = ~group_fe)) %>%
-    tidy(conf.int = T) %>% 
-    filter(str_detect(term, ':same_sexTRUE:mixedTRUE')) %>%
-    mutate(year = as.numeric(str_extract(term, '\\d\\d\\d\\d')),
-           mod = 'origin_score > 5'),
-  extra_pois_mixed_low %>%
-    coeftest(., vcov = vcovCL(., cluster = ~group_fe)) %>%
-    tidy(conf.int = T) %>%  
-    filter(str_detect(term, ':same_sexTRUE:mixedTRUE')) %>%
-    mutate(year = as.numeric(str_extract(term, '\\d\\d\\d\\d')),
-           mod = 'origin_score < -1')) %>%
-  ggplot(aes(x = year, y = estimate, color = mod)) +
-  geom_pointrange(aes(ymin = conf.low, ymax = conf.high), position=position_dodge(width=.5)) +
-  geom_hline(yintercept = 0) +
-  geom_vline(xintercept = 2013, linetype = 2)  + 
-  ggtitle('Mixed citizenship')
-
-```
+# References
