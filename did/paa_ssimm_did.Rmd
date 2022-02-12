@@ -146,11 +146,9 @@ acs_count_mixed_bpld <- read_csv(here('data', 'acs_count_mixed.csv'))  %>%
 ```
 
 # Introduction
+The policy environment for Lesbian, Gay, and Bisexual (LGB) couples around the world has changed rapidly in recent years. One notable shift is the 2013 U.S. Supreme Court decision ruling the Defense of Marriage Act (DOMA) unconstitutional. While For the first time, U.S. citizens could sponsor the visa of their same-sex spouse. @redpath_2021_spousal demonstrates that end of DOMA resulted in a significant increase in unions between mixed-citizenship, same-sex couples. However, as show in Figure \@ref(fig:desc), this rapid increase after 2013 was not uniform across immigrants from all countries. For those hailing from countries with progressive LGB policies, the increase was indeed rapid after 2013. However, from those with repressive LGB policies, no increase occurred.  
 
-@redpath_2021_spousal demonstrates convincingly that the 2013 repeal of the Defense of Marriage Act (DOMA) results in a significant increase in unions between mixed-citizenship, same-sex couples. We extend his differences-in-differences-in-differences (DDD) design to examine an important moderator of this effect: the policy environment of the origin country.  
-
-As show in Figure \@ref(fig:desc), this rapid increase after 2013 was not uniform across immigrants from all countries. For those hailing from countries with progressive LGB policies, the increase was indeed rapid after 2013. However, from those with repressive LGB policies, no increase occured. (See below for more on our LGB policy index.)
-
+Using waves 2008 to 2019 of the American Community Survey, this study employs a differences-in-differences-in-differences (DDD) design to examine how the policy environment of the origin country moderates the effect of the end of DOMA on the entry of same-sex, mixed-citizenship couples into unions.
 
 
 
@@ -184,22 +182,23 @@ bind_rows(
     summarize(n = sum(n)) %>%
     mutate(cat = 'Full sample')
 ) %>% 
-  ggplot(aes(x = year, y = n, color = cat, linetype = cat)) +
+  ggplot(aes(x = year, y = n/1000, color = cat, linetype = cat)) +
   geom_line() +
-  geom_vline(xintercept = 2013, linetype = 2) 
+  geom_vline(xintercept = 2013, linetype = 2) +
+  labs(x = 'Year', y = 'n (thousands)')
   
 ```
 
 # Research Questions
-1. How does LGB policy at country of origin moderate the effect of the repeal of DOMA on union formation of same-sex mixed-citizenship couples in the U.S.?  
+1. How does LGB policy at country of origin moderate the effect of the repeal of DOMA on union formation of same-sex, mixed-citizenship couples in the U.S.?  
+
+2. Which specific LGB policies of country of origin are most relevant in shaping entry into same-sex unions?
 
 # Background
 blah blah Kris
 
 
 # Data and Methods
-
-
 
 We employ data from the 2008 to 2019 ACS [@ruggles_2021]. Each year, the ACS surveys a 1-percent representative sample of the U.S. population about a variety of other individual and household attributes. We focus on counts of individuals in mixed-citizenship same-sex couples, comparing to those in same-citizenship or different-sex couples. Our counts include only cohabiting individuals who identify themselves as spouses or unmarried partners, since the ACS does not allow identification of same-sex couples that do not reside together. "Mixed-citizenship" couples include either two citizens or two non-citizens, and "same-sex" couples include two individuals who report the same sex and are related as either. We exclude individuals who immigrated before the age of 18 as well as those younger than 18 or older than 64 in each survey year.    
 
