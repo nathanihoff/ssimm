@@ -113,10 +113,10 @@ knit_hooks$set(inline = function(x) {
 knitr::opts_chunk$set(error=TRUE) 
 
 set_flextable_defaults(font.family = 'Times New Roman',
-                       padding.bottom = 1,
-                       padding.top = 1,
-                       padding.left = 3,
-                       padding.right = 1,
+                       # padding.bottom = 1,
+                       # padding.top = 1,
+                       # padding.left = 3,
+                       # padding.right = 1,
                        theme_fun = 'theme_booktabs',
                        digits = 3, 
                        big.mark = ',',
