@@ -39,7 +39,7 @@ link-citations: no
 linkcolor: black
 bibliography: "Same-Sex Immigration.bib"
 # csl: apa.csl
-title: "Political Dimensions of Entry into Mixed-Citizenship, Same-Sex Couples: A Difference-in-Differences-in-Differences Analysis"
+title: "Political Dimensions of Rising Mixed-Citizenship, Same-Sex Couples: A Difference-in-Differences-in-Differences Analysis"
 subtitle: "ASA 2022 Submission"
 # date: "`r format(Sys.time(), '%B %e, %Y')`"
 # author:
