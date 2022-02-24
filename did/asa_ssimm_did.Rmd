@@ -181,6 +181,9 @@ bind_rows(
   geom_vline(xintercept = 2013, linetype = 2) +
   labs(x = 'Year', y = 'n (thousands)')
   
+
+# acs_count_mixed_bpld %>% 
+#   filter(origin_score > 3)
 ```
 
 
@@ -235,7 +238,11 @@ count_origin_high <- acs_count_mixed_bpld %>%
   filter(origin_score > 3 | is.na(origin_score)) %>%
   group_by(state, year, same_sex, mixed, post_2013, group_fe) %>%
   summarize(n = sum(n)) %>% 
-  ungroup() 
+  ungroup() %>%
+  complete(state, year, same_sex, mixed) %>%
+  mutate(across(n, function(x) ifelse(is.na(x), 0, x)),
+         post_2013 = year > 2013,
+         group_fe = paste(state, same_sex, mixed, sep = '_'))
 
 mod_os_high <- glm(n ~  I(post_2013*same_sex*mixed) + 
                         I(post_2013*same_sex) + 
@@ -250,7 +257,11 @@ count_origin_low <- acs_count_mixed_bpld %>%
   filter(origin_score < 0 | is.na(origin_score)) %>%
   group_by(state, year, same_sex, mixed, post_2013, group_fe) %>%
   summarize(n = sum(n)) %>% 
-  ungroup() 
+  ungroup() %>%
+  complete(state, year, same_sex, mixed) %>%
+  mutate(across(n, function(x) ifelse(is.na(x), 0, x)),
+         post_2013 = year > 2013,
+         group_fe = paste(state, same_sex, mixed, sep = '_'))
 
 mod_os_low <- glm(n ~  I(post_2013*same_sex*mixed) + 
                         I(post_2013*same_sex) + 
