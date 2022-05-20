@@ -4,7 +4,7 @@ output:
   bookdown::word_document2:
     reference_docx: "word-template.docx"
     toc: no
-    number_sections: no
+    number_sections: yes
     pandoc_args: !expr rmdfiltr::add_wordcount_filter(rmdfiltr::add_citeproc_filter(args = NULL))
     latex_engine: xelatex
     keep_tex: yes
@@ -166,7 +166,7 @@ acs_ind_small <- acs_ind
 # ) 
 
 total_df <- acs_wide_survey %>%
-  mutate(same_sex = ifelse(same_sex == T, 'Same-Sex', 'Different-Sex')) %>%
+  mutate(same_sex = if_else(same_sex == T, 'Same-Sex', 'Different-Sex')) %>%
   group_by(year, imm_couple, same_sex) %>%
   summarize(n = survey_total(vartype = "ci")) 
 ```
@@ -324,24 +324,12 @@ Aside from the country and state indices, we also include a binary variable to i
 
 
 ## Analytic Strategy 
-We construct three dependent variables: one for each set of analyses. Our first goal is to isolate the effects of country-of-origin LGB policy on the immigration of immigrants in same-sex couples. The ideal survey would follow potential immigrants over time and have information about sexual orientation, allowing us to estimate how the probability of migrating and choice of U.S. state of residence vary by sexual orientation. This ideal dataset does not exist, but we approximate it by conducting three sets of analyses, reshaping the data in different ways to test different aspects of our theory (see Table \@ref(tab:analytic)).  
+Many of our analyses rely on descriptive statistics of ACS data. For these, we apply survey weights from the ACS.  
 
-For the first set of analyses, we pool the 12 years of ACS data and take the (sampling-weighted) number of immigrants in same-sex couples from a given country and a given year of immigration and divide by the total number of immigrants from that country-year. We multiply each of these `r nrow(acs_prop)` country-year observations by 100 to yield a percentage. In effect this transformation controls for aspects of the migration process common to all immigrants from a given country; if sending-country LGB policy has no effect on LGB immigrants, then we would expect these proportions to be similar across countries. We cluster standard errors by country of origin, and our preferred model includes country fixed effects and controls. 
-<!-- However, even if proportions of immigrants in same-sex couples vary between countries, LGB policy may not be the cause; perhaps LGB immigrants respond idiosyncratically to migration-relevant variables that may covary with LGB policy, such as country income, unemployment, democratization, relationship to the U.S., and immigrant networks, so we control for these variables (described below) in our preferred model and estimate using ordinary least squares (OLS) regression.  -->
-<!-- In light of the 2013 Supreme Court decision on DOMA, we also add a dichotomous variable for whether the year of immigration was later than 2013, and we interact this variable with sending-country policy score. As discussed below, we test other possible years for this dichotomous variable and report the results in Section C of the Supplementary Material.   -->
+One of our goals is to isolate the effects of country-of-origin LGB policy on the immigration of immigrants in same-sex couples. The ideal survey would follow potential immigrants over time and have information about sexual orientation, allowing us to estimate how the probability of migrating and choice of U.S. state of residence vary by sexual orientation. This ideal dataset does not exist, but we attempt to approximate it.  
 
+We reshape the data so that each observation is the proportion of individual immigrants in same-sex couples from country $x$ in state $y$ in year $z$, then multiply by 100. This results in `r nrow(acs_prop_state)` country-state-years. As in the previous set of models, this reshaping acts to control for aspects of migrant settlement common to immigrants from the same country. We regress the state-country-survey year proportion on state and sending-country policy scores and adjust for state and origin-country controls. State-level measures are linked to survey year, while origin-country LGB policy and controls are linked to the mean year of immigration for each immigrant group. We include state and country-of-origin fixed effects, and we cluster errors at the state and country levels.    
 
-**[TABLE \@ref(tab:analytic) ABOUT HERE]**
-
-
-
-Our second set of models address how differing LGB policy environments across U.S. states influence proportions of immigrants in same-sex couples. We reshape the data so that each observation is the proportion of individual immigrants in same-sex couples from country $x$ in state $y$ in year $z$, then multiply by 100. This results in `r nrow(acs_prop_state)` country-state-years. As in the previous set of models, this reshaping acts to control for aspects of migrant settlement common to immigrants from the same country. We regress the state-country-survey year proportion on state and sending-country policy scores and adjust for state and origin-country controls.
-<!-- We merge this by survey year to state-level measures of LGB policy and state controls -->
-<!-- per capita income, unemployment rate, -->
-<!-- and we merge with origin-country LGB policy and country-level controls using the mean year of immigration for each immigrant group.  -->
-State-level measures are linked to survey year, while origin-country LGB policy and controls are linked to the mean year of immigration for each immigrant group. We include state and country-of-origin fixed effects, and we cluster errors at the state and country levels.    
-
-Our third and final set of models turns toward the individual: Conditional on immigrating to the U.S., do immigrants in same-sex couples choose more LGB-friendly states to reside in? And how does sending-country LGB context moderate this relationship? This part of the analysis uses ordered logistic regression to predict the policy index of state of residence. Whereas the full U.S. state policy index ranges from `r min(acs_ind$state_policy, na.rm = T)` to `r max(acs_ind$state_policy, na.rm = T)`, we break up the index into three "bins": repressive (0 or less), neutral (1 or 2), and progressive (3 or greater). We regress this ordered categorical outcome on a same-sex indicator and country-of-origin policy score, interacting these variables in our preferred model. The interaction term estimates the possibly moderating effect of origin-country policy context. We also control for individual attributes that could possibly confound our results, interacting these with the same-sex indicator, and we include country-clustered standard errors. The final models also include state and country controls.
 
 
 
@@ -353,7 +341,7 @@ Our country- and state-level controls come from a variety of sources. Country-of
 
 <!-- the World Bank's Global Bilateral Migration Database [@ozden_2011] for 1960, 1970, and 1980 and -->
 
-For our individual-level analysis we include individual controls from the ACS for reported sex, age, education (with categories for less than high school, high school, some college, and college), year of immigration, inverse hyperbolic sign of positive income in the past year [similar to the natural log transformation; see @burbidge_1988_alternative], and a binary unemployment indicator (for income reported to be 0 or less). Descriptive statistics for variables used in all analyses are included in Section A of the Supplementary Material. 
+For our individual-level analysis we include individual controls from the ACS for reported sex, age, education (with categories for less than high school, high school, some college, and college), year of immigration, inverse hyperbolic sign of positive income in thousands in the past year [similar to the natural log transformation; see @burbidge_1988_alternative], and a binary unemployment indicator (for income reported to be 0 or less). Descriptive statistics for variables used in all analyses are included in Section A of the Supplementary Material. 
 
 
 
@@ -362,10 +350,12 @@ For our individual-level analysis we include individual controls from the ACS fo
 
 # Results
 ## Descriptive Trends
-Prior to getting to our analytic results, we first want to carefully assess some descriptive characteristics. Doing so is important as even descriptive insights about this emerging population are largely unknown and are themselves novel. Additionally, knowing these descriptives allows for clearer assessment of model results below. We first estimate total numbers of immigrants in same- and different-sex couples, applying survey weights to obtain population-level estimates from the ACS. Recall, Figure \@ref(fig:total-pop) showed that whereas numbers of different-sex immigrant couples have steadily increased over the period of study, numbers of same-sex immigrant couples have increased much more rapidly, especially since the the 2013 Supreme Court decision overturning DOMA.  
+We first estimate total numbers of immigrants in same- and different-sex couples, applying survey weights to obtain population-level estimates from the ACS. Recall, Figure \@ref(fig:total-pop) showed that whereas numbers of different-sex immigrant couples have steadily increased over the period of study, numbers of same-sex immigrant couples have increased much more rapidly, especially since the the 2013 Supreme Court decision overturning DOMA.  
 
 
-**[FIGURE \@ref(fig:desc) ABOUT HERE]**  
+**[FIGURE \@ref(fig:desc-ind) ABOUT HERE]**  
+
+**[FIGURE \@ref(fig:desc-country) ABOUT HERE]**  
 
 **[FIGURE \@ref(fig:policy-desc) ABOUT HERE]**  
 
@@ -587,50 +577,6 @@ Recent research has argued that sexuality is a salient factor determining immigr
 \newpage
 
 # Tables
-```{r analytic}
-tibble(`Analytic Strategy` = c(1,2,3),
-       Name = c('Country-of-Origin Effects',
-                'State Effects',
-                'Individual Analysis'),
-           `Dependent Variable` = 
-             c('Proportion of immigrants in same-sex couples, for each country in each of year of immigration 1991-2019, averaged over the 12 years of survey data',
-               'Proportion of immigrants in same-sex couples, for each country, state, and survey year 2008-2019',
-               'Binned state policy context for individual immigrants'),
-           `Example` = c('Among ACS respondents who immigrated from France in 2001, a weighted 1.3 percent were in same-sex couples at the time of survey.',
-                         'Among ACS respondents who immigrated from France and resided in New York at the time of the 2012 survey, a weighted 0.91 percent were in same-sex couples.',
-                         'One immigrant from France in ACS survey year 2012 lived in a progressive policy context.'),
-           `LGB Policy for Sending Country` = c('linked to year of immigration',
-                                     'linked to survey year',
-                                     'linked to year of immigration'),
-           `LGB Policy for U.S. State` = c('NA',
-                                     'linked to survey year',
-                                     'linked to survey year')
-) %>%
-  # kable(booktabs = T, format = 'html') %>%
-  # kable_styling('striped')
-  # as_hux() %>%
-  # set_bold(1, T)             %>%
-  # set_bottom_border(1, everywhere) %>%
-  # set_caption('Analytic strategies') %>%
-  # set_width(1)
-  #
-  flextable() %>% 
-  set_caption('Analytic strategies')  %>%
-  flextable::autofit() %>%
-  fit_to_width(7.5)
-  
-
-# acs_prop %>%
-#   filter(country == 'France', yrimmig == 2001) %>%
-#   select(prop_same_sex, n_dif_sex, n_same_sex)
-# 
-# acs_prop_state %>%
-#   filter(country == 'France', year == 2015, state == 'New York') %>%
-#   select(prop_same_sex, n_dif_sex, n_same_sex)
-
-```
-\newpage
-
 
 ```{r country-tab, eval = T}
 
@@ -787,7 +733,7 @@ total_df %>%
   mutate(`Total population (thousands)` = n/1000,
          n_low = n_low/1000, n_upp = n_upp/1000,
          Year = year,
-         imm_couple = ifelse(imm_couple == 'one', 'Mixed-status couples', 'Two-immigrant couples')) %>%
+         imm_couple = if_else(imm_couple == 'one', 'Mixed-status couples', 'Two-immigrant couples')) %>%
   ggplot(aes(x = Year, y = `Total population (thousands)`, 
              linetype = imm_couple)) +
   geom_line() +
@@ -801,75 +747,97 @@ total_df %>%
 
 \newpage
 
-```{r desc, fig.cap = 'Descriptive statistics for immigrants in couples 2008-2019, with survey weights and 95% confidence intervals. All currency in thousands of 1999 dollars.'}
+```{r desc-ind, fig.cap = 'Individual descriptive statistics for immigrants in couples 2008-2019, with survey weights and 95% confidence intervals. Currency in thousands of 1999 dollars.'}
 income <- acs_ind_survey %>%
-  mutate(same_sex = ifelse(same_sex == T, 'Same-Sex', 'Different-Sex')) %>%
+  mutate(same_sex = if_else(same_sex == T, 'Same-Sex', 'Different-Sex')) %>%
   group_by(year, same_sex) %>%
   summarize(var = survey_mean(inctot, vartype = "ci", na.rm = T)) %>%
-  mutate(var_name = 'Individual Income')
+  mutate(var_name = 'Annual Gross Income (Thousands)')
 
-# hwsei <- acs_ind_survey %>%
-#   mutate(same_sex = ifelse(same_sex == T, 'Same-Sex', 'Different-Sex')) %>%
-#   group_by(year, same_sex) %>%
-#   summarize(var = survey_mean(hwsei, vartype = "ci", na.rm = T)) %>%
-#   mutate(var_name = 'Hauser and Warren Socioeconomic Index')
-# 
-# nchild <- acs_ind_survey %>%
-#   mutate(same_sex = ifelse(same_sex == T, 'Same-Sex', 'Different-Sex')) %>%
-#   group_by(year, same_sex) %>%
-#   summarize(var = survey_mean(nchild, vartype = "ci", na.rm = T)) %>%
-#   mutate(var_name = 'Number of Children')
-# 
-# years <- acs_ind_survey %>%
-#   mutate(same_sex = ifelse(same_sex == T, 'Same-Sex', 'Different-Sex')) %>%
-#   group_by(year, same_sex) %>%
-#   summarize(var = survey_mean(years_in_us, vartype = "ci", na.rm = T)) %>%
-#   mutate(var_name = 'Years in U.S.')
-
-# distance <- acs_ind_survey %>%
-#   mutate(same_sex = ifelse(same_sex == T, 'Same-Sex', 'Different-Sex')) %>%
-#   group_by(year, same_sex) %>%
-#   summarize(var = survey_mean(distw, vartype = "ci", na.rm = T)) %>%
-#   mutate(var_name = 'Distance to Country of Origin (KM)')
-# 
-# unemp <- acs_ind_survey %>%
-#   mutate(same_sex = ifelse(same_sex == T, 'Same-Sex', 'Different-Sex')) %>%
-#   group_by(year, same_sex) %>%
-#   summarize(var = survey_mean(unemp_dif, vartype = "ci", na.rm = T)) %>%
-#   mutate(var_name = 'Difference in Unemployment Rates')
-
-prop_stock <- acs_ind_survey %>%
-  mutate(same_sex = ifelse(same_sex == T, 'Same-Sex', 'Different-Sex')) %>%
+hs <- acs_ind_survey %>%
+  mutate(same_sex = if_else(same_sex == T, 'Same-Sex', 'Different-Sex'),
+         hs = if_else(educ %in% c('HS', 'some col', 'college'), 1, 0)) %>%
   group_by(year, same_sex) %>%
-  summarize(var = survey_mean(stock_prop, vartype = "ci", na.rm = T)) %>%
-  mutate(var_name = 'Proportion Immigrant Stock in Year of Migration')
+  summarize(var = survey_mean(hs, vartype = "ci", na.rm = T)) %>%
+  mutate(var_name = 'High School Completion')
 
-wage_dif <- acs_ind_survey %>%
-  mutate(same_sex = ifelse(same_sex == T, 'Same-Sex', 'Different-Sex')) %>%
+college <- acs_ind_survey %>%
+  mutate(same_sex = if_else(same_sex == T, 'Same-Sex', 'Different-Sex'),
+         college = if_else(educ == 'college', 1, 0)) %>%
   group_by(year, same_sex) %>%
-  summarize(var = survey_mean(wage_dif, vartype = "ci", na.rm = T)) %>%
-  mutate(var_name = 'GDP Differential in Year of Migration')
-
-vdem <- acs_ind_survey %>%
-  mutate(same_sex = ifelse(same_sex == T, 'Same-Sex', 'Different-Sex')) %>%
-  group_by(year, same_sex) %>%
-  summarize(var = survey_mean(vdem, vartype = "ci", na.rm = T)) %>%
-  mutate(var_name = 'V-Dem Score in Year of Migration')
+  summarize(var = survey_mean(college, vartype = "ci", na.rm = T)) %>%
+  mutate(var_name = 'College Completion')
 
 # state_income <- acs_ind_survey %>%
-#   mutate(same_sex = ifelse(same_sex == T, 'Same-Sex', 'Different-Sex')) %>%
+#   mutate(same_sex = if_else(same_sex == T, 'Same-Sex', 'Different-Sex')) %>%
 #   group_by(year, same_sex) %>%
 #   summarize(var = survey_mean(state_income, vartype = "ci", na.rm = T)) %>%
 #   mutate(var_name = 'U.S. State of Residence Per Capita Income')
 
+hwsei <- acs_ind_survey %>%
+  mutate(same_sex = if_else(same_sex == T, 'Same-Sex', 'Different-Sex')) %>%
+  group_by(year, same_sex) %>%
+  summarize(var = survey_mean(hwsei, vartype = "ci", na.rm = T)) %>%
+  mutate(var_name = 'Hauser and Warren Socioeconomic Index')
 
 
-bind_rows(income, wage_dif, vdem, prop_stock) %>%
+bind_rows(income, hs, college, hwsei) %>%
   rename(Year = year) %>%
   ggplot(aes(x = Year, y = var, linetype = same_sex)) +
   geom_line() +
   geom_ribbon(aes(ymin = var_low, ymax = var_upp, group = same_sex, col = NULL), alpha = .2) +
-  facet_wrap(~var_name, scales = "free") +
+  facet_wrap(~var_name, scales = "free", ncol = 2) +
+  ylab('') +
+  theme( # legend.justification=c(1,0),
+  #     legend.position=c(.22,.82),
+  #     legend.background = element_rect(fill = alpha("white", 0.5))
+      legend.position="bottom",
+      text = element_text(size = 8))
+ 
+```
+
+\newpage
+
+```{r desc-country, fig.cap = 'Origin country-level descriptive statistics for immigrants in couples 2008-2019, for year of migration, with survey weights and 95% confidence intervals. Currency in thousands of 1999 dollars.'}
+
+
+distance <- acs_ind_survey %>%
+  mutate(same_sex = if_else(same_sex == T, 'Same-Sex', 'Different-Sex')) %>%
+  group_by(year, same_sex) %>%
+  summarize(var = survey_mean(distw, vartype = "ci", na.rm = T)) %>%
+  mutate(var_name = 'Distance to Country of Origin (km)')
+
+unemp <- acs_ind_survey %>%
+  mutate(same_sex = if_else(same_sex == T, 'Same-Sex', 'Different-Sex')) %>%
+  group_by(year, same_sex) %>%
+  summarize(var = -survey_mean(unemp_dif, vartype = "ci", na.rm = T)) %>%
+  mutate(var_name = 'Unemployment Rate Difference with U.S.')
+
+prop_stock <- acs_ind_survey %>%
+  mutate(same_sex = if_else(same_sex == T, 'Same-Sex', 'Different-Sex')) %>%
+  group_by(year, same_sex) %>%
+  summarize(var = survey_mean(stock_prop, vartype = "ci", na.rm = T)) %>%
+  mutate(var_name = 'Proportion U.S. Immigrant Stock')
+
+wage_dif <- acs_ind_survey %>%
+  mutate(same_sex = if_else(same_sex == T, 'Same-Sex', 'Different-Sex')) %>%
+  group_by(year, same_sex) %>%
+  summarize(var = -survey_mean(wage_dif, vartype = "ci", na.rm = T)) %>%
+  mutate(var_name = 'GDP Difference with U.S.')
+
+vdem <- acs_ind_survey %>%
+  mutate(same_sex = if_else(same_sex == T, 'Same-Sex', 'Different-Sex')) %>%
+  group_by(year, same_sex) %>%
+  summarize(var = survey_mean(vdem, vartype = "ci", na.rm = T)) %>%
+  mutate(var_name = 'Democracy Score (V-Dem)')
+
+
+bind_rows(wage_dif, vdem, prop_stock, unemp, distance) %>%
+  rename(Year = year) %>%
+  ggplot(aes(x = Year, y = var, linetype = same_sex)) +
+  geom_line() +
+  geom_ribbon(aes(ymin = var_low, ymax = var_upp, group = same_sex, col = NULL), alpha = .2) +
+  facet_wrap(~var_name, scales = "free", ncol = 2) +
   ylab('') +
   theme( # legend.justification=c(1,0),
   #     legend.position=c(.22,.82),
@@ -885,13 +853,13 @@ bind_rows(income, wage_dif, vdem, prop_stock) %>%
 
 
 origin_df <- acs_ind_survey %>%
-  mutate(same_sex = ifelse(same_sex == T, 'Same-Sex', 'Different-Sex')) %>%
+  mutate(same_sex = if_else(same_sex == T, 'Same-Sex', 'Different-Sex')) %>%
   group_by(year, same_sex) %>%
   summarize(`Policy Score` = survey_mean(origin_score, vartype = "ci", na.rm = T)) %>%
   mutate(var = 'Country-of-Origin Index')
 
 state_df <- acs_ind_survey %>%
-  mutate(same_sex = ifelse(same_sex == T, 'Same-Sex', 'Different-Sex')) %>%
+  mutate(same_sex = if_else(same_sex == T, 'Same-Sex', 'Different-Sex')) %>%
   group_by(year, same_sex) %>%
   summarize(`Policy Score` = survey_mean(state_policy, vartype = "ci", na.rm = T)) %>%
   mutate(var = 'U.S. State Index')
@@ -912,9 +880,9 @@ bind_rows(origin_df, state_df) %>%
 
 ```{r country-map, fig.cap = 'Percentage of immigrants to the U.S. in same-sex couples by country of origin, averaging over years of immigration from 1991 to 2019.'}
 country_tab <- acs_ind %>%
-  mutate(bpld = ifelse(bpld == "United Kingdom, ns", "England", bpld),
-         bpld = ifelse(bpldid == 46500, 'Russia', bpld),
-         bpld = ifelse(bpldid == 46510, 'Belarus', bpld)) %>%
+  mutate(bpld = if_else(bpld == "United Kingdom, ns", "England", bpld),
+         bpld = if_else(bpldid == 46500, 'Russia', bpld),
+         bpld = if_else(bpldid == 46510, 'Belarus', bpld)) %>%
   group_by(bpld, same_sex) %>%
   count(wt = perwt) %>%
   pivot_wider(names_from = 'same_sex', values_from = 'n') %>%
