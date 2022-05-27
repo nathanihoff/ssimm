@@ -308,7 +308,7 @@ In sum, it is evident that sexuality and the policies governing it are salient f
 
 # Data and Methods
 ## Identifying Same-Sex Couples in the ACS
-We merge individual-level data on immigrants in the U.S. with state- and country-level variables from a variety of datasets. The individual data come from the 2008 to 2019 ACS [@ruggles_2021]. Each year, the ACS surveys a 1-percent representative sample of the U.S. population about their education, occupation, income, family structure, immigration status, country of origin, location, and a variety of other individual and household attributes. It is important to note that the ACS is currently the only representative, public-use dataset to inquire about both partner sex and immigrant status which is, in part, why queer migration scholarship has been limited. We define a same-sex couple as two individuals of the same sex in the same household who report their relationship as "spouse" or "unmarried partner." We limit the sample to individuals who immigrated at the age of 18 or older and in 1991 or later.^[The exception is for for Figure \@ref(fig:total-pop), where we include those who immigrated in any year, at age 18 or older.] Hence this analysis considers four types of couples: (1) two-immigrant couples who came to the U.S. together; (2) two-immigrant couples that formed once in the U.S.; (3) mixed status couples where an immigrant migrated to be with their U.S.-born partner; and (4) mixed status couples that formed in the U.S. As shown in the Supplementary Material, results do not differ substantively for one- or two-immigrant couples. We are unable to differentiate between couples that partnered or married abroad and those that did so in the U.S. We elaborate on the implications of these scope conditions in the Discussion.  
+We merge individual-level data on immigrants in the U.S. with state- and country-level variables from a variety of datasets. The individual data come from the 2008 to 2019 ACS [@ruggles_2021]. Each year, the ACS surveys a 1-percent representative sample of the U.S. population about their education, occupation, income, family structure, immigration status, country of origin, location, and a variety of other individual and household attributes. It is important to note that the ACS is currently the only representative, public-use dataset to inquire about both partner sex and immigrant status which is, in part, why queer migration scholarship has been limited. We define a same-sex couple as two individuals of the same sex in the same household who report their relationship as "spouse" or "unmarried partner." We limit the sample to individuals who immigrated at the age of 18 or older and in 1991 or later.^[The exception is for for Figure \@ref(fig:total-pop), where we include those who immigrated in any year, at age 18 or older.] Hence this analysis considers four types of couples: (1) two-immigrant couples who came to the U.S. together; (2) two-immigrant couples that formed once in the U.S.; (3) mixed status couples where an immigrant migrated to be with their U.S.-born partner; and (4) mixed status couples that formed in the U.S. As shown in the Online Appendix, results do not differ substantively for one- or two-immigrant couples. We are unable to differentiate between couples that partnered or married abroad and those that did so in the U.S. We elaborate on the implications of these scope conditions in the Discussion.  
 
 The 12 years of survey data contain `r nrow(filter(acs_wide, same_sex == T & (yrimmig_main >= 1991 | yrimmig_partner >= 1991)))` same-sex couples that include at least one immigrant, for a total of `r nrow(filter(acs_ind, same_sex == T))` immigrants in same-sex couples with complete data. These immigrants are compared to `r nrow(filter (acs_wide, same_sex == F & (yrimmig_main >= 1991 | yrimmig_partner >= 1991)))` corresponding different-sex couples containing `r nrow(filter(acs_ind, same_sex == F))` individual immigrants. Below, we outline how we use these data to construct dependent variables based on each analysis. All analyses incorporate ACS sampling weights.  
 
@@ -341,7 +341,7 @@ Our country- and state-level controls come from a variety of sources. Country-of
 
 <!-- the World Bank's Global Bilateral Migration Database [@ozden_2011] for 1960, 1970, and 1980 and -->
 
-For our individual-level analysis we include individual controls from the ACS for reported sex, age, education (with categories for less than high school, high school, some college, and college), year of immigration, inverse hyperbolic sign of positive income in thousands in the past year [similar to the natural log transformation; see @burbidge_1988_alternative], and a binary unemployment indicator (for income reported to be 0 or less). Descriptive statistics for variables used in all analyses are included in Section A of the Supplementary Material. 
+For our individual-level analysis we include individual controls from the ACS for reported sex, age, education (with categories for less than high school, high school, some college, and college), year of immigration, inverse hyperbolic sign of positive income in thousands in the past year [similar to the natural log transformation; see @burbidge_1988_alternative], and a binary unemployment indicator (for income reported to be 0 or less). Descriptive statistics for variables used in all analyses are included in Section A of the Online Appendix. 
 
 
 
@@ -352,34 +352,32 @@ For our individual-level analysis we include individual controls from the ACS fo
 ## Descriptive Trends
 We first estimate total numbers of immigrants in same- and different-sex couples, applying survey weights to obtain population-level estimates from the ACS. Recall, Figure \@ref(fig:total-pop) showed that whereas numbers of different-sex immigrant couples have steadily increased over the period of study, numbers of same-sex immigrant couples have increased much more rapidly, especially since the the 2013 Supreme Court decision overturning DOMA.  
 
+**[FIGURE \@ref(fig:desc-country) ABOUT HERE]**  
 
 **[FIGURE \@ref(fig:desc-ind) ABOUT HERE]**  
 
-**[FIGURE \@ref(fig:desc-country) ABOUT HERE]**  
+
+
+How do same- and different-sex immigrant couples differ in their individual attributes? Do variables typically used in models for migration differ between the groups? Figure \@ref(fig:desc-country) compares immigrants in same- and different-sex couples on five origin country-level variables. First, macroeconomic theory predicts that difference in wages and living standards across countries is one of the most important motivations for migration. Panel A in Figure \@ref(fig:desc-country) shows that per-capita GDP is indeed higher in the U.S. than the average country of origin for both groups of immigrants, but the gap is significantly greater for immigrants in different-sex couples. This means that immigrants in same-sex couples are coming from countries with higher standards of living than those in different-sex couples. Statistics for the unemployment rate differential (Panel B) indicate similar trends: LGB immigrants come from countries with lower unemployment rates. These findings indicate that macroeconomic considerations may be less important to the migration of LGB immigrants.  
+
+Models of migration also often use distance between countries as a proxy for migration costs, with closer countries often having more migration between. Panel C of \@ref(fig:desc-country) shows that immigrants in same-sex couples tend to come from somewhat more distant countries. Panel D looks at a measure of network effects: at the time of immigration, what is the proportion of total immigrants in the U.S. from the country of origin? Compared to different-sex couples, immigrants in same-sex couples immigrated from countries that were less represented in the U.S. population at the time of migration. This indicates that the network effects that attract migrants from the same country of origin may be less relevant to LGB immigrants. Finally, Panel E of Figure \@ref(fig:desc-country) compares V-Dem democracy level for country of origin at time of migration. We see that levels of liberal democracy tend to be higher for immigrants in same-sex couples, indicating that political context may play a more important or different role in their migration decisions.  
+
+Immigrants in same-sex couples appear to come from more advantaged countries, but are they more advantaged on an individual level as well? Previous studies on LGB immigrants show those coming from wealthy, democratic countries may still be fleeing oppression. Figure \@ref(fig:desc-ind) present results from four individual attributes. Panels A and B show that immigrants in same-sex couples tend to *more* highly educated than immigrants in different-sex couples, with about 10 percent more having high school and four-year college degrees. Panel C corroborates the macroeconomic findings at the individual level: Not only do immigrants in same-sex couples come from countries with higher per capita GDP, but they individually tend to earn more than immigrants in different-sex couples. Panel D demonstrates that immigrants in same-sex couples also tend to work in professions with higher occupational prestige scores. Together, these findings indicate that LGB immigrants may come from more privileged social origins than their heterosexual counterparts.  
+
+Figure \@ref(fig:desc-country) implies that there is between-country selection of immigrants in same-sex couples, but Figure \@ref(fig:desc-ind) does not necessarily imply within-country selection as well. Section B of the Online Appendix examines within-country selection explicitly, subtracting the individual attributes in Figure \@ref(fig:desc-ind) from country-year averages in the ACS. The steadily positive values for immigrants in same-sex couples mean that not only do immigrants in same-sex couples come from more advantaged countries, but they tend to be among the most advantaged immigrants from a given couuntry, as well.  
+
+Although we see significant differences between same- and different-sex couples on a number of important migration variables, none shows the sudden jump in recent years reflected in Figure \@ref(fig:total-pop). Turning to LGB policy may better explain this surge. Figure \@ref(fig:policy-desc) charts the average country-of-origin and U.S.-state LGB policy score for the immigrants in our sample over time, comparing means for immigrants in same- and different-sex couples. The left panel shows that country-of-origin index at time of migration is generally higher for immigrants in same-sex couples, and since 2013 it has rapidly increased. Immigrants in same-sex couples tend to come from more progressive countries, and this trend tracks closely with the overall population of this group. The right panel indicates less of a difference in U.S. state policies, although states where immigrants in same-sex couples live tend to score somewhat higher. 
 
 **[FIGURE \@ref(fig:policy-desc) ABOUT HERE]**  
 
 
-How do same- and different-sex immigrant couples differ in their individual attributes? Do variables typically used in models for migration differ between the groups? Figure \@ref(fig:desc) compares immigrants in same- and different-sex couples on four variables. First, macroeconomic theory predicts that difference in wages and living standards across countries is one of the most important motivations for migration. The first panel in Figure \@ref(fig:desc) shows that per-capita GDP is indeed higher in the U.S. than the average country of origin for both groups of immigrants, but the gap is significantly greater for immigrants in different-sex couples. This means that immigrants in same-sex couples are coming from countries with higher standards of living than those in different-sex couples.  
 
-Statistics for the unemployment rate differential (see Section B of the Supplementary Material) indicate similar trends: LGB immigrants come from countries with lower unemployment rates. These findings indicate that macroeconomic considerations may be less important to the migration of LGB immigrants. The second panel corroborates this finding on the individual level: Not only do immigrants in same-sex couples come from countries with higher per capita GDP, but they individually tend to earn more than immigrants in different-sex couples. Additional analyses (see Supplementary Material) demonstrate that immigrants in same-sex couples also tend to work in professions with higher occupational prestige scores and have somewhat higher education qualifications, indicating that they may come from more privileged social origins than their heterosexual counterparts.  
-
-The bottom-left panel of Figure \@ref(fig:desc) looks at a measure of network effects: at the time of immigration, what is the proportion of total immigrants in the U.S. from the country of origin? Compared to different-sex couples, immigrants in same-sex couples immigrated from countries that were less represented in the U.S. population at the time of migration. This indicates that the network effects that attract migrants from the same country of origin may be less relevant to LGB immigrants. Finally, the fourth panel of Figure \@ref(fig:desc) compares V-Dem democracy level for country of origin at time of migration. We see that levels of liberal democracy tend to be higher for immigrants in same-sex couples, indicating that political context may play a more important or different role in their migration decisions.  
-
-Although we see significant differences between same- and different-sex couples on a number of important migration variables, none shows the sudden jump in recent years reflected in Figure \@ref(fig:total-pop). Turning to LGB policy may better explain this surge. Figure \@ref(fig:policy-desc) charts the average country-of-origin and U.S.-state LGB policy score for the immigrants in our sample over time, comparing means for immigrants in same- and different-sex couples. The left panel shows that country-of-origin index at time of migration is generally higher for immigrants in same-sex couples, and since 2013 it has rapidly increased. Immigrants in same-sex couples tend to come from more progressive countries, and this trend tracks closely with the overall population of this group. The right panel indicates less of a difference in U.S. state policies, although states where immigrants in same-sex couples live tend to score somewhat higher. 
-
-
+Figure \@ref(fig:country-map) shows the percentage of immigrants to the U.S. in same-sex couples from each country of origin, averaging over the 29 possible years of immigration, and Table \@ref(tab:country-tab) presents the top ten of these along with average LGB policy score over these years. The top sending countries include interesting diversity. Although countries with more progressive policies top the list, Malaysia, Zimbabwe, and Singapore make the list with their relatively repressive contexts. Having countries within the top 10 span multiple regions and cultures provides preliminary evidence that LGB policy in not substantially affecting willingness to respond truthfully on the ACS about being in a same-sex couple. Nor does it appear as though responses to the ACS are simply a function of country-of-origin LGB policies, as policy scores vary significantly across the top 10. Figure \@ref(fig:state-map) presents the percentage of immigrants in same-sex couples in U.S. states, averaging over the survey years and possible countries of origin, and Table \@ref(tab:state-tab) ranks the top ten. Although states with progressive policies occupy the top spots, Montana, Missouri, and Florida still make the list with less affirming policy environments.  
 
 **[FIGURE \@ref(fig:country-map) ABOUT HERE]**  
   
 
 **[FIGURE \@ref(fig:state-map) ABOUT HERE]**  
-
-
-
-  
-
-Figure \@ref(fig:country-map) shows the percentage of immigrants to the U.S. in same-sex couples from each country of origin, averaging over the 29 possible years of immigration, and Table \@ref(tab:country-tab) presents the top ten of these along with average LGB policy score over these years. The top sending countries include interesting diversity. Although countries with more progressive policies top the list, Malaysia, Zimbabwe, and Singapore make the list with their relatively repressive contexts. Having countries within the top 10 span multiple regions and cultures provides preliminary evidence that LGB policy in not substantially affecting willingness to respond truthfully on the ACS about being in a same-sex couple. Nor does it appear as though responses to the ACS are simply a function of country-of-origin LGB policies, as policy scores vary significantly across the top 10. Figure \@ref(fig:state-map) presents the percentage of immigrants in same-sex couples in U.S. states, averaging over the survey years and possible countries of origin, and Table \@ref(tab:state-tab) ranks the top ten. Although states with progressive policies occupy the top spots, Montana, Missouri, and Florida still make the list with less affirming policy environments.  
 
   
 **[TABLE \@ref(tab:country-tab) ABOUT HERE]**  
@@ -519,13 +517,13 @@ Finally, Model 5 includes a dichotomous variable for the post-2013 DOMA decision
 ## Robustness Checks
 
 
-Our results hold up to a variety of robustness checks presented in Section C of the Supplementary Material; we outline the major results here. First, as mentioned above, sex misreporting may bias the results by including a non-trivial number of different-sex couples in the counts of same-sex couples. Published papers using the ACS to study same-sex couples overwhelmingly deal with potential misreporting using the method suggested by @gates_2009 that we employ: dropping respondents whose sex or relation to household head were allocated by the Census Bureau. We conduct a more stringent test of the sensitivity of our results to misreporting, using the empirical mismatch rates by survey response mode from two studies conducted by the Census Bureau in 2010 and 2016 [@kreider_2015; @kreider_2017] to reduce the proportions of immigrants in same-sex couples in data before 2019.^[Beginning in 2019, the ACS added explicit "opposite-sex" and "same-sex" categories for spouses and unmarried partners, so data for this year should be in large part purged of sex misreporting [@walker_2021]. See the Supplementary Material for more details.]  
+Our results hold up to a variety of robustness checks presented in Section C of the Online Appendix; we outline the major results here. First, as mentioned above, sex misreporting may bias the results by including a non-trivial number of different-sex couples in the counts of same-sex couples. Published papers using the ACS to study same-sex couples overwhelmingly deal with potential misreporting using the method suggested by @gates_2009 that we employ: dropping respondents whose sex or relation to household head were allocated by the Census Bureau. We conduct a more stringent test of the sensitivity of our results to misreporting, using the empirical mismatch rates by survey response mode from two studies conducted by the Census Bureau in 2010 and 2016 [@kreider_2015; @kreider_2017] to reduce the proportions of immigrants in same-sex couples in data before 2019.^[Beginning in 2019, the ACS added explicit "opposite-sex" and "same-sex" categories for spouses and unmarried partners, so data for this year should be in large part purged of sex misreporting [@walker_2021]. See the Online Appendix for more details.]  
 
 **[FIGURE \@ref(fig:sens) ABOUT HERE]**  
 
-Here we show the hypothetical effects on our coefficients in the presence of even very high misreporting rates. Figure \@ref(fig:sens) takes Model 5 from the country proportions models (Table \@ref(tab:country-props)) and Model 4 from the state proportions models (Table \@ref(tab:state-props)) and reduces the proportions of same-sex couples in the data for pre-2019 data. It varies the percentage of misreported same-sex married couples from 0 to 90 percent and of unmarried couples from 0 to 14 percent; the horizontal axis shows a weighted average of misreporting between these two groups. Highlighted in dashed bars are the empirical mismatch rates found in the two studies by @kreider_2015 and @kreider_2017. We see that even extremely high misreporting rates in the pre-2019 ACS do not render these coefficients insignificant. In the Supplementary Material, we present the coefficients of interest for all of the models in Tables \@ref(tab:country-props) and \@ref(tab:state-props) with proportions reduced to levels implied by the studies by @kreider_2015 and @kreider_2017. Results are substantively the same.  
+Here we show the hypothetical effects on our coefficients in the presence of even very high misreporting rates. Figure \@ref(fig:sens) takes Model 5 from the country proportions models (Table \@ref(tab:country-props)) and Model 4 from the state proportions models (Table \@ref(tab:state-props)) and reduces the proportions of same-sex couples in the data for pre-2019 data. It varies the percentage of misreported same-sex married couples from 0 to 90 percent and of unmarried couples from 0 to 14 percent; the horizontal axis shows a weighted average of misreporting between these two groups. Highlighted in dashed bars are the empirical mismatch rates found in the two studies by @kreider_2015 and @kreider_2017. We see that even extremely high misreporting rates in the pre-2019 ACS do not render these coefficients insignificant. In the Online Appendix, we present the coefficients of interest for all of the models in Tables \@ref(tab:country-props) and \@ref(tab:state-props) with proportions reduced to levels implied by the studies by @kreider_2015 and @kreider_2017. Results are substantively the same.  
 
-Second, although our analysis for the most part has been at the country or state levels, there is the question of whether the aggregate trends in Tables \@ref(tab:country-props) and \@ref(tab:state-props) are driven by smaller, progressive countries that send relatively few immigrants. Hence in the Supplementary Material we re-specify these models using Weighted Least Squares (Tables C.5 and C.6), weighting by the relative size of the immigrant stock in the year of immigration. Results are substantively the same; for country proportions models, the coefficient for country LGB policy score is more precisely estimated, while effects are somewhat weaker for the state proportions models. This implies that, for the typical immigrant, associations with LGB policy at country of origin are stronger than those with U.S. state LGB policy.  
+Second, although our analysis for the most part has been at the country or state levels, there is the question of whether the aggregate trends in Tables \@ref(tab:country-props) and \@ref(tab:state-props) are driven by smaller, progressive countries that send relatively few immigrants. Hence in the Online Appendix we re-specify these models using Weighted Least Squares (Tables C.5 and C.6), weighting by the relative size of the immigrant stock in the year of immigration. Results are substantively the same; for country proportions models, the coefficient for country LGB policy score is more precisely estimated, while effects are somewhat weaker for the state proportions models. This implies that, for the typical immigrant, associations with LGB policy at country of origin are stronger than those with U.S. state LGB policy.  
 
 Third, we assess whether the results in Table \@ref(tab:country-props) are driven by trends for married couples (Table C.7) or those with one U.S.-born partner (Table C.9). Results are stronger for married couples and those with no U.S.-born partner. This implies that married immigrant couples may be immigrating from countries with more progressive LGB policies, while U.S. citizens tend to partner with immigrants from somewhat less progressive countries.  
 <!-- Fourth, we re-specify individual models with the state policy outcome treated as continuous and estimate linear models using OLS. Results are substantively the same as in Table \@ref(tab:ord}.   -->
@@ -745,91 +743,42 @@ total_df %>%
 
 ```
 
-\newpage
 
-```{r desc-ind, fig.cap = 'Individual descriptive statistics for immigrants in couples 2008-2019, with survey weights and 95% confidence intervals. Currency in thousands of 1999 dollars.'}
-income <- acs_ind_survey %>%
-  mutate(same_sex = if_else(same_sex == T, 'Same-Sex', 'Different-Sex')) %>%
-  group_by(year, same_sex) %>%
-  summarize(var = survey_mean(inctot, vartype = "ci", na.rm = T)) %>%
-  mutate(var_name = 'Annual Gross Income (Thousands)')
-
-hs <- acs_ind_survey %>%
-  mutate(same_sex = if_else(same_sex == T, 'Same-Sex', 'Different-Sex'),
-         hs = if_else(educ %in% c('HS', 'some col', 'college'), 1, 0)) %>%
-  group_by(year, same_sex) %>%
-  summarize(var = survey_mean(hs, vartype = "ci", na.rm = T)) %>%
-  mutate(var_name = 'High School Completion')
-
-college <- acs_ind_survey %>%
-  mutate(same_sex = if_else(same_sex == T, 'Same-Sex', 'Different-Sex'),
-         college = if_else(educ == 'college', 1, 0)) %>%
-  group_by(year, same_sex) %>%
-  summarize(var = survey_mean(college, vartype = "ci", na.rm = T)) %>%
-  mutate(var_name = 'College Completion')
-
-# state_income <- acs_ind_survey %>%
-#   mutate(same_sex = if_else(same_sex == T, 'Same-Sex', 'Different-Sex')) %>%
-#   group_by(year, same_sex) %>%
-#   summarize(var = survey_mean(state_income, vartype = "ci", na.rm = T)) %>%
-#   mutate(var_name = 'U.S. State of Residence Per Capita Income')
-
-hwsei <- acs_ind_survey %>%
-  mutate(same_sex = if_else(same_sex == T, 'Same-Sex', 'Different-Sex')) %>%
-  group_by(year, same_sex) %>%
-  summarize(var = survey_mean(hwsei, vartype = "ci", na.rm = T)) %>%
-  mutate(var_name = 'Hauser and Warren Socioeconomic Index')
-
-
-bind_rows(income, hs, college, hwsei) %>%
-  rename(Year = year) %>%
-  ggplot(aes(x = Year, y = var, linetype = same_sex)) +
-  geom_line() +
-  geom_ribbon(aes(ymin = var_low, ymax = var_upp, group = same_sex, col = NULL), alpha = .2) +
-  facet_wrap(~var_name, scales = "free", ncol = 2) +
-  ylab('') +
-  theme( # legend.justification=c(1,0),
-  #     legend.position=c(.22,.82),
-  #     legend.background = element_rect(fill = alpha("white", 0.5))
-      legend.position="bottom",
-      text = element_text(size = 8))
- 
-```
 
 \newpage
 
-```{r desc-country, fig.cap = 'Origin country-level descriptive statistics for immigrants in couples 2008-2019, for year of migration, with survey weights and 95% confidence intervals. Currency in thousands of 1999 dollars.'}
+```{r desc-country, fig.height = 6.5, fig.cap = 'Origin country-level descriptive statistics for immigrants in couples 2008-2019, for year of migration, with survey weights and 95% confidence intervals. Currency in thousands of 1999 dollars.'}
 
 
 distance <- acs_ind_survey %>%
   mutate(same_sex = if_else(same_sex == T, 'Same-Sex', 'Different-Sex')) %>%
   group_by(year, same_sex) %>%
   summarize(var = survey_mean(distw, vartype = "ci", na.rm = T)) %>%
-  mutate(var_name = 'Distance to Country of Origin (km)')
+  mutate(var_name = 'C. Distance to Country of Origin (km)')
 
 unemp <- acs_ind_survey %>%
   mutate(same_sex = if_else(same_sex == T, 'Same-Sex', 'Different-Sex')) %>%
   group_by(year, same_sex) %>%
   summarize(var = -survey_mean(unemp_dif, vartype = "ci", na.rm = T)) %>%
-  mutate(var_name = 'Unemployment Rate Difference with U.S.')
+  mutate(var_name = 'B. Unemployment Rate Difference with U.S.')
 
 prop_stock <- acs_ind_survey %>%
   mutate(same_sex = if_else(same_sex == T, 'Same-Sex', 'Different-Sex')) %>%
   group_by(year, same_sex) %>%
   summarize(var = survey_mean(stock_prop, vartype = "ci", na.rm = T)) %>%
-  mutate(var_name = 'Proportion U.S. Immigrant Stock')
+  mutate(var_name = 'D. Proportion U.S. Immigrant Stock')
 
 wage_dif <- acs_ind_survey %>%
   mutate(same_sex = if_else(same_sex == T, 'Same-Sex', 'Different-Sex')) %>%
   group_by(year, same_sex) %>%
   summarize(var = -survey_mean(wage_dif, vartype = "ci", na.rm = T)) %>%
-  mutate(var_name = 'GDP Difference with U.S.')
+  mutate(var_name = 'A. GDP Difference with U.S.')
 
 vdem <- acs_ind_survey %>%
   mutate(same_sex = if_else(same_sex == T, 'Same-Sex', 'Different-Sex')) %>%
   group_by(year, same_sex) %>%
   summarize(var = survey_mean(vdem, vartype = "ci", na.rm = T)) %>%
-  mutate(var_name = 'Democracy Score (V-Dem)')
+  mutate(var_name = 'E. Democracy Score (V-Dem)')
 
 
 bind_rows(wage_dif, vdem, prop_stock, unemp, distance) %>%
@@ -845,6 +794,55 @@ bind_rows(wage_dif, vdem, prop_stock, unemp, distance) %>%
       legend.position="bottom",
       text = element_text(size = 8))
  
+```
+\newpage
+
+```{r desc-ind, fig.cap = 'Individual descriptive statistics for immigrants in couples 2008-2019, with survey weights and 95% confidence intervals. Currency in thousands of 1999 dollars.'}
+income <- acs_ind_survey %>%
+  mutate(same_sex = if_else(same_sex == T, 'Same-Sex', 'Different-Sex')) %>%
+  group_by(year, same_sex) %>%
+  summarize(var = survey_mean(inctot, vartype = "ci", na.rm = T)) %>%
+  mutate(var_name = 'C. Annual Gross Income (Thousands)')
+
+hs <- acs_ind_survey %>%
+  mutate(same_sex = if_else(same_sex == T, 'Same-Sex', 'Different-Sex'),
+         hs = if_else(educ %in% c('HS', 'some col', 'college'), 1, 0)) %>%
+  group_by(year, same_sex) %>%
+  summarize(var = survey_mean(hs, vartype = "ci", na.rm = T)) %>%
+  mutate(var_name = 'A. High School Completion')
+
+college <- acs_ind_survey %>%
+  mutate(same_sex = if_else(same_sex == T, 'Same-Sex', 'Different-Sex'),
+         college = if_else(educ == 'college', 1, 0)) %>%
+  group_by(year, same_sex) %>%
+  summarize(var = survey_mean(college, vartype = "ci", na.rm = T)) %>%
+  mutate(var_name = 'B. College Completion')
+
+# state_income <- acs_ind_survey %>%
+#   mutate(same_sex = if_else(same_sex == T, 'Same-Sex', 'Different-Sex')) %>%
+#   group_by(year, same_sex) %>%
+#   summarize(var = survey_mean(state_income, vartype = "ci", na.rm = T)) %>%
+#   mutate(var_name = 'U.S. State of Residence Per Capita Income')
+
+hwsei <- acs_ind_survey %>%
+  mutate(same_sex = if_else(same_sex == T, 'Same-Sex', 'Different-Sex')) %>%
+  group_by(year, same_sex) %>%
+  summarize(var = survey_mean(hwsei, vartype = "ci", na.rm = T)) %>%
+  mutate(var_name = 'D. Hauser and Warren Socioeconomic Index')
+
+
+bind_rows(income, hs, college, hwsei) %>%
+  rename(Year = year) %>%
+  ggplot(aes(x = Year, y = var, linetype = same_sex)) +
+  geom_line() +
+  geom_ribbon(aes(ymin = var_low, ymax = var_upp, group = same_sex, col = NULL), alpha = .2) +
+  facet_wrap(~var_name, scales = "free", ncol = 2) +
+  ylab('') +
+  theme( # legend.justification=c(1,0),
+  #     legend.position=c(.22,.82),
+  #     legend.background = element_rect(fill = alpha("white", 0.5))
+      legend.position="bottom",
+      text = element_text(size = 8))
 ```
 
 \newpage 

@@ -1,0 +1,636 @@
+---
+output:
+  bookdown::pdf_document2:
+    toc: yes
+    number_sections: yes
+    pandoc_args: !expr rmdfiltr::add_wordcount_filter(rmdfiltr::add_citeproc_filter(args = NULL))
+    latex_engine: xelatex
+    keep_tex: yes
+    extra_dependencies: ["float"]
+    #template: svm-latex-ms.tex
+# output: 
+#   pdf_document:
+#     citation_package: natbib
+#     keep_tex: true
+#     fig_caption: true
+#     latex_engine: pdflatex
+#     template: svm-latex-ms.tex
+header-includes:
+  # - \usepackage{setspace}\doublespace
+  # - \usepackage{endnotes}
+  #- \let\footnote=\endnote
+  #- \usepackage{endfloat}
+  # - \usepackage{fancyhdr}
+  # - \pagestyle{fancy}
+  # - \setlength{\headheight}{13.6pt}
+  # - \rhead{\textit{Hoffmann and Velasco}}
+  # - \lhead{\textit{`r format(Sys.time(), '%B %e, %Y')`}}
+  - \usepackage{float}
+  # - \let\counterwithout\relax
+  # - \let\counterwithin\relax
+  # - \usepackage{chngcntr}
+  - \counterwithin{figure}{section}
+  - \counterwithin{table}{section}
+  # - \usepackage{flafter}
+editor_options: 
+  
+  chunk_output_type: console
+citeproc: no
+fontfamily: mathpazo
+fontsize: 11pt
+geometry: margin=1in
+indent: yes
+link-citations: yes
+linkcolor: blue
+bibliography: zotero.bib  
+csl: apa.csl
+title: "Online Appendix"
+subtitle: "Making Migration Sexy: How LGB Policies Influence International Migration"
+# date: "`r format(Sys.time(), '%B %e, %Y')`"
+ 
+# author:
+# - Nathan I. Hoffmann, Department of Sociology, University of California, Los Angeles
+# - Kristopher Velasco, Department of Sociology, Princeton University
+---
+
+<!-- Turn off hyphenation -->
+<!-- \usepackage[none]{hyphenat} -->
+
+
+```{r setup, include=F}
+knitr::opts_chunk$set(echo = F, warning = F, message = F, cache = T, results = 'asis',
+                      cache.lazy = F)
+# knitr::opts_chunk$set(fig.pos = "h", out.extra = "")
+
+library(broom)
+library(janitor)
+library(priceR)
+library(kableExtra)
+library(sjstats)
+library(imputeTS)
+library(mvtnorm)
+library(ordinal)
+library(lme4)
+library(MASS)
+library(countrycode)
+library(knitr)
+library(RColorBrewer)
+library(haven)
+library(cowplot)
+library(srvyr)
+library(lmtest)
+library(sandwich)
+library(here)
+library(plm)
+library(patchwork)
+library(stargazer)
+library(gtsummary)
+library(tidyverse)
+
+# knitr::opts_chunk$set(error=TRUE) 
+
+options("yaml.eval.expr" = TRUE)
+
+# theme_set(theme_cowplot(font_family = 'Palatino') + 
+theme_set(theme_classic(base_family = 'Palatino') + 
+            theme(legend.title=element_blank(), 
+                  panel.grid.major.y = element_line('grey80'),
+                  legend.background = element_rect(fill = "transparent")))
+ggplot <- function(...) ggplot2::ggplot(...) + scale_color_brewer(palette="Dark2") + 
+  scale_fill_brewer(palette="Dark2")
+
+options(scipen=1, digits=2)
+knit_hooks$set(inline = function(x) {
+  prettyNum(x, big.mark=",")
+})
+knitr::opts_chunk$set(error=TRUE) 
+
+
+```
+
+```{r load, include = F}
+acs_wide <- read.csv(here('data', 'acs_wide.csv'))
+acs_ind <- readRDS(here('data', 'acs_couple_policy.rds')) 
+acs_prop <- read.csv(here('data', 'acs_prop_yrimmig_policy.csv')) %>%
+  mutate(post_2013 = (yrimmig > 2013),
+         n_same_sex_coupled = n_spouse_same_sex + n_partner_same_sex)
+acs_prop_state <- read.csv(here('data', 'acs_dyad_policy.csv'))
+
+
+
+income_country <- acs_ind %>%
+  group_by(year, bpld) %>%
+  summarize(income_country = weighted.mean(inctot, perwt, na.rm = T)) 
+
+hs_country <- acs_ind %>%
+  mutate(hs = if_else(educ %in% c('HS', 'some col', 'college'), 1, 0)) %>%
+  group_by(year, bpld) %>%
+  summarize(hs_country = weighted.mean(hs, perwt, na.rm = T)) 
+
+college_country <- acs_ind %>%
+  mutate(college = if_else(educ == 'college', 1, 0)) %>%
+  group_by(year, bpld) %>%
+  summarize(college_country = weighted.mean(college, perwt, na.rm = T)) 
+
+hwsei_country <- acs_ind %>%
+  group_by(year, bpld) %>%
+  summarize(hwsei_country = weighted.mean(hwsei, perwt, na.rm = T)) 
+
+
+acs_ind <- acs_ind %>%
+  left_join(income_country) %>%
+  left_join(hs_country) %>%
+  left_join(college_country) %>%
+  left_join(hwsei_country)
+
+
+
+acs_wide_survey <- acs_wide %>% as_survey_design(ids = cluster, weights = hhwt)
+acs_ind_survey <- acs_ind %>% as_survey_design(ids = cluster, weights = perwt)
+
+```
+
+# (APPENDIX) Appendix {-} 
+
+# Descriptive Statistics
+```{r desc-table-country}
+theme_gtsummary_compact()
+
+acs_prop %>%
+  select(`Percent in same-sex couples` = prop_same_sex, `Country LGB policy score` = origin_score,
+         `Distance (km)` = distw, 
+         `Contiguous border` = contig, `Common official language` = comlang_off, 
+         `Common ethnic language` = comlang_ethno, `Ever colonial relationship` = colony,
+         `Per-cap. GDP difference` = wage_dif, `Unemployment difference` = unemp_dif, 
+         `Liberal democracy (V-Dem)` = vdem, `Proportion same-country stock` = stock_prop) %>%
+  tbl_summary() %>%
+  modify_caption('Summary statistics for country-level analysis') %>%
+  as_kable_extra(booktabs = T) %>%
+  kable_styling(latex_options = "hold_position")
+
+```
+
+```{r desc-table-state}
+
+acs_prop_state %>%
+  select(`Percent in same-sex couples` = prop_same_sex, `State LGB policy score` = state_policy,
+         `Country LGB policy score` = origin_score,
+         `Distance (km)` = distw, 
+         `Contiguous border` = contig, `Common official language` = comlang_off, 
+         `Common ethnic language` = comlang_ethno, `Ever colonial relationship` = colony,
+         `Per-cap. GDP difference` = wage_dif, `Unemployment difference` = unemp_dif, 
+         `Liberal democracy (V-Dem)` = vdem, `Proportion same-country stock` = stock_prop,
+         `State unemployment rate` = state_unemploy, `State per-capita income` = state_income) %>%
+  tbl_summary() %>%
+  modify_caption('Summary statistics for state-level analysis')  %>%
+  as_kable_extra(booktabs = T) %>%
+  kable_styling(latex_options = "hold_position")
+```
+
+```{r desc-table-ind}
+acs_ind %>%
+  labelled::remove_labels() %>%
+  mutate(same_sex = ifelse(same_sex == T, 'Same-sex', 'Different-sex')) %>%
+  select(`State LGB policy` = state_policy_binned, `Same-sex` = same_sex, 
+         `Country LGB policy score` = origin_score, 
+         `Sex` = sex, `Age` = age, `Education` = educ,
+         `Number of children` = nchild, `IHS-transformed income` = ihs_income, 
+         `No income` = no_income, `Year of immigration` = yrimmig,
+         `Distance (km)` = distw, 
+         `Contiguous border` = contig, `Common official language` = comlang_off, 
+         `Common ethnic language` = comlang_ethno, `Ever colonial relationship` = colony,
+         `Per-cap. GDP difference` = wage_dif, `Unemployment difference` = unemp_dif, 
+         `Liberal democracy (V-Dem)` = vdem, `Proportion same-country stock` = stock_prop,
+         `State unemployment rate` = state_unemploy, `State per-capita income` = state_income) %>%
+  tbl_summary(by = `Same-sex`) %>%
+  add_overall() %>%
+  modify_caption('Summary statistics for individual-level analysis')  %>%
+  as_kable_extra(booktabs = T) %>%
+  kable_styling(latex_options = "hold_position")
+```
+
+
+
+
+\newpage
+
+# Additional Descriptive Trends
+Figure \ref{fig:scatter-country} relies on the data used in the country-level models. The vertical axis represents the proportion of immigrants from each country in same-sex couples in each year of immigration, from 1991 to 2019, while the horizontal axis indicates the policy score of the country of origin in the year of immigration. The line shows the bivariate regression line. Percentages above 5 are not shown (hiding `r sum(acs_prop$prop_same_sex > 5)` out of `r nrow(acs_prop)` country-years).  
+
+Figure \ref{fig:scatter-state} relies on the data used in the state-level models, with the vertical axis showing the proportion of immigrants from each country in same-sex couples in each state, in each survey year, from 2008 to 2019. In the left panel, the horizontal axis represents the origin country policy score in the mean year of immigration for that group, while the right panel's horizontal axis represents the state policy score in the survey year. The lines shows the bivariate regression lines.  
+
+```{r scatter-country, fig.cap = "Proportion of immigrants from each country in same-sex couples in each year of immigration, from 1991 to 2019. The horizontal axis indicates the policy score of the country of origin in the year of immigration. Points are jittered for clarity, and percentages above 5 are not shown."}
+
+acs_prop %>%
+  filter(prop_same_sex <= 5) %>%
+  ggplot(aes(x = origin_score, y = prop_same_sex, color = yrimmig)) +
+  geom_jitter(alpha = .5) + 
+  scale_color_continuous() +
+  geom_smooth(method = "lm", color = 'black') +
+  ylim(0,5) +
+  labs(x= 'LGB policy score for country of origin', 
+        y = 'Percentage of immigrants in same-sex couples')
+
+
+
+
+```
+
+
+
+```{r scatter-state, fig.cap = "Proportion of immigrants from each country in same-sex couples in each state, in each survey year, from 2008 to 2019. The left panel's horizontal axis represents the origin country policy score in the mean year of immigration for that group, while the right panel's horizontal axis represents the state policy score in the survey year. Points are jittered for clarity, and percentages above 5 are not shown."}
+state_plot_1 <- acs_prop_state %>%
+  filter(prop_same_sex <= 5) %>%
+  ggplot(aes(x = state_policy, y = prop_same_sex, color = year)) +
+  geom_jitter(alpha = .5) +
+  geom_smooth(method = "lm", color = 'black') +
+  scale_color_continuous(low = 'black', high = 'green') +
+    labs(x= 'LGB policy score for country of origin', 
+        y = 'Percentage of immigrants in same-sex couples')
+
+state_plot_2 <- acs_prop_state %>%
+  filter(prop_same_sex <= 5) %>%
+  ggplot(aes(x = origin_score, y = prop_same_sex, color = mean_year_immig)) +
+  geom_jitter(alpha = .5) +
+  geom_smooth(method = "lm", color = 'black') +
+  scale_color_continuous() +
+    labs(x= 'LGB policy score for U.S. state of residence', 
+        y = '')
+
+
+
+state_plot_1 + state_plot_2
+
+```
+
+```{r desc-top1}
+acs_ind %>%
+  filter(same_sex == T) %>%
+  group_by(bpld) %>%
+  count() %>%
+  rename(`Birth country` = bpld) %>%
+  arrange(desc(n)) %>%
+  head(10) %>%
+  kable(booktabs = T,
+        caption = 'Top 10 sending countries of immigrants in same-sex couples in the American Community Survey 2008-2019') %>%
+  kable_styling(latex_options = "hold_position")
+```
+
+```{r desc-top2}
+acs_ind %>%
+  filter(same_sex == F)%>%
+  group_by(bpld) %>%
+  count() %>%
+  rename(`Birth country` = bpld) %>%
+  arrange(desc(n))%>%
+  head(10) %>%
+  kable(booktabs = T,
+        caption = 'Top 10 sending countries of immigrants in different-sex couples in the American Community Survey 2008-2019') %>%
+  kable_styling(latex_options = "hold_position")
+```
+
+```{r desc-fig, fig.cap = 'Selection descriptive statistics for immigrants in couples 2008-2019, with survey weights and 95% confidence intervals. Each panel subtracts the ACS year- and country-level average from each immigrant originating from that country. Values above 0 indicate positive selection. All currency in 1000s of 1999 dollars.'}
+
+
+income <- acs_ind_survey %>%
+  mutate(same_sex = if_else(same_sex == T, 'Same-Sex', 'Different-Sex')) %>%
+  group_by(year, same_sex) %>%
+  summarize(var = survey_mean(inctot - income_country, vartype = "ci", na.rm = T)) %>%
+  mutate(var_name = 'C. Annual Gross Income (Thousands)')
+
+hs <- acs_ind_survey %>%
+  mutate(same_sex = if_else(same_sex == T, 'Same-Sex', 'Different-Sex'),
+         hs = if_else(educ %in% c('HS', 'some col', 'college'), 1, 0)) %>%
+  group_by(year, same_sex) %>%
+  summarize(var = survey_mean(hs - hs_country, vartype = "ci", na.rm = T) ) %>%
+  mutate(var_name = 'A. High School Completion')
+
+college <- acs_ind_survey %>%
+  mutate(same_sex = if_else(same_sex == T, 'Same-Sex', 'Different-Sex'),
+         college = if_else(educ == 'college', 1, 0)) %>%
+  group_by(year, same_sex) %>%
+  summarize(var = survey_mean(college - college_country, vartype = "ci", na.rm = T)) %>%
+  mutate(var_name = 'B. College Completion')
+
+hwsei <- acs_ind_survey %>%
+  mutate(same_sex = if_else(same_sex == T, 'Same-Sex', 'Different-Sex')) %>%
+  group_by(year, same_sex) %>%
+  summarize(var = survey_mean(hwsei - hwsei_country, vartype = "ci", na.rm = T)) %>%
+  mutate(var_name = 'D. Hauser and Warren Socioeconomic Index')
+
+
+bind_rows(income, hs, college, hwsei) %>%
+  rename(Year = year) %>%
+  ggplot(aes(x = Year, y = var, linetype = same_sex)) +
+  geom_line() +
+  geom_ribbon(aes(ymin = var_low, ymax = var_upp, group = same_sex, col = NULL), alpha = .2) +
+  facet_wrap(~var_name, scales = "free", ncol = 2) +
+  ylab('') +
+  theme( # legend.justification=c(1,0),
+  #     legend.position=c(.22,.82),
+  #     legend.background = element_rect(fill = alpha("white", 0.5))
+      legend.position="bottom",
+      text = element_text(size = 8))
+
+
+```
+
+\newpage
+
+
+# Robustness Checks
+
+## Adjusting proportions based on empirical mismatch rates
+
+
+
+Published papers using the ACS to study same-sex couples overwhelmingly use the method by @gates_2009 employed our main paper to adjust for misreporting. However here we implement a novel method to adjust proportions of estimated immigrants in same-sex couples, based on the estimated mismatch rates from two U.S. Census Bureau studies.  Beginning in 2019, the ACS provides explicit categories for "Opposite-sex husband/wife/spouse," "Opposite-sex unmarried partner," "Same-sex husband/wife/spouse," and "Same-sex unmarried partner" [@walker_2021], so sex misreporting in the 2019 data is unlikely. Hence in most sensitivity analyses below, 2019 estimates are not adjusted for misreporting.  
+
+In a Census Bureau working paper, @kreider_2015 use personal information such as names and addresses match same-sex couples from the 2010 ACS to Social Security administrative data. They find that 57 percent of married couples coded as same-sex in the ACS are coded as different-sex in the administrative data. The corresponding sex mismatch rate for unmarried same-sex couples is 7 percent. (Our data include `r sum(acs_wide$related_partner == 'Spouse' & acs_wide$same_sex == T)` married and `r sum(acs_wide$related_partner == 'Unmarried Partner' & acs_wide$same_sex == T)` unmarried same-sex immigrant couples.) A follow-up study [@kreider_2017] shows that these mismatch rates appear to have fallen: In a 2016 ACS test module that included explicit categories for different- and same-sex spouses and partners, 31 percent of married and 3 percent of unmarried same-sex couples had inconsistent sex responses. This decreasing mismatch rate may be due to the greater numbers of same-sex couples openly identifying themselves as well as the growing popularity of responding to the ACS via Internet (see Supplementary Material), a response mode introduced in 2013 which is now the default [@u.s.censusbureau_2017]. In the 2016 test of the ACS, the mismatch rate for mail-in responses was 47 and 6 percent for married and unmarried same-sex couples, respectively, whereas for Internet responses they were only 22 and 2.4 percent [@kreider_2017]. A computer-assisted telephone interviewing (CATI) or computer-assisted personal interviewing (CAPI) response mode is sometimes administered as well, but the 2016 study did not assess its error rate. In the 2010 ACS, @kreider_2015 find CATI/CAPI sex reporting mismatch for 46 and 13 percent for married and unmarried same-sex couples, respectively. In our sample of immigrants in same-sex couples, `r sum(acs_ind$respmode == 'Mail' & acs_ind$same_sex == T)` responded by mail, `r with(filter(acs_ind, same_sex == T), sum(respmode == 'CATI/CAPI'))` responded by CAPI/CATI, and `r sum(acs_ind$respmode == 'Internet' & acs_ind$same_sex == T)` responded by Internet survey. Response mode proportions by couple type are shown in Table \ref{tab:respmode}.  
+
+Table \ref{tab:mismatch} shows the mismatch rates estimated by @kreider_2015 and @kreider_2015. In the supplemental analysis below (Table \ref{tab:country-props-adj}), we use these apparent mismatch rates to adjust proportions used in models in Table 3 of the main paper. Each proportion is adjusted separately by marital status and response mode. For example, all internet respondents coded as being in married same-sex couples have their final proportion reduced by 22.5%. For mail-in responses, the proportions are reduced by the average between the two studies (`r (59+47.4)/2` percent for married and `r (7+5.6)/2` percent for unmarried couples). 
+
+```{r respmode}
+tabyl(acs_ind, respmode, year, same_sex) %>%
+  adorn_percentages('col') %>%
+  bind_rows() %>%
+  mutate(same_sex = c(F, F, F, T, T, T)) %>%
+  select(respmode, same_sex, everything()) %>%
+  kable(booktabs = T,
+        caption = 'Response mode proportions for different- and same-sex couples, by year. Proportions are within couple type and year.') %>%
+  kable_styling(font_size = 9) %>%
+  kable_styling(latex_options = "hold_position")
+```
+
+```{r mismatch}
+
+tibble(`Study Year` = c(2010, 2010, 2016, 2016),
+       Relationship = c('Married', 'Unmarried Partner', 'Married', 'Unmarried Partner'),
+       `Mail` = c('59%', '7%', '47.4%', '5.6%'), 
+       `Internet` = c('NA', 'NA', '22.5%', '2.4%'), 
+       `CAPI/CATI` = c('46%', '13%', 'Unknown', 'Unknown'),
+       Overall = c('57.3%', '7%', '35%', '3.4%')) %>%
+  kable(booktabs = T, 
+        caption = 'Mismatch rates from Kreider \\& Lofquist (2015) and Kreider et al. (2017)') %>%
+      footnote(general = "American Community Survey 2008-2019. Authors\' calculations.",
+           general_title = 'Source:',
+           footnote_as_chunk = T)  %>%
+  kable_styling(latex_options = "hold_position")
+```
+
+```{r state-props-adj}
+
+state_prop <- lm(prop_same_sex_adj ~ state_policy, data = acs_prop_state)
+
+state_prop2 <- lm(prop_same_sex_adj ~ origin_score + state_policy, data = acs_prop_state)
+
+state_prop_fe <- lm(prop_same_sex_adj ~ state_policy + origin_score + distw + contig + 
+                          comlang_off + comlang_ethno + colony +
+                          wage_dif + unemp_dif + vdem + stock_prop +
+                           state_unemploy + state_income + Country + state, 
+                       data = acs_prop_state)
+
+state_prop_fe2 <- lm(prop_same_sex_adj ~ state_policy*origin_score + distw + contig + 
+                          comlang_off + comlang_ethno + colony +
+                          wage_dif + unemp_dif + vdem + stock_prop +
+                           state_unemploy + state_income + Country + state, 
+                       data = acs_prop_state)
+
+state_prop_2013 <- lm(prop_same_sex_adj ~ post_2013 + state_policy + origin_score + distw + contig + 
+                          comlang_off + comlang_ethno + colony +
+                          wage_dif + unemp_dif + vdem + stock_prop +
+                           state_unemploy + state_income + Country + state, 
+                       data = mutate(acs_prop_state, post_2013 = (year > 2013)))
+
+state_prop_2013_int <- lm(prop_same_sex_adj ~ post_2013*origin_score + state_policy + distw + contig + 
+                          comlang_off + comlang_ethno + colony +
+                          wage_dif + unemp_dif + vdem + stock_prop +
+                           state_unemploy + state_income + Country + state, 
+                       data = mutate(acs_prop_state, post_2013 = (year > 2013)))
+
+state_prop_2013_int2 <- lm(prop_same_sex_adj ~ post_2013*state_policy + origin_score + distw + contig + 
+                          comlang_off + comlang_ethno + colony +
+                          wage_dif + unemp_dif + vdem + stock_prop +
+                           state_unemploy + state_income + Country + state, 
+                       data = mutate(acs_prop_state, post_2013 = (year > 2013)))
+
+
+mod_list <- list(state_prop, state_prop2, state_prop_fe, state_prop_fe2, 
+                 state_prop_2013, state_prop_2013_int2, state_prop_2013_int)
+
+
+robust_list <- list()
+for(mod_num in 1:length(mod_list)){
+  robust_list[[mod_num]] <- coeftest(mod_list[[mod_num]], 
+                                     vcov = vcovCL(mod_list[[mod_num]], cluster = ~ state + Country), 
+                                     save = T)[, "Std. Error"]
+}
+
+
+
+stargazer(mod_list,
+          header = F, 
+          keep = c('origin_score', 'state_policy', 'post_2013'),
+          # omit = c('Country', 'state'),
+          order = paste0("^", c('state_policy', 'origin_score', 
+                                'state_policy:origin_score', 'post_2013TRUE', 
+                                'post_2013TRUE:state_policy', 
+                                'post_2013TRUE:origin_score') , "$"),
+          covariate.labels = c('State LGB policy score', 'Country LGB policy score',
+                                'State score × country-score', 'Post-2013', 
+                               'State score × post-2013', 'Country score × post-2013'),
+          dep.var.labels = "Percent in same-sex couples by state-country-year",
+          add.lines = list(c('State controls and FEs?', 'no', 'no', rep('yes', 5)),
+                           c('Country controls and FEs?', 'no', 'no', rep('yes', 5))),
+          se = robust_list,
+          keep.stat = c('n'),
+          star.cutoffs = c(0.1, 0.05, 0.01, 0.001),
+          star.char = c('†', '*', '**', '***'),
+          notes = c("\\parbox[t]{\\textwidth}{\\textit{Note}: †\\textit{p}<0.1; *\\textit{p}<0.05; **\\textit{p}<0.01; ***\\textit{p}<0.001. Country and state two-way clustered standard errors are shown in parentheses. State controls include unemployment rate and per-capita income. Country controls include population-weighted distance, contiguous border, common official language, common ethnic language, colonial relationship, wage differential, unemployment differential, proportion same-country stock, and democracy.}", 
+                    "\\textit{Source}: American Community Survey 2008-2019"), 
+          notes.label = '',
+          notes.align = 'l',
+          notes.append = F,
+          table.placement = "H",
+          label = 'tab:state-props-adj',
+          title = 'Adjusted by rates of empirical sex mismatch by married, unmarried, and response mode. Percent same-sex in by country of origin, U.S. state, and survey year.')
+
+```
+
+
+```{r state-weights}
+state_prop <- lm(prop_same_sex ~ state_policy, data = acs_prop_state, weights = stock_prop)
+
+state_prop2 <- lm(prop_same_sex ~ origin_score + state_policy, data = acs_prop_state, weights = stock_prop)
+
+state_prop_fe <- lm(prop_same_sex ~ state_unemploy + state_income + state + 
+                        origin_score + state_policy, 
+                       data = acs_prop_state, weights = stock_prop)
+
+state_prop_fe2 <- lm(prop_same_sex ~ state_policy + origin_score + distw + contig + 
+                          comlang_off + comlang_ethno + colony +
+                          wage_dif + unemp_dif + vdem + stock_prop +
+                           state_unemploy + state_income + Country + state, 
+                       data = acs_prop_state, weights = stock_prop)
+
+state_prop_2013 <- lm(prop_same_sex ~ post_2013 + state_policy + origin_score + distw + contig + 
+                          comlang_off + comlang_ethno + colony +
+                          wage_dif + unemp_dif + vdem + stock_prop +
+                           state_unemploy + state_income + Country + state, 
+                       data = mutate(acs_prop_state, post_2013 = (year > 2013)), weights = stock_prop)
+
+state_prop_2013_int <- lm(prop_same_sex ~ post_2013*origin_score + state_policy + distw + contig + 
+                          comlang_off + comlang_ethno + colony +
+                          wage_dif + unemp_dif + vdem + stock_prop +
+                           state_unemploy + state_income + Country + state, 
+                       data = mutate(acs_prop_state, post_2013 = (year > 2013)), weights = stock_prop)
+
+
+
+mod_list <- list(state_prop, state_prop2, state_prop_fe, state_prop_fe2, 
+                 state_prop_2013, state_prop_2013_int)
+robust_list <- list()
+for(mod_num in 1:length(mod_list)){
+  robust_list[[mod_num]] <- coeftest(mod_list[[mod_num]], 
+                                     vcov = vcovCL(mod_list[[mod_num]], cluster = ~ state + Country), 
+                                     save = T)[, "Std. Error"]
+}
+
+stargazer(mod_list,
+          header = F, 
+          keep = c('origin_score', 'state_policy', 'post_2013'),
+          # omit = c('Country', 'state'),
+          order = paste0("^", c('state_policy', 'origin_score', 'post_2013TRUE', 
+                                'post_2013TRUE:origin_score') , "$"),
+          covariate.labels = c('State LGB policy score', 'Country LGB policy score',
+                                'Post-2013', 'Country score × Post-2013'),
+          dep.var.labels = "Percent in same-sex couples by state-country-year",
+          add.lines = list(c('State controls and FEs?', 'no', 'no', rep('yes', 4)),
+                           c('Country controls and FEs?', rep('no', 3), rep('yes', 3))),
+          se = robust_list,
+          keep.stat = c('n'),
+          star.cutoffs = c(0.1, 0.05, 0.01, 0.001),
+          star.char = c('†', '*', '**', '***'),
+          notes = c("\\parbox[t]{.8\\textwidth}{\\textit{Note}: †\\textit{p}<0.1; *\\textit{p}<0.05; **\\textit{p}<0.01; ***\\textit{p}<0.001. Country and state two-way clustered standard errors are shown in parentheses. State controls include unemployment rate and per-capita income. Country controls include population-weighted distance, contiguous border, common official language, common ethnic language, colonial relationship, wage differential, unemployment differential, proportion same-country stock, and democracy.}", 
+                    "\\textit{Source}: American Community Survey 2008-2019"), 
+          notes.label = '',
+          notes.align = 'l',
+          notes.append = F,
+          table.placement = "H",
+          label = 'tab:state-props',
+          title = 'Weighted regression of percent same-sex in by country of origin, U.S. state, and survey year. ')
+```
+
+\newpage
+
+
+
+\newpage
+
+
+
+```{r state-props-full}
+state_prop <- lm(prop_same_sex ~ state_policy, data = acs_prop_state)
+
+state_prop2 <- lm(prop_same_sex ~ origin_score + state_policy, data = acs_prop_state)
+
+
+
+state_prop_fe <- lm(prop_same_sex ~ state_policy + origin_score + distw + contig + 
+                          comlang_off + comlang_ethno + colony +
+                          wage_dif + unemp_dif + vdem + stock_prop +
+                           state_unemploy + state_income + bpld + sname, 
+                       data = mutate(acs_prop_state, bpld = Country, sname = state))
+
+state_prop_fe2 <- lm(prop_same_sex ~ state_policy*origin_score + distw + contig + 
+                          comlang_off + comlang_ethno + colony +
+                          wage_dif + unemp_dif + vdem + stock_prop +
+                           state_unemploy + state_income + bpld + sname, 
+                       data = mutate(acs_prop_state, bpld = Country, sname = state))
+
+state_prop_2013 <- lm(prop_same_sex ~ post_2013 + state_policy + origin_score + distw + contig + 
+                          comlang_off + comlang_ethno + colony +
+                          wage_dif + unemp_dif + vdem + stock_prop +
+                           state_unemploy + state_income + bpld + sname, 
+                       data = mutate(acs_prop_state, post_2013 = (year > 2013),bpld = Country, sname = state))
+
+state_prop_2013_int <- lm(prop_same_sex ~ post_2013*origin_score + state_policy + distw + contig + 
+                          comlang_off + comlang_ethno + colony +
+                          wage_dif + unemp_dif + vdem + stock_prop +
+                           state_unemploy + state_income + bpld + sname, 
+                       data = mutate(acs_prop_state, post_2013 = (year > 2013),bpld = Country, sname = state))
+
+state_prop_2013_int2 <- lm(prop_same_sex ~ post_2013*state_policy + origin_score + distw + contig + 
+                          comlang_off + comlang_ethno + colony +
+                          wage_dif + unemp_dif + vdem + stock_prop +
+                           state_unemploy + state_income + bpld + sname, 
+                       data = mutate(acs_prop_state, post_2013 = (year > 2013), bpld = Country, sname = state))
+
+
+
+mod_list <- list(state_prop, state_prop2, state_prop_fe, state_prop_fe2, 
+                 state_prop_2013, state_prop_2013_int2, state_prop_2013_int)
+
+
+robust_list <- list()
+for(mod_num in 1:length(mod_list)){
+  robust_list[[mod_num]] <- coeftest(mod_list[[mod_num]], 
+                                     vcov = vcovCL(mod_list[[mod_num]], cluster = ~ Country + state), 
+                                     save = T)[, "Std. Error"]
+}
+
+stargazer(mod_list,
+          header = F, 
+          omit = c('bpld', 'sname'),
+          order = paste0("^", c('state_policy', 'origin_score', 
+                                'state_policy:origin_score', 'post_2013TRUE', 
+                                'post_2013TRUE:state_policy', 
+                                'post_2013TRUE:origin_score') , "$"),
+          covariate.labels = c('State LGB policy score', 
+                               'Country LGB policy score',
+                               'State score × country-score', 
+                               'Post-2013',
+                               'State score × post-2013', 
+                               'Country score × post-2013',
+                               'Distance (km)',
+                               'Contiguous border',
+                               'Common official language',
+                               'Common ethnic language',
+                               'Ever colonial relationship',
+                               'Per-cap. GDP difference',
+                               'Unemployment difference',
+                               'Liberal democracy (V-Dem)',
+                               'Proportion same-country stock',
+                               'State unemployment rate',
+                               'State per-capita income'),
+          dep.var.labels = "Percent in same-sex couples by state-country-year",
+          add.lines = list(c('State controls and FEs?', 'no', 'no', rep('yes', 5)),
+                           c('Country controls and FEs?', 'no', 'no', rep('yes', 5))),
+          se = robust_list,
+          keep.stat = c('n'),
+          star.cutoffs = c(0.1, 0.05, 0.01, 0.001),
+          star.char = c('†', '*', '**', '***'),
+          notes = c("\\parbox[t]{\\textwidth}{\\textit{Note}: †\\textit{p}<0.1; *\\textit{p}<0.05; **\\textit{p}<0.01; ***\\textit{p}<0.001. Country and state two-way clustered standard errors are shown in parentheses.}", 
+                     "\\textit{Source}: American Community Survey 2008-2019"), 
+          no.space = T,
+          column.sep.width = '2pt',
+          font.size = 'footnotesize',
+          notes.label = '',
+          notes.align = 'l',
+          notes.append = F,
+          table.placement = "H",
+          label = 'tab:state-props-full',
+          title = 'Percent same-sex in by country of origin, U.S. state, and survey year.')
+
+```
+
+
+\newpage
+
+# References
+\setlength{\parindent}{-0.2in}
+\setlength{\leftskip}{0.2in}
+\setlength{\parskip}{8pt}
+\noindent
+
+
