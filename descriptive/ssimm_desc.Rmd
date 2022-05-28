@@ -1039,22 +1039,22 @@ sim_state <- bind_rows(sim)
 ```{r state-sim, fig.cap='Predicted percentage of immigrants in same-sex couples by country-state, using Model 5 from Table 3.'}
 plot1 <- sim_country  %>%
   mutate(state_policy = ifelse(state_policy == -2, 'Min. U.S. state policy', 'Max. U.S. state policy')) %>%
-  ggplot(aes(x=origin_score, y=fit, col=state_policy)) +
+  ggplot(aes(x=origin_score, y=fit, linetype=state_policy)) +
   geom_line() + 
   geom_ribbon(aes(ymin=fit.low, ymax=fit.high, 
-                  fill = state_policy, col = NULL), alpha = .2) +
+                  col = NULL), alpha = .2) +
   xlab('Country-of-origin LGB policy score') +
-  ylab('') +
+  ylab('Percentage of immigrants in same-sex couples') +
   theme(legend.position=c(.4,.8))
 
 plot2 <- sim_state %>%
   mutate(origin_score = ifelse(origin_score == -3, 'Min. country policy', 'Max. country policy')) %>%
-  ggplot(aes(x=state_policy, y=fit, col=origin_score)) +
+  ggplot(aes(x=state_policy, y=fit, linetype=origin_score)) +
   geom_line() + 
   geom_ribbon(aes(ymin=fit.low, ymax=fit.high, 
-                  fill = origin_score, col = NULL), alpha = .2) +
+                  col = NULL), alpha = .2) +
   xlab('U.S. state-of-residence LGB policy score') +
-  ylab('Percentage of immigrants in same-sex couples') +
+  ylab('') +
   theme(legend.position=c(.4,.8))
 
 
