@@ -4,7 +4,7 @@ output:
   bookdown::word_document2:
     reference_docx: "word-template.docx"
     toc: no
-    number_sections: yes
+    number_sections: no
     pandoc_args: !expr rmdfiltr::add_wordcount_filter(rmdfiltr::add_citeproc_filter(args = NULL))
     latex_engine: xelatex
     keep_tex: yes
@@ -324,13 +324,11 @@ Aside from the country and state indices, we also include a binary variable to i
 
 
 ## Analytic Strategy 
-Many of our analyses rely on descriptive statistics of ACS data. For these, we apply survey weights from the ACS.  
+Many of our analyses entail descriptive statistics of ACS data. For these, we apply survey weights from the ACS.  
 
 One of our goals is to isolate the effects of country-of-origin LGB policy on the immigration of immigrants in same-sex couples. The ideal survey would follow potential immigrants over time and have information about sexual orientation, allowing us to estimate how the probability of migrating and choice of U.S. state of residence vary by sexual orientation. This ideal dataset does not exist, but we attempt to approximate it.  
 
-We reshape the data so that each observation is the proportion of individual immigrants in same-sex couples from country $x$ in state $y$ in year $z$, then multiply by 100. This results in `r nrow(acs_prop_state)` country-state-years. As in the previous set of models, this reshaping acts to control for aspects of migrant settlement common to immigrants from the same country. We regress the state-country-survey year proportion on state and sending-country policy scores and adjust for state and origin-country controls. State-level measures are linked to survey year, while origin-country LGB policy and controls are linked to the mean year of immigration for each immigrant group. We include state and country-of-origin fixed effects, and we cluster errors at the state and country levels.    
-
-
+We reshape the data so that each observation is the proportion of individual immigrants in same-sex couples from country $x$ in state $y$ in survey year $z$, then multiply by 100. For example, the observation for France $\times$ New York $\times$ 2015 is `r acs_prop_state %>% filter(state == 'New York', country == 'France', year == 2015) %>% pull(prop_same_sex)`, meaning that among ACS respondents who immigrated from France and resided in New York at the time of the 2012 survey, a weighted 0.91 percent were in cohabiting same-sex couples. This transformation of the data results in `r nrow(acs_prop_state)` country-state-year observations.^[Cells without any immigrants from a given country are necessarily dropped from the analysis.] This reshaping acts to control for aspects of migrant settlement common to immigrants from the same country. We regress the country-state-survey year proportion on state and sending-country policy scores and adjust for state and origin-country controls using OLS. State-level measures are linked to survey year, while origin-country LGB policy and controls are linked to the mean year of immigration for each country-state-year immigrant group. We include state and country-of-origin fixed effects, and we cluster errors at the state and country levels.    
 
 
 
@@ -362,7 +360,7 @@ How do same- and different-sex immigrant couples differ in their individual attr
 
 Models of migration also often use distance between countries as a proxy for migration costs, with closer countries often having more migration between. Panel C of \@ref(fig:desc-country) shows that immigrants in same-sex couples tend to come from somewhat more distant countries. Panel D looks at a measure of network effects: at the time of immigration, what is the proportion of total immigrants in the U.S. from the country of origin? Compared to different-sex couples, immigrants in same-sex couples immigrated from countries that were less represented in the U.S. population at the time of migration. This indicates that the network effects that attract migrants from the same country of origin may be less relevant to LGB immigrants. Finally, Panel E of Figure \@ref(fig:desc-country) compares V-Dem democracy level for country of origin at time of migration. We see that levels of liberal democracy tend to be higher for immigrants in same-sex couples, indicating that political context may play a more important or different role in their migration decisions.  
 
-Immigrants in same-sex couples appear to come from more advantaged countries, but are they more advantaged on an individual level as well? Previous studies on LGB immigrants show those coming from wealthy, democratic countries may still be fleeing oppression. Figure \@ref(fig:desc-ind) present results from four individual attributes. Panels A and B show that immigrants in same-sex couples tend to *more* highly educated than immigrants in different-sex couples, with about 10 percent more having high school and four-year college degrees. Panel C corroborates the macroeconomic findings at the individual level: Not only do immigrants in same-sex couples come from countries with higher per capita GDP, but they individually tend to earn more than immigrants in different-sex couples. Panel D demonstrates that immigrants in same-sex couples also tend to work in professions with higher occupational prestige scores. Together, these findings indicate that LGB immigrants may come from more privileged social origins than their heterosexual counterparts.  
+Immigrants in same-sex couples appear to come from more advantaged countries, but are they more advantaged on an individual level as well? Previous studies on LGB immigrants show those coming from wealthy, democratic countries may still be fleeing oppression. Figure \@ref(fig:desc-ind) presents results from four individual attributes. Panels A and B show that immigrants in same-sex couples tend to *more* highly educated than immigrants in different-sex couples, with about 10 percent more having high school and four-year college degrees. Panel C corroborates the macroeconomic findings at the individual level: Not only do immigrants in same-sex couples come from countries with higher per capita GDP, but they individually tend to earn more than immigrants in different-sex couples. Panel D demonstrates that immigrants in same-sex couples also tend to work in professions with higher occupational prestige scores. Together, these findings indicate that LGB immigrants may come from more privileged social origins than their heterosexual counterparts.  
 
 Figure \@ref(fig:desc-country) implies that there is between-country selection of immigrants in same-sex couples, but Figure \@ref(fig:desc-ind) does not necessarily imply within-country selection as well. Section B of the Online Appendix examines within-country selection explicitly, subtracting the individual attributes in Figure \@ref(fig:desc-ind) from country-year averages in the ACS. The steadily positive values for immigrants in same-sex couples mean that not only do immigrants in same-sex couples come from more advantaged countries, but they tend to be among the most advantaged immigrants from a given couuntry, as well.  
 
@@ -372,7 +370,7 @@ Although we see significant differences between same- and different-sex couples 
 
 
 
-Figure \@ref(fig:country-map) shows the percentage of immigrants to the U.S. in same-sex couples from each country of origin, averaging over the 29 possible years of immigration, and Table \@ref(tab:country-tab) presents the top ten of these along with average LGB policy score over these years. The top sending countries include interesting diversity. Although countries with more progressive policies top the list, Malaysia, Zimbabwe, and Singapore make the list with their relatively repressive contexts. Having countries within the top 10 span multiple regions and cultures provides preliminary evidence that LGB policy in not substantially affecting willingness to respond truthfully on the ACS about being in a same-sex couple. Nor does it appear as though responses to the ACS are simply a function of country-of-origin LGB policies, as policy scores vary significantly across the top 10. Figure \@ref(fig:state-map) presents the percentage of immigrants in same-sex couples in U.S. states, averaging over the survey years and possible countries of origin, and Table \@ref(tab:state-tab) ranks the top ten. Although states with progressive policies occupy the top spots, Montana, Missouri, and Florida still make the list with less affirming policy environments.  
+Figure \@ref(fig:country-map) shows the percentage of immigrants to the U.S. in same-sex couples from each country of origin, averaging over the 29 possible years of immigration, and Table \@ref(tab:country-tab) presents the top ten of these along with average LGB policy score over these years. The top sending countries include interesting diversity. Although countries with more progressive policies top the list, Malaysia, Zimbabwe, and Singapore make the list with their relatively repressive contexts. Having countries within the top 10 span multiple regions and cultures provides preliminary evidence that LGB policy is not substantially affecting willingness to respond truthfully on the ACS about being in a same-sex couple. Nor does it appear as though responses to the ACS are simply a function of country-of-origin LGB policies, as policy scores vary significantly across the top 10. Figure \@ref(fig:state-map) presents the percentage of immigrants in same-sex couples in U.S. states, averaging over the survey years and possible countries of origin, and Table \@ref(tab:state-tab) ranks the top ten. Although states with progressive policies occupy the top spots, Montana, Missouri, and Florida still make the list with less affirming policy environments.  
 
 **[FIGURE \@ref(fig:country-map) ABOUT HERE]**  
   
@@ -451,9 +449,6 @@ names(state_vec) <- state_tab$`State`
 
 ## Model Results
 
-
-
-
 ```{r state-props-mods}
 country_prop <- lm(prop_same_sex ~ origin_score, data = acs_prop_state)
 
@@ -498,30 +493,29 @@ state_effect <- sd(acs_ind$state_policy, na.rm = T)*coef(state_prop2)[['state_po
 
 ```
 
-We next turn to the effects of U.S. state LGB policy. Table \@ref(tab:state-props) presents models of the U.S. state-level proportion of immigrants in same-sex couples, from a given country of origin in a given survey year. Model 1 contains only one predictor: U.S. state policy score in the survey year. We see that, on average, states with more friendly LGB policies have somewhat higher proportions of immigrants in same-sex couples. Model 2 adds a predictor for country-of-origin policy score at the mean year of immigration. Although the coefficient for country of origin score is more precisely estimated, the two variables have effects of roughly equal size. A one-standard deviation (`r sd(acs_ind$origin_score, na.rm = T)`-point) increase origin score is associated with a `r origin_effect` percentage-point increase of immigrants in same-sex couples, whereas the corresponding state policy standard deviation increase of `r sd(acs_ind$state_policy, na.rm = T)` points is `r state_effect` percentage points.   
+Although the trends in Figure \@ref(fig:policy-desc) are suggestive, other factors correlated with LGB policy may be confounding results. To address this, Table \@ref(tab:state-props) presents OLS models of the U.S. state-level proportion of immigrants in same-sex couples, from a given country of origin in a given survey year. We present only coefficients of interest here, but Section D of the Online Appendix contains full tables of regression coefficients.
 
 **[TABLE \@ref(tab:state-props) ABOUT HERE]**  
 
-<!-- Although more LGB-friendly policies in both locations are associated with higher numbers of immigrants in same-sex couples, country-of-origin LGB policy is a stronger predictor than U.S. state policy, even considering the somewhat different scale of these variables.    -->
+Model 1 contains only one predictor: origin-country LGB policy score, for average year of immigration for immigrants in the country-state-year cell. We see that countries with more progressive LGB policies tend to send more immigrants to the U.S. who end up in same-sex couples. The average percentage of immigrants in same-sex couples is only `r mean(acs_prop_state$prop_same_sex, na.rm = T)` percent, so an increase of `r coef(country_prop)[[2]]` percent per point increase in LGB policy score represents a substantial effect.  
 
-According to the descriptive analysis above, immigrants in same-sex couples tend to have higher incomes and hold more prestigious occupations than immigrants in different-sex couples, and they tend to come from wealthier countries. This implies that immigrants in same-sex couples may be attracted to progressive states for their economic rather than political benefits, so Model 3 adds state and origin-country controls and fixed effects. Surprisingly, the coefficients for state score and country score *grow* in strength. More progressive sending countries are represented by greater proportions of same-sex couples, and they tend to settle in more progressive U.S. states.  
+Model 2 turns to the role of U.S. state policy score in a given survey year, adjusting only for this variable. We see that, on average, states with more friendly LGB policies have somewhat higher proportions of immigrants in same-sex couples, on the order of `r coef(state_prop)[[2]]` percentage points per point of LGB policy score. Model 3 includes both country and state LGB scores; results barely change from the first two models, suggesting that LGB policy in both sending country and receiving state have somewhat independent relationships with LGB migration. 
 
-Model 4 adds an interaction between state and country LGB scores. It is positive and significant, and the coefficient for state score retains its value while that for country score becomes insignificant. Progressive states attract higher proportions of same-sex immigrant couples, and this effect is stronger for immigrants from more progressive countries. 
+According to the descriptive analysis above, immigrants in same-sex couples tend to have higher incomes and hold more prestigious occupations than immigrants in different-sex couples, and they tend to come from wealthier countries. This implies that immigrants in same-sex couples may be attracted to progressive states for their economic rather than political benefits, so Model 4 adds state and origin-country controls and fixed effects. Intriguingly, the coefficients for state score and country score *grow* in strength. More progressive sending countries are represented by greater proportions of same-sex couples, and they tend to settle in more progressive U.S. states.  
 
-<!-- To help with interpretation, we use simulation to predict representation of same-sex couples. The left panel of Figure \@ref(fig:state-sim2} has U.S. state LGB policy on the horizontal axis and the percentage of immigrants in same-sex couples depending on vertical axis, with separate prediction lines shown for immigrants originating in countries with the minimum or maximum LGB policy score. As we vary the two hypothetical policy environments, we see that in repressive U.S. states,  -->
 
-Finally, Model 5 includes a dichotomous variable for the post-2013 DOMA decision era, and Models 6 and 7 interact this with state and sending-country scores, respectively. The significant post-2013 variable in Model 5 implies that proportions LGB have increased across the country in the past few years. Coefficients for state policy, including in its interaction with the post-2013 dichotomous variable, become less important in these models, whereas origin-country score retains its effect. After 2013, the proportion of immigrants in same-sex couples increased across states for those from more progressive countries. With increasingly progressive federal policy, state policy appears to matter less in the post-DOMA era.
+Model 5 adds an interaction between state and country LGB scores. It is positive and significant; progressive states attract higher proportions of same-sex immigrant couples, and this effect is stronger for immigrants from more progressive countries. To aid interpretation, we use simulation to predict representation of same-sex couples. Country and state LGB policy score are set to the same value for the entire sample, and the outcome is simulated and averaged over the entire sample. The left panel of Figure \@ref(fig:state-sim} has country-of-origin LGB policy on the horizontal axis and the percentage of immigrants in same-sex couples depending on vertical axis, with separate prediction lines shown for immigrants living in U.S. states with the minimum or maximum LGB policy score. The right panel switches the role of country and state policy. Both panels show that LGB immigrants tend to originate from more progressive countries and live in more progressive U.S. states. But the relationship is strongest when both country and state policy scores are high; at low levels of either score, the difference in the other score has little effect on the expected percentage of immigrants in same-sex couples.  
 
+Finally, Model 6 augments Model 4 with a dichotomous variable for the post-2013 DOMA decision era, and Model 7 adds the same variable to Model 5. The significant post-2013 variable in both regressions implies that proportions LGB have increased across the country in the past few years. Coefficients for state policy become less important in these models, whereas origin-country score retains its effect. After 2013, the proportion of immigrants in same-sex couples increased across states for those from more progressive countries. With increasingly progressive federal policy, state policy appears to matter less in the post-DOMA era, or to matter only in conjunction with origin-country policy.
 
 
 ## Robustness Checks
-
 
 Our results hold up to a variety of robustness checks presented in Section C of the Online Appendix; we outline the major results here. First, as mentioned above, sex misreporting may bias the results by including a non-trivial number of different-sex couples in the counts of same-sex couples. Published papers using the ACS to study same-sex couples overwhelmingly deal with potential misreporting using the method suggested by @gates_2009 that we employ: dropping respondents whose sex or relation to household head were allocated by the Census Bureau. We conduct a more stringent test of the sensitivity of our results to misreporting, using the empirical mismatch rates by survey response mode from two studies conducted by the Census Bureau in 2010 and 2016 [@kreider_2015; @kreider_2017] to reduce the proportions of immigrants in same-sex couples in data before 2019.^[Beginning in 2019, the ACS added explicit "opposite-sex" and "same-sex" categories for spouses and unmarried partners, so data for this year should be in large part purged of sex misreporting [@walker_2021]. See the Online Appendix for more details.]  
 
 **[FIGURE \@ref(fig:sens) ABOUT HERE]**  
 
-Here we show the hypothetical effects on our coefficients in the presence of even very high misreporting rates. Figure \@ref(fig:sens) takes Model 5 from the country proportions models (Table \@ref(tab:country-props)) and Model 4 from the state proportions models (Table \@ref(tab:state-props)) and reduces the proportions of same-sex couples in the data for pre-2019 data. It varies the percentage of misreported same-sex married couples from 0 to 90 percent and of unmarried couples from 0 to 14 percent; the horizontal axis shows a weighted average of misreporting between these two groups. Highlighted in dashed bars are the empirical mismatch rates found in the two studies by @kreider_2015 and @kreider_2017. We see that even extremely high misreporting rates in the pre-2019 ACS do not render these coefficients insignificant. In the Online Appendix, we present the coefficients of interest for all of the models in Tables \@ref(tab:country-props) and \@ref(tab:state-props) with proportions reduced to levels implied by the studies by @kreider_2015 and @kreider_2017. Results are substantively the same.  
+Here we show the hypothetical effects on our coefficients in the presence of even very high misreporting rates. Figure \@ref(fig:sens) takes Model 5 (which includes country and state controls and fixed effects) and reduces the proportions of same-sex couples in the data for pre-2019 data. It varies the percentage of misreported same-sex married couples from 0 to 90 percent and of unmarried couples from 0 to 14 percent; the horizontal axis shows a weighted average of misreporting between these two groups. Highlighted in dashed bars are the empirical mismatch rates found in the two studies by @kreider_2015 and @kreider_2017. We see that even extremely high misreporting rates in the pre-2019 ACS do not render these coefficients insignificant. In the Online Appendix, we present the coefficients of interest for all of the models in Tables \@ref(tab:country-props) and \@ref(tab:state-props) with proportions reduced to levels implied by the studies by @kreider_2015 and @kreider_2017. Results are substantively the same.  
 
 Second, although our analysis for the most part has been at the country or state levels, there is the question of whether the aggregate trends in Tables \@ref(tab:country-props) and \@ref(tab:state-props) are driven by smaller, progressive countries that send relatively few immigrants. Hence in the Online Appendix we re-specify these models using Weighted Least Squares (Tables C.5 and C.6), weighting by the relative size of the immigrant stock in the year of immigration. Results are substantively the same; for country proportions models, the coefficient for country LGB policy score is more precisely estimated, while effects are somewhat weaker for the state proportions models. This implies that, for the typical immigrant, associations with LGB policy at country of origin are stronger than those with U.S. state LGB policy.  
 
@@ -665,8 +659,8 @@ for(mod_num in 1:length(mod_list)){
 }
 
 huxreg(robust_list,
-       coefs = c('State LGB policy score' = 'state_policy',
-                 'Country LGB policy score' = 'origin_score', 
+       coefs = c('Country LGB policy score' = 'origin_score', 
+                 'State LGB policy score' = 'state_policy',
                  'State score × country-score' = 'state_policy:origin_score',
                  'Post-2013' = 'post_2013TRUE'),
        note = "{stars}. Country and state two-way clustered standard errors are shown in parentheses. State controls include unemployment rate and per-capita income. Country controls include population-weighted distance, contiguous border, common official language, common ethnic language, colonial relationship, per-capita GDP differential, unemployment differential, proportion same-country stock, and democracy. Source: American Community Survey 2008-2019.",
@@ -747,7 +741,7 @@ total_df %>%
 
 \newpage
 
-```{r desc-country, fig.height = 6.5, fig.cap = 'Origin country-level descriptive statistics for immigrants in couples 2008-2019, for year of migration, with survey weights and 95% confidence intervals. Currency in thousands of 1999 dollars.'}
+```{r desc-country, fig.height = 6, fig.cap = 'Origin country-level descriptive statistics for immigrants in couples 2008-2019, for year of migration, with survey weights and 95% confidence intervals. Currency in thousands of 1999 dollars.'}
 
 
 distance <- acs_ind_survey %>%
@@ -985,8 +979,91 @@ ggplot(data = state_imm,
 ```
 
 \newpage
+```{r state-sim-calc}
+## Varying origin score while keeping state score constant (at min and max)
+var1 <- 'origin_score'
+var <- 'state_policy'
+sim <- list()
+for(cat_loop in unique(acs_prop_state[,var1])){
+    var_vals <- c(min(acs_prop_state[,var]), max(acs_prop_state[,var]))
+    for(val in var_vals){
+        sim_dat <- acs_prop_state
+        sim_dat[, var1] <- cat_loop
+        sim_dat[, var] <- val
 
-```{r sens, eval = T, fig.cap = 'Coefficients for sending-country and U.S. state LGB policy context for fixed effects models in Tables 3 and 4, adjusted for hypothetical misreporting rates of married and unmarried same-sex couples in pre-2019 data. Ribbon shows 95 percent confidence intervals and dashed bars show estimated misreporting from the 2010 and 2016 U.S. Census Bureau tests on the ACS.'}
+        pred_dat <- predict(state_prop_fe2, newdata = sim_dat, se.fit = T,
+                            type = 'response') %>%
+          as.data.frame()
+
+       sim[[paste0(var,cat_loop, val)]] <- pred_dat %>%
+         summarize(fit = mean(fit, na.rm = T),
+                   se.fit = sqrt(mean(se.fit^2, na.rm = T)),
+                   fit.low = fit - 1.96*se.fit,
+                   fit.high = fit + 1.96*se.fit,
+                          origin_score = cat_loop,
+                          state_policy = val)
+    }
+}
+
+sim_country <- bind_rows(sim)
+
+## Varying state score while keeping origin policy constant (at min and max)
+var1 <- 'state_policy'
+var <- 'origin_score'
+sim <- list()
+for(cat_loop in unique(acs_prop_state[,var1])){
+    var_vals <- c(min(acs_prop_state[,var]), max(acs_prop_state[,var]))
+    for(val in var_vals){
+        sim_dat <- acs_prop_state
+        sim_dat[, var1] <- cat_loop
+        sim_dat[, var] <- val
+
+        pred_dat <- predict(state_prop_fe2, newdata = sim_dat, se.fit = T, 
+                            type = 'response') %>%
+          as.data.frame()
+
+       sim[[paste0(var,cat_loop, val)]] <- pred_dat %>%
+         summarize(fit = mean(fit, na.rm = T),
+                   se.fit = sqrt(mean(se.fit^2, na.rm = T)),
+                   fit.low = fit - 1.96*se.fit,
+                   fit.high = fit + 1.96*se.fit,
+                          state_policy = cat_loop,
+                          origin_score = val) 
+    }
+}
+
+
+sim_state <- bind_rows(sim)
+```
+
+```{r state-sim, fig.cap='Predicted percentage of immigrants in same-sex couples by country-state, using Model 5 from Table 3.'}
+plot1 <- sim_country  %>%
+  mutate(state_policy = ifelse(state_policy == -2, 'Min. U.S. state policy', 'Max. U.S. state policy')) %>%
+  ggplot(aes(x=origin_score, y=fit, col=state_policy)) +
+  geom_line() + 
+  geom_ribbon(aes(ymin=fit.low, ymax=fit.high, 
+                  fill = state_policy, col = NULL), alpha = .2) +
+  xlab('Country-of-origin LGB policy score') +
+  ylab('') +
+  theme(legend.position=c(.4,.8))
+
+plot2 <- sim_state %>%
+  mutate(origin_score = ifelse(origin_score == -3, 'Min. country policy', 'Max. country policy')) %>%
+  ggplot(aes(x=state_policy, y=fit, col=origin_score)) +
+  geom_line() + 
+  geom_ribbon(aes(ymin=fit.low, ymax=fit.high, 
+                  fill = origin_score, col = NULL), alpha = .2) +
+  xlab('U.S. state-of-residence LGB policy score') +
+  ylab('Percentage of immigrants in same-sex couples') +
+  theme(legend.position=c(.4,.8))
+
+
+plot1 + plot2 +  plot_layout(guides = 'keep') & theme(text = element_text(size = 9))
+```
+
+\newpage
+
+```{r sens, fig.cap = 'Coefficients for sending-country and U.S. state LGB policy context for Model 5 from Table 3, adjusted for hypothetical misreporting rates of married and unmarried same-sex couples in pre-2019 data. Ribbon shows 95 percent confidence intervals and dashed bars show estimated misreporting from the 2010 and 2016 U.S. Census Bureau tests on the ACS.'}
 
 mod <- lm(partner ~ spouse + I(spouse^2), data.frame(spouse = c(0, .573, .35),
            partner = c(0, .07, .034)))
@@ -1113,22 +1190,8 @@ add_global_label <- function(pwobj, Xlab = NULL, Ylab = NULL, Xgap = 0.03, Ygap 
     return(pwobj)
 }
 
-plot1 <- sens_df %>%
-  mutate(`Misreporting rate (weighted average)` =
-           (mis_spouse*n_spouse+mis_partner*n_partner)/(n_spouse + n_partner)) %>%
-  ggplot(aes(x = `Misreporting rate (weighted average)`, y = est)) +
-  geom_line() +
-  geom_ribbon(aes(ymin = lower, ymax = upper), alpha = .2)  +
-  geom_hline(yintercept = 0, linetype = 1) +
-  geom_errorbar(aes(ymin = lower, ymax = upper, width = .02, color = highlight),
-                linetype = 2) +
-  # facet_wrap(~facet) +
-  theme(legend.position = "none") +
-  scale_color_manual(values = c('transparent', 'black')) +
-  labs(y = 'Country score × Post-2013', x = 'Misreporting rate') +
-  ggtitle('Country Model 5')
 
-plot2 <- sens_df %>%
+plot1 <- sens_df %>%
   mutate(`Misreporting rate (weighted average)` = (mis_spouse*n_spouse+mis_partner*n_partner)/(n_spouse + n_partner)) %>%
   ggplot(aes(x = `Misreporting rate (weighted average)`, y = est2)) +
   geom_line() +
@@ -1139,10 +1202,10 @@ plot2 <- sens_df %>%
   #facet_wrap(~facet) +
   theme(legend.position = "none") +
   scale_color_manual(values = c('transparent', 'black')) +
-  labs(y = 'State LGB policy score', x = 'Misreporting rate') +
-  ggtitle('State Model 4')
+  labs(y = '', x = 'Misreporting rate') +
+  ggtitle('State LGB policy score')
 
-plot3 <- sens_df %>%
+plot2 <- sens_df %>%
   mutate(`Misreporting rate (weighted average)` = (mis_spouse*n_spouse+mis_partner*n_partner)/(n_spouse + n_partner)) %>%
   ggplot(aes(x = `Misreporting rate (weighted average)`, y = est3)) +
   geom_line() +
@@ -1153,8 +1216,8 @@ plot3 <- sens_df %>%
   #facet_wrap(~facet) +
   theme(legend.position = "none") +
   scale_color_manual(values = c('transparent', 'black')) +
-  labs(y = 'Country LGB policy score', x= 'Misreporting rate') +
-  ggtitle('State Model 4')
+  labs(y = '', x= 'Misreporting rate') +
+  ggtitle('Country LGB policy score')
 
-(plot1 + plot2 + plot3) & theme(text = element_text(size = 9))
+(plot1 + plot2) & theme(text = element_text(size = 9))
 ```
