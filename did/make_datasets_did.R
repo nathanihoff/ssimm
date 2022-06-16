@@ -548,15 +548,16 @@ acs_dyad_policy1 <- acs_dyad %>%
   left_join(state_policy,by = c('year' = 'Year', 'state' = 'State')) %>%
   filter(!is.na(origin_score)) %>%
   mutate(
-    prop_spouse_same_sex_adj = n_spouse_adj_same_sex / state_stock_year * 100,
-    prop_partner_same_sex_adj = n_partner_adj_same_sex / state_stock_year * 100,
+    n_couples = n_spouse_same_sex + n_partner_same_sex + n_dif_sex,
+    prop_spouse_same_sex_adj = n_spouse_adj_same_sex / n_couples * 100,
+    prop_partner_same_sex_adj = n_partner_adj_same_sex / n_couples * 100,
     prop_same_sex_adj = prop_spouse_same_sex_adj + prop_partner_same_sex_adj,
-    prop_dif_sex = n_dif_sex / state_stock_year * 100,
-    prop_spouse_same_sex = n_spouse_same_sex / state_stock_year * 100,
-    prop_partner_same_sex = n_partner_same_sex / state_stock_year * 100,
+    prop_dif_sex = n_dif_sex / n_couples * 100,
+    prop_spouse_same_sex = n_spouse_same_sex / n_couples * 100,
+    prop_partner_same_sex = n_partner_same_sex / n_couples * 100,
     prop_same_sex = prop_spouse_same_sex + prop_partner_same_sex,
-    prop_same_sex_oneimm = (n_spouse_oneimm_same_sex + n_partner_oneimm_same_sex) / state_stock_year * 100,
-    prop_same_sex_twoimm = (n_spouse_twoimm_same_sex + n_partner_twoimm_same_sex) / state_stock_year * 100)
+    prop_same_sex_oneimm = (n_spouse_oneimm_same_sex + n_partner_oneimm_same_sex) / n_couples * 100,
+    prop_same_sex_twoimm = (n_spouse_twoimm_same_sex + n_partner_twoimm_same_sex) / n_couples * 100)
   
   
   # mutate(prop_same_sex = same_sex_stock / state_stock_year * 100,
