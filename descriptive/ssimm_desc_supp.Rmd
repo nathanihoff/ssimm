@@ -5,7 +5,7 @@ output:
     number_sections: yes
     pandoc_args: !expr rmdfiltr::add_wordcount_filter(rmdfiltr::add_citeproc_filter(args = NULL))
     latex_engine: xelatex
-    keep_tex: yes
+    keep_tex: no
     extra_dependencies: ["float"]
     #template: svm-latex-ms.tex
 # output: 
@@ -45,7 +45,7 @@ linkcolor: blue
 bibliography: zotero.bib  
 csl: apa.csl
 title: "Online Appendix"
-subtitle: "Making Migration Sexy: How LGB Policies Influence International Migration"
+subtitle:  "Sexuality, Migration, and LGB Policy: A Portrait of Immigrants in Same-Sex Couples in the United States"
 # date: "`r format(Sys.time(), '%B %e, %Y')`"
  
 # author:

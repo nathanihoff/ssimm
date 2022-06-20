@@ -7,7 +7,8 @@ output:
     number_sections: no
     pandoc_args: !expr rmdfiltr::add_wordcount_filter(rmdfiltr::add_citeproc_filter(args = NULL))
     latex_engine: xelatex
-    keep_tex: yes
+    keep_tex: no
+    keep_md: true
     #template: svm-latex-ms.tex
 # output: 
 #   pdf_document:
@@ -43,20 +44,21 @@ title: "Sexuality, Migration, and LGB Policy: A Portrait of Immigrants in Same-S
 # title: "How Immigrants in Same-Sex Couples Change our Understanding of Migration"
 # title: "Repressed or Empowered? Immigrants in Same-Sex Couples in the U.S."
 # title: "Making Migration Sexy: How LGB Policies Influence International Migration"
-date: "`r format(Sys.time(), '%B %e, %Y')`"
+# date: "`r format(Sys.time(), '%B %e, %Y')`"
 # author:
 # - name: Nathan I. Hoffmann
 #   affiliation: Department of Sociology, University of California, Los Angeles
 # - name: Kristopher Velasco
 #   affiliation: Department of Sociology, Princeton University
  
-author:
-- Nathan I. Hoffmann, Department of Sociology, University of California, Los Angeles
-- Kristopher Velasco, Department of Sociology, Princeton University
-abstract: "Both internationally and in the U.S., the policy landscape for same-sex couples is changing rapidly, and surveys report swiftly increasing numbers of immigrants in same-sex couples in the U.S. Yet few researchers have examined immigrant-containing lesbian, gay, and bisexual (LGB) couples on a large scale, especially regarding their relationship to LGB policy. Are these immigrants disadvantaged and fleeing anti-LGB contexts, or empowered to migrate by progressive origin-country LGB policy? Using the American Community Survey from 2008 to 2019 and original datasets indexing LGB policy changes in 121 countries and all U.S. states, this study characterizes and assesses the scale of LGB migration to the U.S. as well as the role of LGB policy. Compared to different-sex immigrant couples, immigrants in same-sex couples come from richer, more democratic countries that are less represented among immigrants in the U.S. They also tend to be more highly educated, work in more prestigious occupations, and have higher incomes. Contrary to previous work focusing on LGB immigrants from repressive contexts, fixed-effect models show that higher proportions of these immigrants come from LGB-friendly countries, and they are more likely to live in progressive U.S. states. These findings highlight how sexuality as well as state policies seemingly unrelated to migration can shape migratory pathways."
+# author:
+# - Nathan I. Hoffmann, Department of Sociology, University of California, Los Angeles
+# - Kristopher Velasco, Department of Sociology, Princeton University
+
+abstract: "Both internationally and in the U.S., the policy landscape for same-sex couples is changing rapidly, and surveys report swiftly increasing numbers of immigrants in same-sex couples in the U.S. Yet few researchers have examined immigrant-containing lesbian, gay, and bisexual (LGB) couples on a large scale, especially regarding their relationship to LGB policy. Are these immigrants disadvantaged and fleeing anti-LGB contexts, or empowered to migrate by progressive origin-country LGB policy? Using the American Community Survey from 2008 to 2019 and original datasets indexing LGB policy changes in 121 countries and all U.S. states, this study assesses and characterizes the scale of LGB migration to the U.S. as well as the role of LGB policy. Compared to those in different-sex couples, immigrants in same-sex couples come from richer, more democratic countries that are less represented among immigrants in the U.S. They also tend to be more highly educated, work in more prestigious occupations, and have higher incomes. Contrary to previous work focusing on LGB immigrants from repressive contexts, fixed-effect models show that higher proportions of these immigrants come from LGB-friendly countries, and they are more likely to live in progressive U.S. states. These findings highlight how sexuality as well as state policies seemingly unrelated to migration can shape migratory pathways."
   
 # keywords: "migration, same-sex couples, LGB policy, sexuality"   
-thanks: "The authors contributed equally to this paper. We thank Phillip Ayoub, Filiz Garip, Margaret Peters, Roger Waldinger, the Migration Working Group at UCLA, and participants at the Annual Meetings of the American Sociological Association and the Population Association of America for their helpful feedback."
+# thanks: "The authors contributed equally to this paper. We thank Phillip Ayoub, Filiz Garip, Margaret Peters, Roger Waldinger, the Migration Working Group at UCLA, and participants at the Annual Meetings of the American Sociological Association and the Population Association of America for their helpful feedback."
 ---
 
 <!-- Turn off hyphenation -->
@@ -247,28 +249,17 @@ Migration scholars have long accepted that migration is more likely when economi
 
 <!-- On the other hand, factors specific to LGB couples may outweigh factors conventionally included in migration models. Work on the relationship between welfare policies and immigration suggests that social policies not explicitly related to the latter can impact the migration and settlement processes. Historically, welfare and immigration were tightly linked in the U.S. [@fox_2012], and welfare generosity may play a role in shaping choice of destination for prospective emigrants today [@razin_2015; @ferwerda_2021_pull]. Our research builds on these insights to test how non-welfare social policy specific to LGB individuals may influence their migration and settlement.  -->
 
-
 <!-- Our analysis compares conventional explanations for migration to political ones related to LGB policy. Massey et al. [-@massey_1999, p. 50] provided an influential synthesis of migration theories from sociology, economics, and anthropology, arguing that "causal processes relevant to international migration might operate on multiple levels simultaneously." Our investigation incorporates insights from their work as well as assesses how sexuality and LGB policy complicate migration research. At one level, neoclassical economic theories underscore that promise of material gain is a frequent motivation to migrate [@hatton_2005a; @todaro_1980], predicting that migrants will follow wage and unemployment differentials across countries. To account for migration costs, these models often adjust for distance: Immigrants are more likely to migrate between proximate, especially bordering, countries. At another level, migration streams often continue in a process of cumulative causation even after wage differentials decrease [@massey_1990_social]; this is due in large part to immigrant networks that share information and resources to lower the cost of migration and settling in the destination country [@massey_1987] as well as institutions that arise to ease entry and settlement [@hernandez-leon_2013].  -->
-
-
 <!-- @garip_2016 argues that different theories of migration are more relevant for different types of migrants; as the most prevalent migrant types shift, theories arise to better explain them.  -->
 <!-- The theories synthesized by @massey_1999 remained largely materialistic.  Our study heeds Garip's [-@garip_2016] call to explore migrant heterogeneity, assessing what the theories of migration synthesized by @massey_1999 might miss when accounting for the migration of this LGB subpopulation. Recent research has shown that not only physical but cultural proximity can matter to the migration process; scholars have shown that shared language, colonial history, and democracy matter in the sending country [@karemera_2000; @mayda_2010], and immigrant rights matter in the receiving country [@fitzgerald_2014]. Work on the relationship between welfare policies and immigration suggests that social policies not explicitly related to the latter can impact the migration and settlement processes. Historically, welfare and immigration were tightly linked in the U.S. [@fox_2012], and welfare generosity may play a role in shaping choice of destination for prospective emigrants today [@razin_2015; @ferwerda_2021_pull]. Our research builds on these insights to test how non-welfare social policy specific to LGB individuals may influence their migration and settlement. -->
 
 <!-- Previous scholarship has not explicitly applied these analyses and insights to the migration of same-sex couples on a large scale in the U.S. context, but  -->
 
-
-
  <!-- Overall, sexuality may interact with processes of migration in ways not anticipated by the conventional migration theories. We seek to intervene within migration scholarship by explicitly considering how sexuality, and the governance of it, expand our comprehension of migration atop this previous work. -->
- 
- 
+
 <!--  @garip_2016 argues that different theories of migration are more relevant for different types of migrants; as the most prevalent migrant types shift, theories arise to better explain them.  --> 
- 
- 
+
 <!-- Whereas @massey_1999 sought to integrate migration theories at different causal levels, more recent sociological work seeks to uncover heterogeneity between different types of migrants [@garip_2012; @drouhot_2021_what].Our study builds on this work by probing migrant heterogeneity, assessing what the theories of migration synthesized by @massey_1999 might miss when accounting for the migration of this LGB subpopulation.
-
-
-
-
 
 <!-- We harness an aspirations-capabilities framework [@dehaas_2021; @schewel_2020; @carling_2018_aspiration], which allows consideration of the conventional migration theories discussed above as well as additional factors more relevant to LGB individuals.  -->
 
@@ -281,8 +272,6 @@ We incorporate the conventional migration theories discussed above into a broade
 
 <!-- ## Sexuality and Migration -->
 <!-- Sexuality has long factored into migratory decisions [@carrillo_2018; @cantu_2009; @suen_2021_sexual]. Typically, however, there is an assumed heterosexuality when researchers investigate partner selection, family formation, lifestyle, etc. within migration [@luibheid_2008]. If those in same-sex relationships have similar profiles and descriptive characteristics as their heterosexual counterparts, then previous theories are likely to maintain. There are important qualitative distinctions between these populations, though, like differential access to rights and recognition through LGB policies. -->
-
-
 
 <!-- Although this provides rich insights into the motivations and consequences of migration, differing effects of policies emerge. Research on queer asylum, one key line of research within this area, suggests repressive policies are more likely to spur migration to the U.S. However, another set of scholarship, extending from research on "lifestyle migration," suggests affirming policy environments may serve as a migratory launchpad.  -->
 
@@ -337,7 +326,7 @@ Many of our analyses entail descriptive statistics of ACS data. For these, we ap
 
 One of our goals is to isolate the effects of country-of-origin LGB policy on the immigration of immigrants in same-sex couples. The ideal survey would follow potential immigrants over time and have information about sexual orientation, allowing us to estimate how the probability of migrating and choice of U.S. state of residence vary by sexual orientation. This ideal dataset does not exist, but we attempt to approximate it.  
 
-We reshape the data so that each observation is the proportion of individual cohabiting immigrants in same-sex couples from country $x$ in state $y$ in survey year $z$, then multiply by 100. For example, the observation for France $\times$ New York $\times$ 2015 is `r acs_prop_state %>% filter(state == 'New York', country == 'France', year == 2015) %>% pull(prop_same_sex)`, meaning that among coupled ACS respondents who immigrated from France and resided in New York at the time of the 2015 survey, a weighted `r acs_prop_state %>% filter(state == 'New York', country == 'France', year == 2015) %>% pull(prop_same_sex)` percent were in same-sex couples. This transformation of the data results in `r nrow(acs_prop_state)` country-state-year observations.^[Cells without any immigrants from a given country are necessarily dropped from the analysis.] This reshaping acts to control for aspects of migrant settlement common to immigrants from the same country. We regress the country-state-survey year proportion on state and sending-country policy scores and adjust for state and origin-country controls (listed below) using OLS. State-level measures are linked to survey year, while origin-country LGB policy and controls are linked to the mean year of immigration for each country-state-year immigrant group. In our final models, we include state and country-of-origin fixed effects, and we cluster errors at the state and country levels.    
+We reshape the data so that each observation is the proportion of individual cohabiting immigrants in same-sex couples from country $x$ in state $y$ in survey year $z$, then multiply by 100. For example, the observation for France $\times$ New York $\times$ 2015 is `r acs_prop_state %>% filter(state == 'New York', country == 'France', year == 2015) %>% pull(prop_same_sex)`, meaning that among coupled ACS respondents who immigrated from France and resided in New York at the time of the 2015 survey, a weighted `r acs_prop_state %>% filter(state == 'New York', country == 'France', year == 2015) %>% pull(prop_same_sex)` percent were in same-sex couples. This transformation of the data results in `r nrow(acs_prop_state)` country-state-year observations.^[Cells without any cohabiting immigrants from a given country are necessarily dropped from the analysis.] This reshaping acts to control for aspects of migrant settlement common to immigrants from the same country. We regress the country-state-survey year proportion on state and sending-country policy scores and adjust for state and origin-country controls (listed below) using OLS. State-level measures are linked to survey year, while origin-country LGB policy and controls are linked to the mean year of immigration for each country-state-year immigrant group. In our final models, we include state and country-of-origin fixed effects, and we cluster errors at the state and country levels.    
 
 
 
@@ -371,7 +360,7 @@ We first estimate total numbers of immigrants in same- and different-sex couples
 
 How do same- and different-sex immigrant couples differ in their origin-country and individual attributes? Do variables typically used in models for migration differ between the groups? Figure \@ref(fig:desc-country) compares immigrants in same- and different-sex couples on five origin country-level variables. First, macroeconomic theory predicts that differences in wages and living standards across countries is one of the most important motivations for migration. Panel A in Figure \@ref(fig:desc-country) shows that per-capita GDP is indeed higher in the U.S. than the average country of origin for both groups of immigrants, but the gap is significantly greater for immigrants in different-sex couples. This means that immigrants in same-sex couples are coming from countries with higher standards of living than those in different-sex couples. Statistics for the unemployment rate differential (Panel B) indicate similar trends: LGB immigrants come from countries with lower unemployment rates. These findings indicate that macroeconomic considerations may be less important to the migration of LGB immigrants.  
 
-Models of migration also often use distance between countries as a proxy for migration costs, with closer countries often having more migration between. Panel C of \@ref(fig:desc-country) shows that immigrants in same-sex couples tend to come from somewhat more distant countries. Panel D looks at a measure of network effects: At the time of immigration, what is the proportion of total immigrants in the U.S. from the country of origin? Compared to different-sex couples, immigrants in same-sex couples immigrated from countries that were less represented in the U.S. population at the time of migration. This indicates that the network effects that attract migrants from the same country of origin may be less relevant to LGB immigrants. Finally, Panel E of Figure \@ref(fig:desc-country) compares V-Dem democracy level for country of origin at time of migration. We see that levels of liberal democracy tend to be higher for immigrants in same-sex couples, indicating that political context may play a more important or different role in their migration decisions.  
+Models of migration also often use distance between countries as a proxy for migration costs, with closer countries often having more migration between. Panel C of Figure \@ref(fig:desc-country) shows that immigrants in same-sex couples tend to come from somewhat more distant countries. Panel D looks at a measure of network effects: At the time of immigration, what is the proportion of total immigrants in the U.S. from the country of origin? Compared to different-sex couples, immigrants in same-sex couples immigrated from countries that were less represented in the U.S. population at the time of migration. This indicates that the network effects that attract migrants from the same country of origin may be less relevant to LGB immigrants. Finally, Panel E of Figure \@ref(fig:desc-country) compares V-Dem democracy level for country of origin at time of migration. We see that levels of liberal democracy tend to be higher for immigrants in same-sex couples, indicating that political context may play a more important or different role in their migration decisions.  
 
 **[FIGURE \@ref(fig:desc-ind) ABOUT HERE]**  
 
@@ -506,7 +495,7 @@ state_effect <- sd(acs_ind$state_policy, na.rm = T)*coef(state_prop2)[['state_po
 
 ```
 
-Although the trends in Figure \@ref(fig:policy-desc) are suggestive, other factors correlated with LGB policy may be confounding results. To address this, Table \@ref(tab:state-props) presents OLS models of the U.S. state-level proportion of immigrants in same-sex couples, from a given country of origin in a given survey year. We present only coefficients of interest here, but Section D of the Online Appendix contains full tables of regression coefficients.
+Although the trends in Figure \@ref(fig:policy-desc) are suggestive, other factors correlated with LGB policy may be confounding results. To address this, Table \@ref(tab:state-props) presents OLS models of the U.S. state-level proportion of immigrants in same-sex couples, from a given country of origin in a given survey year. We present only coefficients of interest here, but Section D of the Online Appendix contains the full table of regression coefficients.
 
 **[TABLE \@ref(tab:state-props) ABOUT HERE]**  
 
@@ -753,7 +742,9 @@ total_df %>%
 
 \newpage
 
-```{r desc-country, fig.height = 6, fig.cap = 'Origin country-level descriptive statistics for immigrants in couples 2008-2019, for year of migration, with survey weights and 95% confidence intervals. Currency in thousands of 1999 dollars.'}
+  
+
+```{r desc-country, fig.height = 6, fig.cap = "Origin country-level descriptive statistics for immigrants in couples 2008-2019, for year of migration, with survey weights and 95% confidence intervals. Currency in thousands of 1999 dollars."}
 
 
 distance <- acs_ind_survey %>%
@@ -801,6 +792,9 @@ bind_rows(wage_dif, vdem, prop_stock, unemp, distance) %>%
       text = element_text(size = 8))
  
 ```
+
+
+
 \newpage
 
 ```{r desc-ind, fig.cap = 'Individual descriptive statistics for immigrants in couples 2008-2019, with survey weights and 95% confidence intervals. Currency in thousands of 1999 dollars.'}
