@@ -176,7 +176,10 @@ acs_dyad <- acs_coupled_imms %>%
             n_spouse_2019 = sum(perwt[married == T & year == 2019]),
             n_spouse_pre_2019 = sum(perwt[married == T & year < 2019]),
             n_partner_2019 = sum(perwt[married == F & year == 2019]),
-            n_partner_pre_2019 = sum(perwt[married == F & year < 2019])) %>%
+            n_partner_pre_2019 = sum(perwt[married == F & year < 2019]),
+            n_recent = sum(perwt[year == yrimmig + 1]),
+            n_spouse_recent = sum(perwt[married == T & year == yrimmig + 1]),
+            n_partner_recent = sum(perwt[married == F & year == yrimmig + 1])) %>%
   ungroup() %>%
   mutate(same_sex = ifelse(same_sex == T, 'same_sex', 'dif_sex')) %>%
   pivot_wider(names_from = 'same_sex', values_from = 5:ncol(.)) %>% 
@@ -273,7 +276,7 @@ acs_prop_yrimmig <- acs_wide %>%
             n_spouse_pre_2019 = sum(perwt[married == T & year < 2019]),
             n_partner_2019 = sum(perwt[married == F & year == 2019]),
             n_partner_pre_2019 = sum(perwt[married == F & year < 2019]),
-            n_recent = sum(perwt[year = yrimmig + 1]),
+            n_recent = sum(perwt[year == yrimmig + 1]),
             n_spouse_recent = sum(perwt[married == T & year == yrimmig + 1]),
             n_partner_recent = sum(perwt[married == F & year == yrimmig + 1])) %>%
   # summarize(n = n(), 
@@ -549,6 +552,7 @@ acs_dyad_policy1 <- acs_dyad %>%
   filter(!is.na(origin_score)) %>%
   mutate(
     n_couples = n_spouse_same_sex + n_partner_same_sex + n_dif_sex,
+    n_couples_recent = n_spouse_recent_same_sex + n_partner_recent_same_sex + n_recent_dif_sex,
     prop_spouse_same_sex_adj = n_spouse_adj_same_sex / n_couples * 100,
     prop_partner_same_sex_adj = n_partner_adj_same_sex / n_couples * 100,
     prop_same_sex_adj = prop_spouse_same_sex_adj + prop_partner_same_sex_adj,
@@ -556,9 +560,22 @@ acs_dyad_policy1 <- acs_dyad %>%
     prop_spouse_same_sex = n_spouse_same_sex / n_couples * 100,
     prop_partner_same_sex = n_partner_same_sex / n_couples * 100,
     prop_same_sex = prop_spouse_same_sex + prop_partner_same_sex,
-    prop_same_sex_oneimm = (n_spouse_oneimm_same_sex + n_partner_oneimm_same_sex) / n_couples * 100,
-    prop_same_sex_twoimm = (n_spouse_twoimm_same_sex + n_partner_twoimm_same_sex) / n_couples * 100)
-  
+    prop_same_sex_recent = (n_spouse_recent_same_sex + n_partner_recent_same_sex) / 
+      (n_spouse_recent_same_sex + n_partner_recent_same_sex + n_spouse_recent_dif_sex + n_partner_recent_dif_sex) * 100,
+    prop_same_sex_oneimm = (n_spouse_oneimm_same_sex + n_partner_oneimm_same_sex) / 
+      (n_spouse_oneimm_same_sex + n_partner_oneimm_same_sex + n_spouse_oneimm_dif_sex + n_partner_oneimm_dif_sex) * 100,
+    prop_same_sex_twoimm = (n_spouse_twoimm_same_sex + n_partner_twoimm_same_sex) / 
+      (n_spouse_twoimm_same_sex + n_partner_twoimm_same_sex + n_spouse_twoimm_dif_sex + n_partner_twoimm_dif_sex) * 100)
+
+# acs_dyad_policy <- acs_prop_state %>%
+#   mutate(   prop_same_sex_recent = (n_spouse_recent_same_sex + n_partner_recent_same_sex) /
+#               (n_spouse_recent_same_sex + n_partner_recent_same_sex + n_spouse_recent_dif_sex + n_partner_recent_dif_sex) * 100,
+#             prop_same_sex_oneimm = (n_spouse_oneimm_same_sex + n_partner_oneimm_same_sex) /
+#               (n_spouse_oneimm_same_sex + n_partner_oneimm_same_sex + (n_spouse_oneimm_dif_sex + n_partner_oneimm_dif_sex)) * 100,
+#             prop_same_sex_twoimm = (n_spouse_twoimm_same_sex + n_partner_twoimm_same_sex) /
+#               (n_spouse_twoimm_same_sex + n_partner_twoimm_same_sex + n_spouse_twoimm_dif_sex + n_partner_twoimm_dif_sex) * 100)
+# 
+
   
   # mutate(prop_same_sex = same_sex_stock / state_stock_year * 100,
   #        prop_dif_sex = opp_sex_stock / state_stock_year * 100)
@@ -596,6 +613,10 @@ state_income_df <- read_csv(here('data', 'state_income.csv'), na = c('', '(NA)')
   rename(state = GeoName) %>% 
   select(-GeoFips) %>%
   mutate(state_income = adjust_for_inflation(state_income, year, "US", to_date = 1999)/1000)
+
+# state_income_df <- acs_prop_state %>%
+#   select(state_income, year, state) %>%
+#   distinct(state_income, year, state)
 
 acs_dyad_policy <- acs_dyad_policy1 %>%
   left_join(unemploy,  by = c('year', 'state')) %>%
