@@ -7,7 +7,7 @@ output:
     number_sections: yes
     pandoc_args: !expr rmdfiltr::add_wordcount_filter(rmdfiltr::add_citeproc_filter(args = NULL))
     latex_engine: xelatex
-    keep_tex: yes
+    keep_tex: no
     #template: svm-latex-ms.tex
 # output: 
 #   pdf_document:
@@ -132,6 +132,24 @@ knitr::knit_hooks$set(plot = function(x, options) {  # set new plot hook ...
 ```
 
 ```{r load, include = F}
+acs_count_base <- read_csv(here('data', 'acs_count_base.csv'))
+
+count_func <- function(condition = '!is.na(state)'){
+  acs_count_base %>%
+    rename(mixed = mixed_citizenship) %>%
+    filter(eval(rlang::parse_expr(condition))) %>%
+    group_by(state, year, same_sex, mixed) %>%
+    summarize(n = sum(perwt), 
+              n_unweighted = n(),
+              n_ar = sum(perwt[qcitizen != 'Allocated' & qeduc != 'Consistency edit' & allocated == F]), 
+              n_unweighted_ar = sum(qcitizen != 'Allocated' & qeduc != 'Consistency edit' & allocated == F)) %>%
+    ungroup() %>%
+    complete(state, year, same_sex, mixed) %>%
+    mutate(across(n:n_unweighted_ar, function(x) ifelse(is.na(x), 0, x))) %>%
+    mutate(post_2013 = year > 2013,
+           group_fe = paste(state, same_sex, mixed, sep = '_'))
+}
+
 acs_count_mixed <- read_csv(here('data', 'acs_count_mixed.csv')) %>%
   group_by(state, year, same_sex, mixed) %>%
   summarize(n = sum(n),
@@ -145,12 +163,24 @@ acs_prop <- read.csv(here('data', 'acs_prop_yrimmig_policy.csv')) %>%
   mutate(post_2013 = (yrimmig > 2013))
 acs_prop_state <- read.csv(here('data', 'acs_dyad_policy.csv'))
 
-acs_ind <- read_rds(here('data', 'acs_couple_policy.rds')) 
+lgb_origin_index <- read_csv(here('data', 'lgb_origin_index.csv'))
+acs_ind <- read_rds(here('data', 'acs_couple_policy.rds'))  %>%
+  mutate(post_2013 = year > 2013
+         # mixed =  mixed_citizenship = (citizen_main == 'Not a citizen' & citizen_partner != 'Not a citizen') | 
+         #   (citizen_main != 'Not a citizen' & citizen_partner == 'Not a citizen')
+         ) %>%
+  left_join(lgb_origin_index,  by = c('yrimmig' = 'year', 'bpldid' = 'Code')) 
+
 acs_count_mixed_bpld <- read_csv(here('data', 'acs_count_mixed.csv'))  %>%
   left_join(
     acs_ind %>%
-  group_by(year, state, bpld, same_sex) %>%
-  summarize(origin_score = mean(origin_score))) 
+      group_by(year, state, bpld, same_sex) %>% 
+      summarize(across(c(equal_age:propaganda, origin_score), mean))
+      #summarize(origin_score = mean(origin_score))
+    )
+
+
+
 ```
 
 ```{r intro-stats}
@@ -272,6 +302,7 @@ We focus on heterogeneity of this effect: how it varies by the LGB policy contex
 
 
 # Results
+## Main Effects
 ```{r mod-tab}
 mod_mixed <- acs_count_mixed %>%
   glm(n ~ I(post_2013*same_sex*mixed) + I(post_2013*same_sex) + I(post_2013*mixed) + post_2013 + group_fe + as.factor(year), 
@@ -296,7 +327,7 @@ mod_os_high <- glm(n ~  I(post_2013*same_sex*mixed) +
                         group_fe + as.factor(year), 
                         data = count_origin_high, 
                         family = 'quasipoisson') %>%
-coeftest(., vcov = vcovCL(., cluster = ~group_fe))
+  coeftest(., vcov = vcovCL(., cluster = ~group_fe))
 
 count_origin_low <- acs_count_mixed_bpld %>%
   filter(origin_score < 0 | is.na(origin_score)) %>%
@@ -424,6 +455,77 @@ Figure \@ref(fig:lag-plot) presents dynamic models of the effect of interest. Th
 ## Which Policies are Responsible?
 
 
+```{r policies}
+
+
+policy_list <- list()
+variables <- names(subset(acs_count_mixed_bpld, select = equal_age:propaganda))
+
+# for(var_name in variables){
+#   policy_list[[var_name]] <- acs_ind %>%
+#     filter(!!sym(var_name) == 1 | is.na(!!sym(var_name))) %>%
+#     group_by(state, year, same_sex, mixed, post_2013, group_fe) %>%
+#     summarize(n = sum(n)) %>% 
+#     ungroup() %>%
+#     complete(state, year, same_sex, mixed) %>%
+#     mutate(across(n, function(x) ifelse(is.na(x), 0, x)),
+#            post_2013 = year > 2013,
+#            group_fe = paste(state, same_sex, mixed, sep = '_'))
+# }
+
+for(var_name in variables){
+  dataset_policy <- acs_count_mixed_bpld %>%
+    filter(!!sym(var_name) > 0 | is.na(!!sym(var_name))) %>%
+    group_by(state, year, same_sex, mixed, post_2013, group_fe) %>%
+    summarize(n = sum(n)) %>%
+    ungroup() %>%
+    complete(state, year, same_sex, mixed) %>%
+    mutate(across(n, function(x) ifelse(is.na(x), 0, x)),
+           post_2013 = year > 2013,
+           group_fe = paste(state, same_sex, mixed, sep = '_'))
+  
+  policy_list[[var_name]] <- glm(n ~  I(post_2013*same_sex*mixed) + 
+                        I(post_2013*same_sex) + 
+                        I(post_2013*mixed) + 
+                        post_2013 + 
+                        group_fe + as.factor(year), 
+                        data = dataset_policy, 
+                        family = 'quasipoisson') %>%
+  coeftest(., vcov = vcovCL(., cluster = ~group_fe))
+}
+
+
+
+huxreg(policy_list[1:9],
+       coefs = c('Post-2013 × Same-sex × Mixed-citizenship' = 'I(post_2013 * same_sex * mixed)',
+                'Post-2013 × Same-sex'  = 'I(post_2013 * same_sex)',
+                'Post-2013 × Mixed-citizenship'  = 'I(post_2013 * mixed)',
+                'Post-2013' = 'post_2013TRUE'),
+  note = '{stars}. Group-clustered standard errors shown in parentheses. Source: American Community Survey 2008-2019. Authors\' calculations.',
+       stars = c(`†` = 0.1, `*` = 0.05, `**` = 0.01, `***` = 0.001),
+       statistics = c('Observations' = 'nobs')) %>%
+  huxtable::set_width(1) %>%
+  set_wrap(T) %>%
+  set_all_padding(0) %>%
+  huxtable::set_caption('By policy: Quasi-Poisson DDD regressions of counts of 
+                        mixed-citizenship same-sex couples')
+
+
+huxreg(policy_list[10:16],
+       coefs = c('Post-2013 × Same-sex × Mixed-citizenship' = 'I(post_2013 * same_sex * mixed)',
+                'Post-2013 × Same-sex'  = 'I(post_2013 * same_sex)',
+                'Post-2013 × Mixed-citizenship'  = 'I(post_2013 * mixed)',
+                'Post-2013' = 'post_2013TRUE'),
+  note = '{stars}. Group-clustered standard errors shown in parentheses. Source: American Community Survey 2008-2019. Authors\' calculations.',
+       stars = c(`†` = 0.1, `*` = 0.05, `**` = 0.01, `***` = 0.001),
+       statistics = c('Observations' = 'nobs')) %>%
+  huxtable::set_width(1) %>%
+  set_wrap(T) %>%
+  set_all_padding(0) %>%
+  huxtable::set_caption('By policy: Quasi-Poisson DDD regressions of counts of 
+                        mixed-citizenship same-sex couples')
+
+```
 
 
 # Next steps

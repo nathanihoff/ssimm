@@ -41,6 +41,7 @@ acs <- read_dta('/Users/nathan/Data/ACS/acs_2008_2020.dta') %>%
 
 
 
+
 # Define immigrant as someone born abroad not to US parents
 acs_wide <- acs %>%
   # Only  those who immigrated when 18+
@@ -75,11 +76,15 @@ acs_wide <- acs %>%
          allocated = (qrelate_main == 'Allocated' | qrelate_partner == 'Allocated' |
                         qsex_main == 'Allocated' | qsex_partner == 'Allocated'))
 
-# acs_wide %>%
-#   filter(imm_couple != 'none', allocated == F) %>%
-#   write_csv(here('data', 'acs_wide.csv'))
+acs_wide %>%
+  filter(imm_couple != 'none', allocated == F) %>%
+  write_csv(here('data', 'acs_wide.csv'))
 
+lgbt_policy <- read.csv(here('data', 'lgb_origin_index.csv')) %>%
+  rename(origin_score = origin_couple_score) %>%
+  mutate(iso_o = countrycode::countrycode(Country, origin = 'country.name', destination = 'iso3c'))
 
+acs_wide <- read_csv(here('data', 'acs_wide.csv'))
 
 ## Counts for poisson model ####
 acs_count_base <- acs_wide %>%
@@ -88,7 +93,9 @@ acs_count_base <- acs_wide %>%
            (citizen_main != 'Not a citizen' & citizen_partner == 'Not a citizen'),
          noncit = citizen_main == 'Not a citizen' | citizen_partner == 'Not a citizen',
          bpldnew_main = if_else(is.na(yrimmig_main) & !is.na(yrimmig_partner), bpld_partner, bpld_main),
-         bpldnew_partner = if_else(is.na(yrimmig_partner) & !is.na(yrimmig_main), bpld_main, bpld_partner)) %>%
+         bpldnew_partner = if_else(is.na(yrimmig_partner) & !is.na(yrimmig_main), bpld_main, bpld_partner),
+         bpldidnew_main = if_else(is.na(yrimmig_main) & !is.na(yrimmig_partner), bpldid_partner, bpldid_main),
+         bpldidnew_partner = if_else(is.na(yrimmig_partner) & !is.na(yrimmig_main), bpldid_main, bpldid_partner)) %>%
   filter(allocated == F) %>%
   pivot_longer(-c(year, serial, nchild, hhwt, ssmc,
                   cluster, strata, metro, region, state, stateicp, ftotinc, respmode,
@@ -97,7 +104,28 @@ acs_count_base <- acs_wide %>%
                names_sep = '_') %>% 
   filter(age >= 18 & age <= 64) %>%
   filter(across(c(state, year, same_sex), 
-                ~ !is.na(.x)))
+                ~ !is.na(.x))) %>%
+  left_join(lgbt_policy, by = c('yrimmig' = 'year', 'bpldidnew' = 'Code'))
+
+write_csv(acs_count_base, here('data', 'acs_count_base.csv'))
+
+
+# acs_count_base <- acs_wide %>%
+#   mutate(state = as.character(state),
+#          mixed_citizenship = (citizen_main == 'Not a citizen' & citizen_partner != 'Not a citizen') | 
+#            (citizen_main != 'Not a citizen' & citizen_partner == 'Not a citizen'),
+#          noncit = citizen_main == 'Not a citizen' | citizen_partner == 'Not a citizen',
+#          bpldnew_main = if_else(is.na(yrimmig_main) & !is.na(yrimmig_partner), bpld_partner, bpld_main),
+#          bpldnew_partner = if_else(is.na(yrimmig_partner) & !is.na(yrimmig_main), bpld_main, bpld_partner)) %>%
+#   filter(allocated == F) %>%
+#   pivot_longer(-c(year, serial, nchild, hhwt, ssmc,
+#                   cluster, strata, metro, region, state, stateicp, ftotinc, respmode,
+#                   same_sex, imm_couple, married, allocated, mixed_citizenship, noncit),
+#                names_to = c('.value', 'position'),
+#                names_sep = '_') %>% 
+#   filter(age >= 18 & age <= 64) %>%
+#   filter(across(c(state, year, same_sex), 
+#                 ~ !is.na(.x)))
 
 acs_count <- acs_count_base %>%
   group_by(state, year, same_sex, imm_couple) %>%
@@ -143,7 +171,7 @@ acs_count_noncit <- acs_count_base %>%
   mutate(post_2013 = year > 2013,
          group_fe = paste(state, same_sex, noncit, sep = '_')) %>%
   rename(bpld = bpldnew)
-  
+
 
 # acs_count_mixed %>%
 #   group_by(same_sex, mixed) %>%
@@ -152,7 +180,7 @@ acs_count_noncit <- acs_count_base %>%
 
 acs_count_imm <- acs_count_base %>%
   mutate(immigrant = case_when(imm_couple == 'none' ~ F,
-                           imm_couple == 'two' | imm_couple == 'one' ~ T)) %>%
+                               imm_couple == 'two' | imm_couple == 'one' ~ T)) %>%
   group_by(state, year, same_sex, immigrant, bpldnew) %>%
   summarize(n = sum(perwt), 
             n_unweighted = n(),
@@ -165,10 +193,12 @@ acs_count_imm <- acs_count_base %>%
          group_fe = paste(state, same_sex, immigrant, sep = '_')) %>%
   rename(bpld = bpldnew)
 
-write_csv(acs_count, here('data', 'acs_count.csv'))
+write_csv(acs_count_base, here('data', 'acs_count_base.csv'))
 write_csv(acs_count_mixed, here('data', 'acs_count_mixed.csv'))
-write_csv(acs_count_noncit, here('data', 'acs_count_noncit.csv'))
-write_csv(acs_count_imm, here('data', 'acs_count_imm.csv'))
+
+# write_csv(acs_count, here('data', 'acs_count.csv'))
+# write_csv(acs_count_noncit, here('data', 'acs_count_noncit.csv'))
+# write_csv(acs_count_imm, here('data', 'acs_count_imm.csv'))
 
 
 
@@ -187,4 +217,4 @@ write_csv(acs_count_imm, here('data', 'acs_count_imm.csv'))
 #   replace(is.na(.), 0) %>%
 #   mutate(post_2013 = year > 2013,
 #          group_fe = paste(state, same_sex, immigrant, sep = '_'))
-  
+
