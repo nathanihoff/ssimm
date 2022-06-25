@@ -263,6 +263,8 @@ Of the many consequences of these shifts toward more progressive policies, one i
 
 Conversely, policy environments that are especially repressive can hinder the formation of mixed-citizenship, same-sex unions by immigrants in the U.S. This can operate in multiple ways. First, repressive contexts can potentially limit the desirability of forming a same-sex union by limiting what is seen as possible. At the end of 2021, roughly 70 countries still criminalized same-sex sexual acts between two consenting adults [xx]. While in some countries these laws are rarely enforced, in others, such as Cameroon, there has been an active revival of these laws to terrorize LGB populations [@bongmba_2021_samesex]. Moreover, the DOMA legislation in the U.S. was not a unique act. More than 30 countries since the 1990s have similarly re-codified a “one man, one woman” definition of marriage either through federal law like DOMA or through constitutional amendments [xx]. Second, these legal environments can influence how the cultural norms, rituals, and performances of relationships manifest. In the U.S. and many Western countries where marriage equality exists, mainstream LGB cultures emphasize publicly “coming out” and sameness with heterosexuals using language such as “love is love.” But LGB cultures where “coming out” risks vulnerability state-sponsored violence can look quite different [@msibi_2013_denied]. Third, and relatedly, these different cultures can negatively influence whether U.S. immigration bureaucrats in charge of issuing visas perceive relationships as legitimate [@carron_2015_marriagebased]. When photos, disclosure to friends and family, and other public pieces of evidence are used to evaluate if a relationship is valid and worthy of a visa, immigrants coming from countries where such pieces of evidence can be harmful are at a systematic disadvantage. Thus, for all of these reasons, mixed-citizen, same-sex unions following the 2013 DOMA decision are likely to contain fewer immigrant partners from repressive contexts.
 
+## Empirical Expectations
+To address our second research question, we will examine which specific LGB policies of countries of origin are associated with the strongest effect on increase in same-sex, mixed-citizenship unions. We hypothesize that policies relating specifically to unions -- such as a provision for civil partnerships -- are most important. In addition, we will examine the effect of one specific repressive policy -- same-sex marriage bans -- to test the implications of our theory. If it is correct, then even negative reinforcement of the institution of same-sex unions may have a lasting impact on immigrants' cultural repertoires.
 
 
 # Data and Methods
@@ -454,9 +456,11 @@ Figure \@ref(fig:lag-plot) presents dynamic models of the effect of interest. Th
 
 ## Which Policies are Responsible?
 
+Clearly, the post-2013 rise in mixed-citizenship same-sex unions occurred much more strongly for immigrants from countries with overall progressive LGB policies. But are there some policies that matter more than others? Whereas Table \@ref(tab:mod-tab) stratified the sample by values of the policy index, here we stratify the sample by specific policies. Within each cell, we include only mixed-citizenship couples for whom the non-citizen country of origin has an average value greater than 0 for the policy of interest -- i.e., where immigrants in that group tended to experience the given policy in their year of immigration.  
 
-```{r policies}
+Figure \@ref(fig:policies) displays coefficients from the three-way interaction of interest, showing the logged relative incidence of mixed-citizenship same-sex couples after 2013. Coefficients in models focusing on progressive policies are mostly positive, while those for repressive policies are nearly mostly nonsignificant. Notably, coefficients for civil unions and marriage equality are especially high.
 
+```{r policies, fig.cap = 'Stratified by specific policy: quasi-Poisson DDD regressions of counts of mixed-citizenship same-sex couples. Estimates and 95-percent confidence intervals are for the three-way interaction between indicators for same-sex, mixed-citizenship, and post-2013 survey year'}
 
 policy_list <- list()
 variables <- names(subset(acs_count_mixed_bpld, select = equal_age:propaganda))
@@ -484,6 +488,8 @@ for(var_name in variables){
            post_2013 = year > 2013,
            group_fe = paste(state, same_sex, mixed, sep = '_'))
   
+  # dataset_policy <- count_func(paste0(var_name, ' > 0 | is.na( ', var_name , ')'))
+  
   policy_list[[var_name]] <- glm(n ~  I(post_2013*same_sex*mixed) + 
                         I(post_2013*same_sex) + 
                         I(post_2013*mixed) + 
@@ -494,42 +500,84 @@ for(var_name in variables){
   coeftest(., vcov = vcovCL(., cluster = ~group_fe))
 }
 
+prog_policies <- c('equal_age', 'constitution', 'employment_discrim', 'hate_crimes',
+                   'incite_hate', 'joint_adoption', 'lgb_military', 'marriage_equality',
+                   'samesex_legal', 'civil_unions', 'conversion_therapies')
+rep_policies <- c('unequal_age', 'death_penalty', 'lgb_military_ban', 
+                  'marriage_ban', 'propaganda')
 
+policy_df <- lapply(policy_list, function(x){
+  tidy(x)[2, 2:3]}
+  ) %>%
+  bind_rows() %>%
+  mutate(policy = names(policy_list),
+         type = if_else(policy %in% prog_policies, 'Progressive', 'Repressive'),
+         policy_name = recode(policy, equal_age = 'Equal age of consent', 
+                         unequal_age = 'Unequal age of consent',
+                         constitution = 'Constitutional protection',
+                         conversion_therapies = 'Conversion therapy ban',
+                         death_penalty = 'Death penalty',
+                         employment_discrim = 'Employment protection',
+                         hate_crimes = 'Hate-crime protection',
+                         incite_hate = 'Incitement to hate banned',
+                         joint_adoption = 'Joint adoption',
+                         lgb_military = 'LGB military',
+                         lgb_military_ban = 'LGB military ban',
+                         marriage_equality = 'Marriage equality',
+                         marriage_ban = 'Marriage ban',
+                         samesex_legal = 'Same-sex acts legal',
+                         civil_unions = 'Civil unions',
+                         propaganda = 'Anti-propaganda laws'),
+         lower = estimate - 1.96*std.error,
+         upper = estimate + 1.96*std.error) %>%
+  mutate(policy_name = factor(policy_name, levels = sort({.$policy_name}, decreasing = T)))
 
-huxreg(policy_list[1:9],
-       coefs = c('Post-2013 × Same-sex × Mixed-citizenship' = 'I(post_2013 * same_sex * mixed)',
-                'Post-2013 × Same-sex'  = 'I(post_2013 * same_sex)',
-                'Post-2013 × Mixed-citizenship'  = 'I(post_2013 * mixed)',
-                'Post-2013' = 'post_2013TRUE'),
-  note = '{stars}. Group-clustered standard errors shown in parentheses. Source: American Community Survey 2008-2019. Authors\' calculations.',
-       stars = c(`†` = 0.1, `*` = 0.05, `**` = 0.01, `***` = 0.001),
-       statistics = c('Observations' = 'nobs')) %>%
-  huxtable::set_width(1) %>%
-  set_wrap(T) %>%
-  set_all_padding(0) %>%
-  huxtable::set_caption('By policy: Quasi-Poisson DDD regressions of counts of 
-                        mixed-citizenship same-sex couples')
-
-
-huxreg(policy_list[10:16],
-       coefs = c('Post-2013 × Same-sex × Mixed-citizenship' = 'I(post_2013 * same_sex * mixed)',
-                'Post-2013 × Same-sex'  = 'I(post_2013 * same_sex)',
-                'Post-2013 × Mixed-citizenship'  = 'I(post_2013 * mixed)',
-                'Post-2013' = 'post_2013TRUE'),
-  note = '{stars}. Group-clustered standard errors shown in parentheses. Source: American Community Survey 2008-2019. Authors\' calculations.',
-       stars = c(`†` = 0.1, `*` = 0.05, `**` = 0.01, `***` = 0.001),
-       statistics = c('Observations' = 'nobs')) %>%
-  huxtable::set_width(1) %>%
-  set_wrap(T) %>%
-  set_all_padding(0) %>%
-  huxtable::set_caption('By policy: Quasi-Poisson DDD regressions of counts of 
-                        mixed-citizenship same-sex couples')
-
+policy_df %>%
+  ggplot(aes(policy_name, y = estimate)) +
+  geom_hline(yintercept = 0, linetype = 2) +
+  geom_pointrange(aes(ymin = lower, ymax = upper)) +
+  coord_flip() +
+  facet_wrap(~type, scales = 'free_y') +
+  labs(x = '', y = '')
 ```
 
 
+```{r policy-tab, eval = F}
+huxreg(policy_list[prog_policies],
+       coefs = c('Post-2013 × Same-sex × Mixed-citizenship' = 'I(post_2013 * same_sex * mixed)',
+                'Post-2013 × Same-sex'  = 'I(post_2013 * same_sex)',
+                'Post-2013 × Mixed-citizenship'  = 'I(post_2013 * mixed)',
+                'Post-2013' = 'post_2013TRUE'),
+  note = '{stars}. Group-clustered standard errors shown in parentheses. Source: American Community Survey 2008-2019. Authors\' calculations.',
+       stars = c(`†` = 0.1, `*` = 0.05, `**` = 0.01, `***` = 0.001),
+       statistics = c('Observations' = 'nobs')) %>%
+  huxtable::set_width(1) %>%
+  set_wrap(T) %>%
+  set_all_padding(0) %>%
+  huxtable::set_caption('Stratified by progressive policies: Quasi-Poisson DDD regressions of counts of 
+                        mixed-citizenship same-sex couples')
+
+
+huxreg(policy_list[rep_policies],
+       coefs = c('Post-2013 × Same-sex × Mixed-citizenship' = 'I(post_2013 * same_sex * mixed)',
+                'Post-2013 × Same-sex'  = 'I(post_2013 * same_sex)',
+                'Post-2013 × Mixed-citizenship'  = 'I(post_2013 * mixed)',
+                'Post-2013' = 'post_2013TRUE'),
+  note = '{stars}. Group-clustered standard errors shown in parentheses. Source: American Community Survey 2008-2019. Authors\' calculations.',
+       stars = c(`†` = 0.1, `*` = 0.05, `**` = 0.01, `***` = 0.001),
+       statistics = c('Observations' = 'nobs')) %>%
+  huxtable::set_width(1) %>%
+  set_wrap(T) %>%
+  set_all_padding(0) %>%
+  huxtable::set_caption('Stratified by repressive policies: Quasi-Poisson DDD regressions of counts of 
+                        mixed-citizenship same-sex couples')
+```
+
+
+
+
 # Next steps
-We plan to extend our analysis as well as conduct a series of robustness checks. First, to address our second research question, we will examine which specific LGB policies of countries of origin are associated with the strongest effect on increase in same-sex, mixed-citizenship unions. We hypothesize that policies relating specifically to unions -- such as a provision for civil partnerships -- are most important. Second, we will examine the effect of one specific repressive policy -- same-sex marriage bans -- to test the implications of our theory. If it is correct, then even negative reinforcement of the institution of same-sex unions may have a lasting impact on immigrants' cultural repertoires. Third, future analyses will incorporate ACS data from 2020 and, fourth, examine whether effects vary by U.S. state of residence and local LGB policy. Finally, although the two-way fixed effects in our specifications allay concerns of time-invariant confounders, we will test the robustness of our results by including possible time-varying confounders such as state GDP.
+We plan to extend our analysis as well as conduct a series of robustness checks. Future analyses will incorporate ACS data from 2020 and, fourth, examine whether effects vary by U.S. state of residence and local LGB policy. Finally, although the two-way fixed effects in our specifications allay concerns of time-invariant confounders, we will test the robustness of our results by including possible time-varying confounders such as state GDP.
 
 
 
