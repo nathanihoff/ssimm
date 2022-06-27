@@ -529,11 +529,12 @@ policy_df <- lapply(policy_list, function(x){
                          civil_unions = 'Civil unions',
                          propaganda = 'Anti-propaganda laws'),
          lower = estimate - 1.96*std.error,
-         upper = estimate + 1.96*std.error) %>%
-  mutate(policy_name = factor(policy_name, levels = sort({.$policy_name}, decreasing = T)))
+         upper = estimate + 1.96*std.error)
+
+# levels(policy_df$policy_name) <- policy_df$policy_name[sort(policy_df$estimate)]
 
 policy_df %>%
-  ggplot(aes(policy_name, y = estimate)) +
+  ggplot(aes(reorder(policy_name, estimate), y = estimate)) +
   geom_hline(yintercept = 0, linetype = 2) +
   geom_pointrange(aes(ymin = lower, ymax = upper)) +
   coord_flip() +
