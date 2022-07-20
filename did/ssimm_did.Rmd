@@ -293,7 +293,7 @@ To isolate the effect of the 2013 DOMA repeal, we employ a triple difference, or
 Our estimand is the relative change in incidence of individual in mixed-citizenship, same-sex couples following the repeal of DOMA in 2013. We estimate this as the coefficient to a three-way interaction between indicators for same-sex, mixed-citizenship, and post-2013 survey year. We write our model as
 $$\begin{aligned}
 y_{gst} = &\exp[\beta_0 + \beta_1 post_t + \beta_2 (M_g \times post_t) + \beta_3 (S_g \times post_t)  \\
-&+ \beta_4 ( M_g \times S_g \times post_g) + \alpha_{gs} + \gamma_{t} + \epsilon_{gst}]
+&+ \beta_4 ( M_g \times S_g \times post_t) + \alpha_{gs} + \gamma_{t} + \epsilon_{gst}]
 \end{aligned}$$
 where $y_{gst}$ is the count of individuals in group $g$ in state $s$ in survey year $t$; $post_t$ is an indicator variable for $t > 2013$; $M_g$ is an indicator variable for group $g$ being mixed-citizenship; $S_g$ is an indicator variable for group $g$ being same-sex; $\alpha_{gs}$ are group-state fixed effects; $\gamma_t$ are survey year fixed effects; and $\epsilon_{gst}$ is an error term such that $\mathbb E(\epsilon_{gst}) = 0$. The coefficient of interest is $\beta_4$; the incidence ratio $\exp(\beta_4)$ estimates the relative increase in mixed-citizenship same-sex couples after 2013, relative to other couples.
 
@@ -307,10 +307,17 @@ We focus on heterogeneity of this effect: how it varies by the LGB policy contex
 ## Main Effects
 ```{r mod-tab}
 mod_mixed <- acs_count_mixed %>%
-  glm(n ~ I(post_2013*same_sex*mixed) + I(post_2013*same_sex) + I(post_2013*mixed) + post_2013 + group_fe + as.factor(year), 
+  glm(n ~ I(post_2013*same_sex*mixed) + I(post_2013*same_sex) + I(post_2013*mixed) + 
+        post_2013 + group_fe + as.factor(year), 
                         data = ., 
                         family = 'quasipoisson') %>%
-coeftest(., vcov = vcovCL(., cluster = ~group_fe))
+  coeftest(., vcov = vcovCL(., cluster = ~group_fe))
+
+# acs_count_mixed %>%
+#   glm(n ~ post_2013*same_sex*mixed + group_fe + as.factor(year), 
+#                         data = ., 
+#                         family = 'quasipoisson') %>%
+# coeftest(., vcov = vcovCL(., cluster = ~group_fe))
 
 count_origin_high <- acs_count_mixed_bpld %>%
   filter(origin_score > 3 | is.na(origin_score)) %>%
