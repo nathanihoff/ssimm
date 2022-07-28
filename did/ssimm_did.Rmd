@@ -40,7 +40,7 @@ link-citations: yes
 linkcolor: blue
 bibliography: "Same-Sex Immigration.bib"
 # csl: apa.csl
-title: "Policy Effects on Mixed-Citizenship, Same-Sex Couples: A Triple-Difference Analysis"
+title: "Policy Effects on Mixed-Citizenship, Same-Sex Unions: A Triple-Difference Analysis"
 # subtitle: "ASA 2022 Submission"
 
 date: "`r format(Sys.time(), '%B %e, %Y')`"
@@ -224,6 +224,25 @@ One policy change especially relevant to immigrants is the 2013 U.S. Supreme Cou
 How can we understand the rapid rise of this type of union? Are trends homogeneous across the population of mixed-citizenship same-sex couples? As shown in Figure \@ref(fig:desc), this rapid increase after 2013 was not uniform across immigrants from all countries. For those hailing from countries with progressive LGB policies, the increase was indeed rapid after 2013. However, from those with repressive LGB policies, no increase occurred. Why do we see so much variation by policy context at the country of origin?   
 
 ```{r desc, fig.height = 3, fig.cap = 'Estimated counts of individuals in mixed-citizenship, same-same couples from the American Community Survey. The "Repressive" sample includes only countries with a LGB policy score less than 0, and the "Progressive" sample includes only those with a score greater than 3.'}
+
+# bind_rows(
+#   acs_count_base %>%
+#     mutate(cat = case_when(origin_score > 3 ~ 'Progressive',
+#                              origin_score < 0 ~ 'Repressive')) %>%
+#     filter(mixed_citizenship == T & same_sex == T & !is.na(cat)) %>%
+#     group_by(year, cat) %>%
+#     summarize(n = sum(perwt)),
+#   acs_count_base %>%
+#     filter(mixed_citizenship == T & same_sex == T) %>%
+#     group_by(year) %>%
+#     summarize(n = sum(perwt)) %>%
+#     mutate(cat = 'Full sample')) %>%
+#   ggplot(aes(x = year, y = n/1000, color = cat, linetype = cat)) +
+#   geom_line() +
+#   geom_vline(xintercept = 2013, linetype = 2) +
+#   labs(x = 'Year', y = 'n (thousands)')
+
+
 bind_rows(
   acs_count_mixed_bpld %>%
     mutate(cat = case_when(origin_score > 3 ~ 'Progressive',
@@ -410,8 +429,8 @@ huxreg(list('Full sample' = mod_mixed, 'Progressive' = mod_os_high, 'Repressive'
   huxtable::set_width(1) %>%
   set_wrap(T) %>%
   set_all_padding(0) %>%
-  huxtable::set_caption('GROUP LEVEL: STRATIFYING BY STATE-COUNTRY-YEAR AVERAGE POLICY ENVIRONMENT. Quasi-Poisson DDD regressions of counts of 
-                        mixed-citizenship same-sex couples')
+  huxtable::set_caption('Quasi-Poisson DDD regressions of counts of 
+                        mixed-citizenship same-sex couples, stratifying by state-country-year-group average policy environment')
   # theme_compact()
 
 base_effect <- tidy(mod_mixed) %>%
@@ -422,7 +441,7 @@ high_effect <- tidy(mod_os_high) %>%
   pull(estimate) 
 ```
 
-```{r lag-plot, fig.height = 3.5, fig.cap = 'GROUP-LEVEL (STATE-COUNTRY-YEAR-GROUPS). Dynamic specification of quasi-Poisson regression with two-way fixed effects, displaying the coefficient for the Year × Same-sex × Mixed-citizenship interaction. Survey years are aggregated into pairs, with 2008-2009 as the base category.'}
+```{r lag-plot, fig.height = 3.5, fig.cap = 'Dynamic specification of quasi-Poisson regression with two-way fixed effects, displaying the coefficient for the Year × Same-sex × Mixed-citizenship interaction. Survey years are aggregated into pairs, with 2008-2009 as the base category.'}
 base_plot <- acs_count_mixed %>%
   mutate(year = floor(year/2)*2) %>%
   group_by(state, year, same_sex, mixed, group_fe) %>%
@@ -497,9 +516,8 @@ p_combined &
   ylim(min(p_ranges_y), max(p_ranges_y))
 ```
 
-\newpage
 
-```{r mod-tab2}
+```{r mod-tab2, eval = F}
 mod_mixed <- acs_count_mixed %>%
   glm(n ~ I(post_2013*same_sex*mixed) + I(post_2013*same_sex) + I(post_2013*mixed) + 
         post_2013 + group_fe + as.factor(year), 
@@ -602,7 +620,7 @@ high_effect <- tidy(mod_os_high) %>%
 ```
 
 
-```{r lag-plot2, fig.height = 3.5, fig.cap = 'INDIVIDUAL-LEVEL: Dynamic specification of quasi-Poisson regression with two-way fixed effects, displaying the coefficient for the Year × Same-sex × Mixed-citizenship interaction. Survey years are aggregated into pairs, with 2008-2009 as the base category.'}
+```{r lag-plot2, eval = F, fig.height = 3.5, fig.cap = 'INDIVIDUAL-LEVEL: Dynamic specification of quasi-Poisson regression with two-way fixed effects, displaying the coefficient for the Year × Same-sex × Mixed-citizenship interaction. Survey years are aggregated into pairs, with 2008-2009 as the base category.'}
 base_plot <- acs_count_mixed %>%
   mutate(year = floor(year/2)*2) %>%
   group_by(state, year, same_sex, mixed, group_fe) %>%
@@ -762,9 +780,7 @@ policy_df <- lapply(policy_list, function(x){
 write_csv(policy_df, here('did', 'policy_df.csv'))
 ```
 
-```{r policies-plot, fig.cap = 'COUNTRY-LEVEL: STATE-COUNTRY-YEAR-GROUPS WITH POLICY AVERAGE GREATER THAN 0. Stratified by specific policy: quasi-Poisson DDD regressions of counts of mixed-citizenship same-sex couples. Estimates and 95-percent confidence intervals are for the three-way interaction between indicators for same-sex, mixed-citizenship, and post-2013 survey year'}
-policy_df <- read_csv(here('did', 'policy_df.csv'))
-
+```{r policies-plot, fig.cap = 'Stratified by specific policy: quasi-Poisson DDD regressions of counts of mixed-citizenship same-sex couples, stratifying by state-country-year-groups with policy averages greater than 0. Estimates and 95-percent confidence intervals are for the three-way interaction between indicators for same-sex, mixed-citizenship, and post-2013 survey year.'}
 policy_list <- list()
 variables <- names(subset(acs_count_mixed_bpld, select = equal_age:propaganda))
 
@@ -845,7 +861,7 @@ policy_df %>%
   labs(x = '', y = '')
 ```
 
-```{r policies-plot2, fig.cap = 'COUNTRY-LEVEL: STATE-COUNTRY-YEAR-GROUPS WITH POLICY AVERAGE GREATER THAN 0.5. Stratified by specific policy: quasi-Poisson DDD regressions of counts of mixed-citizenship same-sex couples. Estimates and 95-percent confidence intervals are for the three-way interaction between indicators for same-sex, mixed-citizenship, and post-2013 survey year'}
+```{r policies-plot2, eval = F, fig.cap = 'COUNTRY-LEVEL: STATE-COUNTRY-YEAR-GROUPS WITH POLICY AVERAGE GREATER THAN 0.5. Stratified by specific policy: quasi-Poisson DDD regressions of counts of mixed-citizenship same-sex couples. Estimates and 95-percent confidence intervals are for the three-way interaction between indicators for same-sex, mixed-citizenship, and post-2013 survey year'}
 policy_df <- read_csv(here('did', 'policy_df.csv'))
 
 policy_list <- list()
@@ -928,7 +944,7 @@ policy_df %>%
   labs(x = '', y = '')
 ```
 
-```{r policies-plot3, fig.cap = 'INDIVIDUAL LEVEL: ONLY INDIVIDUALS EXPERIENCING POLICY. Stratified by specific policy: quasi-Poisson DDD regressions of counts of mixed-citizenship same-sex couples. Estimates and 95-percent confidence intervals are for the three-way interaction between indicators for same-sex, mixed-citizenship, and post-2013 survey year'}
+```{r policies-plot3, eval = F, fig.cap = 'INDIVIDUAL LEVEL: ONLY INDIVIDUALS EXPERIENCING POLICY. Stratified by specific policy: quasi-Poisson DDD regressions of counts of mixed-citizenship same-sex couples. Estimates and 95-percent confidence intervals are for the three-way interaction between indicators for same-sex, mixed-citizenship, and post-2013 survey year'}
 policy_df <- read_csv(here('did', 'policy_df.csv'))
 
 
@@ -1007,7 +1023,7 @@ We plan to extend our analysis as well as conduct a series of robustness checks.
 
 
 
-```{r stratified-mixed, fig.cap = 'Predicted numbers of individuals in mixed-citizenship couples, stratified by LGBT policy score of origin country', eval = F}
+```{r stratified-mixed, eval = F, fig.cap = 'Predicted numbers of individuals in mixed-citizenship couples, stratified by LGBT policy score of origin country'}
 
 extra_pois_mixed_high <- glm(n ~ as.factor(year):same_sex:mixed + 
                         as.factor(year):same_sex + 

@@ -43,14 +43,13 @@
 \AtBeginSubsection{
   \frame{\subsectionpage}
 }
+\usepackage{amsmath,amssymb}
 \usepackage{lmodern}
-\usepackage{amsmath}
-\usepackage{ifxetex,ifluatex}
-\ifnum 0\ifxetex 1\fi\ifluatex 1\fi=0 % if pdftex
+\usepackage{iftex}
+\ifPDFTeX
   \usepackage[T1]{fontenc}
   \usepackage[utf8]{inputenc}
   \usepackage{textcomp} % provide euro and other symbols
-  \usepackage{amssymb}
 \else % if luatex or xetex
   \usepackage{unicode-math}
   \defaultfontfeatures{Scale=MatchLowercase}
@@ -173,7 +172,7 @@
 \AtBeginSubsubsection{}
 \setlength{\emergencystretch}{0em}
 \setlength{\parskip}{0pt}
-\ifluatex
+\ifLuaTeX
   \usepackage{selnolig}  % disable illegal ligatures
 \fi
 
@@ -444,8 +443,24 @@ Kristopher Velasco, Depatment of Sociology, Princeton}
 \includegraphics{ssimm_pres_files/figure-beamer/country-coefs2-1.pdf}
 \end{frame}
 
-\begin{frame}{Model Results: State Effects (Table 4)}
+\begin{frame}[fragile]{Model Results: State Effects (Table 4)}
 \protect\hypertarget{model-results-state-effects-table-4}{}
+\begin{verbatim}
+## Error in eval(predvars, data, env): object 'same_prop' not found
+\end{verbatim}
+
+\begin{verbatim}
+## Error in eval(predvars, data, env): object 'same_prop' not found
+\end{verbatim}
+
+\begin{verbatim}
+## Error in eval(predvars, data, env): object 'same_prop' not found
+\end{verbatim}
+
+\begin{verbatim}
+## Error in eval(expr, envir, enclos): object 'state_prop_fe' not found
+\end{verbatim}
+
 \includegraphics{ssimm_pres_files/figure-beamer/state-coefs-1.pdf}
 \end{frame}
 
@@ -570,16 +585,16 @@ Rank & Country of origin & Proportion same-sex & Mean policy score\\
 \toprule
 Rank & State & Proportion same-sex & Mean policy score\\
 \midrule
-1 & Vermont & 2.10 \% & 5.25\\
+1 & Vermont & 2.10 \% & 5.27\\
 2 & Maine & 1.51 \% & 4.85\\
-3 & Montana & 1.47 \% & 0.93\\
+3 & Montana & 1.47 \% & 0.92\\
 4 & Missouri & 1.11 \% & 1.96\\
 5 & Massachusetts & 1.10 \% & 4.80\\
 6 & New York & 1.08 \% & 4.89\\
 7 & Florida & 0.99 \% & 1.00\\
 8 & New Hampshire & 0.95 \% & 4.40\\
 9 & Minnesota & 0.92 \% & 4.66\\
-10 & New Mexico & 0.92 \% & 4.80\\
+10 & New Mexico & 0.92 \% & 4.79\\
 \bottomrule
 \multicolumn{4}{l}{\rule{0pt}{1em}\textit{Source:} American Community Survey 2008-2019. Authors' calculations.}\\
 \end{tabular}
