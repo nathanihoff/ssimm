@@ -19,14 +19,6 @@ output:
 header-includes:
   - \usepackage{setspace}\doublespace
   - \usepackage{bbm}
-  # - \usepackage{endnotes}
-  #- \let\footnote=\endnote
-  #- \usepackage{endfloat}
-  # - \usepackage{fancyhdr}
-  # - \pagestyle{fancy}
-  # - \setlength{\headheight}{13.6pt}
-  # - \rhead{\textit{Hoffmann and Velasco}}
-  # - \lhead{\textit{`r format(Sys.time(), '%B %e, %Y')`}}
 editor_options: 
   
   chunk_output_type: console
@@ -42,18 +34,13 @@ bibliography: "Same-Sex Immigration.bib"
 # csl: apa.csl
 title: "Policy Effects on Mixed-Citizenship, Same-Sex Unions: A Triple-Difference Analysis"
 # subtitle: "ASA 2022 Submission"
-
 date: "`r format(Sys.time(), '%B %e, %Y')`"
-
 author:
 - Nathan I. Hoffmann, Department of Sociology, University of California, Los Angeles
 - Kristopher Velasco, Department of Sociology, Princeton University
- 
 abstract: "After the U.S. Supreme Court struck down the Defense of Marriage Act (DOMA) in 2013, same-sex partners of U.S. citizens became eligible for spousal visas. Since then, the U.S. has a seen a rapid rise in same-sex, mixed-citizenship couples. However, this effect varies greatly depending on the LGB policy context of the non-citizen's country of origin. Using waves 2008 to 2019 of the American Community Survey, this study employs a triple-difference design to examine how the policy environment of the origin country moderates the effect of the end of DOMA. Quasi-Poisson models with two-way fixed effects show that, after 2013, individuals in mixed-citizenship same-sex couples coming from countries with progressive LGB policy saw a more than 50-percent increase in incidence relative to those in different-sex or same-citizenship couples. Meanwhile, those from countries with repressive laws experienced no relative increase. Furthermore, effects appear greatest for laws around same-sex civil unions and marriage. We argue that the policy context of country of origin leaves a lasting cultural impact on immigrants that shapes their response to policy shifts in their country of residence, even many years after migration."
  
 # author:
-# - Nathan I. Hoffmann, Department of Sociology, University of California, Los Angeles
-# - Kristopher Velasco, Department of Sociology, Princeton University
 ---
 
 <!-- Turn off hyphenation -->

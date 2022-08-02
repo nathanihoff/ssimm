@@ -12,7 +12,7 @@ output:
     
 
 # header-includes:
-#   - \AtBeginDocument{\title[Making Migration Sexy]{Making Migration Sexy: How State and National Policies Influence Migration of Same-Sex Couples}}
+#   - \AtBeginDocument{\title[Mixed-Citizenship, Same-Sex Unions]{Policy Effects on Mixed-Citizenship, Same-Sex Unions: A Triple DIfferences Analysis}}
 #   -\AtBeginDocument{\author[Hoffmann \& Velasco]{ Nathan I. Hoffmann, Sociology, UCLA
 #  \\ Kristopher Velasco, Sociology, Princeton}}
 
@@ -188,8 +188,10 @@ total_dif_mixed <- acs_count_mixed_bpld %>%
 # Introduction
 ## Introduction
 - In 2013, the U.S. Supreme Court struck down the Defense of Marriage Act
+    + Allowing same-sex couples to apply for spousal/marriage visas
 - From 2013 to 2019, 156% increase in mixed-citizenship same-sex couples, compared to 8% for different-sex
-- LGB policy environments, both at country of origin and in U.S. states, are changing rapidly and yet, little is understood how this contributes toward the migration of immigrants in same-sex couples
+- But from where do these couples come? 
+    + Do LGB policy environments, both at country of origin and in U.S. states, contribute toward the migration of immigrants in same-sex couples?
 
 
 ## Introduction
@@ -215,8 +217,18 @@ bind_rows(
 ```
 
 # Background
+## Our Intervention
 
+-Little research on queer migration beyond asylum and refugees
+-Migration theory typically emphasizes economic and network theories
+-We aim to demonstrate how culture and identity interact with policy to shape migratory pathways
 
+# Background
+## How Country-Origin LGB Policies Influence Migration
+
+-Policies reflect and are constituted by cultural environments
+-Progressive LGB policies (e.g., marriage equality), make desiring same-sex union possible
+-Regressive policies may: limit aspirations for same-sex union, public disclosure of such unions, and, ultimately, undermine credibility in visa applications.
 
 # Data
 ## Identifying Same-Sex Couples in the ACS
