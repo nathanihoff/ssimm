@@ -200,7 +200,7 @@ total_dif_mixed <- acs_count_mixed_bpld %>%
 bind_rows(
   acs_count_mixed_bpld %>%
     mutate(cat = case_when(origin_score > 3 ~ 'Progressive',
-                           origin_score < 0 ~ 'Repressive')) %>%
+                           origin_score < 0 ~ 'Regressive')) %>%
     filter(!is.na(cat) & mixed == T & same_sex == T) %>%
     group_by(year, cat) %>%
     summarize(n = sum(n)),
@@ -224,7 +224,7 @@ bind_rows(
 - Regressive policies may: limit aspirations for same-sex union, public disclosure of such unions, and, ultimately, undermine credibility in visa applications.
 - Regressive policies may also limit access to requisite resources to migrate
 
-# Background
+
 ## Our Contribution
 
 - Migration theory typically emphasizes economic and network theories  
@@ -232,7 +232,8 @@ bind_rows(
 - Continue advancing research on queer migration; Recognizing populations besides refugees and asylum-seekers
 
 
-# Data
+# Data and Methods
+## Data
 - 2008 to 2019 American Community Survey (ACS)
     + immigrated at age 18 or older post-1990
     + 18 to 64 at time of survey
@@ -241,10 +242,12 @@ bind_rows(
 
 
 ## Data
-- Data structure: state-year-group counts
+- Data structure: state-year-group counts ($n$ = 2448)
   + groups: same sex $\times$ mixed citizenship
   + e.g. number of same-sex mixed-citizenship couples living in Arizona in 2012
 - Explanatory variable: country of origin LGBT policy index (sum of 14 policies) (Velasco 2020)
+  + progressive policies such civil unions, marriage equality, and hate-crime protection
+  + regressive policies such as anti-propaganda
 
 ## Sample sizes
 ```{r data-tab}
@@ -265,13 +268,14 @@ acs_count_mixed %>%
 
 
 
-# Methods
+## Methods
 - Difference-in-differences-in-differences (DDD)
 
 $$\begin{aligned}
 y_{gst} = &\exp[\beta_0 + \beta_1 post_t + \beta_2 (M_g \times post_t) + \beta_3 (S_g \times post_t)  \\
 &+ \beta_4 ( M_g \times S_g \times post_t) + \alpha_{gs} + \gamma_{t} + \epsilon_{gst}]
-\end{aligned}$$
+\end{aligned}$$  
+
 - where $y_{gst}$ is the count of individuals in group $g$ in state $s$ in survey year $t$; $post_t$ is an indicator variable for $t > 2013$; $M_g$ is an indicator variable for group $g$ being mixed-citizenship; $S_g$ is an indicator variable for group $g$ being same-sex; $\alpha_{gs}$ are group-state fixed effects; $\gamma_t$ are survey year fixed effects; and $\epsilon_{gst}$ is an error term such that $\mathbb E(\epsilon_{gst}) = 0$.  
 
 - Coefficient of interest is $\beta_4$: the incidence ratio $\exp(\beta_4)$ estimates the relative increase in mixed-citizenship same-sex couples after 2013, relative to other couples.
@@ -368,7 +372,7 @@ mod_os_low <- glm(n ~  I(post_2013*same_sex*mixed) +
 bind_rows(
   mutate(tidy(mod_mixed, conf.int = T), name = 'Full sample'),
   mutate(tidy(mod_os_high, conf.int = T), name = 'Progressive (>3)'),
-  mutate(tidy(mod_os_low, conf.int = T), name = 'Repressive (<0)')) %>%
+  mutate(tidy(mod_os_low, conf.int = T), name = 'Regressive (<0)')) %>%
   filter(term %in% c('I(post_2013 * same_sex * mixed)', 'I(post_2013 * same_sex)',
                 'I(post_2013 * mixed)', 'post_2013TRUE')) %>%
   mutate(term = recode(term, 
@@ -378,9 +382,11 @@ bind_rows(
                 'post_2013TRUE' = 'Post-2013')) %>%
   ggplot(aes(x = term, y = estimate)) +
   geom_pointrange(aes(ymin = conf.low, ymax = conf.high)) +
+  geom_hline(yintercept = 0, linetype = 2) +
   coord_flip() + 
   facet_wrap(~name, ncol = 3) +
   labs(x = '', y = '')
+
 ```
 
 ## Dynamic Models
@@ -504,7 +510,7 @@ policy_df <- lapply(policy_list, function(x){
   ) %>%
   bind_rows() %>%
   mutate(policy = names(policy_list),
-         type = if_else(policy %in% prog_policies, 'Progressive', 'Repressive'),
+         type = if_else(policy %in% prog_policies, 'Progressive', 'Regressive'),
          policy_name = recode(policy, 
                          equal_age = 'Equal age of consent', 
                          unequal_age = 'Unequal age of consent',
@@ -542,7 +548,7 @@ policy_df %>%
 
 ```{r policies-plot-2}
 policy_df %>% 
-  filter(type == 'Repressive') %>%
+  filter(type == 'Regressive') %>%
   # arrange(desc(estimate)) %>%
   # head(10) %>%
   ggplot(aes(reorder(policy_name, estimate), y = estimate)) +
@@ -556,15 +562,20 @@ policy_df %>%
 
 
 # Discussion
-## Discussion
 
-# Next steps
+- effect of 2013 only for immigrants from progressive countries
+- stronger effects for marriage equality and civil unions
+- culture, identity, and policy can affect migration and unions
+- broadening focus of queer migration studies to immigrants from progressive countries
+
+
+## Next steps
 - Adjust for possible state- and group-level confounders
 - Stratify by state LGB policy environment
 - Incorporate 2020 data
 
 
-## End
+## 
 \begin{center}
   \huge{\textcolor{uclablue}{Thank You}}
 \end{center}
