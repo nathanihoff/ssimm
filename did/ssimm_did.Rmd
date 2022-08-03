@@ -686,6 +686,110 @@ Table \@ref(tab:mod-tab) presents results from our DDD specifications. For the f
 
 Figure \@ref(fig:lag-plot) presents dynamic models of the effect of interest. These models replace the post-2013 indicator variable with a categorical variable for survey year, with years grouped into pairs for statistical power. The left panel shows this lag-lead specification for the full sample. We see that coefficients for the three-way interaction between year, same-sex, and mixed-citizenship become significantly positive only after 2013. The right panel presents the same specification, but for the stratified samples as in Table \@ref(tab:mod-tab). Here, we see a clear upward trend for non-citizens from progressive countries, while the trend for those from repressive countries hovers close to 0. Also of note across all samples is the lower coefficient for the years 2018-2019, perhaps demonstrating a "Trump effect" reducing LGB immigration or the willingness of LGB citizens and non-citizens to enter into unions.
 
+
+```{r mod-tab-controls, eval = F}
+mod_mixed <- acs_count_mixed_bpld %>%
+  group_by(state, year, same_sex, mixed) %>%
+  summarize(n = sum(n),
+            across(distw:stock_prop)) %>%
+  ungroup() %>%
+  complete(state, year, same_sex, mixed) %>%
+  mutate(across(n, function(x) ifelse(is.na(x), 0, x)),
+         post_2013 = year > 2013,
+         group_fe = paste(state, same_sex, mixed, sep = '_'))
+  glm(n ~ I(post_2013*same_sex*mixed) + I(post_2013*same_sex) + I(post_2013*mixed) + 
+        post_2013 + group_fe + as.factor(year) +
+                        data = ., 
+                        family = 'quasipoisson') %>%
+  coeftest(., vcov = vcovCL(., cluster = ~group_fe)) 
+
+# acs_count_mixed %>%
+#   glm(n ~ post_2013*same_sex*mixed + group_fe + as.factor(year),
+#                         data = .,
+#                         family = 'quasipoisson') %>%
+# coeftest(., vcov = vcovCL(., cluster = ~group_fe)) %>%
+#   tidy() %>%
+#   filter(!str_detect(term, 'group'), !str_detect(term, 'year'))
+
+count_origin_high <- # count_func('origin_score > 3 | is.na(origin_score)') 
+  acs_count_mixed_bpld %>%
+  filter(origin_score > 3 | is.na(origin_score)) %>%
+  group_by(state, year, same_sex, mixed, post_2013, group_fe) %>%
+  summarize(n = sum(n)) %>%
+  ungroup() %>%
+  complete(state, year, same_sex, mixed) %>%
+  mutate(across(n, function(x) ifelse(is.na(x), 0, x)),
+         post_2013 = year > 2013,
+         group_fe = paste(state, same_sex, mixed, sep = '_'))
+
+# acs_count_base %>%
+#   select(state, year, mixed_citizenship, same_sex, bpld, bpldnew, yrimmig, yrimmigmod, origin_score) %>%
+#   sample_n(10)
+
+
+
+# count_origin_high <- acs_count_base %>%
+#     rename(mixed = mixed_citizenship) %>%
+#     filter(origin_score > 3 | mixed == F) %>%
+#     # filter(origin_score > 3 | is.na(origin_score)) %>%
+#     group_by(state, year, same_sex, mixed) %>%
+#     summarize(n = sum(perwt), 
+#               n_unweighted = n(),
+#               n_ar = sum(perwt[qcitizen != 'Allocated' & qeduc != 'Consistency edit' & allocated == F]), 
+#               n_unweighted_ar = sum(qcitizen != 'Allocated' & qeduc != 'Consistency edit' & allocated == F)) %>%
+#     ungroup() %>%
+#     complete(state, year, same_sex, mixed) %>%
+#     mutate(across(n:n_unweighted_ar, function(x) ifelse(is.na(x), 0, x))) %>%
+#     mutate(post_2013 = year > 2013,
+#            group_fe = paste(state, same_sex, mixed, sep = '_')) 
+
+
+mod_os_high <- glm(n ~  I(post_2013*same_sex*mixed) + 
+                        I(post_2013*same_sex) + 
+                        I(post_2013*mixed) + 
+                        post_2013 + 
+                        group_fe + as.factor(year), 
+                        data = count_origin_high, 
+                        family = 'quasipoisson') %>%
+  coeftest(., vcov = vcovCL(., cluster = ~group_fe))
+
+count_origin_low <- # count_func('origin_score < 0 |  is.na(origin_score)')
+  acs_count_mixed_bpld %>%
+  filter(origin_score < 0 | is.na(origin_score)) %>%
+  group_by(state, year, same_sex, mixed, post_2013, group_fe) %>%
+  summarize(n = sum(n)) %>%
+  ungroup() %>%
+  complete(state, year, same_sex, mixed) %>%
+  mutate(across(n, function(x) ifelse(is.na(x), 0, x)),
+         post_2013 = year > 2013,
+         group_fe = paste(state, same_sex, mixed, sep = '_'))
+
+mod_os_low <- glm(n ~  I(post_2013*same_sex*mixed) + 
+                        I(post_2013*same_sex) + 
+                        I(post_2013*mixed) + 
+                        post_2013 + 
+                        group_fe + as.factor(year), 
+                        data = count_origin_low, 
+                        family = 'quasipoisson') %>%
+coeftest(., vcov = vcovCL(., cluster = ~group_fe)) 
+
+
+huxreg(list('Full sample' = mod_mixed, 'Progressive' = mod_os_high, 'Repressive' = mod_os_low),
+       coefs = c('Post-2013 × Same-sex × Mixed-citizenship' = 'I(post_2013 * same_sex * mixed)',
+                'Post-2013 × Same-sex'  = 'I(post_2013 * same_sex)',
+                'Post-2013 × Mixed-citizenship'  = 'I(post_2013 * mixed)',
+                'Post-2013' = 'post_2013TRUE'),
+  note = '{stars}. The "Repressive" sample includes only countries with a LGB policy score less than 0, and the "Progressive" sample includes only those with a score greater than 3. Group-clustered standard errors shown in parentheses. Source: American Community Survey 2008-2019. Authors\' calculations.',
+       stars = c(`†` = 0.1, `*` = 0.05, `**` = 0.01, `***` = 0.001),
+       statistics = c('Observations' = 'nobs')) %>%
+  huxtable::set_width(1) %>%
+  set_wrap(T) %>%
+  set_all_padding(0) %>%
+  huxtable::set_caption('Quasi-Poisson DDD regressions of counts of 
+                        mixed-citizenship same-sex couples, stratifying by state-country-year-group average policy environment')
+  # theme_compact()
+```
+
 ## Which Policies are Responsible?
 
 Clearly, the post-2013 rise in mixed-citizenship same-sex unions occurred much more strongly for immigrants from countries with overall progressive LGB policies. But are there some policies that matter more than others? Whereas Table \@ref(tab:mod-tab) stratified the sample by values of the policy index, here we stratify the sample by specific policies. Within each cell, we include only mixed-citizenship couples for whom the non-citizen country of origin has an average value greater than 0 for the policy of interest -- i.e., where immigrants in that group tended to experience the given policy in their year of immigration.  
@@ -1006,7 +1110,7 @@ huxreg(policy_list[rep_policies],
 
 
 # Next steps
-We plan to extend our analysis as well as conduct a series of robustness checks. Future analyses will incorporate ACS data from 2020 and, fourth, examine whether effects vary by U.S. state of residence and local LGB policy. Finally, although the two-way fixed effects in our specifications allay concerns of time-invariant confounders, we will test the robustness of our results by including possible time-varying confounders such as state GDP.
+We plan to extend our analysis as well as conduct a series of robustness checks. Future analyses will incorporate ACS data from 2020 and examine whether effects vary by U.S. state of residence and local LGB policy. Finally, although the two-way fixed effects in our specifications allay concerns of time-invariant confounders, we will test the robustness of our results by including possible time-varying confounders such as state GDP.
 
 
 

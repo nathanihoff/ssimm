@@ -78,7 +78,7 @@ update_geom_defaults("line", list(size = 1.75))
 #   scale_color_discrete_sequential(palette=colorspace_palette) +
 #   scale_fill_discrete_sequential(palette=colorspace_palette)
 
-options(scipen=1, digits=2)
+options(scipen=999, digits=2)
 knit_hooks$set(inline = function(x) {
   prettyNum(x, big.mark=",")
 })
@@ -219,31 +219,47 @@ bind_rows(
 # Background
 ## Our Intervention
 
--Little research on queer migration beyond asylum and refugees
--Migration theory typically emphasizes economic and network theories
--We aim to demonstrate how culture and identity interact with policy to shape migratory pathways
+- Little research on queer migration beyond asylum and refugees  
+- Migration theory typically emphasizes economic and network theories  
+- We aim to demonstrate how culture and identity interact with policy to shape migratory pathways
 
 # Background
 ## How Country-Origin LGB Policies Influence Migration
 
--Policies reflect and are constituted by cultural environments
--Progressive LGB policies (e.g., marriage equality), make desiring same-sex union possible
--Regressive policies may: limit aspirations for same-sex union, public disclosure of such unions, and, ultimately, undermine credibility in visa applications.
+- Policies reflect and are constituted by cultural environments  
+- Progressive LGB policies (e.g., marriage equality), make desiring same-sex union possible
+- Regressive policies may: limit aspirations for same-sex union, public disclosure of such unions, and, ultimately, undermine credibility in visa applications.
 
 # Data
-## Identifying Same-Sex Couples in the ACS
 - 2008 to 2019 American Community Survey (ACS)
     + immigrated at age 18 or older post-1990
+    + 18 to 64 at time of survey
 - Immigrants in same-sex couples are identified as foreign-born respondents who live with a same-sex married or unmarried partner
     + This necessarily excludes single and non-cohabiting LGB individuals
-- Sample of 7,011 immigrants in same-sex couples compared to 898,869 immigrants in different-sex couples
 
 
-## Variables
-- Explanatory variables
-    + Country of origin LGBT policy index (sum of 14 policies) (Velasco 2020)
-    + U.S. state LGBT policy index (sum of 8 policies) (Movement Advancement Project 2020)
+## Data
+- Data structure: state-year-group counts
+  + groups: same sex $\times$ mixed citizenship
+  + e.g. number of same-sex mixed-citizenship couples living in Arizona in 2012
+- Explanatory variable: country of origin LGBT policy index (sum of 14 policies) (Velasco 2020)
 
+## Sample sizes
+```{r data-tab}
+options(scipen=999, digits=2)
+acs_count_mixed %>%
+  mutate(Composition = if_else(same_sex == T, 'Same sex', 'Different sex'),
+         Citizenship = if_else(mixed == T, 'Mixed citizenship', 'Same citizenship')) %>%
+  group_by(Composition, Citizenship) %>%
+  summarize(`n (unweighted)` = sum(n_unweighted),
+            `n (weighted)` = sum(n)) %>%
+  kable(booktabs = T,
+        format.args = list(big.mark = ",")) %>%
+   kable_styling(position = "center")
+  # flextable() %>%
+  # flextable::autofit() 
+  # flextable::set_caption('Unweighted and weighted sample sizes from American Community Survey (ACS) data, 2008-2019')
+```
 
 
 
@@ -254,7 +270,8 @@ $$\begin{aligned}
 y_{gst} = &\exp[\beta_0 + \beta_1 post_t + \beta_2 (M_g \times post_t) + \beta_3 (S_g \times post_t)  \\
 &+ \beta_4 ( M_g \times S_g \times post_t) + \alpha_{gs} + \gamma_{t} + \epsilon_{gst}]
 \end{aligned}$$
-- where $y_{gst}$ is the count of individuals in group $g$ in state $s$ in survey year $t$; $post_t$ is an indicator variable for $t > 2013$; $M_g$ is an indicator variable for group $g$ being mixed-citizenship; $S_g$ is an indicator variable for group $g$ being same-sex; $\alpha_{gs}$ are group-state fixed effects; $\gamma_t$ are survey year fixed effects; and $\epsilon_{gst}$ is an error term such that $\mathbb E(\epsilon_{gst}) = 0$. 
+- where $y_{gst}$ is the count of individuals in group $g$ in state $s$ in survey year $t$; $post_t$ is an indicator variable for $t > 2013$; $M_g$ is an indicator variable for group $g$ being mixed-citizenship; $S_g$ is an indicator variable for group $g$ being same-sex; $\alpha_{gs}$ are group-state fixed effects; $\gamma_t$ are survey year fixed effects; and $\epsilon_{gst}$ is an error term such that $\mathbb E(\epsilon_{gst}) = 0$.  
+
 - Coefficient of interest is $\beta_4$: the incidence ratio $\exp(\beta_4)$ estimates the relative increase in mixed-citizenship same-sex couples after 2013, relative to other couples.
 
 
@@ -266,10 +283,7 @@ y_{gst} = &\exp[\beta_0 + \beta_1 post_t + \beta_2 (M_g \times post_t) + \beta_3
   
 
 ## Main Effects
-
-
-
-```{r mod-tab, eval = F}
+```{r mod-tab-setup, include = F}
 mod_mixed <- acs_count_mixed %>%
   glm(n ~ I(post_2013*same_sex*mixed) + I(post_2013*same_sex) + I(post_2013*mixed) + 
         post_2013 + group_fe + as.factor(year), 
@@ -345,28 +359,26 @@ mod_os_low <- glm(n ~  I(post_2013*same_sex*mixed) +
                         group_fe + as.factor(year), 
                         data = count_origin_low, 
                         family = 'quasipoisson') %>%
-coeftest(., vcov = vcovCL(., cluster = ~group_fe)) 
+  coeftest(., vcov = vcovCL(., cluster = ~group_fe)) 
+```
 
-
-huxreg(list('Full sample' = mod_mixed, 'Progressive' = mod_os_high, 'Repressive' = mod_os_low),
-       coefs = c('Post-2013 × Same-sex × Mixed-citizenship' = 'I(post_2013 * same_sex * mixed)',
-                'Post-2013 × Same-sex'  = 'I(post_2013 * same_sex)',
-                'Post-2013 × Mixed-citizenship'  = 'I(post_2013 * mixed)',
-                'Post-2013' = 'post_2013TRUE'),
-  # note = '{stars}. The "Repressive" sample includes only countries with a LGB policy score less than 0, and the "Progressive" sample includes only those with a score greater than 3. Group-clustered standard errors shown in parentheses. Source: American Community Survey 2008-2019. Authors\' calculations.',
-       stars = c(`†` = 0.1, `*` = 0.05, `**` = 0.01, `***` = 0.001),
-       statistics = c('Observations' = 'nobs')) %>%
-  huxtable::set_width(1) %>%
-  set_wrap(T) %>%
-  set_all_padding(0)
-  # theme_compact()
-
-base_effect <- tidy(mod_mixed) %>%
-  filter(term == 'I(post_2013 * same_sex * mixed)') %>%
-  pull(estimate) 
-high_effect <- tidy(mod_os_high) %>%
-  filter(term == 'I(post_2013 * same_sex * mixed)') %>%
-  pull(estimate) 
+```{r mod-tab, eval = T}
+bind_rows(
+  mutate(tidy(mod_mixed, conf.int = T), name = 'Full sample'),
+  mutate(tidy(mod_os_high, conf.int = T), name = 'Progressive (>3)'),
+  mutate(tidy(mod_os_low, conf.int = T), name = 'Repressive (<0)')) %>%
+  filter(term %in% c('I(post_2013 * same_sex * mixed)', 'I(post_2013 * same_sex)',
+                'I(post_2013 * mixed)', 'post_2013TRUE')) %>%
+  mutate(term = recode(term, 
+                'I(post_2013 * same_sex * mixed)' = 'Post-2013 × Same-sex × Mixed-citizenship' ,
+                'I(post_2013 * same_sex)' ='Post-2013 × Same-sex',
+                'I(post_2013 * mixed)' = 'Post-2013 × Mixed-citizenship',
+                'post_2013TRUE' = 'Post-2013')) %>%
+  ggplot(aes(x = term, y = estimate)) +
+  geom_pointrange(aes(ymin = conf.low, ymax = conf.high)) +
+  coord_flip() + 
+  facet_wrap(~name, ncol = 3) +
+  labs(x = '', y = '')
 ```
 
 ## Dynamic Models
@@ -543,6 +555,12 @@ policy_df %>%
 
 # Discussion
 ## Discussion
+
+# Next steps
+- Adjust for possible state- and group-level confounders
+- Stratify by state LGB policy environment
+- Incorporate 2020 data
+
 
 ## End
 \begin{center}
