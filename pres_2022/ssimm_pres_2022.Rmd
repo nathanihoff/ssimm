@@ -191,7 +191,7 @@ total_dif_mixed <- acs_count_mixed_bpld %>%
     + Allowing same-sex couples to apply for spousal/marriage visas
 - From 2013 to 2019, 156% increase in mixed-citizenship same-sex couples, compared to 8% for different-sex
 - But from where do these couples come? 
-    + Do LGB policy environments, both at country of origin and in U.S. states, contribute toward the migration of immigrants in same-sex couples?
+    + Do LGB policy environments at country of origin contribute toward the migration of immigrants in same-sex couples into the U.S.?
 
 
 ## Introduction
@@ -217,18 +217,20 @@ bind_rows(
 ```
 
 # Background
-## Our Intervention
-
-- Little research on queer migration beyond asylum and refugees  
-- Migration theory typically emphasizes economic and network theories  
-- We aim to demonstrate how culture and identity interact with policy to shape migratory pathways
-
-# Background
 ## How Country-Origin LGB Policies Influence Migration
 
-- Policies reflect and are constituted by cultural environments  
+- Policies both influence and are constituted by cultural environments  
 - Progressive LGB policies (e.g., marriage equality), make desiring same-sex union possible
 - Regressive policies may: limit aspirations for same-sex union, public disclosure of such unions, and, ultimately, undermine credibility in visa applications.
+- Regressive policies may also limit access to requisite resources to migrate
+
+# Background
+## Our Contribution
+
+- Migration theory typically emphasizes economic and network theories  
+- We aim to demonstrate how culture and identity interact with policy to shape migratory pathways
+- Continue advancing research on queer migration; Recognizing populations besides refugees and asylum-seekers
+
 
 # Data
 - 2008 to 2019 American Community Survey (ACS)
@@ -462,7 +464,7 @@ strat_plot &
 ```
 
 
-## Specific Policies
+## Specific Policies: Progressive
 ```{r policies-plot-1}
 policy_list <- list()
 variables <- names(subset(acs_count_mixed_bpld, select = equal_age:propaganda))
@@ -536,7 +538,7 @@ policy_df %>%
   ylim(c(-.4, 0.75))
 ```
 
-## Specific Policies: Progressive
+## Specific Policies: Regressive
 
 ```{r policies-plot-2}
 policy_df %>% 
