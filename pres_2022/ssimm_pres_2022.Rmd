@@ -31,6 +31,7 @@ date: "UCLA & Princeton"
 ```{r setup, include=F}
 library(knitr)
 library(broom)
+library(srvyr)
 library(huxtable)
 library(sandwich)
 library(lmtest)
@@ -70,7 +71,9 @@ ggplot <- function(...) ggplot2::ggplot(...) +
   scale_fill_manual(values = ucla_palette)
 
 update_geom_defaults("line", list(size = 1.75))
-                     #"pointrange", list(size = 1.75))
+update_geom_defaults("pointrange", list(size = 1.3))
+
+
 
 # library(colorspace)
 # colorspace_palette = 'RdPu'
@@ -169,6 +172,8 @@ acs_count_mixed_bpld <- read_csv(here('data', 'acs_count_mixed.csv'))  %>%
       summarize(across(c(equal_age:propaganda, origin_score), mean, na.rm = T))
       #summarize(origin_score = mean(origin_score))
     )
+
+acs_ind_survey <- acs_ind %>% as_survey_design(ids = cluster, weights = perwt)
 ```
 
 ```{r intro-stats}
@@ -232,13 +237,13 @@ bind_rows(
 - Continue advancing research on queer migration; Recognizing populations besides refugees and asylum-seekers
 
 
-# Data and Methods
+# Data and Method
 ## Data
 - 2008 to 2019 American Community Survey (ACS)
     + immigrated at age 18 or older post-1990
     + 18 to 64 at time of survey
 - Immigrants in same-sex couples are identified as foreign-born respondents who live with a same-sex married or unmarried partner
-    + This necessarily excludes single and non-cohabiting LGB individuals
+    + necessarily excludes single and non-cohabiting LGB individuals
 
 
 ## Data
@@ -246,6 +251,7 @@ bind_rows(
   + groups: same sex $\times$ mixed citizenship
   + e.g. number of same-sex mixed-citizenship couples living in Arizona in 2012
 - Explanatory variable: country of origin LGBT policy index (sum of 14 policies) (Velasco 2020)
+  + ranges from -3 to 10, with a mean of 1.7
   + progressive policies such civil unions, marriage equality, and hate-crime protection
   + regressive policies such as anti-propaganda
 
@@ -268,15 +274,27 @@ acs_count_mixed %>%
 
 
 
-## Methods
-- Difference-in-differences-in-differences (DDD)
+## Method
+- Difference-in-differences-in-differences (DDD) using quasi-Poisson regression
+  + Following Redpath (2022), model incidence of mixed-citizenship same-sex couples after 2013 relative to those before 2013 and same-citizenship or different-sex couples
+- Stratify by policy environment
+  + include only country-state-year mixed-citizenship groups with progressive (>3) or regressive (<0) policy scores
+  + include only groups with specific policies
 
+## Method
 $$\begin{aligned}
 y_{gst} = &\exp[\beta_0 + \beta_1 post_t + \beta_2 (M_g \times post_t) + \beta_3 (S_g \times post_t)  \\
 &+ \beta_4 ( M_g \times S_g \times post_t) + \alpha_{gs} + \gamma_{t} + \epsilon_{gst}]
 \end{aligned}$$  
 
-- where $y_{gst}$ is the count of individuals in group $g$ in state $s$ in survey year $t$; $post_t$ is an indicator variable for $t > 2013$; $M_g$ is an indicator variable for group $g$ being mixed-citizenship; $S_g$ is an indicator variable for group $g$ being same-sex; $\alpha_{gs}$ are group-state fixed effects; $\gamma_t$ are survey year fixed effects; and $\epsilon_{gst}$ is an error term such that $\mathbb E(\epsilon_{gst}) = 0$.  
+- Where
+  + $y_{gst}$: count of individuals in group $g$ in state $s$ in survey year $t$  
+  + $post_t$: indicator  for $t > 2013$  
+  + $M_g$: indicator for group $g$ being mixed-citizenship  
+  + $S_g$: indicator for group $g$ being same-sex  
+  + $\alpha_{gs}$: group-state fixed effects  
+  + $\gamma_t$: survey year fixed effects  
+  + $\epsilon_{gst}$ is an error term such that $\mathbb E(\epsilon_{gst}) = 0$ 
 
 - Coefficient of interest is $\beta_4$: the incidence ratio $\exp(\beta_4)$ estimates the relative increase in mixed-citizenship same-sex couples after 2013, relative to other couples.
 
@@ -582,3 +600,107 @@ policy_df %>%
 
 - Nathan I. Hoffmann ([nathanihoff\@ucla.edu](mailto:nathanihoff@ucla.edu))
 - Kristopher Velasco ([kvelasco\@princeton.edu](mailto:kvelasco\@princeton.edu))  
+
+
+``` {=latex}
+\end{frame}
+\appendix
+\begin{frame}<0| handout:0>
+```
+
+
+# Supplementary Material
+## Country-Level Descriptives
+```{r desc-country}
+distance <- acs_ind_survey %>%
+  mutate(same_sex = if_else(same_sex == T, 'Same-Sex', 'Different-Sex')) %>%
+  group_by(year, same_sex) %>%
+  summarize(var = survey_mean(distw, vartype = "ci", na.rm = T)) %>%
+  mutate(var_name = 'C. Distance to Country of Origin (km)')
+
+unemp <- acs_ind_survey %>%
+  mutate(same_sex = if_else(same_sex == T, 'Same-Sex', 'Different-Sex')) %>%
+  group_by(year, same_sex) %>%
+  summarize(var = -survey_mean(unemp_dif, vartype = "ci", na.rm = T)) %>%
+  mutate(var_name = 'B. Unemployment Rate Difference with U.S.')
+
+prop_stock <- acs_ind_survey %>%
+  mutate(same_sex = if_else(same_sex == T, 'Same-Sex', 'Different-Sex')) %>%
+  group_by(year, same_sex) %>%
+  summarize(var = survey_mean(stock_prop, vartype = "ci", na.rm = T)) %>%
+  mutate(var_name = 'D. Proportion U.S. Immigrant Stock')
+
+wage_dif <- acs_ind_survey %>%
+  mutate(same_sex = if_else(same_sex == T, 'Same-Sex', 'Different-Sex')) %>%
+  group_by(year, same_sex) %>%
+  summarize(var = -survey_mean(wage_dif, vartype = "ci", na.rm = T)) %>%
+  mutate(var_name = 'A. GDP Difference with U.S.')
+
+vdem <- acs_ind_survey %>%
+  mutate(same_sex = if_else(same_sex == T, 'Same-Sex', 'Different-Sex')) %>%
+  group_by(year, same_sex) %>%
+  summarize(var = survey_mean(vdem, vartype = "ci", na.rm = T)) %>%
+  mutate(var_name = 'E. Democracy Score (V-Dem)')
+
+
+bind_rows(wage_dif, vdem, prop_stock, distance) %>%
+  rename(Year = year) %>%
+  ggplot(aes(x = Year, y = var, linetype = same_sex)) +
+  geom_line() +
+  geom_ribbon(aes(ymin = var_low, ymax = var_upp, group = same_sex, col = NULL), alpha = .2) +
+  facet_wrap(~var_name, scales = "free", ncol = 2) +
+  ylab('') +
+  theme( # legend.justification=c(1,0),
+  #     legend.position=c(.22,.82),
+  #     legend.background = element_rect(fill = alpha("white", 0.5))
+      legend.position="bottom")
+ 
+```
+
+## Individual Descriptives
+```{r desc-ind}
+income <- acs_ind_survey %>%
+  mutate(same_sex = if_else(same_sex == T, 'Same-Sex', 'Different-Sex')) %>%
+  group_by(year, same_sex) %>%
+  summarize(var = survey_mean(inctot, vartype = "ci", na.rm = T)) %>%
+  mutate(var_name = 'C. Annual Gross Income (Thousands)')
+
+hs <- acs_ind_survey %>%
+  mutate(same_sex = if_else(same_sex == T, 'Same-Sex', 'Different-Sex'),
+         hs = if_else(educ %in% c('HS', 'some col', 'college'), 1, 0)) %>%
+  group_by(year, same_sex) %>%
+  summarize(var = survey_mean(hs, vartype = "ci", na.rm = T)) %>%
+  mutate(var_name = 'A. High School Completion')
+
+college <- acs_ind_survey %>%
+  mutate(same_sex = if_else(same_sex == T, 'Same-Sex', 'Different-Sex'),
+         college = if_else(educ == 'college', 1, 0)) %>%
+  group_by(year, same_sex) %>%
+  summarize(var = survey_mean(college, vartype = "ci", na.rm = T)) %>%
+  mutate(var_name = 'B. College Completion')
+
+# state_income <- acs_ind_survey %>%
+#   mutate(same_sex = if_else(same_sex == T, 'Same-Sex', 'Different-Sex')) %>%
+#   group_by(year, same_sex) %>%
+#   summarize(var = survey_mean(state_income, vartype = "ci", na.rm = T)) %>%
+#   mutate(var_name = 'U.S. State of Residence Per Capita Income')
+
+hwsei <- acs_ind_survey %>%
+  mutate(same_sex = if_else(same_sex == T, 'Same-Sex', 'Different-Sex')) %>%
+  group_by(year, same_sex) %>%
+  summarize(var = survey_mean(hwsei, vartype = "ci", na.rm = T)) %>%
+  mutate(var_name = 'D. Hauser and Warren Socioeconomic Index')
+
+
+bind_rows(income, hs, college, hwsei) %>%
+  rename(Year = year) %>%
+  ggplot(aes(x = Year, y = var, linetype = same_sex)) +
+  geom_line() +
+  geom_ribbon(aes(ymin = var_low, ymax = var_upp, group = same_sex, col = NULL), alpha = .2) +
+  facet_wrap(~var_name, scales = "free", ncol = 2) +
+  ylab('') +
+  theme( # legend.justification=c(1,0),
+  #     legend.position=c(.22,.82),
+  #     legend.background = element_rect(fill = alpha("white", 0.5))
+      legend.position="bottom")
+```
