@@ -239,21 +239,22 @@ bind_rows(
 
 # Data and Method
 ## Data
-- 2008 to 2019 American Community Survey (ACS)
-    + immigrated at age 18 or older post-1990
+- all couples in the 2008 to 2019 American Community Survey (ACS)
     + 18 to 64 at time of survey
-- Immigrants in same-sex couples are identified as foreign-born respondents who live with a same-sex married or unmarried partner
+    + for immigrants, only those who immigrated at age 18 or older
+
+- Individuals in same-sex couples are identified as respondents who live with a same-sex married or unmarried partner
     + necessarily excludes single and non-cohabiting LGB individuals
 
 
 ## Data
 - Data structure: state-year-group counts ($n$ = 2448)
-  + groups: same sex $\times$ mixed citizenship
-  + e.g. number of same-sex mixed-citizenship couples living in Arizona in 2012
-- Explanatory variable: country of origin LGBT policy index (sum of 14 policies) (Velasco 2020)
+  + groups: same- or different-sex $\times$ same- or mixed-citizenship
+  + e.g. number of people in same-sex mixed-citizenship couples in Arizona in 2012
+- Explanatory variable: country of origin LGB policy index (sum of 16 policies) (Velasco 2020)
   + ranges from -3 to 10, with a mean of 1.7
   + progressive policies such civil unions, marriage equality, and hate-crime protection
-  + regressive policies such as anti-propaganda
+  + regressive policies such as anti-propaganda laws
 
 ## Sample sizes
 ```{r data-tab}
@@ -296,7 +297,7 @@ y_{gst} = &\exp[\beta_0 + \beta_1 post_t + \beta_2 (M_g \times post_t) + \beta_3
   + $\gamma_t$: survey year fixed effects  
   + $\epsilon_{gst}$ is an error term such that $\mathbb E(\epsilon_{gst}) = 0$ 
 
-- Coefficient of interest is $\beta_4$: the incidence ratio $\exp(\beta_4)$ estimates the relative increase in mixed-citizenship same-sex couples after 2013, relative to other couples.
+- Coefficient of interest is $\beta_4$: the three-way interaction between indicators for post-2013, same-sex, and mixed-citizenship. the incidence ratio $\exp(\beta_4)$ estimates the relative increase in mixed-citizenship same-sex couples after 2013, relative to other couples.
 
 
 # Results
@@ -581,8 +582,8 @@ policy_df %>%
 
 # Discussion
 
-- effect of 2013 only for immigrants from progressive countries
-- stronger effects for marriage equality and civil unions
+- Rise in mixed-citizenship, same sex couples after the 2013 end of DOMA, but only for immigrants from progressive countries
+- stronger effects for civil unions and marriage equality
 - culture, identity, and policy can affect migration and unions
 - broadening focus of queer migration studies to immigrants from progressive countries
 
@@ -645,7 +646,8 @@ vdem <- acs_ind_survey %>%
 
 bind_rows(wage_dif, vdem, prop_stock, distance) %>%
   rename(Year = year) %>%
-  ggplot(aes(x = Year, y = var, linetype = same_sex)) +
+  ggplot(aes(x = Year, y = var, linetype = same_sex,
+             color = same_sex, fill = same_sex)) +
   geom_line() +
   geom_ribbon(aes(ymin = var_low, ymax = var_upp, group = same_sex, col = NULL), alpha = .2) +
   facet_wrap(~var_name, scales = "free", ncol = 2) +
@@ -694,9 +696,10 @@ hwsei <- acs_ind_survey %>%
 
 bind_rows(income, hs, college, hwsei) %>%
   rename(Year = year) %>%
-  ggplot(aes(x = Year, y = var, linetype = same_sex)) +
+  ggplot(aes(x = Year, y = var, linetype = same_sex, color = same_sex, fill = same_sex)) +
   geom_line() +
-  geom_ribbon(aes(ymin = var_low, ymax = var_upp, group = same_sex, col = NULL), alpha = .2) +
+  geom_ribbon(aes(ymin = var_low, ymax = var_upp, 
+                  group = same_sex, col = NULL), alpha = .2) +
   facet_wrap(~var_name, scales = "free", ncol = 2) +
   ylab('') +
   theme( # legend.justification=c(1,0),
