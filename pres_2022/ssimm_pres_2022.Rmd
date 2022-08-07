@@ -196,7 +196,7 @@ total_dif_mixed <- acs_count_mixed_bpld %>%
     + Allowing same-sex couples to apply for spousal/marriage visas
 - From 2013 to 2019, 156% increase in mixed-citizenship same-sex couples, compared to 8% for different-sex
 - But from where do these couples come? 
-    + Do LGB policy environments at country of origin contribute toward the incidence of immigrants in same-sex unions within the U.S.?
+    + Do LGB policy environments at country of origin contribute toward the incidence of mixed-citiensehip, same-sex unions within the U.S.?
 
 
 ## Introduction
@@ -243,22 +243,22 @@ bind_rows(
 
 # Data and Method
 ## Data
-- all couples in the 2008 to 2019 American Community Survey (ACS)
+- All couples in the 2008 to 2019 American Community Survey (ACS)
     + 18 to 64 at time of survey
-    + for immigrants, only those who immigrated at age 18 or older
+    + For immigrants, only those who immigrated at age 18 or older
 
 - Individuals in same-sex couples are identified as respondents who live with a same-sex married or unmarried partner
-    + necessarily excludes single and non-cohabiting LGB individuals
+    + Necessarily excludes single and non-cohabiting LGB individuals
 
 
 ## Data
 - Data structure: state-year-group counts ($n$ = 2448)
-  + groups: same- or different-sex $\times$ same- or mixed-citizenship
+  + Groups: same- or different-sex $\times$ same- or mixed-citizenship
   + e.g. number of people in same-sex mixed-citizenship couples in Arizona in 2012
 - Explanatory variable: country of origin LGB policy index (sum of 16 policies) (Velasco 2020)
-  + ranges from -3 to 10, with a mean of 1.7
-  + progressive policies such civil unions, marriage equality, and hate-crime protection
-  + regressive policies such as anti-propaganda laws
+  + Ranges from -3 to 10, with a mean of 1.7
+  + Progressive policies such civil unions, marriage equality, and hate-crime protection
+  + Regressive policies such as anti-propaganda laws
 
 ## Sample sizes
 ```{r data-tab}
@@ -587,9 +587,9 @@ policy_df %>%
 # Discussion
 
 - Rise in mixed-citizenship, same sex couples after the 2013 end of DOMA, but only for immigrants from progressive countries
-- stronger effects for civil unions and marriage equality
-- culture, identity, and policy can affect migration and unions
-- broadening focus of queer migration studies to immigrants from progressive countries
+- Stronger effects for civil unions and marriage equality
+- Culture, identity, and policy can affect migration and unions
+- Broadening focus of queer migration studies to immigrants from progressive countries
 
 
 ## Next steps
