@@ -196,7 +196,7 @@ total_dif_mixed <- acs_count_mixed_bpld %>%
     + Allowing same-sex couples to apply for spousal/marriage visas
 - From 2013 to 2019, 156% increase in mixed-citizenship same-sex couples, compared to 8% for different-sex
 - But from where do these couples come? 
-    + Do LGB policy environments at country of origin contribute toward the migration of immigrants in same-sex couples into the U.S.?
+    + Do LGB policy environments at country of origin contribute toward the incidence of immigrants in same-sex unions within the U.S.?
 
 
 ## Introduction
@@ -222,12 +222,15 @@ bind_rows(
 ```
 
 # Background
-## How Country-Origin LGB Policies Influence Migration
+## How Country-Origin LGB Policies Influence Mixed-Citizenship, Same-Sex Unions
 
 - Policies both influence and are constituted by cultural environments  
-- Progressive LGB policies (e.g., marriage equality), make desiring same-sex union possible
-- Regressive policies may: limit aspirations for same-sex union, public disclosure of such unions, and, ultimately, undermine credibility in visa applications.
-- Regressive policies may also limit access to requisite resources to migrate
+- These environments influence the desire to join a same-sex union
+    +  Progressive policies like marriage equality legitimize these social relationships and increase accessibility
+    + Regressive policies may limit aspirations for same-sex union and public disclosure of such unions
+- Policy environments influence the capacity to migrate
+    +  Progressive policies may enhance human, economic, and political capitals that enable migration
+    +  Regressive policies may limit "outness" of one's same-sex union -- potentially undermining credibility in visa applications.
 
 
 ## Our Contribution
@@ -235,6 +238,7 @@ bind_rows(
 - Migration theory typically emphasizes economic and network theories  
 - We aim to demonstrate how culture and identity interact with policy to shape migratory pathways
 - Continue advancing research on queer migration; Recognizing populations besides refugees and asylum-seekers
+- Expand understandings of union formation by incorporating mixed-citizenship, same-sex couples
 
 
 # Data and Method
