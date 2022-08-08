@@ -396,19 +396,21 @@ bind_rows(
   mutate(tidy(mod_mixed, conf.int = T), name = 'Full sample'),
   mutate(tidy(mod_os_high, conf.int = T), name = 'Progressive (>3)'),
   mutate(tidy(mod_os_low, conf.int = T), name = 'Regressive (<0)')) %>%
-  filter(term %in% c('I(post_2013 * same_sex * mixed)', 'I(post_2013 * same_sex)',
-                'I(post_2013 * mixed)', 'post_2013TRUE')) %>%
+  filter(term %in% c('I(post_2013 * same_sex * mixed)')) %>% 
+  #, 'I(post_2013 * same_sex)', 'I(post_2013 * mixed)', 'post_2013TRUE')) %>%
   mutate(term = recode(term, 
                 'I(post_2013 * same_sex * mixed)' = 'Post-2013 × Same-sex × Mixed-citizenship' ,
                 'I(post_2013 * same_sex)' ='Post-2013 × Same-sex',
                 'I(post_2013 * mixed)' = 'Post-2013 × Mixed-citizenship',
                 'post_2013TRUE' = 'Post-2013')) %>%
-  ggplot(aes(x = term, y = estimate)) +
+  mutate(name = factor(name, levels = c('Regressive (<0)', 'Progressive (>3)',
+                                        'Full sample'))) %>%
+  ggplot(aes(x = name, y = estimate)) +
   geom_pointrange(aes(ymin = conf.low, ymax = conf.high)) +
   geom_hline(yintercept = 0, linetype = 2) +
   coord_flip() + 
-  facet_wrap(~name, ncol = 3) +
-  labs(x = '', y = '')
+  #facet_wrap(~name, ncol = 3) +
+  labs(x = '', y = '', title = 'Post-2013 × Same-sex × Mixed-citizenship')
 
 ```
 
@@ -488,7 +490,9 @@ base_plot &
 
 ## Dynamic Models
 ```{r lag-plot-2}
-strat_plot & 
+strat_plot +
+    scale_color_manual(values = ucla_palette[c(3,1)]) +
+  scale_fill_manual(values = ucla_palette[c(3,1)]) & 
   ylim(min(p_ranges_y), max(p_ranges_y))
 ```
 
