@@ -203,8 +203,50 @@ acs_count_imm <- acs_count_base %>%
          group_fe = paste(state, same_sex, immigrant, sep = '_')) %>%
   rename(bpld = bpldnew)
 
+
+
 write_csv(acs_count_base, here('data', 'acs_count_base.csv'))
 write_csv(acs_count_mixed, here('data', 'acs_count_mixed.csv'))
+
+## State controls ####
+state_policy <- read.csv(here('data', 'state_policy.csv'))
+
+state_policy[is.na(state_policy)] <- 0
+
+state_policy <- state_policy %>%
+  mutate(state_policy = -sodomy_illega + -marriage_ban + marriage_equality + 
+           civil_union + employment_discrim_so + hate_crime_so + 
+           joint_adoption + -adoption_religious_freedom +
+           conversion_therapy_ban + housing_discrim_so + 
+           state_ban_local_nondiscrimimation) %>%
+  select(state = State, year = Year, state_policy, state_couple_laws)
+
+state_policy$state_policy_binned <- cut(state_policy$state_policy, breaks = c(-2,0,2, Inf), 
+                                        labels = c("Repressive", "Neutral", "Progressive"))
+
+
+unemploy <- read.table(here('data', 'la.data.3.AllStatesS.txt'), header = T,
+                       fill = T) %>% 
+  filter(str_detect(series_id, '00003')) %>%
+  as_tibble() %>%
+  mutate(value = as.numeric(value),
+         state_num = as.numeric(str_extract(series_id, "\\d\\d"))) %>%
+  left_join(data.frame(state = c(state.name, 'District of Columbia', 'Puerto Rico'), 
+                       state_num =c(1,2,4:6, 8:10, 12, 13, 15:42, 44:51, 53:56, 11, 72))) %>%
+  group_by(state, year) %>%
+  summarize(state_unemploy = mean(value))
+
+state_income_df <- read_csv(here('data', 'state_income.csv'), na = c('', '(NA)')) %>%
+  pivot_longer(!1:2, names_to = 'year', values_to = 'state_income') %>%
+  mutate(year = as.integer(year)) %>%
+  rename(state = GeoName) %>% 
+  select(-GeoFips) %>%
+  mutate(state_income = priceR::adjust_for_inflation(state_income, year, "US", to_date = 1999)/1000)
+
+state_df <- state_policy %>%
+  left_join(unemploy) %>%
+  left_join(state_income_df) 
+write_csv(state_df, here('data', 'state_df.csv'))
 
 # write_csv(acs_count, here('data', 'acs_count.csv'))
 # write_csv(acs_count_noncit, here('data', 'acs_count_noncit.csv'))

@@ -194,9 +194,9 @@ total_dif_mixed <- acs_count_mixed_bpld %>%
 ## Introduction
 - In 2013, the U.S. Supreme Court struck down the Defense of Marriage Act
     + Allowing same-sex couples to apply for spousal/marriage visas
-- From 2013 to 2019, 156% increase in mixed-citizenship same-sex couples, compared to 8% for different-sex
+- From 2013 to 2019, 156% increase in mixed-citizenship same-sex couples, compared to 8% for different-sex (ACS)
 - But from where do these couples come? 
-    + Do LGB policy environments at country of origin contribute toward the incidence of mixed-citiensehip, same-sex unions within the U.S.?
+    + Do LGB policy environments at country of origin contribute toward the incidence of mixed-citizenship, same-sex unions within the U.S.?
 
 
 ## Introduction
@@ -225,8 +225,8 @@ bind_rows(
 ## How Country-Origin LGB Policies Influence Mixed-Citizenship, Same-Sex Unions
 
 - Policies both influence and are constituted by cultural environments  
-- These environments influence the desire to join a same-sex union
-    +  Progressive policies like marriage equality legitimize these social relationships and increase accessibility
+- Policy environments influence the desire to join a same-sex union
+    +  Progressive policies like marriage equality legitimize these social relationships and increase accessibility.
     + Regressive policies may limit aspirations for same-sex union and public disclosure of such unions
 - Policy environments influence the capacity to migrate
     +  Progressive policies may enhance human, economic, and political capitals that enable migration
@@ -237,7 +237,7 @@ bind_rows(
 
 - Migration theory typically emphasizes economic and network theories  
 - We aim to demonstrate how culture and identity interact with policy to shape migratory pathways
-- Continue advancing research on queer migration; Recognizing populations besides refugees and asylum-seekers
+- Continue advancing research on queer migration; recognizing populations besides refugees and asylum-seekers
 - Expand understandings of union formation by incorporating mixed-citizenship, same-sex couples
 
 
@@ -301,7 +301,7 @@ y_{gst} = &\exp[\beta_0 + \beta_1 post_t + \beta_2 (M_g \times post_t) + \beta_3
   + $\gamma_t$: survey year fixed effects  
   + $\epsilon_{gst}$ is an error term such that $\mathbb E(\epsilon_{gst}) = 0$ 
 
-- Coefficient of interest is $\beta_4$: the three-way interaction between indicators for post-2013, same-sex, and mixed-citizenship. the incidence ratio $\exp(\beta_4)$ estimates the relative increase in mixed-citizenship same-sex couples after 2013, relative to other couples.
+- Coefficient of interest is $\beta_4$: the 3-way interaction between indicators for post-2013, same-sex, and mixed-citizenship. The incidence ratio $\exp(\beta_4)$ estimates the relative increase in mixed-citizenship same-sex couples after 2013 relative to other couples.
 
 
 # Results
@@ -439,7 +439,7 @@ base_plot <- acs_count_mixed %>%
     geom_hline(yintercept = 0) +
     geom_vline(xintercept = 2013, linetype = 2) +
     theme(legend.position = "none") +
-    labs(x = 'Year', y = 'Estimate', title = 'Full sample')
+    labs(x = 'Year', y = 'Estimate', title = 'Full sample') 
 
 
 
@@ -592,7 +592,7 @@ policy_df %>%
 
 - Rise in mixed-citizenship, same sex couples after the 2013 end of DOMA, but only for immigrants from progressive countries
 - Stronger effects for civil unions and marriage equality
-- Culture, identity, and policy can affect migration and unions
+- Culture, identity, and policy can affect migration and union formation
 - Broadening focus of queer migration studies to immigrants from progressive countries
 
 

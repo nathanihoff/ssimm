@@ -121,6 +121,7 @@ knitr::knit_hooks$set(plot = function(x, options) {  # set new plot hook ...
 
 ```{r load, include = F}
 acs_count_base <- read_csv(here('data', 'acs_count_base.csv'))
+state_df <- read_csv(here('data', 'state_df.csv'))
 
 count_func <- function(condition = '!is.na(state)'){
   acs_count_base %>%
@@ -135,7 +136,8 @@ count_func <- function(condition = '!is.na(state)'){
     complete(state, year, same_sex, mixed) %>%
     mutate(across(n:n_unweighted_ar, function(x) ifelse(is.na(x), 0, x))) %>%
     mutate(post_2013 = year > 2013,
-           group_fe = paste(state, same_sex, mixed, sep = '_'))
+           group_fe = paste(state, same_sex, mixed, sep = '_')) %>%
+    left_join(state_df)
 }
 
 # acs_count_base %>%
@@ -153,6 +155,9 @@ count_func <- function(condition = '!is.na(state)'){
 
 acs_count_mixed <- count_func()
 
+
+
+
 # acs_count_mixed <- read_csv(here('data', 'acs_count_mixed.csv')) %>%
 #   group_by(state, year, same_sex, mixed) %>%
 #   summarize(n = sum(n),
@@ -161,10 +166,9 @@ acs_count_mixed <- count_func()
 #             n_unweighted_ar = sum(n_unweighted_ar)) %>%
 #   mutate(post_2013 = year > 2013,
 #          group_fe = paste(state, same_sex, mixed, sep = '_'))
-
-acs_prop <- read.csv(here('data', 'acs_prop_yrimmig_policy.csv')) %>%
-  mutate(post_2013 = (yrimmig > 2013))
-acs_prop_state <- read.csv(here('data', 'acs_dyad_policy.csv'))
+# acs_prop <- read.csv(here('data', 'acs_prop_yrimmig_policy.csv')) %>%
+#   mutate(post_2013 = (yrimmig > 2013))
+# acs_prop_state <- read.csv(here('data', 'acs_dyad_policy.csv'))
 
 lgb_origin_index <- read_csv(here('data', 'lgb_origin_index.csv'))
 acs_ind <- read_rds(here('data', 'acs_couple_policy.rds'))  %>%
@@ -180,7 +184,7 @@ acs_count_mixed_bpld <- read_csv(here('data', 'acs_count_mixed.csv'))  %>%
       group_by(year, state, bpld, same_sex) %>% 
       summarize(across(c(equal_age:propaganda, origin_score), mean, na.rm = T))
       #summarize(origin_score = mean(origin_score))
-    )
+  )
 
 
 
@@ -322,7 +326,7 @@ where $y_{gst}$ is the count of individuals in group $g$ in state $s$ in survey 
 <!-- $$\mathbb E[y_{gst}] = \exp(\beta_0 + \beta_1 \bbm 1_{\{t \geq 2013\}} + \beta_2 \bbm 1_{\{t \geq 2013\}}$$ -->
 
 
-We focus on heterogeneity of this effect: how it varies by the LGB policy context of non-citizens' country of origin. We measure the origin country policy environment using a modified LGBT Policy Index [@velasco_2018] for 1991 to 2019. The index is created by summing the net total of progressive policies (scored $+1$) over regressive policies (scored $-1$). The country index ranges from `r min(acs_count_mixed_bpld$origin_score, na.rm = T)` to `r max(acs_count_mixed_bpld$origin_score, na.rm = T)`, with a mean of `r mean(acs_count_mixed_bpld$origin_score, na.rm = T)` in our sample. Group-state-year-country cells are assigned the average score in the year of immigration for non-citizen individuals in that cell.
+We focus on heterogeneity of this effect: how it varies by the LGB policy context of non-citizens' country of origin. We measure the origin country policy environment using a modified LGBT Policy Index [@velasco_2018] for 1991 to 2019. The index comprises 16 policies, with both progressive policies (civil unions, constitutional protection, conversion therapy ban, employment protection, equal age of consent, hate-crime protection, incitement to hate banned, joint adoption, lgb military, marriage equality, same-sex acts legal) and regressive ones (anti-propaganda laws, death penalty, lgb military ban, marriage ban, unequal age of consent). The index is created by summing the net total of progressive policies (scored $+1$) over regressive policies (scored $-1$). For the `r length(unique(acs_count_mixed_bpld$bpld))` countries of origin for our sample, the country index ranges from `r min(acs_count_mixed_bpld$origin_score, na.rm = T)` to `r max(acs_count_mixed_bpld$origin_score, na.rm = T)`, with a mean of `r mean(acs_count_mixed_bpld$origin_score, na.rm = T)` in our sample. Group-state-year-country cells are assigned the average score in the year of immigration for non-citizen individuals in that cell.
 
 
 # Results
@@ -352,7 +356,8 @@ count_origin_high <- # count_func('origin_score > 3 | is.na(origin_score)')
   complete(state, year, same_sex, mixed) %>%
   mutate(across(n, function(x) ifelse(is.na(x), 0, x)),
          post_2013 = year > 2013,
-         group_fe = paste(state, same_sex, mixed, sep = '_'))
+         group_fe = paste(state, same_sex, mixed, sep = '_')) %>%
+  left_join(state_df)
 
 # acs_count_base %>%
 #   select(state, year, mixed_citizenship, same_sex, bpld, bpldnew, yrimmig, yrimmigmod, origin_score) %>%
@@ -394,7 +399,8 @@ count_origin_low <- # count_func('origin_score < 0 |  is.na(origin_score)')
   complete(state, year, same_sex, mixed) %>%
   mutate(across(n, function(x) ifelse(is.na(x), 0, x)),
          post_2013 = year > 2013,
-         group_fe = paste(state, same_sex, mixed, sep = '_'))
+         group_fe = paste(state, same_sex, mixed, sep = '_')) %>%
+  left_join(state_df)
 
 mod_os_low <- glm(n ~  I(post_2013*same_sex*mixed) + 
                         I(post_2013*same_sex) + 
@@ -428,6 +434,8 @@ high_effect <- tidy(mod_os_high) %>%
   filter(term == 'I(post_2013 * same_sex * mixed)') %>%
   pull(estimate) 
 ```
+
+
 
 ```{r lag-plot, fig.height = 3.5, fig.cap = 'Dynamic specification of quasi-Poisson regression with two-way fixed effects, displaying the coefficient for the Year × Same-sex × Mixed-citizenship interaction. Survey years are aggregated into pairs, with 2008-2009 as the base category.'}
 base_plot <- acs_count_mixed %>%
@@ -791,11 +799,73 @@ huxreg(list('Full sample' = mod_mixed, 'Progressive' = mod_os_high, 'Regressive'
   # theme_compact()
 ```
 
+Although the two-way fixed effects in our specifications allay concerns confounders, it is still possible that time-varying state- and group-level variables may be confounding results. We test the robustness of our results by re-specifying our models while adjusting for additional variables. State-year-level per capita income by year comes from the Bureau of Economic Analysis [@bea_2020], and annual unemployment rates come from the Bureau of Labor Statistics [@bls_2020]. We also create a U.S. state-year LGB policy index by compiling data from the Movement Advancement Project^[https://www.lgbtmap.org/], a leading LGB organization in the U.S. that collects data on a number of relevant policies. Like the origin-country index, the state index comprises both progressive policies (full marriage equality, state recognition of civil unions and domestic partnerships, ban on all employment and housing discrimination based on sexual orientation, hate crime protections based on sexual orientation, legal joint adoption by same-sex couples, and a ban on conversation therapy for minors) and regressive policies (criminalization of sodomy, state constitutional bans of marriage equality, religious freedom exemptions to discriminate against same-sex couples in adoption, and state-level bans on local non-discrimination ordinances encompassing sexual orientation). The state index ranges from `r min(acs_count_mixed$state_policy, na.rm = T)` to `r max(acs_count_mixed$state_policy, na.rm = T)`, and the mean state policy score for immigrants in our sample is `r mean(acs_count_mixed$state_policy, na.rm = T)`.  
+
+Table \@ref(tab:controls-tab) replicates Table \@ref(tab:mod-tab), but with these additional controls. Coefficients are only slightly attenuated, and substantive conclusions do not change. Notably, the coefficient for state LGB policy is small and nonsignificant; in these models, state LGB policy does not appear related to the incidence of same-sex unions.
+
+
+```{r controls-tab}
+mod_mixed <- acs_count_mixed %>%
+  glm(n ~ I(post_2013*same_sex*mixed) + 
+        I(post_2013*same_sex) + 
+        I(post_2013*mixed) + 
+        post_2013 + 
+        state_policy + state_income + state_unemploy +
+        group_fe + as.factor(year), 
+                        data = ., 
+                        family = 'quasipoisson') %>%
+  coeftest(., vcov = vcovCL(., cluster = ~group_fe)) 
+
+
+mod_os_high <- glm(n ~  I(post_2013*same_sex*mixed) + 
+                        I(post_2013*same_sex) + 
+                        I(post_2013*mixed) + 
+                        post_2013 + 
+                        state_policy + state_income + state_unemploy +
+                        group_fe + as.factor(year), 
+                        data = count_origin_high, 
+                        family = 'quasipoisson') %>%
+  coeftest(., vcov = vcovCL(., cluster = ~group_fe))
+
+
+mod_os_low <- glm(n ~  I(post_2013*same_sex*mixed) + 
+                        I(post_2013*same_sex) + 
+                        I(post_2013*mixed) + 
+                        post_2013 + 
+                        state_policy + state_income + state_unemploy +
+                        group_fe + as.factor(year), 
+                        data = count_origin_low, 
+                        family = 'quasipoisson') %>%
+coeftest(., vcov = vcovCL(., cluster = ~group_fe)) 
+
+
+huxreg(list('Full sample' = mod_mixed, 'Progressive' = mod_os_high, 'Regressive' = mod_os_low),
+       coefs = c('Post-2013 × Same-sex × Mixed-citizenship' = 'I(post_2013 * same_sex * mixed)',
+                'Post-2013 × Same-sex'  = 'I(post_2013 * same_sex)',
+                'Post-2013 × Mixed-citizenship'  = 'I(post_2013 * mixed)',
+                'Post-2013' = 'post_2013TRUE',
+                'State LGB policy' = 'state_policy',
+                'State unemployment' = 'state_unemploy',
+                'State per-capita income' = 'state_income'),
+  note = '{stars}. The "Regressive" sample includes only countries with a LGB policy score less than 0, and the "Progressive" sample includes only those with a score greater than 3. Group-clustered standard errors shown in parentheses. Source: American Community Survey 2008-2019. Authors\' calculations.',
+       stars = c(`†` = 0.1, `*` = 0.05, `**` = 0.01, `***` = 0.001),
+       statistics = c('Observations' = 'nobs')) %>%
+  huxtable::set_width(1) %>%
+  set_wrap(T) %>%
+  set_all_padding(0) %>%
+  huxtable::set_caption('With state-level controls: quasi-Poisson DDD regressions 
+  of counts of mixed-citizenship same-sex couples, stratifying by 
+  state-country-year-group average policy environment')
+```
+
+
 ## Which Policies are Responsible?
 
 Clearly, the post-2013 rise in mixed-citizenship same-sex unions occurred much more strongly for immigrants from countries with overall progressive LGB policies. But are there some policies that matter more than others? Whereas Table \@ref(tab:mod-tab) stratified the sample by values of the policy index, here we stratify the sample by specific policies. Within each cell, we include only mixed-citizenship couples for whom the non-citizen country of origin has an average value greater than 0 for the policy of interest -- i.e., where immigrants in that group tended to experience the given policy in their year of immigration.  
 
-Figure \@ref(fig:policies) displays coefficients from the three-way interaction of interest, showing the logged relative incidence of mixed-citizenship same-sex couples after 2013. Coefficients in models focusing on progressive policies are mostly positive, while those for regressive policies are nearly mostly nonsignificant. Notably, coefficients for civil unions and marriage equality are especially high.
+Figure \@ref(fig:policies-plot) displays coefficients from the three-way interaction of interest, showing the logged relative incidence of mixed-citizenship same-sex couples after 2013. Coefficients in models focusing on progressive policies are mostly positive. Notably, coefficients for civil unions and marriage equality are especially high.  
+
+The right panel of Figure \@ref(fig:policies-plot) shows mostly nonsignificant coefficients for regressive policies. Those that are significant have smaller point estimates than most progressive policies. One possible explanation for the range of results for regressive policies is that more "severe" regressive policies, such as the death penalty, are more effective at erasing the possibility of same-sex unions. Meanwhile, policies such as anti-propaganda laws are often a backlash to an already established LGB community and its cultural forms (XX).
 
 ```{r policies, eval = F}
 
