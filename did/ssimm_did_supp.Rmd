@@ -1,0 +1,305 @@
+---
+output:
+  bookdown::pdf_document2:
+  # bookdown::word_document2:
+  #   reference_docx: "word-template.docx"
+    toc: no
+    number_sections: yes
+    pandoc_args: !expr rmdfiltr::add_wordcount_filter(rmdfiltr::add_citeproc_filter(args = NULL))
+    latex_engine: xelatex
+    keep_tex: no
+    #template: svm-latex-ms.tex
+# output: 
+#   pdf_document:
+#     citation_package: natbib
+#     keep_tex: true
+#     fig_caption: true
+#     latex_engine: pdflatex
+#     template: svm-latex-ms.tex
+header-includes:
+  - \usepackage{setspace}\doublespace
+  - \usepackage{bbm}
+editor_options: 
+  
+  chunk_output_type: console
+citeproc: no
+# fontfamily: mathpazo
+mainfont: "Times New Roman"
+fontsize: 12pt
+geometry: margin=1in
+indent: yes
+link-citations: yes
+linkcolor: blue
+bibliography: "Same-Sex Immigration.bib"
+# csl: apa.csl
+title: "Online Appendix"
+subtitle: "Policy Effects on Mixed-Citizenship, Same-Sex Unions: A Triple-Difference Analysis"
+# subtitle: "ASA 2022 Submission"
+date: "`r format(Sys.time(), '%B %e, %Y')`"
+author:
+- Nathan I. Hoffmann, Department of Sociology, University of California, Los Angeles
+- Kristopher Velasco, Department of Sociology, Princeton University
+
+---
+
+<!-- Turn off hyphenation -->
+<!-- \usepackage[none]{hyphenat} -->
+
+
+```{r setup, include=F}
+library(knitr)
+library(broom)
+library(huxtable)
+library(sandwich)
+library(lmtest)
+library(here)
+library(stargazer)
+library(patchwork)
+library(flextable)
+library(tidyverse)
+library(kableExtra)
+
+knitr::opts_chunk$set(echo = F, warning = F, message = F, cache = T, # results = 'asis',
+                      cache.lazy = F, dpi = 600)
+
+# knitr::opts_chunk$set(error=TRUE) 
+
+options("yaml.eval.expr" = TRUE)
+
+uclablue = '#2774AE'
+gray = '#808080'
+black = '#000000'
+uclagold = '#FFB81C'
+ucla_palette = c(uclablue, black, gray)
+
+# theme_set(theme_cowplot(font_family = 'Palatino') + 
+theme_set(theme_classic(base_family = 'Palatino') + 
+            theme(legend.title=element_blank(), 
+                  panel.grid.major.y = element_line('grey80'),
+                  legend.background = element_rect(fill = "transparent")))
+# ggplot <- function(...) ggplot2::ggplot(...) + scale_color_manual(values = ucla_palette) +
+#   scale_fill_manual(values = ucla_palette)
+ggplot <- function(...) ggplot2::ggplot(...) + scale_color_brewer(palette="Dark2") +
+  scale_fill_brewer(palette="Dark2")
+
+# library(colorspace)
+# colorspace_palette = 'RdPu'
+# ggplot <- function(...) ggplot2::ggplot(...) +
+#   scale_color_discrete_sequential(palette=colorspace_palette) +
+#   scale_fill_discrete_sequential(palette=colorspace_palette)
+
+options(scipen=1, digits=2)
+knit_hooks$set(inline = function(x) {
+  prettyNum(x, big.mark=",")
+})
+knitr::opts_chunk$set(error=TRUE) 
+
+set_flextable_defaults(font.family = 'Times New Roman',
+                       # padding.bottom = 1,
+                       # padding.top = 1,
+                       # padding.left = 3,
+                       # padding.right = 1,
+                       theme_fun = 'theme_booktabs',
+                       digits = 3, 
+                       big.mark = ',',
+                       line_spacing = 1)
+
+defOut <- knitr::knit_hooks$get("plot")  # save the default plot hook 
+knitr::knit_hooks$set(plot = function(x, options) {  # set new plot hook ...
+  x <- defOut(x, options)  # first apply the default hook
+  if(!is.null(options$wrapfigure)) {  # then, if option wrapfigure is given ...
+    # create the new opening string for the wrapfigure environment ...
+    wf <- sprintf("\\begin{wrapfigure}{%s}{%g\\textwidth}", options$wrapfigure[[1]], options$wrapfigure[[2]])
+    x  <- gsub("\\begin{figure}", wf, x, fixed = T)  # and replace the default one with it.
+    x  <- gsub("{figure}", "{wrapfigure}", x, fixed = T)  # also replace the environment ending
+  }
+  return(x)
+})
+```
+
+```{r load, include = F}
+acs_count_base <- read_csv(here('data', 'acs_count_base.csv'))
+state_df <- read_csv(here('data', 'state_df.csv'))
+
+count_func <- function(condition = '!is.na(state)'){
+  acs_count_base %>%
+    rename(mixed = mixed_citizenship) %>%
+    filter(eval(rlang::parse_expr(condition))) %>%
+    group_by(state, year, same_sex, mixed) %>%
+    summarize(n = sum(perwt), 
+              n_unweighted = n(),
+              n_ar = sum(perwt[qcitizen != 'Allocated' & qeduc != 'Consistency edit' & allocated == F]), 
+              n_unweighted_ar = sum(qcitizen != 'Allocated' & qeduc != 'Consistency edit' & allocated == F)) %>%
+    ungroup() %>%
+    complete(state, year, same_sex, mixed) %>%
+    mutate(across(n:n_unweighted_ar, function(x) ifelse(is.na(x), 0, x))) %>%
+    mutate(post_2013 = year > 2013,
+           group_fe = paste(state, same_sex, mixed, sep = '_')) %>%
+    left_join(state_df)
+}
+
+# acs_count_base %>%
+#   filter(state == 'Alabama', year == 2008) %>%
+#   group_by(same_sex, mixed_citizenship, bpldnew) %>%
+#     summarize(n = sum(perwt), 
+#               n_unweighted = n(),
+#               n_ar = sum(perwt[qcitizen != 'Allocated' & qeduc != 'Consistency edit' & allocated == F]), 
+#               n_unweighted_ar = sum(qcitizen != 'Allocated' & qeduc != 'Consistency edit' & allocated == F)) %>%
+#   group_by(same_sex, mixed_citizenship) %>%
+#    summarize(n = sum(n),
+#             n_unweighted = sum(n_unweighted),
+#             n_ar = sum(n_ar),
+#             n_unweighted_ar = sum(n_unweighted_ar))
+
+acs_count_mixed <- count_func()
+
+
+
+
+# acs_count_mixed <- read_csv(here('data', 'acs_count_mixed.csv')) %>%
+#   group_by(state, year, same_sex, mixed) %>%
+#   summarize(n = sum(n),
+#             n_unweighted = sum(n_unweighted),
+#             n_ar = sum(n_ar),
+#             n_unweighted_ar = sum(n_unweighted_ar)) %>%
+#   mutate(post_2013 = year > 2013,
+#          group_fe = paste(state, same_sex, mixed, sep = '_'))
+# acs_prop <- read.csv(here('data', 'acs_prop_yrimmig_policy.csv')) %>%
+#   mutate(post_2013 = (yrimmig > 2013))
+# acs_prop_state <- read.csv(here('data', 'acs_dyad_policy.csv'))
+
+lgb_origin_index <- read_csv(here('data', 'lgb_origin_index.csv'))
+acs_ind <- read_rds(here('data', 'acs_couple_policy.rds'))  %>%
+  mutate(post_2013 = year > 2013
+         # mixed =  mixed_citizenship = (citizen_main == 'Not a citizen' & citizen_partner != 'Not a citizen') | 
+         #   (citizen_main != 'Not a citizen' & citizen_partner == 'Not a citizen')
+         ) %>%
+  left_join(lgb_origin_index,  by = c('yrimmig' = 'year', 'bpldid' = 'Code')) 
+
+acs_count_mixed_bpld <- read_csv(here('data', 'acs_count_mixed.csv'))  %>%
+  left_join(
+    acs_ind %>%
+      group_by(year, state, bpld, same_sex) %>% 
+      summarize(across(c(equal_age:propaganda, origin_score), mean, na.rm = T))
+      #summarize(origin_score = mean(origin_score))
+  )
+
+
+
+```
+
+# Robustness Checks
+
+## Adjusting proportions based on empirical mismatch rates
+
+Published papers using the ACS to study same-sex couples overwhelmingly use the method by @gates_2009 employed our main paper to adjust for misreporting, where we drop all respondents that had either their relationship or sex variable allocated by the Census Bureau. However here we implement a novel method to adjust proportions of estimated immigrants in same-sex couples, based on the estimated mismatch rates from two U.S. Census Bureau studies. Beginning in 2019, the ACS provides explicit categories for "Opposite-sex husband/wife/spouse," "Opposite-sex unmarried partner," "Same-sex husband/wife/spouse," and "Same-sex unmarried partner" [@walker_2021], so sex misreporting in the 2019 data is unlikely, but we still adjust mismatch rates in these years as well.  
+
+In a Census Bureau working paper, @kreider_2015 use personal information such as names and addresses match same-sex couples from the 2010 ACS to Social Security administrative data. They find that 7 percent of unmarried couples coded as same-sex in the ACS are coded as different-sex in the administrative data, and 57 percent of married same-sex couples. A follow-up study [@kreider_2017] shows that these mismatch rates appear to have fallen: In a 2016 ACS test module that included explicit categories for different- and same-sex spouses and partners, 31 percent of married and 3 percent of unmarried same-sex couples had inconsistent sex responses.  
+
+To test the robustness of our results these levels of misreporting, we re-assign up to 60 percent of counts of individuals in same-sex couples to counts in different-sex couples, within state, year, and citizenship group. We then re-fit the models reported in the main paper. Coefficients for the three-way interaction of interest are shown in Figure \@ref(misreporting:plot). Results are extremely robust to even high levels of sex misreporting.
+
+```{r misreporting, eval = F}
+count_origin_high <- 
+  acs_count_mixed_bpld %>%
+  filter(origin_score > 3 | is.na(origin_score)) %>%
+  group_by(state, year, same_sex, mixed, post_2013, group_fe) %>%
+  summarize(n = sum(n)) %>%
+  ungroup() %>%
+  complete(state, year, same_sex, mixed) %>%
+  mutate(across(n, function(x) ifelse(is.na(x), 0, x)),
+         post_2013 = year > 2013,
+         group_fe = paste(state, same_sex, mixed, sep = '_')) %>%
+  left_join(state_df)
+
+count_origin_low <- 
+  acs_count_mixed_bpld %>%
+  filter(origin_score < 0 | is.na(origin_score)) %>%
+  group_by(state, year, same_sex, mixed, post_2013, group_fe) %>%
+  summarize(n = sum(n)) %>%
+  ungroup() %>%
+  complete(state, year, same_sex, mixed) %>%
+  mutate(across(n, function(x) ifelse(is.na(x), 0, x)),
+         post_2013 = year > 2013,
+         group_fe = paste(state, same_sex, mixed, sep = '_')) %>%
+  left_join(state_df)
+
+misreport <- function(dataset, rates = seq(0, 0.6, length.out = 7)){
+  df <- dataset %>%
+    select(state, year, same_sex, mixed, n) %>%
+    pivot_wider(names_from = same_sex, values_from = n, names_prefix = 'same_sex_') 
+  
+  df[paste0(as.character(rates), '-TRUE')] <- round(sapply(1-rates, function(x)x*df$same_sex_TRUE))
+  df[paste0(as.character(rates), '-FALSE')] <- round(sapply(rates, function(x){x*df$same_sex_TRUE + df$same_sex_FALSE}))
+    
+  df %>%
+    select(-c(same_sex_FALSE, same_sex_TRUE)) %>%
+    pivot_longer(cols = c(paste0(as.character(rates), '-TRUE'), paste0(as.character(rates), '-FALSE')),
+                 names_sep = '-',
+                 names_to = c('rate', 'same_sex'),
+                 values_to = 'n') %>%
+    mutate(same_sex = as.logical(same_sex)) %>%
+    left_join(select(dataset, -starts_with('n')))
+}
+
+data_list <- list(
+  'Full sample' = misreport(acs_count_mixed),
+  'Progressive' = misreport(count_origin_high),
+  'Regressive' = misreport(count_origin_low)
+)
+
+mis_list <- list()
+
+# test <- misreport(count_origin_high)
+
+for(rate_loop in as.character(unique(data_list[[1]]$rate))){
+  for(dataset_num in 1:3){
+    print(rate_loop)
+    mis_list[[paste0(rate_loop, dataset_num, '1')]] <- data_list[[dataset_num]] %>%
+      filter(rate == rate_loop) %>%
+      glm(n ~ I(post_2013*same_sex*mixed) + I(post_2013*same_sex) + I(post_2013*mixed) + 
+          post_2013 + group_fe + as.factor(year), 
+                          data = ., 
+                          family = 'quasipoisson') %>%
+    coeftest(., vcov = vcovCL(., cluster = ~group_fe)) %>%
+      tidy() %>%
+      filter(term == 'I(post_2013 * same_sex * mixed)') %>%
+      mutate(rate = as.numeric(rate_loop), 
+             policy = names(data_list)[dataset_num],
+             model = 'Main effects')
+    
+    mis_list[[paste0(rate_loop, dataset_num, '2')]] <- data_list[[dataset_num]] %>%
+      filter(rate == rate_loop) %>%
+      glm(n ~ I(post_2013*same_sex*mixed) + I(post_2013*same_sex) + I(post_2013*mixed) + 
+          state_policy + state_income + state_unemploy +
+          post_2013 + group_fe + as.factor(year), 
+                          data = ., 
+                          family = 'quasipoisson') %>%
+    coeftest(., vcov = vcovCL(., cluster = ~group_fe)) %>%
+      tidy() %>%
+      filter(term == 'I(post_2013 * same_sex * mixed)') %>%
+      mutate(rate = as.numeric(rate_loop), 
+             policy = names(data_list)[dataset_num],
+             model = 'With controls')
+  }
+}
+
+
+write_csv(bind_rows(mis_list), here('did', 'misreporting_df.csv'))
+```
+
+```{r misreporting-plot}
+misreporting_df <- read_csv(here('did', 'misreporting_df.csv'))
+
+ggplot(misreporting_df, aes(x = rate, y = estimate, color = policy)) +
+  geom_pointrange(aes(ymin = estimate - 1.96*std.error, ymax = estimate + 1.96*std.error), 
+                  position = position_dodge(.02)) +
+  facet_wrap(~model, ncol= 1) +
+  geom_hline(yintercept = 0) +
+  labs(x = 'Hypothetical misreporting rate', y = 'Coefficient for 3-way interaction')
+```
+
+
+
+\newpage
+
+# References
