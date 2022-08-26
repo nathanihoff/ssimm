@@ -1,0 +1,43 @@
+---
+output:
+  bookdown::pdf_document2:
+    toc: no
+    number_sections: yes
+    pandoc_args: !expr rmdfiltr::add_wordcount_filter(rmdfiltr::add_citeproc_filter(args = NULL))
+    latex_engine: xelatex
+    keep_tex: no
+
+header-includes:
+  - \usepackage{setspace}\doublespace
+  - \usepackage{bbm}
+editor_options: 
+  
+  chunk_output_type: console
+citeproc: no
+# fontfamily: mathpazo
+mainfont: "Times New Roman"
+fontsize: 12pt
+geometry: margin=1in
+indent: yes
+link-citations: yes
+linkcolor: blue
+bibliography: "Same-Sex Immigration.bib"
+
+title: "TESS Proposal: Skill, Sexuality, and Immigrant Deservingness"
+
+date: "`r format(Sys.time(), '%B %e, %Y')`"
+author:
+- Nathan I. Hoffmann, Department of Sociology, University of California, Los Angeles
+- Kristopher Velasco, Department of Sociology, Princeton University
+
+---
+
+
+Previous work shows that Western publics usually prefers "high-skill" over "low-skill" immigrants, but also view refugees fleeing for their lives as "deserving." We're curious how lesbian, gay, or bisexual identity moderates these relationships. Does the public find LGB immigrants to be more deserving of visas if they're fleeing violence than if they work in prestigious occupations? And does it consider refugees fleeing due to their sexual identity more deserving (perhaps because of some notion of cultural similarity) than those fleeing political persecution? 
+
+To test this, we envision presenting survey respondents with six profiles. We will vary skill (low/high), reason for migration (work/asylum), and sexual identity (straight/LGB). It could be interesting to look at how effects vary by respondents' education level and political affiliation.
+
+
+\newpage
+
+# References
