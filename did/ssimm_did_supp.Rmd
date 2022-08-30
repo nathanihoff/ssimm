@@ -196,7 +196,7 @@ Published papers using the ACS to study same-sex couples overwhelmingly use the 
 
 In a Census Bureau working paper, @kreider_2015 use personal information such as names and addresses match same-sex couples from the 2010 ACS to Social Security administrative data. They find that 7 percent of unmarried couples coded as same-sex in the ACS are coded as different-sex in the administrative data, and 57 percent of married same-sex couples. A follow-up study [@kreider_2017] shows that these mismatch rates appear to have fallen: In a 2016 ACS test module that included explicit categories for different- and same-sex spouses and partners, 31 percent of married and 3 percent of unmarried same-sex couples had inconsistent sex responses.  
 
-To test the robustness of our results these levels of misreporting, we re-assign up to 60 percent of counts of individuals in same-sex couples to counts in different-sex couples, within state, year, and citizenship group. We then re-fit the models reported in the main paper. Coefficients for the three-way interaction of interest are shown in Figure \@ref(misreporting:plot). Results are extremely robust to even high levels of sex misreporting.
+To test the robustness of our results these levels of misreporting, we re-assign up to 60 percent of counts of individuals in same-sex couples to counts in different-sex couples, within state, year, and citizenship group. We then re-fit the models reported in the main paper. Coefficients for the three-way interaction of interest are shown in Figure \@ref(misreporting:plot). Results are extremely robust to even high levels of sex misreporting.  
 
 ```{r misreporting, eval = F}
 count_origin_high <- 
