@@ -382,8 +382,8 @@ penn_wages$wage_dif <- NA
 for(country_loop in unique(penn_wages$country)){
   for(year in penn_wages$year[penn_wages$country == country_loop]){
     penn_wages$wage_dif[penn_wages$year == year & penn_wages$country == country_loop] <-
-      usa_wages$pc_income[usa_wages$year == year] -
-      penn_wages$pc_income[penn_wages$year == year & penn_wages$country == country_loop]
+      penn_wages$pc_income[penn_wages$year == year & penn_wages$country == country_loop] -
+        usa_wages$pc_income[usa_wages$year == year]
     # penn_wages$usa_pc_income[penn_wages$year == year & penn_wages$country == country_loop] <- 
     #   usa_wages$pc_income[usa_wages$year == year]
   }
@@ -403,8 +403,8 @@ wb_unemp$unemp_dif <- NA
 for(year in usa_unemp$year){
   for(country in unique(wb_unemp$country)){
     wb_unemp$unemp_dif[wb_unemp$year == year & wb_unemp$country == country] <-
-      usa_unemp$unemployment[usa_unemp$year == year] -
-      wb_unemp$unemployment[wb_unemp$year == year & wb_unemp$country == country]
+      wb_unemp$unemployment[wb_unemp$year == year & wb_unemp$country == country] -
+       usa_unemp$unemployment[usa_unemp$year == year]
   }
 }
 
@@ -520,7 +520,7 @@ state_policy <- state_policy %>%
            conversion_therapy_ban + housing_discrim_so + state_ban_local_nondiscrimimation) %>%
   select(State, Year, state_policy, state_couple_laws)
 
-acs_prop_yrimmig_policy <- acs_prop_yrimmig %>%
+acs_prop <- acs_prop_yrimmig %>%
   # mutate(pre_1991 = yrimmig <1991,
   #        yrimmig = ifelse(yrimmig < 1991, 1991, yrimmig)) %>%
   left_join(lgbt_policy, by = c('yrimmig' = 'year', 'bpldid' = 'Code')) %>%
@@ -539,7 +539,7 @@ acs_prop_yrimmig_policy <- acs_prop_yrimmig %>%
 
 
 # State-level analysis
-acs_dyad_policy1 <- acs_dyad %>%
+acs_prop_state1 <- acs_dyad %>%
   mutate(mean_year_immig = round(mean_year_immig)) %>%
   left_join(yearly_prop, by = c('mean_year_immig' = 'year', 'bpldid')) %>%
   filter(mean_year_immig >= 1991) %>%
@@ -567,7 +567,7 @@ acs_dyad_policy1 <- acs_dyad %>%
     prop_same_sex_twoimm = (n_spouse_twoimm_same_sex + n_partner_twoimm_same_sex) / 
       (n_spouse_twoimm_same_sex + n_partner_twoimm_same_sex + n_spouse_twoimm_dif_sex + n_partner_twoimm_dif_sex) * 100)
 
-# acs_dyad_policy <- acs_prop_state %>%
+# acs_prop_state <- acs_prop_state%>%
 #   mutate(   prop_same_sex_recent = (n_spouse_recent_same_sex + n_partner_recent_same_sex) /
 #               (n_spouse_recent_same_sex + n_partner_recent_same_sex + n_spouse_recent_dif_sex + n_partner_recent_dif_sex) * 100,
 #             prop_same_sex_oneimm = (n_spouse_oneimm_same_sex + n_partner_oneimm_same_sex) /
@@ -581,7 +581,7 @@ acs_dyad_policy1 <- acs_dyad %>%
   #        prop_dif_sex = opp_sex_stock / state_stock_year * 100)
 
 
-# acs_dyad_policy1_old <- acs_dyad %>%
+# acs_prop_state1_old <- acs_dyad %>%
 #   mutate(mean_year_immig = round(mean_year_immig)) %>%
 #   left_join(yearly_prop, by = c('mean_year_immig' = 'year', 'bpldid')) %>%
 #   filter(mean_year_immig >= 1991) %>%
@@ -611,20 +611,28 @@ state_income_df <- read_csv(here('data', 'state_income.csv'), na = c('', '(NA)')
   pivot_longer(!1:2, names_to = 'year', values_to = 'state_income') %>%
   mutate(year = as.integer(year)) %>%
   rename(state = GeoName) %>% 
-  select(-GeoFips) %>%
-  mutate(state_income = adjust_for_inflation(state_income, year, "US", to_date = 1999)/1000)
+  select(-GeoFips)
 
-# state_income_df <- acs_prop_state %>%
+for(i in nrow(state_income_df)){
+  state_income_df$state_income[i] <- adjust_for_inflation(state_income_df$state_income[i], 
+                                                          state_income_df$year[i], 
+                                                          "US", 
+                                                          to_date = 1999)
+}
+  
+
+
+# state_income_df <- acs_prop_state%>%
 #   select(state_income, year, state) %>%
 #   distinct(state_income, year, state)
 
-acs_dyad_policy <- acs_dyad_policy1 %>%
+acs_prop_state <- acs_prop_state1 %>%
   left_join(unemploy,  by = c('year', 'state')) %>%
   left_join(state_income_df,  by = c('year', 'state'))  %>%
   drop_na(state_policy, origin_score, distw, contig, comlang_off, comlang_ethno, colony,
           wage_dif, unemp_dif, vdem, state_unemploy, state_income, Country, state)
 
-# acs_dyad_policy_old <- acs_dyad_policy1_old %>%
+# acs_prop_state_old <- acs_prop_state1_old %>%
 #   left_join(unemploy,  by = c('mean_year_immig' = 'year', 'state')) %>%
 #   left_join(state_income_df,  by = c('mean_year_immig' = 'year', 'state'))  %>%
 #   drop_na(state_policy, origin_score, distw, contig, comlang_off, comlang_ethno, colony,
@@ -635,7 +643,7 @@ acs_dyad_policy <- acs_dyad_policy1 %>%
 state_policy$state_policy_binned <- cut(state_policy$state_policy, breaks = c(-2,0,2, Inf), 
                                         labels = c("Repressive", "Neutral", "Progressive"))    
 
-acs_couple_policy <- acs_coupled_imms %>%
+acs_ind <- acs_coupled_imms %>%
   left_join(yearly_prop, by = c('yrimmig' = 'year', 'bpldid')) %>%
   # filter(yrimmig >= 1991) %>%
   # mutate(pre_1991 = yrimmig < 1991,
@@ -657,13 +665,13 @@ acs_couple_policy <- acs_coupled_imms %>%
           state_unemploy, state_income) %>%
   filter(allocated == F)
 
-write_rds(acs_couple_policy, here('data', 'acs_couple_policy.rds'))
-write_csv(acs_prop_yrimmig_policy, here('data', 'acs_prop_yrimmig_policy.csv'))
-write_csv(acs_dyad_policy, here('data', 'acs_dyad_policy.csv'))
-# write_csv(acs_dyad_policy_old, here('data'acs_prop_yrimmig_policy, 'acs_dyad_policy_old.csv'))
+write_rds(acs_ind, here('data', 'acs_ind.rds'))
+write_csv(acs_prop, here('data', 'acs_prop.csv'))
+write_csv(acs_prop_state, here('data', 'acs_prop_state.csv'))
+# write_csv(acs_prop_state_old, here('data'acs_prop, 'acs_prop_state_old.csv'))
 
 
-# acs_prop_yrimmig_policy_old <- read_csv(here('data', 'acs_prop_yrimmig_policy_old.csv'))
+# acs_prop_old <- read_csv(here('data', 'acs_prop_old.csv'))
 
 
 # acs_prop_yrimmig %>%

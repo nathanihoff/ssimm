@@ -112,11 +112,9 @@ knitr::opts_chunk$set(error=TRUE)
 acs_wide <- read.csv(here('data', 'acs_wide.csv'))
 acs_ind <- readRDS(here('data', 'acs_couple_policy.rds')) 
 acs_prop <- read.csv(here('data', 'acs_prop_yrimmig_policy.csv')) %>%
-  mutate(post_2013 = (yrimmig > 2013),
-         n_same_sex_coupled = n_spouse_same_sex + n_partner_same_sex)
+  mutate(post_2013 = (yrimmig > 2013))
 acs_prop_state <- read.csv(here('data', 'acs_dyad_policy.csv')) %>%
   mutate(post_2013 = (year > 2013))
-
 
 
 income_country <- acs_ind %>%
@@ -177,7 +175,8 @@ acs_prop_state %>%
 desc_table_ind <- acs_ind %>%
   labelled::remove_labels() %>%
   mutate(same_sex = ifelse(same_sex == T, 'Same-sex', 'Different-sex'),
-         state_policy = as.numeric(state_policy)) %>%
+         state_policy = as.numeric(state_policy),
+         educ = factor(educ, levels = c('< HS', 'HS', 'some col', 'college'))) %>%
   as_survey_design(ids = cluster, weights = perwt) %>%
   select(`Same-sex` = same_sex,
          `Country LGB policy score` = origin_score, `State LGB policy` = state_policy, 

@@ -5,3 +5,7 @@ V-Dem-CY-Core-v10.csv
 acs_couple_policy.csv
 acs_couple_policy.rds
 acs_count_base.csv
+acs_ind.rds
+acs_prop.csv
+acs_prop_state.csv
+acs_wide_small.csv
