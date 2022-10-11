@@ -109,12 +109,25 @@ knitr::opts_chunk$set(error=TRUE)
 ```
 
 ```{r load, include = F}
+country_tab_ci <- read_csv(here('descriptive/files', 'country_tab_ci.csv'))
+state_tab_ci <- read_csv(here('descriptive/files', 'state_tab_ci.csv'))
+
+countries_ex <- country_tab_ci %>%
+  filter(n >= 150) %>%
+  pull(bpld)
+
+states_ex <- state_tab_ci %>%
+  filter(n >= 500) %>%
+  pull(state)
+
 acs_wide <- read.csv(here('data', 'acs_wide.csv'))
-acs_ind <- readRDS(here('data', 'acs_couple_policy.rds')) 
-acs_prop <- read.csv(here('data', 'acs_prop_yrimmig_policy.csv')) %>%
-  mutate(post_2013 = (yrimmig > 2013))
-acs_prop_state <- read.csv(here('data', 'acs_dyad_policy.csv')) %>%
-  mutate(post_2013 = (year > 2013))
+acs_ind <- readRDS(here('data', 'acs_ind.rds')) 
+acs_prop <- read.csv(here('data', 'acs_prop.csv')) %>%
+  mutate(post_2013 = (yrimmig > 2013)) 
+acs_prop_state <- read.csv(here('data', 'acs_prop_state.csv')) %>%
+  mutate(post_2013 = (year > 2013)) %>%
+  filter(bpld %in% countries_ex,
+         state %in% states_ex)
 
 
 income_country <- acs_ind %>%
@@ -190,7 +203,10 @@ desc_table_ind <- acs_ind %>%
          `Per-cap. GDP difference` = wage_dif, `Unemployment difference` = unemp_dif, 
          `Liberal democracy (V-Dem)` = vdem, `Proportion same-country stock` = stock_prop,
          `State unemployment rate` = state_unemploy, `State per-capita income` = state_income) %>%
-  tbl_svysummary(by = `Same-sex`, type = list(`State LGB policy` ~ "continuous")) %>%
+  tbl_svysummary(by = `Same-sex`, 
+                 type = list(`State LGB policy` ~ "continuous"),
+                 digits = list(`Year of immigration` ~ 
+                                 function(x) style_number(x, big.mark = ''))) %>%
   # add_overall() %>%
   modify_caption('Summary statistics for individual-level dataset, with survey weights applied')
 
@@ -205,6 +221,8 @@ desc_table_ind %>%
   kable_styling(latex_options = "hold_position")
   # kableExtra::save_kable(here('descriptive', 'desc_table_ind.tex'))
 
+select(acs_prop_state, state, bpld, year, origin_score, origin_score_lag, 
+       state_policy, state_policy_lag) %>% View()
 ```
 
 \newpage
@@ -863,6 +881,12 @@ for(mod_num in 1:length(mod_list)){
                                      save = T)[, "Std. Error"]
 }
 
+huxtable::huxreg(robust_list,
+       coefs = c('Country LGB policy score' = 'origin_score_lag', 
+                 'State LGB policy score' = 'state_policy_lag',
+                 'State score × country-score' = 'state_policy_lag:origin_score_lag',
+                 'Post-2013' = 'post_2013TRUE'))
+
 stargazer(mod_list,
           header = F, 
           keep = c('origin_score', 'state_policy', 'post_2013'),
@@ -886,6 +910,81 @@ stargazer(mod_list,
           table.placement = "H",
           label = 'tab:twoimm',
           title = 'Only two-immigrant couples: Alternate specifications of OLS regressions of percent same-sex in by country of origin, U.S. state, and survey year.')
+```
+
+
+## Lagged policy variables
+```{r state-props-mods}
+country_prop <- lm(prop_same_sex ~ origin_score_lag, data = acs_prop_state)
+
+state_prop <- lm(prop_same_sex ~ state_policy_lag, data = acs_prop_state)
+
+state_prop2 <- lm(prop_same_sex ~ origin_score_lag + state_policy_lag, data = acs_prop_state)
+
+# state_prop_fe <- lm(prop_same_sex ~ state_unemploy + state_income + state + 
+#                         origin_score_lag + state_policy_lag, 
+#                        data = acs_prop_state)
+
+state_prop_fe <- lm(prop_same_sex ~ state_policy_lag + origin_score_lag + distw + contig + 
+                          comlang_off + comlang_ethno + colony +
+                          wage_dif + unemp_dif + vdem + stock_prop +
+                           state_unemploy + state_income + Country + state, 
+                       data = acs_prop_state)
+
+state_prop_fe2 <- lm(prop_same_sex ~ state_policy_lag*origin_score_lag + distw + contig + 
+                          comlang_off + comlang_ethno + colony +
+                          wage_dif + unemp_dif + vdem + stock_prop +
+                           state_unemploy + state_income + Country + state, 
+                       data = acs_prop_state)
+
+state_prop_fe2_2013 <- lm(prop_same_sex ~ state_policy_lag*origin_score_lag + post_2013 + distw + contig + 
+                          comlang_off + comlang_ethno + colony +
+                          wage_dif + unemp_dif + vdem + stock_prop +
+                           state_unemploy + state_income + Country + state, 
+                       data = acs_prop_state)
+
+state_prop_2013 <- lm(prop_same_sex ~ post_2013 + state_policy_lag + origin_score_lag + distw + contig + 
+                          comlang_off + comlang_ethno + colony +
+                          wage_dif + unemp_dif + vdem + stock_prop +
+                           state_unemploy + state_income + Country + state, 
+                       data = acs_prop_state)
+
+
+
+mod_list <- list(country_prop, state_prop, state_prop2, state_prop_fe, state_prop_fe2, 
+                 state_prop_2013, state_prop_fe2_2013)
+robust_list <- list()
+for(mod_num in 1:length(mod_list)){
+  robust_list[[mod_num]] <- coeftest(mod_list[[mod_num]], 
+                                     vcov = vcovCL(mod_list[[mod_num]], cluster = ~ state + Country), 
+                                     save = T)[, "Std. Error"]
+}
+
+stargazer(mod_list,
+          header = F, 
+          keep = c('origin_score_lag', 'state_policy_lag', 'post_2013'),
+          # omit = c('Country', 'state'),
+          order = paste0("^", c('origin_score_lag', 'state_policy_lag', 
+                                'state_policy_lag:origin_score_lag', 'post_2013TRUE') , "$"),
+          covariate.labels = c('Country LGB policy score', 
+                               'State LGB policy score', 
+                                'State score × country-score', 'Post-2013'),
+          dep.var.labels = "Percent in same-sex couples by state-country-year",
+          add.lines = list(c('State controls and FEs?', 'no', 'no', 'no', rep('yes', 4)),
+                           c('Country controls and FEs?', 'no', 'no', 'no', rep('yes', 4))),
+          se = robust_list,
+          keep.stat = c('n'),
+          star.cutoffs = c(0.1, 0.05, 0.01, 0.001),
+          star.char = c('†', '*', '**', '***'),
+          notes = c("\\parbox[t]{\\textwidth}{\\textit{Note}: †\\textit{p}<0.1; *\\textit{p}<0.05; **\\textit{p}<0.01; ***\\textit{p}<0.001. Country and state two-way clustered standard errors are shown in parentheses. State controls include unemployment rate and per-capita income. Country controls include population-weighted distance, contiguous border, common official language, common ethnic language, colonial relationship, wage differential, unemployment differential, proportion same-country stock, and democracy.}", 
+                    "\\textit{Source}: American Community Survey 2008-2019. Authors' calculations."), 
+          notes.label = '',
+          notes.align = 'l',
+          notes.append = F,
+          table.placement = "H",
+          label = 'tab:twoimm',
+          title = 'Country-of-origin and state LGB policy scores lagged by one year: Alternate specifications of OLS regressions of percent same-sex in by country of origin, U.S. state, and survey year.')
+
 ```
 
 <!-- \newpage  -->

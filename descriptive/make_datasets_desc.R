@@ -536,7 +536,12 @@ acs_prop <- acs_prop_yrimmig %>%
   drop_na(prop_same_sex, distw, contig, comlang_off, comlang_ethno, colony,
           wage_dif, unemp_dif, vdem, origin_score, bpld) 
 
-
+lgbt_policy_lag <- lgbt_policy %>%
+  select(origin_score_lag = origin_score, year, Code) %>%
+  mutate(year = year + 1)
+state_policy_lag <- state_policy %>%
+  select(state_policy_lag = state_policy, Year, State) %>%
+  mutate(Year = Year + 1)
 
 # State-level analysis
 acs_prop_state1 <- acs_dyad %>%
@@ -548,7 +553,9 @@ acs_prop_state1 <- acs_dyad %>%
   #                                 mean_year_immig,
   #                                 1991)) %>%
   left_join(lgbt_policy, by = c('mean_year_immig' = 'year', 'bpldid' = 'Code')) %>%
-  left_join(state_policy,by = c('year' = 'Year', 'state' = 'State')) %>%
+  left_join(state_policy, by = c('year' = 'Year', 'state' = 'State')) %>%
+  left_join(lgbt_policy_lag, by = c('mean_year_immig' = 'year', 'bpldid' = 'Code')) %>%
+  left_join(state_policy_lag, by = c('year' = 'Year', 'state' = 'State')) %>%
   filter(!is.na(origin_score)) %>%
   mutate(
     n_couples = n_spouse_same_sex + n_partner_same_sex + n_dif_sex,

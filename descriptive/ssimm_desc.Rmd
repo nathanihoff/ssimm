@@ -138,13 +138,67 @@ set_flextable_defaults(font.family = 'Times New Roman',
                        line_spacing = 1)
 ```
 
+```{r tab-var, eval = F}
+country_tab_ci <- acs_ind_survey %>%
+  filter(yrimmig >= 1991) %>%
+  filter(allocated == F) %>%
+  group_by(bpld, same_sex) %>%
+  summarize(survey_prop(vartype = 'ci'),
+            n_same_sex = n(),
+            origin_score =  weighted.mean(origin_score, na.rm = T, w = perwt)) %>%
+  filter(same_sex == T) %>%
+  mutate(across(c(coef, `_low`, `_upp`), function(x){x*100}))
+
+left_join(country_tab_ci, 
+          acs_ind %>%
+            filter(yrimmig >= 1991) %>%
+            filter(allocated == F) %>%
+            count(bpld)) %>%
+  write_csv(here('descriptive/files', 'country_tab_ci.csv'))
+
+state_tab_ci <- acs_ind_survey %>%
+  filter(yrimmig >= 1991) %>%
+  filter(allocated == F) %>%
+  group_by(state, same_sex) %>%
+  summarize(survey_prop(vartype = 'ci'),
+            n_same_sex = n(),
+            state_policy = weighted.mean(state_policy, na.rm = T, w = perwt)) %>%
+  filter(same_sex == T) %>%
+  mutate(across(c(coef, `_low`, `_upp`), function(x){x*100}))
+
+left_join(state_tab_ci, 
+          acs_ind %>%
+            filter(yrimmig >= 1991) %>%
+            filter(allocated == F) %>%
+            count(state)) %>%
+  write_csv(here('descriptive/files', 'state_tab_ci.csv'))
+
+```
+
 ```{r load, include = F}
+country_tab_ci <- read_csv(here('descriptive/files', 'country_tab_ci.csv'))
+state_tab_ci <- read_csv(here('descriptive/files', 'state_tab_ci.csv'))
+
+countries_ex <- country_tab_ci %>%
+  filter(n >= 150) %>%
+  pull(bpld)
+
+states_ex <- state_tab_ci %>%
+  filter(n >= 500) %>%
+  pull(state)
+
+
+
 acs_wide <- read.csv(here('data', 'acs_wide.csv'))
-acs_ind <- readRDS(here('data', 'acs_couple_policy.rds')) 
-acs_prop <- read.csv(here('data', 'acs_prop_yrimmig_policy.csv')) %>%
-  mutate(post_2013 = (yrimmig > 2013))
-acs_prop_state <- read.csv(here('data', 'acs_dyad_policy.csv')) %>%
-  mutate(post_2013 = (year > 2013))
+acs_ind <- readRDS(here('data', 'acs_ind.rds')) 
+acs_prop <- read.csv(here('data', 'acs_prop.csv')) %>%
+  mutate(post_2013 = (yrimmig > 2013)) 
+acs_prop_state <- read.csv(here('data', 'acs_prop_state.csv')) %>%
+  mutate(post_2013 = (year > 2013)) %>%
+  filter(bpld %in% countries_ex,
+         state %in% states_ex)
+
+
 
 # acs_oneimm <- read.csv(here('data', 'acs_oneimm.csv'))
 # acs_coupled_imms <- read.csv(here('data', 'acs_coupled_imms.csv'))
@@ -168,6 +222,9 @@ total_df <- acs_wide_survey %>%
   group_by(year, imm_couple, same_sex) %>%
   summarize(n = survey_total(vartype = "ci")) 
 ```
+
+
+
 
 ```{r intro}
 same_2013 <- total_df %>%
@@ -250,7 +307,7 @@ Although the studies described above support the pathway of immigrants in same-s
 
 <!-- Some recent, small-scale studies also suggest that economic resources can enable the migration of elite gay migrants [@choi_2022_global], and that  -->
 
-On the other hand, immigrants in same-sex couples may come from countries with greater recognition and access to sexuality-related rights and services than the U.S. There are three interrelated reasons for this. First, affirming policy environments are likely to enable people’s capacity to make such an important, expensive move [@dehaas_2021]. Long-standing research on immigrant selection demonstrates that migrants typically occupy stronger social positions -- more formal education, higher incomes, and more prestigious occupations [@feliciano_2020]. Supportive policies like marriage equality and protections against employment discrimination may enable the capacity to migrate by providing more access to necessary social, human, and economic capitals. Second, same-sex coupledom, like marriage, is a culturally contingent artifact [@philpot_2016_gay]. Consequently, the interactive dynamics between policy and culture within an immigrant’s country of origin is likely to influence both their decision to "come out" and then their desire to be part of a couple [@baiocco_2014_desire; @flores_2016_backlash; @ocobock_2020_leveraging; @suen_2021_sexual]. Policies supportive of LGB communities normalize and validate the disclosure of such identities and partnerships [@ocobock_2020_leveraging] -- influencing those with same-sex attractions to imagine and aspire such possibilities for themselves. And, relatedly, being from a country where the state recognizes one’s sexuality and validates these relationships may make survey respondents, once in the U.S., more comfortable disclosing their relationship. And, third, these factors may combine to make those coming from countries with progressive policies more legible to migration officials determining access to visas as the enactment of the sexuality and relationship may align more closely to dominant expressions within the U.S. [@edwards_2013_welcoming].   
+On the other hand, immigrants in same-sex couples may come from countries with greater recognition and access to sexuality-related rights and services than the U.S. There are three interrelated reasons for this. First, affirming policy environments are likely to enable people’s capacity to make such an important, expensive move [@dehaas_2021]. Long-standing research on immigrant selection demonstrates that migrants typically occupy stronger social positions -- more formal education, higher incomes, and more prestigious occupations [@feliciano_2020]. Supportive policies like marriage equality and protections against employment discrimination may enable the capacity to migrate by providing more access to necessary social, human, and economic capitals. Second, same-sex coupledom, like marriage, is a culturally contingent artifact [@philpot_2016_gay]. Consequently, the interactive dynamics between policy and culture within an immigrant’s country of origin is likely to influence both their decision to "come out" and then their desire to be part of a couple [@baiocco_2014_desire; @flores_2016_backlash; @ocobock_2020_leveraging; @suen_2021_sexual]. Policies supportive of LGB communities normalize and validate the disclosure of such identities and partnerships [@ocobock_2020_leveraging] -- influencing those with same-sex attractions to imagine and aspire such possibilities for themselves. And, relatedly, being from a country where the state recognizes one’s sexuality and validates these relationships may make survey respondents, once in the U.S., more comfortable disclosing their relationship. And, third, these factors may combine to make those coming from countries with progressive policies more legible to migration officials determining access to visas as the enactment of the sexuality and relationship may align more closely to dominant expressions within the U.S. [@edwards_2013].   
 
 Migration from progressive policy contexts can also support traditional migration theories as well. The cost-benefit analysis inherent in neoclassical economic theory could imply that migrants coming from progressive contexts enjoy greater resources and hence face relatively lower costs to migration. Under NELM, countries that recognize same-sex relationships are more likely to have same-sex couples that make the migration decision together. Finally, since spousal migration for same-sex couples is a new pathway for migration, cumulative causation theory suggests that barriers to migrate will be high and hence "pioneer" migrants will be positively selected.  
 
@@ -320,15 +377,15 @@ We merge individual-level data on immigrants in the U.S. with state- and country
 
 The 12 years of survey data contain `r nrow(filter(acs_wide, same_sex == T & (yrimmig_main >= 1991 | yrimmig_partner >= 1991)))` same-sex couples that include at least one immigrant, for a total of `r nrow(filter(acs_ind, same_sex == T))` immigrants in same-sex couples with complete data. These immigrants are compared to `r nrow(filter (acs_wide, same_sex == F & (yrimmig_main >= 1991 | yrimmig_partner >= 1991)))` corresponding different-sex couples containing `r nrow(filter(acs_ind, same_sex == F))` individual immigrants.   
 
-We use "LGB" to refer to all individuals who may be in romantic relationships with members of the same sex. We recognize that we are not able to identify bisexual (or pansexual, multisexual, etc.) individuals with different-sex partners. In addition, measuring the prevalence of same-sex couples in the U.S. is difficult [@michaels_2013]. As in most nationally representative demographic work on same-sex couples [@baumle_2013; @baumle_2019], we are able to identify only LGB couples that cohabit; unpartnered LGB individuals and those who do not live with their partner are not included in the analysis [@baumle_2009, p. 6]. In addition, LGB individuals who do not feel comfortable with the partner labels of the ACS are not in the sample. Another pitfall is measurement error: Misreporting may result when different-sex couples accidentally misspecify the gender of one of the partners [@gates_2009; @goodnature_2021]. Beginning in 2008 the Census Bureau made changes to ACS gender and partnership questions in order to prevent such errors [@u.s.censusbureau_2013], so we rely on data only from 2008 onward, but difficulties remain. If even a small number of different-sex couples misreport one partner's sex, the counts of same-sex couples will be inflated. Following @gates_2009, we remove all respondents that had either their relationship or sex variable allocated by the Census Bureau, which results in dropping `r 7683 - sum(acs_ind$same_sex == T)` immigrants in same-sex couples and `r 949775 - sum(acs_ind$same_sex == F)` in different-sex couples, or `r round(1-nrow(acs_ind) / 957458, 4) * 100` percent of the sample. This is the strategy used by most studies of same-sex couples in the ACS [e.g. @boertien_2019; @gates_2013; @goldberg_2021; @christafore_2019; @martell_2020]. We also include robustness checks to test the sensitivity of our results to high rates of misreporting.  
+We use "LGB" to refer to all individuals who may be in romantic relationships with members of the same sex. We recognize that we are not able to identify bisexual (or pansexual, multisexual, etc.) individuals with different-sex partners. In addition, measuring the prevalence of same-sex couples in the U.S. is difficult [@michaels_2013]. As in most nationally representative demographic work on same-sex couples [@baumle_2013; @baumle_2019], we are able to identify only LGB couples that cohabit; unpartnered LGB individuals and those who do not live with their partner are not included in the analysis [@baumle_2009, p. 6]. In addition, LGB individuals who do not feel comfortable with the partner labels of the ACS are not in the sample. Another pitfall is measurement error: Misreporting may result when different-sex couples accidentally misspecify the gender of one of the partners [@gates_2009; @goodnature_2021]. Beginning in 2008 the Census Bureau made changes to ACS gender and partnership questions in order to prevent such errors [@u.s.censusbureau_2013], so we rely on data only from 2008 onward, but difficulties remain. If even a small number of different-sex couples misreport one partner's sex, the counts of same-sex couples will be inflated. Following @gates_2009, we remove all respondents that had either their relationship or sex variable allocated by the Census Bureau, which results in dropping `r 7683 - sum(acs_ind$same_sex == T)` immigrants in same-sex couples and `r 949775 - sum(acs_ind$same_sex == F)` in different-sex couples, or `r round(1-nrow(acs_ind) / 957458, 4) * 100` percent of the sample. This is the strategy used by most studies of same-sex couples in the ACS [e.g. @boertien_2019; @gates_2013; @goldberg_2021; @christafore_2019; @martell_2020]. In the Online Appendix we also include robustness checks to test the sensitivity of our results to high rates of misreporting.  
 
 
 ## Analytic Strategy 
-Many of our analyses entail descriptive statistics of ACS data. For these, we apply survey weights from the ACS.  
+Many of our analyses entail descriptive statistics of ACS data. For these and for the reshaping described below, we apply survey weights from the ACS. 
 
 One of our goals is to isolate the effects of country-of-origin LGB policy on the immigration of immigrants in same-sex couples. The ideal survey would follow potential immigrants over time and have information about sexual orientation, allowing us to estimate how the probability of migrating and choice of U.S. state of residence vary by sexual orientation. This ideal dataset does not exist, but we attempt to approximate it.  
 
-We reshape the data so that each observation is the proportion of individual cohabiting immigrants in same-sex couples from country $x$ in state $y$ in survey year $z$, then multiply by 100. For example, the observation for France $\times$ New York $\times$ 2015 is `r acs_prop_state %>% filter(state == 'New York', country == 'France', year == 2015) %>% pull(prop_same_sex)`, meaning that among coupled ACS respondents who immigrated from France and resided in New York at the time of the 2015 survey, a weighted `r acs_prop_state %>% filter(state == 'New York', country == 'France', year == 2015) %>% pull(prop_same_sex)` percent were in same-sex couples. This transformation of the data results in `r nrow(acs_prop_state)` country-state-year observations.^[Cells without any cohabiting immigrants from a given country are necessarily dropped from the analysis.] This reshaping acts to control for aspects of migrant settlement common to immigrants from the same country. We regress the country-state-survey year proportion on state and sending-country policy scores and adjust for state and origin-country controls (listed below) using OLS. State-level measures are linked to survey year, while origin-country LGB policy and controls are linked to the mean year of immigration for each country-state-year immigrant group. In our final models, we include state and country-of-origin fixed effects, and we cluster errors at the state and country levels.    
+We reshape the data so that each observation is the proportion of individual cohabiting immigrants in same-sex couples from country $x$ in state $y$ in survey year $z$, then multiply by 100. For example, the observation for France $\times$ New York $\times$ 2015 is `r acs_prop_state %>% filter(state == 'New York', country == 'France', year == 2015) %>% pull(prop_same_sex)`, meaning that among coupled ACS respondents who immigrated from France and resided in New York at the time of the 2015 survey, a weighted `r acs_prop_state %>% filter(state == 'New York', country == 'France', year == 2015) %>% pull(prop_same_sex)` percent were in same-sex couples. This transformation of the data results in `r nrow(acs_prop_state)` country-state-year observations.^[Cells without any cohabiting immigrants from a given country are necessarily dropped from the analysis.] This reshaping acts to control for aspects of migrant settlement common to immigrants from the same country. To reduce variance, we drop countries with fewer than 150 and U.S. states with fewer than 500 cohabiting immigrants in the U.S. We regress the country-state-survey year proportion on state and sending-country policy scores and adjust for state and origin-country controls (listed below) using OLS. State-level measures are linked to survey year, while origin-country LGB policy and controls are linked to the mean year of immigration for each country-state-year immigrant group. In our final models, we include state and country-of-origin fixed effects, and we cluster errors at the state and country levels.    
 
 
 
@@ -373,7 +430,7 @@ Although we see significant differences between same- and different-sex couples 
 
  
 
-Figure \@ref(fig:country-map) shows the percentage of immigrants to the U.S. in same-sex couples from each country of origin, averaging over the 12 years of survey data, and Table \@ref(tab:country-tab) presents the top ten of these along with average LGB policy score over these years. The top sending countries include interesting diversity. Although countries with more progressive policies top the list, Malaysia, Zimbabwe, and Singapore make the list with their relatively repressive contexts. Having countries within the top 10 span multiple regions and cultures provides preliminary evidence that LGB policy is not substantially affecting willingness to respond truthfully on the ACS about being in a same-sex couple. Nor does it appear as though responses to the ACS are simply a function of country-of-origin LGB policies, as policy scores vary significantly across the top 10. Figure \@ref(fig:state-map) presents the percentage of immigrants in same-sex couples in U.S. states, averaging over the survey years and possible countries of origin, and Table \@ref(tab:state-tab) ranks the top ten. Although states with progressive policies occupy the top spots, Montana, Missouri, and Florida still make the list with less affirming policy environments.  
+Figure \@ref(fig:country-map) shows the percentage of immigrants to the U.S. in same-sex couples from each country of origin, averaging over the 12 years of survey data, and Table \@ref(tab:country-tab) presents the top ten of these along with average LGB policy score over these years. The top sending countries include interesting diversity. Although countries with more progressive policies top the list, Malaysia, Zimbabwe, and Singapore make the list with their relatively repressive contexts. Having countries within the top 10 span multiple regions and cultures provides preliminary evidence that LGB policy is not substantially affecting willingness to respond truthfully on the ACS about being in a same-sex couple. Nor does it appear as though responses to the ACS are simply a function of country-of-origin LGB policies, as policy scores vary significantly across the top 10. Figure \@ref(fig:state-map) presents the percentage of immigrants in same-sex couples in U.S. states, averaging over the survey years and possible countries of origin, and Table \@ref(tab:state-tab) ranks the top ten. Although states with progressive policies occupy the top spots, Mississippi, Missouri, and Florida still make the list with less affirming policy environments.  
 
 
 **[FIGURE \@ref(fig:country-map) ABOUT HERE]**  
@@ -574,42 +631,7 @@ Although our focus is on same-sex couples, this study offers a broader correctio
 \newpage
 
 # Tables
-```{r tab-var, eval = F}
-country_tab_ci <- acs_ind_survey %>%
-  filter(yrimmig >= 1991) %>%
-  filter(allocated == F) %>%
-  group_by(bpld, same_sex) %>%
-  summarize(survey_prop(vartype = 'ci'),
-            n_same_sex = n(),
-            origin_score =  weighted.mean(origin_score, na.rm = T, w = perwt)) %>%
-  filter(same_sex == T) %>%
-  mutate(across(c(coef, `_low`, `_upp`), function(x){x*100}))
 
-left_join(country_tab_ci, 
-          acs_ind %>%
-            filter(yrimmig >= 1991) %>%
-            filter(allocated == F) %>%
-            count(bpld)) %>%
-  write_csv(here('descriptive/files', 'country_tab_ci.csv'))
-
-state_tab_ci <- acs_ind_survey %>%
-  filter(yrimmig >= 1991) %>%
-  filter(allocated == F) %>%
-  group_by(state, same_sex) %>%
-  summarize(survey_prop(vartype = 'ci'),
-            n_same_sex = n(),
-            state_policy = weighted.mean(state_policy, na.rm = T, w = perwt)) %>%
-  filter(same_sex == T) %>%
-  mutate(across(c(coef, `_low`, `_upp`), function(x){x*100}))
-
-left_join(state_tab_ci, 
-          acs_ind %>%
-            filter(yrimmig >= 1991) %>%
-            filter(allocated == F) %>%
-            count(state)) %>%
-  write_csv(here('descriptive/files', 'state_tab_ci.csv'))
-
-```
 
 
 ```{r country-tab}
@@ -625,7 +647,7 @@ country_tab_ci %>%
             nchar(x) == 3 ~ paste0(x, '0 %'),
             nchar(x) == 1 ~ paste0(x, '.00 %')) }),
          `95% CI` = paste0('(', `_low`, ', ', `_upp`, ')')) %>%
-  #filter(n >= 200) %>%
+  filter(n >= 150) %>%
   arrange(desc(coef)) %>%
   rownames_to_column('Rank') %>%
   select(Rank,
@@ -679,6 +701,7 @@ country_tab_ci %>%
 ```{r state-tab}
 state_tab_ci <- read_csv(here('descriptive/files', 'state_tab_ci.csv'))
 
+
 state_tab_ci %>% 
   mutate(`_low` = ifelse(`_low` < 0, 0, `_low`),
          across(coef:`_upp`, function(x){
@@ -688,7 +711,7 @@ state_tab_ci %>%
             nchar(x) == 3 ~ paste0(x, '0 %'),
             nchar(x) == 1 ~ paste0(x, '.00 %')) }),
          `95% CI` = paste0('(', `_low`, ', ', `_upp`, ')')) %>%
-  # filter(n >= 200 & n_same_sex >= 20) %>%
+  filter(n >= 500) %>%
   arrange(desc(coef)) %>%
   rownames_to_column('Rank') %>%
   select(Rank,
@@ -728,12 +751,14 @@ state_tab_ci %>%
 ```{r state-props}
 mod_list <- list(country_prop, state_prop, state_prop2, state_prop_fe, state_prop_fe2, 
                  state_prop_2013, state_prop_fe2_2013)
+
 robust_list <- list()
 for(mod_num in 1:length(mod_list)){
   robust_list[[mod_num]] <- coeftest(mod_list[[mod_num]], 
                                      vcov = vcovCL(mod_list[[mod_num]], cluster = ~ state + Country), 
                                      save = T)
 }
+
 huxtable::huxreg(robust_list,
        coefs = c('Country LGB policy score' = 'origin_score', 
                  'State LGB policy score' = 'state_policy',
