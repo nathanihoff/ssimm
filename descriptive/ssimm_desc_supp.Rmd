@@ -62,6 +62,7 @@ knitr::opts_chunk$set(echo = F, warning = F, message = F, cache = T, results = '
                       cache.lazy = F)
 # knitr::opts_chunk$set(fig.pos = "h", out.extra = "")
 
+library(huxtable)
 library(broom)
 library(janitor)
 library(priceR)
@@ -625,7 +626,7 @@ stargazer(mod_list,
 
 ## Alternate specifications
 ### Relative immmigrant population-weighted regressions
-Although our analysis for the most part has been at the country or state levels, there is the question of whether the results presented are driven by smaller, progressive countries that send relatively few immigrants. In Table \@ref(tab:state-weights), we re-specify these models using Weighted Least Squares, weighting by the relative size of the immigrant stock in the average year of immigration. Coefficients for origin-country and state policy scores become insignificant in models with controls and fixed effects, but their interaction remains significant throughout.  
+<!-- Although our analysis for the most part has been at the country or state levels, there is the question of whether the results presented are driven by smaller, progressive countries that send relatively few immigrants. In Table \@ref(tab:state-weights), we re-specify these models using Weighted Least Squares, weighting by the relative size of the immigrant stock in the average year of immigration. Coefficients for origin-country and state policy scores become insignificant in models with controls and fixed effects, but their interaction remains significant throughout.   -->
 
 
 ```{r state-weights}
@@ -700,7 +701,7 @@ stargazer(mod_list,
 \newpage 
 
 ### Married, one-immigrant, and two-immigrant couples
-We assess whether the results in Table 3 are driven by trends for married couples or those with one U.S.-born partner. Table \@ref(tab:married) restricts the sample to only married couples, Table \@ref(tab:oneimm) to only couples with one immigrant and one U.S.-born member, and Table \@ref(tab:twoimm) to only couples consisting of two immigrants. Results are substantively the same for married and one-immigrant couples, and less strong for two-immigrant couples. This implies that married and mixed-nativity couples are driving the main results.
+<!-- We assess whether the results in Table 3 are driven by trends for married couples or those with one U.S.-born partner. Table \@ref(tab:married) restricts the sample to only married couples, Table \@ref(tab:oneimm) to only couples with one immigrant and one U.S.-born member, and Table \@ref(tab:twoimm) to only couples consisting of two immigrants. Results are substantively the same for married and one-immigrant couples, and less strong for two-immigrant couples. This implies that married and mixed-nativity couples are driving the main results. -->
 
 
 
@@ -982,7 +983,7 @@ stargazer(mod_list,
           notes.align = 'l',
           notes.append = F,
           table.placement = "H",
-          label = 'tab:twoimm',
+          label = 'tab:lag',
           title = 'Country-of-origin and state LGB policy scores lagged by one year: Alternate specifications of OLS regressions of percent same-sex in by country of origin, U.S. state, and survey year.')
 
 ```
@@ -1152,6 +1153,72 @@ stargazer(mod_list,
           title = 'Percent same-sex in by country of origin, U.S. state, and survey year.')
 ```
 
+\newpage
+
+# Full Country and U.S. State Rankings
+
+
+```{r country-tab}
+country_tab_ci <- read_csv(here('descriptive/files', 'country_tab_ci.csv'))
+
+
+country_tab_ci %>% 
+  mutate(`_low` = ifelse(`_low` < 0, 0, `_low`),
+         across(coef:`_upp`, function(x){
+           x = round(x, 2) 
+           x =  case_when(
+            nchar(x) == 4 ~ paste0(x, ' %'),
+            nchar(x) == 3 ~ paste0(x, '0 %'),
+            nchar(x) == 1 ~ paste0(x, '.00 %')) }),
+         `95% CI` = paste0('(', `_low`, ', ', `_upp`, ')'),
+         origin_score = round(origin_score, 1)) %>%
+  filter(n >= 150) %>%
+  arrange(desc(coef)) %>%
+  rownames_to_column('Rank') %>%
+  select(Rank,
+         `Country of origin` = bpld,
+         `Percentage same-sex` = coef,
+         `95% CI`,
+         `Mean country policy score` = origin_score) %>%
+  flextable::flextable() %>% 
+  flextable::set_caption('Sending countries ranked by proportion immigrant couples with same-sex partners') %>%
+  flextable::add_footer_lines('Source: American Community Survey 2008-2019. Authors\' calculations.') %>%
+  flextable::autofit() %>%
+  flextable::fit_to_width(6)
+ 
+
+```
+
+\newpage
+
+```{r state-tab}
+state_tab_ci <- read_csv(here('descriptive/files', 'state_tab_ci.csv'))
+
+
+state_tab_ci %>% 
+  mutate(`_low` = ifelse(`_low` < 0, 0, `_low`),
+         across(coef:`_upp`, function(x){
+           x = round(x, 2) 
+           x =  case_when(
+            nchar(x) == 4 ~ paste0(x, ' %'),
+            nchar(x) == 3 ~ paste0(x, '0 %'),
+            nchar(x) == 1 ~ paste0(x, '.00 %')) }),
+         `95% CI` = paste0('(', `_low`, ', ', `_upp`, ')'),
+         state_policy = round(state_policy, 1)) %>%
+  filter(n >= 500) %>%
+  arrange(desc(coef)) %>%
+  rownames_to_column('Rank') %>%
+  select(Rank,
+         `State` = state,
+         `Percentage same-sex` = coef,
+         `95% CI`,
+         `Mean state policy score` = state_policy) %>%
+  flextable::flextable() %>% 
+  flextable::set_caption('States ranked by proportion immigrant couples with same-sex partners') %>%
+  flextable::add_footer_lines('Source: American Community Survey 2008-2019. Authors\' calculations.') %>%
+  flextable::autofit() %>%
+  flextable::fit_to_width(6)
+```
 
 \newpage
 

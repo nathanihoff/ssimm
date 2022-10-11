@@ -26,7 +26,7 @@ header-includes:
   # - \pagestyle{fancy}
   # - \setlength{\headheight}{13.6pt}
   # - \rhead{\textit{Hoffmann and Velasco}}
-  # - \lhead{\textit{October 10, 2022}}
+  # - \lhead{\textit{October 11, 2022}}
 editor_options: 
   
   chunk_output_type: console
@@ -44,7 +44,7 @@ title: "Sexuality, Migration, and LGB Policy: A Portrait of Immigrants in Same-S
 # title: "How Immigrants in Same-Sex Couples Change our Understanding of Migration"
 # title: "Repressed or Empowered? Immigrants in Same-Sex Couples in the U.S."
 # title: "Making Migration Sexy: How LGB Policies Influence International Migration"
-# date: "October 10, 2022"
+# date: "October 11, 2022"
 # author:
 # - name: Nathan I. Hoffmann
 #   affiliation: Department of Sociology, University of California, Los Angeles
@@ -255,7 +255,7 @@ Although we see significant differences between same- and different-sex couples 
 
  
 
-Figure <a href="#fig:country-map">5</a> shows the percentage of immigrants to the U.S. in same-sex couples from each country of origin, averaging over the 12 years of survey data, and Table <a href="#tab:country-tab">1</a> presents the top ten of these along with average LGB policy score over these years. The top sending countries include interesting diversity. Although countries with more progressive policies top the list, Malaysia, Zimbabwe, and Singapore make the list with their relatively repressive contexts. Having countries within the top 10 span multiple regions and cultures provides preliminary evidence that LGB policy is not substantially affecting willingness to respond truthfully on the ACS about being in a same-sex couple. Nor does it appear as though responses to the ACS are simply a function of country-of-origin LGB policies, as policy scores vary significantly across the top 10. Figure <a href="#fig:state-map">6</a> presents the percentage of immigrants in same-sex couples in U.S. states, averaging over the survey years and possible countries of origin, and Table <a href="#tab:state-tab">2</a> ranks the top ten. Although states with progressive policies occupy the top spots, Montana, Missouri, and Florida still make the list with less affirming policy environments.  
+Figure <a href="#fig:country-map">5</a> shows the percentage of immigrants to the U.S. in same-sex couples from each country of origin, averaging over the 12 years of survey data, and Table <a href="#tab:country-tab">1</a> presents the top ten of these along with average LGB policy score over these years. The top sending countries include interesting diversity. Although countries with more progressive policies top the list, Malaysia, Zimbabwe, and Singapore make the list with their relatively repressive contexts. Having countries within the top 10 span multiple regions and cultures provides preliminary evidence that LGB policy is not substantially affecting willingness to respond truthfully on the ACS about being in a same-sex couple. Nor does it appear as though responses to the ACS are simply a function of country-of-origin LGB policies, as policy scores vary significantly across the top 10. Figure <a href="#fig:state-map">6</a> presents the percentage of immigrants in same-sex couples in U.S. states, averaging over the survey years and possible countries of origin, and Table <a href="#tab:state-tab">2</a> ranks the top ten. Although states with progressive policies occupy the top spots, Mississippi, Missouri, and Florida still make the list with less affirming policy environments.  
 
 
 **[FIGURE <a href="#fig:country-map">5</a> ABOUT HERE]**  
@@ -373,7 +373,7 @@ Although our focus is on same-sex couples, this study offers a broader correctio
 
 ::: {custom-style="Table Caption"}
 
-<caption>Table 1: `<w:bookmarkStart w:id="9d189b27-5703-4e5e-b5b3-bb2918a8f5a8" w:name="tab:country-tab"/><w:r><w:t xml:space="preserve">Sending countries ranked by proportion immigrant couples with same-sex partners</w:t></w:r><w:bookmarkEnd w:id="9d189b27-5703-4e5e-b5b3-bb2918a8f5a8"/>`{=openxml}</caption>
+<caption>Table 1: `<w:bookmarkStart w:id="89863224-7c28-4a5a-b9a0-3edb00ba9e0c" w:name="tab:country-tab"/><w:r><w:t xml:space="preserve">Sending countries ranked by proportion immigrant couples with same-sex partners</w:t></w:r><w:bookmarkEnd w:id="89863224-7c28-4a5a-b9a0-3edb00ba9e0c"/>`{=openxml}</caption>
 
 :::
 
@@ -386,7 +386,7 @@ Although our focus is on same-sex couples, this study offers a broader correctio
 
 ::: {custom-style="Table Caption"}
 
-<caption>Table 2: `<w:bookmarkStart w:id="f2d12551-90cf-4fb8-97de-4d02d6f4ca74" w:name="tab:state-tab"/><w:r><w:t xml:space="preserve">States ranked by proportion immigrant couples with same-sex partners</w:t></w:r><w:bookmarkEnd w:id="f2d12551-90cf-4fb8-97de-4d02d6f4ca74"/>`{=openxml}</caption>
+<caption>Table 2: `<w:bookmarkStart w:id="0b803654-167c-4f12-97c5-b55b65f105bc" w:name="tab:state-tab"/><w:r><w:t xml:space="preserve">States ranked by proportion immigrant couples with same-sex partners</w:t></w:r><w:bookmarkEnd w:id="0b803654-167c-4f12-97c5-b55b65f105bc"/>`{=openxml}</caption>
 
 :::
 
@@ -401,7 +401,7 @@ Although our focus is on same-sex couples, this study offers a broader correctio
 
 ::: {custom-style="Table Caption"}
 
-<caption>Table 3: `<w:bookmarkStart w:id="d90fabab-7203-468a-a086-332e068d124e" w:name="tab:state-props"/><w:r><w:t xml:space="preserve">Percent same-sex in by country of origin, U.S. state, and survey year.</w:t></w:r><w:bookmarkEnd w:id="d90fabab-7203-468a-a086-332e068d124e"/>`{=openxml}</caption>
+<caption>Table 3: `<w:bookmarkStart w:id="3b473aa5-3f28-4bde-b590-e3090beae760" w:name="tab:state-props"/><w:r><w:t xml:space="preserve">Percent same-sex in by country of origin, U.S. state, and survey year.</w:t></w:r><w:bookmarkEnd w:id="3b473aa5-3f28-4bde-b590-e3090beae760"/>`{=openxml}</caption>
 
 :::
 

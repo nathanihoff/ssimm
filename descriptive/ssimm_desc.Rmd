@@ -559,10 +559,9 @@ Model 1 contains only one predictor: origin-country LGB policy score, for averag
 
 Model 2 turns to the role of U.S. state policy score in a given survey year, adjusting only for this variable. We see that, on average, states with more friendly LGB policies have somewhat higher proportions of immigrants in same-sex couples, on the order of `r coef(state_prop)[[2]]` percentage points per point of LGB policy score. Model 3 includes both country and state LGB scores; results barely change from the first two models, suggesting that LGB policy in both sending country and receiving state have somewhat independent relationships with LGB migration. 
 
-According to the descriptive analysis above, immigrants in same-sex couples tend to have higher incomes and hold more prestigious occupations than immigrants in different-sex couples, and they tend to come from wealthier countries. This implies that immigrants in same-sex couples may be attracted to progressive states for their economic rather than political benefits, so Model 4 adds state and origin-country controls and fixed effects. Intriguingly, the coefficients for state score and country score *grow* in strength. More progressive sending countries are represented by greater proportions of same-sex couples, and they tend to settle in more progressive U.S. states.  
+According to the descriptive analysis above, immigrants in same-sex couples tend to have higher incomes and hold more prestigious occupations than immigrants in different-sex couples, and they tend to come from wealthier countries. This implies that immigrants in same-sex couples may be attracted to progressive states for their economic rather than political benefits, so Model 4 adds state and origin-country controls and fixed effects. The coefficients for state score and country score are robust to these adjustments. More progressive sending countries are represented by greater proportions of same-sex couples, and they tend to settle in more progressive U.S. states.  
 
-
-Model 5 adds an interaction between state and country LGB scores. It is positive and significant; progressive states attract higher proportions of same-sex immigrant couples, and this effect is stronger for immigrants from more progressive countries. To aid interpretation, we use simulation to predict representation of same-sex couples. Country and state LGB policy score are set to the same value for the entire sample, and the outcome is simulated and averaged over the entire sample. The left panel of Figure \@ref(fig:state-sim) has country-of-origin LGB policy on the horizontal axis and the percentage of immigrants in same-sex couples depending on vertical axis, with separate prediction lines shown for immigrants living in U.S. states with the minimum or maximum LGB policy score. The right panel switches the role of country and state policy. Both panels show that LGB immigrants tend to originate from more progressive countries and live in more progressive U.S. states. But the relationship is strongest when both country and state policy scores are high; at low levels of either score, the difference in the other score has little effect on the expected percentage of immigrants in same-sex couples.  
+Model 5 adds an interaction between state and country LGB scores. It is positive and significant, while the state policy coefficient becomes insignificant; progressive states attract higher proportions of same-sex immigrant couples from more progressive countries. To aid interpretation, we use simulation to predict representation of same-sex couples. Country and state LGB policy score are set to the same value for the entire sample, and the outcome is simulated and averaged over the entire sample. The left panel of Figure \@ref(fig:state-sim) has country-of-origin LGB policy on the horizontal axis and the percentage of immigrants in same-sex couples depending on vertical axis, with separate prediction lines shown for immigrants living in U.S. states with the minimum or maximum LGB policy score. The right panel switches the role of country and state policy. Both panels show that LGB immigrants tend to originate from more progressive countries and live in more progressive U.S. states. But the relationship is strongest when both country and state policy scores are high; at low levels of either score, the difference in the other score has little effect on the expected percentage of immigrants in same-sex couples.  
 
 Finally, Model 6 augments Model 4 with a dichotomous variable for the post-2013 DOMA decision era, and Model 7 adds the same variable to Model 5. The significant post-2013 variable in both regressions implies that proportions LGB have increased across the country in the past few years. The coefficient for state policy become less important in Model 7, whereas origin-country score retains its effect. This means that, after 2013, the proportion of immigrants in same-sex couples increased across states for those from more progressive countries. With increasingly progressive federal policy, state policy appears to matter less in the post-DOMA era, or to matter only in conjunction with origin-country policy.  
 
@@ -1078,7 +1077,7 @@ ggplot(data = state_imm,
   coord_map(projection = "albers", lat0 = 39, lat1 = 45) +
   theme_map(font_family = 'Palatino') + 
   labs(fill = "Same-sex (%)") + 
-  scale_fill_gradient(low = uclablue, high = uclagold) +
+  scale_fill_gradient(low = uclablue, high = uclagold, na.value = 'gray95') +
   #scale_fill_gradient(low = "white", high = "black") +
   theme(legend.justification=c(0,0), legend.position=c(.05,.0),
     legend.title=element_text(size=9),
@@ -1087,14 +1086,16 @@ ggplot(data = state_imm,
 ```
 
 \newpage
-```{r state-sim-calc}
+```{r state-sim-calc, eval = F}
 ## Varying origin score while keeping state score constant (at min and max)
 var1 <- 'origin_score'
 var <- 'state_policy'
-sim <- list()
+sim_country <- list()
 for(cat_loop in unique(acs_prop_state[,var1])){
     var_vals <- c(min(acs_prop_state[,var]), max(acs_prop_state[,var]))
     for(val in var_vals){
+      print(paste0(cat_loop, ' ', val))
+      
         sim_dat <- acs_prop_state
         sim_dat[, var1] <- cat_loop
         sim_dat[, var] <- val
@@ -1103,7 +1104,7 @@ for(cat_loop in unique(acs_prop_state[,var1])){
                             type = 'response') %>%
           as.data.frame()
 
-       sim[[paste0(var,cat_loop, val)]] <- pred_dat %>%
+       sim_country[[paste0(var,cat_loop, val)]] <- pred_dat %>%
          summarize(fit = mean(fit, na.rm = T),
                    se.fit = sqrt(mean(se.fit^2, na.rm = T)),
                    fit.low = fit - 1.96*se.fit,
@@ -1113,15 +1114,17 @@ for(cat_loop in unique(acs_prop_state[,var1])){
     }
 }
 
-sim_country <- bind_rows(sim)
+bind_rows(sim_country) %>%
+  write_csv(here('descriptive/files', 'sim_country.csv'))
 
 ## Varying state score while keeping origin policy constant (at min and max)
 var1 <- 'state_policy'
 var <- 'origin_score'
-sim <- list()
+sim_state <- list()
 for(cat_loop in unique(acs_prop_state[,var1])){
     var_vals <- c(min(acs_prop_state[,var]), max(acs_prop_state[,var]))
     for(val in var_vals){
+      print(paste0(cat_loop, ' ', val))
         sim_dat <- acs_prop_state
         sim_dat[, var1] <- cat_loop
         sim_dat[, var] <- val
@@ -1130,7 +1133,7 @@ for(cat_loop in unique(acs_prop_state[,var1])){
                             type = 'response') %>%
           as.data.frame()
 
-       sim[[paste0(var,cat_loop, val)]] <- pred_dat %>%
+       sim_state[[paste0(var,cat_loop, val)]] <- pred_dat %>%
          summarize(fit = mean(fit, na.rm = T),
                    se.fit = sqrt(mean(se.fit^2, na.rm = T)),
                    fit.low = fit - 1.96*se.fit,
@@ -1140,13 +1143,14 @@ for(cat_loop in unique(acs_prop_state[,var1])){
     }
 }
 
-
-sim_state <- bind_rows(sim)
+bind_rows(sim_state) %>%
+  write_csv(here('descriptive/files', 'sim_state.csv'))
+  
 ```
 
 ```{r state-sim, fig.cap='Predicted percentage of immigrants in same-sex couples by country-state, using Model 5 from Table 3.'}
-plot1 <- sim_country  %>%
-  mutate(state_policy = ifelse(state_policy == -2, 'Min. U.S. state policy', 'Max. U.S. state policy')) %>%
+plot1 <- read_csv(here('descriptive/files', 'sim_country.csv'))  %>%
+  mutate(state_policy = ifelse(state_policy == min(state_policy), 'Min. U.S. state policy', 'Max. U.S. state policy')) %>%
   ggplot(aes(x=origin_score, y=fit, linetype=state_policy)) +
   geom_line() + 
   geom_ribbon(aes(ymin=fit.low, ymax=fit.high, 
@@ -1155,8 +1159,8 @@ plot1 <- sim_country  %>%
   ylab('Percentage of immigrants in same-sex couples') +
   theme(legend.position=c(.4,.8))
 
-plot2 <- sim_state %>%
-  mutate(origin_score = ifelse(origin_score == -3, 'Min. country policy', 'Max. country policy')) %>%
+plot2 <- read_csv(here('descriptive/files', 'sim_state.csv')) %>%
+  mutate(origin_score = ifelse(origin_score == min(origin_score), 'Min. country policy', 'Max. country policy')) %>%
   ggplot(aes(x=state_policy, y=fit, linetype=origin_score)) +
   geom_line() + 
   geom_ribbon(aes(ymin=fit.low, ymax=fit.high, 
