@@ -579,9 +579,22 @@ unemploy <- read.table(here('data', 'la.data.3.AllStatesS.txt'), header = T,
 state_income_df <- read_csv(here('data', 'state_income.csv'), na = c('', '(NA)')) %>%
   pivot_longer(!1:2, names_to = 'year', values_to = 'state_income') %>%
   mutate(year = as.integer(year)) %>%
-  rename(state = GeoName) %>% 
-  select(-GeoFips) %>%
-  mutate(state_income = adjust_for_inflation(state_income, year, "US", to_date = 1999)/1000)
+  rename(state = GeoName) %>%
+  select(-GeoFips) 
+  #mutate(state_income = adjust_for_inflation(state_income, year, "US", to_date = 1999)/1000)
+
+# state_income_df <- read_csv(here('data', 'state_income.csv'), na = c('', '(NA)')) %>%
+#   pivot_longer(!1:2, names_to = 'year', values_to = 'state_income') %>%
+#   mutate(year = as.integer(year)) %>%
+#   rename(state = GeoName) %>% 
+#   select(-GeoFips)
+# 
+# for(i in nrow(state_income_df)){
+#   state_income_df$state_income[i] <- adjust_for_inflation(state_income_df$state_income[i], 
+#                                                           state_income_df$year[i], 
+#                                                           "US", 
+#                                                           to_date = 1999)/1000
+# }
 
 acs_dyad_policy <- acs_dyad_policy1 %>%
   left_join(unemploy,  by = c('year', 'state')) %>%

@@ -361,6 +361,32 @@ acs_wide %>%
 write_csv(acs_oneimm, here('data', 'acs_oneimm.csv'))
 
 
+state_income_df <- read_csv(here('data', 'state_income.csv'), na = c('', '(NA)')) %>%
+  pivot_longer(!1:2, names_to = 'year', values_to = 'state_income') %>%
+  mutate(year = as.integer(year)) %>%
+  rename(state = GeoName) %>% 
+  select(-GeoFips) %>%
+  mutate(state = ifelse(state == 'Alaska *', 'Alaska', state)) %>%
+  filter(year >= 2008)
+
+# for(i in 1:nrow(state_income_df)){
+#   state_income_df$state_income_new[i] <- adjust_for_inflation(state_income_df$state_income[i],
+#                                                           state_income_df$year[i],
+#                                                           "US",
+#                                                           to_date = 1999)/1000
+# }
+
+for(year_loop in unique(state_income_df$year)){
+  print(year_loop)
+  state_income_df$state_income[state_income_df$year == year_loop] <- 
+    adjust_for_inflation(state_income_df$state_income[state_income_df$year == year_loop],
+                         year_loop,
+                         "US",
+                         to_date = 1999)/1000
+}
+
+write_csv(state_income_df, here('data', 'state_income_adj.csv'))
+
 
 ## Making final datasets ####
 acs_coupled_imms <- read.csv(here('data', 'acs_coupled_imms.csv'))
@@ -614,18 +640,9 @@ unemploy <- read.table(here('data', 'la.data.3.AllStatesS.txt'), header = T,
   group_by(state, year) %>%
   summarize(state_unemploy = mean(value))
 
-state_income_df <- read_csv(here('data', 'state_income.csv'), na = c('', '(NA)')) %>%
-  pivot_longer(!1:2, names_to = 'year', values_to = 'state_income') %>%
-  mutate(year = as.integer(year)) %>%
-  rename(state = GeoName) %>% 
-  select(-GeoFips)
+state_income_df <- read_csv(here('data', 'state_income_adj.csv'))
 
-for(i in nrow(state_income_df)){
-  state_income_df$state_income[i] <- adjust_for_inflation(state_income_df$state_income[i], 
-                                                          state_income_df$year[i], 
-                                                          "US", 
-                                                          to_date = 1999)
-}
+
   
 
 
@@ -669,7 +686,12 @@ acs_ind <- acs_coupled_imms %>%
           nchild, ihs_income, no_income, yrimmig, 
           distw, contig, comlang_off, comlang_ethno,
           wage_dif, unemp_dif, vdem, stock_prop,
-          state_unemploy, state_income) %>%
+          state_unemploy, state_income)
+
+count(acs_ind, same_sex, allocated) %>%
+  write_csv(here('data', 'allocated_count.csv'))
+
+acs_ind <- acs_ind %>%
   filter(allocated == F)
 
 write_rds(acs_ind, here('data', 'acs_ind.rds'))
@@ -677,7 +699,7 @@ write_csv(acs_prop, here('data', 'acs_prop.csv'))
 write_csv(acs_prop_state, here('data', 'acs_prop_state.csv'))
 # write_csv(acs_prop_state_old, here('data'acs_prop, 'acs_prop_state_old.csv'))
 
-
+  
 # acs_prop_old <- read_csv(here('data', 'acs_prop_old.csv'))
 
 

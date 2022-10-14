@@ -152,6 +152,8 @@ acs_ind_survey <- acs_ind %>% as_survey_design(ids = cluster, weights = perwt)
 
 # (APPENDIX) Appendix {-} 
 
+\newpage
+
 # Descriptive Statistics
 
 
@@ -172,8 +174,10 @@ acs_prop_state %>%
   kable_styling(latex_options = "hold_position")
 ```
 
-```{r desc-table-ind-calc}
-desc_table_ind <- acs_ind %>%
+\newpage
+
+```{r desc-table-ind}
+acs_ind %>%
   labelled::remove_labels() %>%
   mutate(same_sex = ifelse(same_sex == T, 'Same-sex', 'Different-sex'),
          state_policy = as.numeric(state_policy),
@@ -196,31 +200,25 @@ desc_table_ind <- acs_ind %>%
                  digits = list(`Year of immigration` ~ 
                                  function(x) style_number(x, big.mark = ''))) %>%
   # add_overall() %>%
-  modify_caption('Summary statistics for individual-level dataset, with survey weights applied')
+  modify_caption('Summary statistics for individual-level dataset, with survey weights applied')%>%
+  as_kable_extra(booktabs = T, linesep = "") %>%
+  kable_styling(latex_options = "hold_position")
 
 
 # write_rds(desc_table_ind, here('descriptive', 'desc_table_ind.rds'))
 # read_rds(here('descriptive', 'desc_table_ind.tex'))
 ```
 
-```{r desc-table-ind}
-desc_table_ind %>%
-  as_kable_extra(booktabs = T, linesep = "") %>%
-  kable_styling(latex_options = "hold_position")
-  # kableExtra::save_kable(here('descriptive', 'desc_table_ind.tex'))
 
-select(acs_prop_state, state, bpld, year, origin_score, origin_score_lag, 
-       state_policy, state_policy_lag) %>% View()
-```
 
 \newpage
 
 # Additional Descriptive Trends
-Figure \ref{fig:desc-fig} examines within-country selection. For each immigrant in the dataset, it subtracts off their year- and country-level average for high school completion, college completion, annual income, and occupational prestige score. The figure displays results separately for immigrants in same- and different-sex couples. The lines for different-sex couples are nearly 0, since they are the overwhelming majority in the dataset. The lines for same-sex couples show clear positive selection relative to other immigrants from that country.  
+<!-- Figure \ref{fig:desc-fig} examines within-country selection. For each immigrant in the dataset, it subtracts off their year- and country-level average for high school completion, college completion, annual income, and occupational prestige score. The figure displays results separately for immigrants in same- and different-sex couples. The lines for different-sex couples are nearly 0, since they are the overwhelming majority in the dataset. The lines for same-sex couples show clear positive selection relative to other immigrants from that country.   -->
 
-Figure \ref{fig:scatter-state} relies on the data used in the regression models, with the vertical axis showing the proportion of immigrants from each country in same-sex couples in each state, in each survey year, from 2008 to 2019. In the left panel, the horizontal axis represents the origin country policy score in the mean year of immigration for that group, while the right panel's horizontal axis represents the state policy score in the survey year. The lines shows the bivariate regression lines.  
+<!-- Figure \ref{fig:scatter-state} relies on the data used in the regression models, with the vertical axis showing the proportion of immigrants from each country in same-sex couples in each state, in each survey year, from 2008 to 2019. In the left panel, the horizontal axis represents the origin country policy score in the mean year of immigration for that group, while the right panel's horizontal axis represents the state policy score in the survey year. The lines shows the bivariate regression lines.   -->
 
-Finally, Tables \@ref(tab:desc-top-same) and \@ref(tab:desc-top-dif) show the top sending countries in the data by absolute numbers of same- and different-sex couples. Although there are some differences, the most common sending countries for immigrants to the U.S. dominate the lists.
+<!-- Finally, Tables \@ref(tab:desc-top-same) and \@ref(tab:desc-top-dif) show the top sending countries in the data by absolute numbers of same- and different-sex couples. Although there are some differences, the most common sending countries for immigrants to the U.S. dominate the lists. -->
 
 
 ```{r desc-fig, fig.cap = 'Selection descriptive statistics for immigrants in couples 2008-2019, with survey weights and 95% confidence intervals. Each panel subtracts the ACS year- and country-level average from each immigrant originating from that country. Values above 0 indicate positive selection. All currency in 1000s of 1999 dollars.'}
@@ -268,31 +266,38 @@ bind_rows(income, hs, college, hwsei) %>%
 
 
 ```
+\newpage
 
 ```{r scatter-state, fig.cap = "Proportion of immigrants from each country in same-sex couples in each state, in each survey year, from 2008 to 2019. The left panel's horizontal axis represents the origin country policy score in the mean year of immigration for that group, while the right panel's horizontal axis represents the state policy score in the survey year. Points are jittered for clarity, and percentages above 5 are not shown."}
+set.seed(1850)
 state_plot_1 <- acs_prop_state %>%
-  filter(prop_same_sex <= 5) %>%
   ggplot(aes(x = state_policy, y = prop_same_sex, color = year)) +
+  # geom_point(alpha = .5) +
   geom_jitter(alpha = .5) +
   geom_smooth(method = "lm", color = 'black') +
   scale_color_continuous(low = 'black', high = 'green') +
-    labs(x= 'LGB policy score for country of origin', 
-        y = 'Percentage of immigrants in same-sex couples')
+  ylim(0, 5) +
+   labs(x = 'LGB policy score for U.S. state of residence', 
+       y = 'Percentage of immigrants in same-sex couples')
+  
 
 state_plot_2 <- acs_prop_state %>%
-  filter(prop_same_sex <= 5) %>%
   ggplot(aes(x = origin_score, y = prop_same_sex, color = mean_year_immig)) +
   geom_jitter(alpha = .5) +
   geom_smooth(method = "lm", color = 'black') +
   scale_color_continuous() +
-    labs(x= 'LGB policy score for U.S. state of residence', 
-        y = '')
+  ylim(0, 5) +
+  labs(x = 'LGB policy score for country of origin', 
+       y = '')
+ 
 
 
 
 state_plot_1 + state_plot_2
 
 ```
+
+\newpage
 
 ```{r desc-top-same}
 acs_ind %>%
@@ -330,10 +335,7 @@ acs_ind %>%
 
 \newpage
 
-
-# Robustness Checks
-
-## Adjusting proportions based on empirical mismatch rates
+# Adjusting Proportions for Hypothetical Sex Misreporting
 
 Published papers using the ACS to study same-sex couples overwhelmingly use the method by @gates_2009 employed our main paper to adjust for misreporting, where we drop all respondents that had either their relationship or sex variable allocated by the Census Bureau. However here we implement a novel method to adjust proportions of estimated immigrants in same-sex couples, based on the estimated mismatch rates from two U.S. Census Bureau studies. Beginning in 2019, the ACS provides explicit categories for "Opposite-sex husband/wife/spouse," "Opposite-sex unmarried partner," "Same-sex husband/wife/spouse," and "Same-sex unmarried partner" [@walker_2021], so sex misreporting in the 2019 data is unlikely. Hence in most sensitivity analyses below, 2019 estimates are not adjusted for misreporting.  
 
@@ -611,8 +613,9 @@ stargazer(mod_list,
 
 \newpage
 
-## Alternate specifications
-### Relative immmigrant population-weighted regressions
+# Alternate Specifications of Table 3
+
+## Relative immmigrant population-weighted regressions
 <!-- Although our analysis for the most part has been at the country or state levels, there is the question of whether the results presented are driven by smaller, progressive countries that send relatively few immigrants. In Table \@ref(tab:state-weights), we re-specify these models using Weighted Least Squares, weighting by the relative size of the immigrant stock in the average year of immigration. Coefficients for origin-country and state policy scores become insignificant in models with controls and fixed effects, but their interaction remains significant throughout.   -->
 
 
@@ -687,7 +690,7 @@ stargazer(mod_list,
 
 \newpage 
 
-### Married, one-immigrant, and two-immigrant couples
+## Married, one-immigrant, and two-immigrant couples
 <!-- We assess whether the results in Table 3 are driven by trends for married couples or those with one U.S.-born partner. Table \@ref(tab:married) restricts the sample to only married couples, Table \@ref(tab:oneimm) to only couples with one immigrant and one U.S.-born member, and Table \@ref(tab:twoimm) to only couples consisting of two immigrants. Results are substantively the same for married and one-immigrant couples, and less strong for two-immigrant couples. This implies that married and mixed-nativity couples are driving the main results. -->
 
 
@@ -897,7 +900,7 @@ stargazer(mod_list,
 
 \newpage
 
-### Excluding countries and U.S. states with few immigrants
+## Excluding countries and U.S. states with few immigrants
 
 ```{r}
 country_tab_ci <- read_csv(here('descriptive/files', 'country_tab_ci.csv'))
@@ -989,7 +992,7 @@ stargazer(mod_list,
 
 \newpage
 
-### Lagged policy variables
+## Lagged policy variables
 ```{r state-props-mods}
 country_prop <- lm(prop_same_sex ~ origin_score_lag, data = acs_prop_state)
 
@@ -1138,6 +1141,8 @@ stargazer(mod_list,
 
 \newpage
 
+
+
 # Full Regression Table
 
 
@@ -1230,8 +1235,7 @@ stargazer(mod_list,
 
 \newpage
 
-# Full Country and U.S. State Rankings
-
+# Full Country and U.S. State Rankings by LGB Policy Scores
 
 ```{r country-tab}
 country_tab_ci <- read_csv(here('descriptive/files', 'country_tab_ci.csv'))
@@ -1252,14 +1256,20 @@ country_tab_ci %>%
   rownames_to_column('Rank') %>%
   select(Rank,
          `Country of origin` = bpld,
-         `Percentage same-sex` = coef,
+         `Same-sex` = coef,
          `95% CI`,
-         `Mean country policy score` = origin_score) %>%
-  flextable::flextable() %>% 
-  flextable::set_caption('Sending countries ranked by proportion immigrant couples with same-sex partners') %>%
-  flextable::add_footer_lines('Source: American Community Survey 2008-2019. Authors\' calculations.') %>%
-  flextable::autofit() %>%
-  flextable::fit_to_width(6)
+         `Mean country score` = origin_score) %>%
+  kable(booktabs = T, longtable = T, linesep = "",
+        caption = 'Sending countries ranked by proportion immigrant couples with same-sex partners') %>%
+  kable_styling(latex_options = c("hold_position", 'repeat_header')) %>%
+  kableExtra::footnote('American Community Survey 2008-2019. Authors\' calculations.',
+                       general_title = 'Source:', footnote_as_chunk = T)
+
+  # flextable::flextable() %>% 
+  # flextable::set_caption('Sending countries ranked by proportion immigrant couples with same-sex partners') %>%
+  # flextable::add_footer_lines('Source: American Community Survey 2008-2019. Authors\' calculations.') %>%
+  # flextable::autofit()
+  #flextable::fit_to_width(6)
  
 
 ```
@@ -1285,14 +1295,20 @@ state_tab_ci %>%
   rownames_to_column('Rank') %>%
   select(Rank,
          `State` = state,
-         `Percentage same-sex` = coef,
+         `Same-sex` = coef,
          `95% CI`,
-         `Mean state policy score` = state_policy) %>%
-  flextable::flextable() %>% 
-  flextable::set_caption('States ranked by proportion immigrant couples with same-sex partners') %>%
-  flextable::add_footer_lines('Source: American Community Survey 2008-2019. Authors\' calculations.') %>%
-  flextable::autofit() %>%
-  flextable::fit_to_width(6)
+         `Mean state score` = state_policy) %>%
+  kable(booktabs = T, longtable = T, linesep = "",
+        caption = 'States ranked by proportion immigrant couples with same-sex partners') %>%
+  kable_styling(latex_options = c("hold_position", 'repeat_header')) %>%
+  kableExtra::footnote('American Community Survey 2008-2019. Authors\' calculations.',
+                       general_title = 'Source:', footnote_as_chunk = T)
+
+  # flextable::flextable() %>% 
+  # flextable::set_caption('States ranked by proportion immigrant couples with same-sex partners') %>%
+  # flextable::add_footer_lines('Source: American Community Survey 2008-2019. Authors\' calculations.') %>%
+  # flextable::autofit() %>%
+  # flextable::fit_to_width(6)
 ```
 
 \newpage
