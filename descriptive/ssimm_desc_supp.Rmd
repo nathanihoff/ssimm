@@ -160,7 +160,8 @@ acs_ind_survey <- acs_ind %>% as_survey_design(ids = cluster, weights = perwt)
 ```{r desc-table-state}
 
 acs_prop_state %>%
-  select(`Percent in same-sex couples` = prop_same_sex, `State LGB policy score` = state_policy,
+  select(`Percent in same-sex couples` = prop_same_sex, 
+         `State LGB policy score` = state_policy,
          `Country LGB policy score` = origin_score,
          `Distance (km)` = distw, 
          `Contiguous border` = contig, `Common official language` = comlang_off, 
@@ -168,10 +169,13 @@ acs_prop_state %>%
          `Per-cap. GDP difference` = wage_dif, `Unemployment difference` = unemp_dif, 
          `Liberal democracy (V-Dem)` = vdem, `Proportion same-country stock` = stock_prop,
          `State unemployment rate` = state_unemploy, `State per-capita income` = state_income) %>%
-  tbl_summary() %>%
+  tbl_summary(statistic = list(all_continuous() ~ "{mean} ({sd})",
+              all_categorical() ~ "{n} ({p}%)")) %>%
   modify_caption('Summary statistics for state-country-survey year analysis, the data used in Table 3 in the main paper.')  %>%
   as_kable_extra(booktabs = T, linesep = "") %>%
   kable_styling(latex_options = "hold_position")
+
+#mean(acs_prop_state$prop_same_sex)
 ```
 
 \newpage
@@ -198,7 +202,9 @@ acs_ind %>%
   tbl_svysummary(by = `Same-sex`, 
                  type = list(`State LGB policy` ~ "continuous"),
                  digits = list(`Year of immigration` ~ 
-                                 function(x) style_number(x, big.mark = ''))) %>%
+                                 function(x) style_number(x, big.mark = '')),
+                 statistic = list(all_continuous() ~ "{mean} ({sd})",
+                                  all_categorical() ~ "{n} ({p}%)")) %>%
   # add_overall() %>%
   modify_caption('Summary statistics for individual-level dataset, with survey weights applied')%>%
   as_kable_extra(booktabs = T, linesep = "") %>%

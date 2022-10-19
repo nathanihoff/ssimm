@@ -395,7 +395,7 @@ Models of migration also often use distance between countries as a proxy for mig
 
 **[FIGURE \@ref(fig:desc-ind) ABOUT HERE]**  
 
-Immigrants in same-sex couples appear to come from more advantaged countries, but are they more advantaged on an individual level as well? Previous studies on LGB immigrants suggest that those coming from advantaged countries may still be fleeing individual disadvantage. Figure \@ref(fig:desc-ind) presents results from four individual attributes. Panels A and B show that immigrants in same-sex couples tend to be *more* highly educated than immigrants in different-sex couples, with about 10 percent more having high school and four-year college degrees. Panel C corroborates the macroeconomic findings at the individual level: Not only do immigrants in same-sex couples come from countries with higher per capita GDP, but they individually tend to earn more than immigrants in different-sex couples. Panel D demonstrates that immigrants in same-sex couples also tend to work in professions with higher occupational prestige scores. Together, these findings indicate that LGB immigrants may come from more privileged social origins than their heterosexual counterparts.  
+Immigrants in same-sex couples appear to come from more advantaged countries, but are they more advantaged on an individual level as well? Previous studies on LGB immigrants suggest that those coming from advantaged countries may still be fleeing individual disadvantage. Figure \@ref(fig:desc-ind) presents results from four individual attributes. Panels A and B show that immigrants in same-sex couples tend to be *more* highly educated than immigrants in different-sex couples, with about 10 percent more having high school and four-year college degrees. Panel C corroborates the macroeconomic findings at the individual level: Not only do immigrants in same-sex couples come from countries with higher per capita GDP, but they individually tend to earn more than immigrants in different-sex couples. Panel D demonstrates that immigrants in same-sex couples also tend to work in professions with higher occupational prestige scores. Together, these findings indicate that LGB immigrants may come from more privileged social origins than their heterosexual counterparts. This finding aligns with existing research showing that non-immigrant married same-sex couples in the U.S. have higher earnings than their different-sex counterparts [@fisher_2018].  
 
 Figure \@ref(fig:desc-country) implies that there is between-country selection of immigrants in same-sex couples, but Figure \@ref(fig:desc-ind) does not necessarily imply within-country selection as well. Section B of the Online Appendix examines within-country selection explicitly, subtracting the individual attributes in Figure \@ref(fig:desc-ind) from country-year averages in the ACS. The positive values for immigrants in same-sex couples mean that not only do immigrants in same-sex couples come from more advantaged countries, but they tend to be among the most advantaged immigrants from a given country, as well.  
 
@@ -604,7 +604,7 @@ Third, do different policy environments have differential effects based on coupl
 
 Fourth, although we find compelling patterns, our statistical investigation cannot determine why these couples are deciding to migrate to the U.S. and their motivations for choosing their state of residence. Due to limitations of the data, we are also unable to say whether these migrants came directly to the U.S. from their countries of birth or engaged in stepwise migration. We encourage future scholarship to further investigate these processes and mechanisms. We underscore that results presented here are descriptive, not causal; more rigorous methods of causal inference are necessary to invoke causality.   
 
-Lastly, this is an analysis of cohabiting couples. This particular focus has justification: The DOMA decision itself carries significant relevance to couples and, therefore, attention to cohabiting couples is appropriate. Nevertheless, our findings are unable to generalize to non-cohabiting couples or single migrants. The inclusion of such individuals in our analysis could augment the findings presented here in a few ways. On the one hand, single LGB migrants may come from less progressive countries; as mentioned, supportive policy environments may both be the result of and further reinforce self-disclosure and same-sex relationships. However, we believe that the present findings likely hold for single LGB migrants as well. Without the assistance of a U.S.-based partner, single migrants face greater barriers to migration. While cohabiting LGB migrants may enter the U.S. on family reunification visas, this migration pathway is less likely for single migrants. Instead, single LGB migrants may come to the U.S. on employment visas, which favor more positively selected migrants [@jasso_1995_immigrants]. High-profile migration of disadvantaged single LGB refugees does not discount the fact that refugees constitute a tiny proportion of all migrants to the U.S. Hence we believe that analysis of data containing single LGB individuals will likely reinforce our findings that LGB immigrants to the U.S. tend to be advantaged and come from progressive policy environments. Regardless, identification of single LGB individuals in nationally representative surveys is urgently needed, and future work must attend to whether response rates covary with country-of-origin policies. 
+Lastly, this is an analysis of cohabiting couples. This particular focus has justification: The DOMA decision itself carries significant relevance to couples and, therefore, attention to cohabiting couples is appropriate. Nevertheless, our findings are unable to generalize to non-cohabiting couples or single migrants. The inclusion of such individuals in our analysis could augment the findings presented here in a few ways. On the one hand, single LGB migrants may come from less progressive countries; as mentioned, supportive policy environments may both be the result of and further reinforce self-disclosure and same-sex relationships. However, we believe that the present findings likely hold for single LGB migrants as well. Without the assistance of a U.S.-based partner, single migrants face greater barriers to migration. While cohabiting LGB migrants may enter the U.S. on family-based visas, this migration pathway is less likely for single migrants. Instead, single LGB migrants are more likely to come to the U.S. on employment visas, which favor more positively selected migrants [@jasso_1995_immigrants]. High-profile migration of disadvantaged single LGB refugees does not discount the fact that refugees constitute a tiny proportion of all migrants to the U.S. Hence we believe that analysis of data containing single LGB individuals will likely reinforce our findings that LGB immigrants to the U.S. tend to be advantaged and come from progressive policy environments. Regardless, identification of single LGB individuals in nationally representative surveys is urgently needed, and future work must attend to whether response rates covary with country-of-origin policies. 
 
 <!-- Fifth, although misreporting is documented in the ACS [@gates_2009; @goodnature_2021], our robustness checks following previous work utilizing these data [@goldberg_2021; @christafore_2019; @martell_2020] find remarkably consistent results. And,  -->
 
@@ -1047,32 +1047,44 @@ left_join(country_tab, world_map, by = 'region') %>%
 state_tab <- acs_prop_state %>%
   mutate(bpld = if_else(bpld == "United Kingdom, ns", "England", bpld),
          bpld = if_else(bpldid == 46500, 'Russia', bpld),
-         bpld = if_else(bpldid == 46510, 'Belarus', bpld)) %>%
+         bpld = if_else(bpldid == 46510, 'Belarus', bpld),
+         state = tolower(state)) %>%
   group_by(state) %>%
   summarize(prop_samesex = round(100 * sum(n_same_sex, na.rm = T) / 
                                    sum(n_same_sex + n_dif_sex, na.rm = T), 2))
   
 
-state_tab$region <- tolower(state_tab$state)
+# state_tab$region <- tolower(state_tab$state)
 
 # Getting the map ready
-us_states <- map_data("state")
+# us_states <- map_data("state")
 
-state_imm <- left_join(us_states, state_tab)
+#state_imm <- left_join(us_states, state_tab)
 
-
-ggplot(data = state_imm,
-       mapping = aes(x = long, y = lat, group = group, fill = prop_samesex)) +
-  geom_polygon(color = "gray75", size = 0.1) +
-  coord_map(projection = "albers", lat0 = 39, lat1 = 45) +
-  theme_map(font_family = 'Palatino') + 
-  labs(fill = "Same-sex (%)") + 
+ggplot(state_tab, aes(map_id = state, fill = prop_samesex)) +
+  geom_map(map = fiftystater::fifty_states) +
+  expand_limits(x = fiftystater::fifty_states$long, y = fiftystater::fifty_states$lat) +
+  coord_map() +
   scale_fill_gradient(low = uclablue, high = uclagold, na.value = 'gray95') +
-  #scale_fill_gradient(low = "white", high = "black") +
-  theme(legend.justification=c(0,0), legend.position=c(.05,.0),
+  theme_map(font_family = 'Palatino') +
+  labs(fill = "Same-sex (%)") + 
+  theme(legend.justification=c(1,0), legend.position=c(1, 0),
     legend.title=element_text(size=9),
     legend.key.size = unit(0.3, 'cm'),
     legend.text = element_text(size = 8))
+
+# ggplot(data = state_imm,
+#        mapping = aes(x = long, y = lat, group = group, fill = prop_samesex)) +
+#   geom_polygon(color = "gray75", size = 0.1) +
+#   coord_map(projection = "albers", lat0 = 39, lat1 = 45) +
+#   theme_map(font_family = 'Palatino') + 
+#   labs(fill = "Same-sex (%)") + 
+#   scale_fill_gradient(low = uclablue, high = uclagold, na.value = 'gray95') +
+#   #scale_fill_gradient(low = "white", high = "black") +
+#   theme(legend.justification=c(0,0), legend.position=c(.05,.0),
+#     legend.title=element_text(size=9),
+#     legend.key.size = unit(0.3, 'cm'),
+#     legend.text = element_text(size = 8))
 ```
 
 \newpage
