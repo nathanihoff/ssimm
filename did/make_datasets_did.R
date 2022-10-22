@@ -137,16 +137,16 @@ write_csv(acs_count_base, here('data', 'acs_count_base.csv'))
 #   filter(across(c(state, year, same_sex), 
 #                 ~ !is.na(.x)))
 
-acs_count <- acs_count_base %>%
-  group_by(state, year, same_sex, imm_couple) %>%
-  summarize(n = sum(perwt), n_unweighted = n(),
-            n_ar = sum(perwt[qrelate != 'Allocated']), 
-            n_unweighted_ar = sum(qrelate != 'Allocated')) %>%
-  ungroup() %>%
-  complete(state, year, same_sex, imm_couple) %>%
-  replace(is.na(.), 0) %>%
-  mutate(post_2013 = year > 2013,
-         group_fe = paste(state, same_sex, imm_couple, sep = '_'))
+# acs_count <- acs_count_base %>%
+#   group_by(state, year, same_sex, imm_couple) %>%
+#   summarize(n = sum(perwt), n_unweighted = n(),
+#             n_ar = sum(perwt[qrelate != 'Allocated']), 
+#             n_unweighted_ar = sum(qrelate != 'Allocated')) %>%
+#   ungroup() %>%
+#   complete(state, year, same_sex, imm_couple) %>%
+#   replace(is.na(.), 0) %>%
+#   mutate(post_2013 = year > 2013,
+#          group_fe = paste(state, same_sex, imm_couple, sep = '_'))
 
 
 
@@ -236,12 +236,30 @@ unemploy <- read.table(here('data', 'la.data.3.AllStatesS.txt'), header = T,
   group_by(state, year) %>%
   summarize(state_unemploy = mean(value))
 
+# state_income_df <- read_csv(here('data', 'state_income.csv'), na = c('', '(NA)')) %>%
+#   pivot_longer(!1:2, names_to = 'year', values_to = 'state_income') %>%
+#   mutate(year = as.integer(year)) %>%
+#   rename(state = GeoName) %>% 
+#   select(-GeoFips) %>%
+#   mutate(state_income = priceR::adjust_for_inflation(state_income, year, "US", to_date = 1999)/1000)
+
 state_income_df <- read_csv(here('data', 'state_income.csv'), na = c('', '(NA)')) %>%
   pivot_longer(!1:2, names_to = 'year', values_to = 'state_income') %>%
   mutate(year = as.integer(year)) %>%
   rename(state = GeoName) %>% 
   select(-GeoFips) %>%
-  mutate(state_income = priceR::adjust_for_inflation(state_income, year, "US", to_date = 1999)/1000)
+  mutate(state = ifelse(state == 'Alaska *', 'Alaska', state)) %>%
+  filter(year >= 2008)
+
+for(year_loop in unique(state_income_df$year)){
+  print(year_loop)
+  state_income_df$state_income[state_income_df$year == year_loop] <- 
+    adjust_for_inflation(state_income_df$state_income[state_income_df$year == year_loop],
+                         year_loop,
+                         "US",
+                         to_date = 1999)/1000
+}
+
 
 state_df <- state_policy %>%
   left_join(unemploy) %>%
