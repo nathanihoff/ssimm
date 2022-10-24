@@ -369,13 +369,6 @@ state_income_df <- read_csv(here('data', 'state_income.csv'), na = c('', '(NA)')
   mutate(state = ifelse(state == 'Alaska *', 'Alaska', state)) %>%
   filter(year >= 2008)
 
-# for(i in 1:nrow(state_income_df)){
-#   state_income_df$state_income_new[i] <- adjust_for_inflation(state_income_df$state_income[i],
-#                                                           state_income_df$year[i],
-#                                                           "US",
-#                                                           to_date = 1999)/1000
-# }
-
 for(year_loop in unique(state_income_df$year)){
   print(year_loop)
   state_income_df$state_income[state_income_df$year == year_loop] <- 
@@ -392,6 +385,7 @@ write_csv(state_income_df, here('data', 'state_income_adj.csv'))
 acs_coupled_imms <- read.csv(here('data', 'acs_coupled_imms.csv'))
 acs_prop_yrimmig <- read.csv(here('data', 'acs_prop_yrimmig.csv'))
 acs_dyad <- read.csv(here('data', 'acs_dyad.csv'))
+state_income_df <- read_csv(here('data', 'state_income_adj.csv'))
 
 
 dist_dat <- read_dta(here('data', 'dist_cepii.dta')) %>%

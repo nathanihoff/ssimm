@@ -209,9 +209,9 @@ total_dif_mixed <- acs_count_mixed_bpld %>%
 # Introduction
 Unions, “a term encompassing marriage and nonmarital cohabitation” [@bloome_2020_marriage, p. 1754], are of central concern to many sociologists and demographers. This is because unions provide meaningful life experiences for those who enter them, but also because they are demonstrated to influence a range of important quality-of-life indicators. Moreover, studying how union formations change across populations can reveal other social processes of particular concern to a variety of sociologists: changing migration flows, gendered workforce participation, (de)institutionalization of cultural norms, and shifts in state governance and public policy – to name a few.
 
-While research on unions in the United States historically privileges those in different-sex relationships, this line of research has recently expanded to include those in same-sex unions [@baumle_2009; @rosenfeld_2005_independence; @kolk_2020_two]. Research into this new domain is, in part, driven by both cultural and legal recognition of these alternative family formations. Now, studies seek to understand how previous demographic and sociological theories are strengthened or must be re-imagined when considering these additional arrangements [@martell_2020; @reczek_2017_promise; @manning_2016]. We contribute to this rich scholarly domain by considering an additional union type: those containing same-sex individuals of mixed-citizenship status.
+While research on unions in the United States historically privileges those in different-sex relationships, this line of research has recently expanded to include those in same-sex unions [@baumle_2009; @rosenfeld_2005_independence; @kolk_2020_two]. Research into this new domain is, in part, driven by both cultural and legal recognition of these alternative family formations. Now, studies seek to understand how previous demographic and sociological theories are strengthened or must be re-imagined when considering these additional arrangements [@martell_2020; @reczek_2017_promise; @manning_2016]. We contribute to this rich scholarly domain by considering an additional union type: those containing individuals of the same sex but mixed citizenship statuses.
 
-While mixed-citizenship couples generally face particular barriers to union formation [@lopez_2021_unauthorized], numbers of mixed-citizenship, same-sex unions have been on a dramatic rise in recent years. This is likely due to an important policy change: In 2013, the U.S. Supreme Court ruled the Defense of Marriage Act (DOMA) unconstitutional. For the first time, U.S. citizens could sponsor the visa of their same-sex fiancé or spouse [@edwards_2013]. In the years since, the U.S. population of immigrant-containing same-sex couples has grown rapidly [@hoffmann_2021_making; @redpath_2022_spousal]. Data on cohabiting partners and spouses from the American Community Survey [ACS, @ruggles_2021] show that numbers of different-sex, mixed-citizenship couples grew by `r round((total_dif_mixed[12]/total_dif_mixed[5]-1) * 100)` percent from 2013 to 2019 (from `r total_dif_mixed[5]/1e6` million to `r total_dif_mixed[12]/1e6` million), while corresponding same-sex couples increased by `r round((total_same_mixed[12]/total_same_mixed[5]-1) * 100)` percent (from `r total_same_mixed[5]/1e3` thousand to `r total_same_mixed[12]/1e3` thousand) in the same period. 
+While mixed-citizenship couples generally face particular barriers to union formation [@lopez_2021_unauthorized], numbers of mixed-citizenship, same-sex unions in the U.S. have been on a dramatic rise in recent years. This is likely due to an important policy change: In 2013, the U.S. Supreme Court ruled the Defense of Marriage Act (DOMA) unconstitutional. For the first time, U.S. citizens could sponsor the visa of their same-sex fiancé or spouse [@edwards_2013; @carron_2015_marriagebased]. In the years since, the U.S. population of immigrant-containing same-sex couples has grown rapidly [@hoffmann_2021_making; @redpath_2022_spousal]. Data on cohabiting partners and spouses from the American Community Survey [ACS, @ruggles_2021] show that numbers of different-sex, mixed-citizenship couples grew by `r round((total_dif_mixed[12]/total_dif_mixed[5]-1) * 100)` percent from 2013 to 2019 (from `r total_dif_mixed[5]/1e6` million to `r total_dif_mixed[12]/1e6` million), while corresponding same-sex couples increased by `r round((total_same_mixed[12]/total_same_mixed[5]-1) * 100)` percent (from `r total_same_mixed[5]/1e3` thousand to `r total_same_mixed[12]/1e3` thousand) in the same period. Despite this rapid increase, research on this population has been limited; existing work has largely focused on such unions only outside of the U.S. [@chauvin_2021_class; @salcedorobledo_2013_couples; @badgett_2011_separated].  
 
 <!-- Furthermore, @redpath_2022_spousal convincingly demonstrates that 2013 constituted a watershed moment for mixed-citizenship same-sex couples -->
 
@@ -298,9 +298,9 @@ Our work adds to and connects the burgeoning literature on the importance of cul
 
 The United States Supreme Court overturned the Defense of Marriage Act (DOMA) in United States v. Windsor in 2013. Enacted in 1996, DOMA banned the federal government from recognizing same-sex marriages as it instilled a heterosexual definition of marriage and spouse. Even if same-sex marriages were legalized at the state level, then, such recognition did not unlock access to federal marriage benefits. Thus, the Windsor decision carried significant implications for same-sex couples as they could now jointly file federal tax returns, secure Social Security benefits, and participate in numerous other federal programs like the Supplemental Nutrition Assistance Program.  
 
-Another important consequence of the DOMA ruling was unlocking spousal visas for same-sex couples [@edwards_2013]. The federal government has long provided a pathway for U.S. citizens to secure permanent residency, and eventual citizenship, for their migrant spouses and fiancés. Indeed, family reunification is privileged within U.S. migration law and such cases represent the vast majority of new migrants into the U.S. However, DOMA prevented access to these visas because the federal government did not recognize same-sex unions as legitimate or valid -- thus categorically denying access. Additionally, DOMA had a downstream effect where even if a U.S. state were to legalize marriage, mixed-citizenship couples (where one partner is a U.S. citizen and where the other is a non-citizen) were unlikely to take advantage of these state-level benefits. This is because a condition of non-permanent residents’ visas is to not show intent on staying in the U.S. permanently -- something marriage to a U.S. citizen can potentially violate. The Windsor decision allowed mixed-citizenship couples access to spousal visas and, where legal, for such couples to get married and switch visa types. As a direct consequence of undoing DOMA, @redpath_2022_spousal finds a 36 percent relative increase in partnering of mixed-citizenship same-sex couples and a 78 percent increase in these types of marriages.  
+Another important consequence of the DOMA ruling was unlocking spousal visas for same-sex couples [@edwards_2013]. The federal government has long provided a pathway for U.S. citizens to secure permanent residency, and eventual citizenship, for their migrant spouses and fiancés. Indeed, family reunification is privileged within U.S. migration law and such cases represent vast the  majority of U.S. immigrant visas issued.^[For example, in 2019, The U.S. issued 186,584 visas for immediate relatives of U.S. citizens and 190,938 for other family members, out of a total of 462,422 immigrant visas issued [@u.s.departmentofstate_2022_immigrant].] However, DOMA prevented access to these visas because the federal government did not recognize same-sex unions as legitimate or valid -- thus categorically denying access. Additionally, DOMA had a downstream effect where even if a U.S. state were to legalize marriage, mixed-citizenship couples (where one partner is a U.S. citizen and the other is a non-citizen) were unlikely to take advantage of these state-level benefits. This is because a condition of non-permanent residents’ visas is to not show intent on staying in the U.S. permanently -- something marriage to a U.S. citizen can potentially violate. The Windsor decision allowed mixed-citizenship couples access to spousal visas and, where legal, for such couples to get married and switch visa types. Following the 2013 end of DOMA, @redpath_2022_spousal finds a 36 percent relative increase in partnering of mixed-citizenship same-sex couples and a 78 percent increase in these types of marriages.  
 
-These increases in mixed-citizen couplings as found by Redpath are significant. The dramatic rise in mixed-citizen couplings can be the result of two distinct mechanisms: an increased entry into such unions of individuals already residing in the U.S. and the direct immigration of one or both members of the couple into the U.S. due to the policy shift. Regardless of pathway, these rising trends open new questions, such as: What are the characteristics of immigrants selecting into these relationships?  How does one’s country-of-origin condition entering into such a union? 
+These increases in mixed-citizenship, same-sex couplings found by Redpath are significant. The dramatic rise of this type of union can be the result of two distinct mechanisms: an increased entry into such unions of individuals already residing in the U.S. and the new immigration of one or both members of the couple into the U.S. as a result of the policy shift. Regardless of pathway, these rising trends open new questions, such as: What are the characteristics of immigrants selecting into these relationships? How does one’s country-of-origin condition entering into such a union? 
 
 Indeed, as shown in Figure \@ref(fig:desc), the rapid increase after 2013 was not uniform across immigrants from all countries. For those hailing from countries with progressive LGB policies, the increase was indeed rapid after 2013. However, from those with regressive LGB policies, no increase occurred. Why do we see so much variation by policy context at the country of origin?  
 
@@ -308,13 +308,19 @@ Indeed, as shown in Figure \@ref(fig:desc), the rapid increase after 2013 was no
 <!-- the value in considering broader cultural and legal contexts, even aspects seemingly unrelated to the matter at hand; -->
 
 ## Intersections of Culture, Law, and Sexuality in Understanding Union Formation
-Prior to presenting explicit hypotheses into this division in country-of-origin differences in mixed-citizenship, same-sex unions, we first present a general theoretical framework for understanding the significance of our research question. To do so, we bring together scholarship on union formation, culture, public policy, and queer migration.
+Prior to presenting hypotheses for this diverging trends, we present a general theoretical framework for understanding the significance of our research question. To do so, we bring together scholarship on union formation, culture, public policy, and queer migration.
 
-To begin, family formation, especially understanding processes related to unions, remains a central concern of many sociologists and demographers. Attention to unions derives both from their subjective importance to many individuals’ everyday lives but also because they are an important mechanism that influence a range of outcomes (e.g., health and well-being, economic mobility, social integration) and because their formation and structure reveal on-going social transformations in society (e.g., gendered labor force participation, (de)institutionalization of cultural norms, changing migration patterns). We aim to contribute to this rich area of scholarship by weaving together research on mixed-citizenship unions and same-sex unions to illuminate a less-studied union type: mixed-citizenship, same-sex couples.
+To begin, family formation, especially processes related to unions, remains a central concern of many sociologists and demographers. There are a number of reasons for this attention to unions: They are subjectively important to many individuals’ everyday lives, and they are also an important mechanism that influence a range of outcomes (e.g., health and well-being, economic mobility, social integration) and because their formation and structure reveal on-going social transformations in society (e.g., gendered labor force participation, (de)institutionalization of cultural norms, changing migration patterns). We aim to contribute to this rich area of scholarship by weaving together research on mixed-citizenship unions and same-sex unions to illuminate a less-studied union type: mixed-citizenship, same-sex couples.  
+<!-- Research in this area demonstrates that rates of intermarriages between foreign-born and native-born populations reflects the degree to which foreign-born individuals are socially integrated into broader U.S. society or remain bounded within ethnic or class enclaves [@lichter_2015_whom].  -->
 
-First, a significant body of research focuses on unions between mixed-citizenship individuals, typically a native-born U.S. citizen and a foreign-born immigrant without full citizenship. Research in this area demonstrates that rates of intermarriages between foreign-born and native-born populations reflects the degree to which foreign-born individuals are socially integrated into broader U.S. society or remain bounded within ethnic or class enclaves [@lichter_2015_whom]. Moreover, additional research highlights how these union types are accompanied by increased stress due to differences in each individual’s recognition by the state [@lopez_2015_impossible; @lopez_2021_unauthorized]. Second, a burgeoning area of research focuses on same-sex unions [xx]. Especially following recent legalizations in marriage equality, this work seeks to understand how same-sex couples compare to different-sex couples across a range of outcomes (e.g., satisfaction, relationship stability, division of labor) and how shifting legal environments alter LGBT individuals’ desire to join such a union or alters their behaviors in the union once legal recognition is conferred [xx].
+First, a significant body of research focuses on unions between citizens by birth and non-citizen immigrants, both in the U.S. [@lopez_2015_impossible; @lopez_2021_unauthorized; @qian_2001_measuring; @lichter_2015_whom; @bohra-mishra_2015_intermarriage; @lee_1990_patterns] and elsewhere [@bonjour_2021_intimate; @medrano_2020_europe; @hoogenraad_2021_marriage; @rodriguez-garcia_2015_contesting]. 
+Historically, such research has focused on "marital assimilation" -- i.e., marriage to a native-born citizen -- as an important measure of immigrant integration [@qian_2007_social; @lichter_2015_whom; @gordon_1964_assimilation; @rodriguez-garcia_2015_contesting; @lee_1990_patterns; see @garcia_2015_contesting for a critique]. But more recent work has highlighted the particular stressors and barriers that mixed-citizenship couples face [@lopez_2015_impossible; @lopez_2021_unauthorized; @hoogenraad_2021_marriage]. Despite a pathway to citizenship being legally codified for spouses of U.S. citizens, mixed-citizenship couples face scrutiny and suspicion by the state, and their eventual success in acquiring citizenship is shaped by the timing and strategy that couples deploy as well as the resources they possess.  
 
-Though studies investigate different dimensions of each union type, these lines of research have largely proceeded on independent paths [@carrillo_2018]. This separation is due to research on mixed-citizenship couples assuming heterosexuality and research on same-sex unions assuming U.S. citizenship [@luibheid_2008]. Thus, scholarship sitting at the intersection of this Venn diagram is limited. While queer migration research is expanding, this area of research largely focuses on refugees seeking asylum in the U.S. or qualitative studies into the motivations and experiences of queer migrants. As such, little is known regarding mixed-citizenship, same-sex unions. Attending to this union type is important due to its rapid growth in the U.S., as demonstrated in Figure 1, and because we do not know the degree to which these unions confirm or challenge existing theories (xx work on this).
+Second, a burgeoning area of research focuses on same-sex unions [@gates_2015; @reczek_2020_sexual; @baumle_2009; @baumle_2013]. Especially following recent legalizations in marriage equality, this work compares same-sex to different-sex couples across a range of outcomes, including patterns of assortative mating [@schwartz_2009; @jepsen_2002]; division of household labor [@giddings_2014; @goldberg_2012_division; @goldberg_2013_doing; @vandervleuten_2021_samesex]; relationship satisfaction [@mackey_2004_relational; @holmberg_2009_sexual]; and relationship stability [@manning_2016; @manning_2022_cohabitation; @joyner_2017_gender]. Recent research also seeks to understand how legalization of marriage equality affects propensity to marry [@carpenter_2020], interstate migration [@marcen_2019], and earnings [@martell_2020], as well as how shifting legal environments alter LGBT individuals’ desire to join such a union or alters their behaviors in the union once legal recognition is conferred [xx].  
+
+Though studies investigate different dimensions of each union type, these lines of research have largely proceeded on independent paths. This separation is due to research on mixed-citizenship couples assuming heterosexuality and research on same-sex unions assuming U.S. citizenship [@luibheid_2008]. Thus, scholarship sitting at the intersection of these fields is limited. While queer migration research is expanding, this area of research largely focuses on refugees seeking asylum in the U.S. or qualitative studies into the motivations and experiences of queer migrants. As such, little is known regarding mixed-citizenship, same-sex unions. Small-scale work in France [@salcedorobledo_2013_couples] and the Netherlands [@chauvin_2021_class] suggests that same-sex, mixed-citizenship couples face even higher bureaucratic suspicion of the legitimacy of their relationships, while other scholars question the extent to which marriage equality has actually allowed provided pathways to citizenship for same-sex non-citizen partners [@badgett_2011_separated; @carron_2015_marriagebased].
+
+Attending to this union type is important due to its rapid growth in the U.S., as demonstrated in Figure 1, and because we do not know the degree to which these unions confirm or challenge existing theories (xx work on this).
 
 
 ## Country of Origin and Selection into Same-Sex Unions
@@ -1103,17 +1109,18 @@ policy_df <- read_csv(here('did', 'policy_df.csv'))
 
 policy_list <- list()
 variables <- names(subset(acs_count_mixed_bpld, select = equal_age:propaganda))
-
+dataset_policy_list <- list()
 
 for(var_name in variables){
-  dataset_policy <- count_func(paste0(var_name, ' > 0 | is.na(', var_name , ')'))
+  #print(var_name)
+  dataset_policy_list[[var_name]] <- count_func(paste0(var_name, ' > 0 | is.na(', var_name , ')'))
   
   policy_list[[var_name]] <- glm(n ~  I(post_2013*same_sex*mixed) + 
                         I(post_2013*same_sex) + 
                         I(post_2013*mixed) + 
                         post_2013 + #state_policy + state_income + state_unemploy +
                         group_fe + as.factor(year), 
-                        data = dataset_policy, 
+                        data = dataset_policy_list[[var_name]], 
                         family = 'quasipoisson') %>%
   coeftest(., vcov = vcovCL(., cluster = ~group_fe))
 }
@@ -1158,6 +1165,40 @@ policy_df %>%
   coord_flip() +
   facet_wrap(~type, scales = 'free_y') +
   labs(x = '', y = '')
+
+
+policy_desc_df <- list()
+for(var_name in variables){
+ policy_desc_df[[var_name]] <- dataset_policy_list[[var_name]] %>%
+    filter(mixed == T & same_sex == T) %>%
+    group_by(year) %>%
+    summarize(n = sum(n)) %>%
+    mutate(cat = var_name)
+}
+
+bind_rows(policy_desc_df) %>%
+  filter(cat %in% prog_policies) %>%
+  ggplot(aes(x = year, y = n/1000)) +
+  geom_line(color = 'blue') +
+  geom_vline(xintercept = 2013, linetype = 2) +
+  facet_wrap(~cat) +
+  labs(x = 'Year', y = 'n (thousands)', title = 'Progressive') +
+bind_rows(policy_desc_df) %>%
+  filter(!(cat %in% prog_policies)) %>%
+  ggplot(aes(x = year, y = n/1000)) +
+  geom_line(color = 'red') +
+  geom_vline(xintercept = 2013, linetype = 2) +
+  facet_wrap(~cat) +
+  labs(x = 'Year', y = 'n (thousands)', title = 'Regressive')  
+
+bind_rows(policy_desc_df) %>%
+  mutate(type = ifelse(cat %in% prog_policies, 'Progressive', 'Regressive')) %>%
+  ggplot(aes(x = year, y = n/1000, color = type)) +
+  geom_line() +
+  geom_vline(xintercept = 2013, linetype = 2) +
+  facet_wrap(~cat) +
+  labs(x = 'Year', y = 'n (thousands)')  
+
 ```
 
 

@@ -87,13 +87,16 @@ acs_wide %>%
   filter(allocated == F) %>%
   write_csv(here('data', 'acs_wide_small.csv'))
 
+
+
+## Counts for poisson model ####
 lgbt_policy <- read.csv(here('data', 'lgb_origin_index.csv')) %>%
   rename(origin_score = origin_couple_score) %>%
   mutate(iso_o = countrycode::countrycode(Country, origin = 'country.name', destination = 'iso3c'))
 
 acs_wide_small <- read_csv(here('data', 'acs_wide_small.csv'))
 
-## Counts for poisson model ####
+
 acs_count_base <- acs_wide_small %>%
   mutate(state = as.character(state),
          mixed_citizenship = (citizen_main == 'Not a citizen' & citizen_partner != 'Not a citizen') | 
@@ -204,9 +207,8 @@ acs_count_imm <- acs_count_base %>%
   rename(bpld = bpldnew)
 
 
-
-write_csv(acs_count_base, here('data', 'acs_count_base.csv'))
 write_csv(acs_count_mixed, here('data', 'acs_count_mixed.csv'))
+
 
 ## State controls ####
 state_policy <- read.csv(here('data', 'state_policy.csv'))
