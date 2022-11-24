@@ -45,7 +45,7 @@ author:
 - Nathan I. Hoffmann, Department of Sociology, University of California, Los Angeles
 - Kristopher Velasco, Department of Sociology, Princeton University
 
-abstract: "After the U.S. Supreme Court struck down the Defense of Marriage Act (DOMA) in 2013, same-sex partners of U.S. citizens became eligible for spousal visas. Since then, the U.S. has a seen a rapid rise in same-sex, mixed-citizenship couples. However, this effect varies greatly depending on the LGB policy context of the non-citizen's country of origin. Using waves 2008 to 2019 of the American Community Survey, this study employs a triple-difference design to examine how the policy environment of the origin country moderates the effect of the end of DOMA. Quasi-Poisson models with two-way fixed effects show that, after 2013, individuals in mixed-citizenship same-sex couples coming from countries with progressive LGB policy saw a more than 50-percent increase in incidence relative to those in different-sex or same-citizenship couples. Meanwhile, those from countries with regressive laws experienced no relative increase. These results are corroborated by analyses of individual policies. We argue that the policy context of country of origin leaves a lasting cultural impact on immigrants that shapes their response to policy shifts in their country of residence, even many years after migration."
+abstract: "After the U.S. Supreme Court struck down the Defense of Marriage Act (DOMA) in 2013, same-sex partners of U.S. citizens became eligible for spousal visas. Since then, the U.S. has a seen a rapid rise in same-sex, mixed-citizenship couples. However, this effect varies greatly depending on the LGB policy context of the non-citizen's country of origin. Using waves 2008 to 2019 of the American Community Survey, this study employs a triple-difference design to examine how the policy environment of the origin country moderates the effect of the end of DOMA. Quasi-Poisson models with two-way fixed effects show that, after 2013, individuals in mixed-citizenship same-sex couples coming from countries with progressive LGB policy saw a more than 100-percent increase in incidence relative to those in different-sex or same-citizenship couples. Meanwhile, those from countries with regressive laws experienced no significant increase. These results are corroborated by analyses of individual policies. We argue that the policy context of country of origin leaves a lasting cultural impact on immigrants that shapes their response to policy shifts in their country of residence, even many years after migration."
  
 
 ---
@@ -127,7 +127,8 @@ knitr::knit_hooks$set(plot = function(x, options) {  # set new plot hook ...
 
 ```{r load, include = F}
 acs_count_base <- read_csv(here('data', 'acs_count_base.csv')) %>%
-  filter(is.na(yrimmig) | !is.na(origin_score))
+  filter(is.na(yrimmig) | !is.na(origin_score)) %>%
+  mutate(across(equal_age:propaganda, function(x) round(x)))
 state_df <- read_csv(here('data', 'state_df.csv'))
 
 count_func <- function(condition = '!is.na(state)'){
@@ -391,7 +392,13 @@ To see how the incidence of mixed-citizenship, same-sex unions varies by origin-
 
 Second, which specific LGB policies of country of origin are most relevant in shaping entry into same-sex unions? To examine the influence of individual policies, we follow a similar procedure. Instead of stratifying by policy score, we stratify by whether individuals had a given policy in place in at least the majority of their country of origin in their year of immigration. This allows us to study the descriptive trends for numbers of individuals from countries with these policies.  
 
-However, these policies often co-occur. To obtain a quantity similar to an average partial effect of a given policy, we consider every existing policy combination in the sample. Although thousands of combinations are possible, only 148 are present in the sample. We stratify the sample again for each of these combinations, including only foreign-born individuals originating from countries with each unique combination, along with all U.S.-born individuals. We then estimate the same quasi-Poisson model as in equation \ref{eq:main} for each of these stratified samples. Finally, for the coefficient from the three-way interaction of interest, we estimate the average difference between regressions for samples that include a given policy and those that do not. The resulting quantity is then the average effect of a given policy on the log relative incidence of same-sex, mixed-citizenship couples.  
+However, these policies often co-occur. To obtain a quantity similar to an average partial effect of a given policy, we consider every existing policy combination in the sample. Although thousands of combinations are possible, only 148 are present in the sample. We stratify the sample again for each of these combinations, including only foreign-born individuals originating from countries with each unique combination, along with all U.S.-born individuals. We then estimate the same quasi-Poisson model as in equation \ref{eq:main} for each of these stratified samples. Next, for each policy, we find the average effect size for the three-way interaction of interest for all regressions on samples that include the policy and all regressions that do not. These averages are weighted by the inverse variance of the coefficients [@borenstein_2010_basic] as follows: Let $\beta$ be the coefficient of interest and se be its standard error. We combine the results of $m$ regressions, $i = 1, \ldots, m$ to obtain the average coefficient and standard error:
+$$\begin{aligned}
+\overline \beta = \frac{\sum_{i=1}^m \beta_i \text{se}_i^{-2}}{\sum_{i=1}^m \text{se}_i^{-2}}, &&
+\overline {\text{se}} = \sqrt{\frac{1}{\sum_{i=1}^m \text{se}_i^{-2}}}.
+\end{aligned}$$
+
+Finally, we calculate the difference between the average coefficient for samples that include the policy and those that do not. The resulting quantity is then the average effect of a given policy on the log relative incidence of same-sex, mixed-citizenship couples.  
 
 
 ## Control Variables
@@ -812,7 +819,7 @@ bind_rows(policy_desc_df) %>%
 ```
 
 
-```{r policies-desc-plot, fig.height = 6.5, fig.cap = 'Counts of individuals in mixed-citizenship couples originating from countries with specific LGB policies. Progressive policies are shown in green and regressive policies are shown in orange.'}
+```{r policies-desc-plot, fig.height = 6.5, fig.cap = 'Estimated counts of individuals in mixed-citizenship couples originating from countries with specific LGB policies. Progressive policies are shown in green and regressive policies are shown in orange.'}
 
 policy_desc_df <- read_csv(here('did', 'policy_desc_df.csv')) 
 
@@ -874,7 +881,6 @@ variables <- names(subset(acs_count_mixed_bpld, select = equal_age:propaganda))
 policy_combos <- acs_count_base %>%
   filter(!is.na(origin_score)) %>%
   select(equal_age:propaganda) %>%
-  mutate(across(everything(), function(x) round(x))) %>%
   group_by(across(everything())) %>%
   count() %>%
   ungroup() %>%
@@ -887,12 +893,20 @@ for(i in 1:nrow(policy_combos)){
   print(paste0(i, ' out of ', nrow(policy_combos)))
   print(var_names)
 
-  if(length(var_names) == 0){
-    var_names_formula <- '!is.na(state)'
-    } else {
-      var_names_formula <- paste0('(', paste(var_names, collapse = ' > 0 & '), 
-                                  ' > 0) | is.na(origin_score)')
-    }
+  var_names_formula <- data.frame(policy = variables,
+             operator = '==',
+             val = as.numeric(policy_combos[i,variables])) %>%
+    mutate(exp = paste(policy, operator, val)) %>%
+    pull(exp) %>%
+    paste(collapse = ' & ')
+  var_names_formula <- paste0('(', var_names_formula, ') | is.na(origin_score)') 
+  
+  # if(length(var_names) == 0){
+  #   var_names_formula <- '!is.na(state)'
+  #   } else {
+  #     var_names_formula <- paste0('(', paste(var_names, collapse = ' > 0 & '), 
+  #                                 ' > 0) | is.na(origin_score)')
+  #   }
   
   tryCatch({
     dataset_policy <- count_func(var_names_formula)
@@ -912,7 +926,11 @@ for(i in 1:nrow(policy_combos)){
 }
 
 lapply(policy_list, function(x){
-  tidy(x)[2, 2:3]}
+  if(!is.null(x)){
+    tidy(x)[2, 2:3]
+  } else {
+      data.frame(estimate = NA, std.error = NA)
+    }}
   ) %>%
   bind_rows() %>%
   mutate(id = 1:nrow(.)) %>%
@@ -920,18 +938,21 @@ lapply(policy_list, function(x){
   write_csv(here('did', 'policy_combos.csv'))
 ```
 
-```{r policy-combos, fig.cap = 'Stratified by specific policy: quasi-Poisson DDD regressions of counts of mixed-citizenship same-sex couples. Estimates and 95-percent confidence intervals are for the average difference between samples that include individuals experiencing a policy and those who are not, for coefficients for the three-way interaction between indicators for same-sex, mixed-citizenship, and post-2013 survey year'}
-policy_combos_out <- read_csv(here('did', 'policy_combos.csv')) # %>%
-  # group_by(id) %>%
-  # slice(rep(1:n(), first(n)))
+```{r policy-combos, fig.cap = 'Stratified by specific policy: quasi-Poisson DDD regressions of counts of mixed-citizenship same-sex couples. Estimates and 95-percent confidence intervals are for the inverse variance-weighted average difference between samples that include individuals experiencing a policy and those who are not, for coefficients for the three-way interaction between indicators for same-sex, mixed-citizenship, and post-2013 survey year'}
+policy_combos_out <- read_csv(here('did', 'policy_combos.csv')) 
 
 variables <- names(subset(acs_count_mixed_bpld, select = equal_age:propaganda))
 
 policy_dif_list <- list()
 for(var_name in variables){
   policy_est_df <- policy_combos_out %>%
+    mutate(weight = 1/std.error^2) %>%
     group_by(!!sym(var_name)) %>%
-    summarize(estimate = mean(estimate), std.error = mean(std.error^2))
+    summarize(estimate = sum(estimate*weight)/sum(weight),
+              std.error = sqrt(1/sum(weight)))
+    #summarize(estimate = mean(estimate), std.error = sqrt(mean(std.error^2)), n())
+  # print(var_name)
+  # print(policy_est_df)
   policy_dif_list[[var_name]] <- data.frame(policy = names(policy_est_df)[1],
              est_dif = policy_est_df$estimate[2] - policy_est_df$estimate[1],
              est_dif_se = sqrt(policy_est_df$std.error[2]^2 +
@@ -989,7 +1010,7 @@ bind_rows(policy_dif_list) %>%
 
 ```
 
-To estimate individual policy effects, we consider every existing policy combination in the sample to obtain a quantity similar to an average partial effect. Focusing on the coefficient from the three-way interaction of interest, we estimate the average difference between regressions for samples that include a given policy and those that do not. Results from this analysis are displayed in Figure \@ref(fig:policy-combos). As shown in the left panel, estimates for progressive policies are mostly positive: The post-2013 change in relative incidence was greater for foreign-born individuals originating from countries with these policies. Notably, the average effect for marriage equality is especially high, albeit not significantly more than other progressive policies. For almost all progressive policies, we see greater incidence of mixed-citizenship, same-sex couples. In contrast, the right panel of Figure \@ref(fig:policy-combos) shows mostly negative coefficients for regressive policies. In line with our theory, bans of same-sex marriage are associated with lower incidence of individuals in same-sex, mixed-citizenship couples after 2013.  
+To estimate individual policy effects, we consider every existing policy combination in the sample to obtain a quantity similar to an average partial effect. Focusing on the coefficient from the three-way interaction of interest, we estimate the inverse variance-weighted average difference between regressions for individuals originating from countries that include a given policy and those that do not. Results from this analysis are displayed in Figure \@ref(fig:policy-combos). As shown in the left panel, estimates for progressive policies are mostly positive: The post-2013 change in relative incidence was greater for foreign-born individuals originating from countries with these policies. Notably, the average effect for marriage equality is especially high, albeit not significantly more than other progressive policies. For almost all progressive policies, we see greater incidence of mixed-citizenship, same-sex couples. In contrast, the right panel of Figure \@ref(fig:policy-combos) shows nonsignificant or negative coefficients for regressive policies. 
 
 <!-- displays coefficients from the three-way interaction of interest, showing the logged relative incidence of mixed-citizenship same-sex couples after 2013. Coefficients in models focusing on progressive policies are mostly positive. Notably, coefficients for civil unions and marriage equality are especially high.   -->
 
