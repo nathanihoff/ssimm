@@ -728,7 +728,7 @@ huxreg(list('Full sample' = mod_mixed, 'Progressive' = mod_os_high, 'Regressive'
 
 Although the two-way fixed effects in our specifications help allay concerns of confounders, it is still possible that time-varying state- and group-level variables may be confounding results. We test the robustness of our results by re-specifying our models while adjusting for state per-capita income, annual unemployment rates, and state LGB policy. Table \@ref(tab:controls-tab) replicates Table \@ref(tab:mod-tab), but with these additional controls. Coefficients are only slightly attenuated, and substantive conclusions do not change. Notably, the coefficient for state LGB policy is small and nonsignificant; in these models, state LGB policy does not appear related to the incidence of same-sex unions.
 
-
+\newpage
 
 ```{r controls-tab}
 mod_mixed <- acs_count_mixed %>%
