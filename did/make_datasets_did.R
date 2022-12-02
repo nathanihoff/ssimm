@@ -53,14 +53,14 @@ acs_wide <- acs %>%
     cluster, strata, metro, region, state, stateicp, ftotinc, respmode,
     # individual variables
     position, sex, related, yrimmig, bpld, bpldid, citizen, educ, qrelate, qsex, qcitizen, qeduc,
-    occ, inctot, occscore, hwsei, empstat, yrnatur, poverty, speakeng, age, perwt
+    occ, inctot, occscore, hwsei, empstat, yrnatur, poverty, speakeng, age, perwt, yrmarr
     # state_stock_year, state_stock_avg
   ) %>%
   pivot_wider(#id_cols = serial,
     names_from = position,
     values_from = c(sex, related, related, yrimmig, bpld, bpldid, citizen, educ,
                     occ, inctot, occscore, hwsei, empstat, yrnatur, poverty, 
-                    speakeng, age, perwt, qrelate, qsex, qcitizen, qeduc
+                    speakeng, age, perwt, qrelate, qsex, qcitizen, qeduc, yrmarr
                     #state_stock_year, state_stock_avg
     )) %>%
   filter(!is.na(sex_partner), !is.na(sex_main)) %>%
@@ -82,8 +82,8 @@ acs_wide %>%
          imm_couple, married, allocated,
          citizen_main, citizen_partner, yrimmig_main, yrimmig_partner, bpld_main, bpld_partner,
          bpldid_main, bpldid_partner, age_main, age_partner,
-         perwt_main, perwt_partner, qcitizen_main, qcitizen_partner, qeduc_main, qeduc_partner, 
-         allocated) %>%
+         perwt_main, perwt_partner, qcitizen_main, qcitizen_partner, qeduc_main, qeduc_partner,
+         yrmarr_main, yrmarr_partner) %>%
   filter(allocated == F) %>%
   write_csv(here('data', 'acs_wide_small.csv'))
 
