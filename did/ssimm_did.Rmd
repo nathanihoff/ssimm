@@ -127,7 +127,11 @@ knitr::knit_hooks$set(plot = function(x, options) {  # set new plot hook ...
 ```{r load, include = F}
 acs_count_base <- read_csv(here('data', 'acs_count_base.csv')) %>%
   filter(is.na(yrimmig) | !is.na(origin_score)) %>%
-  mutate(across(equal_age:propaganda, function(x) round(x)))
+  filter(state != 'District of Columbia') %>%
+  mutate(across(equal_age:propaganda, function(x) round(x)),
+         yrmarr = as.numeric(yrmarr))
+
+
 state_df <- read_csv(here('data', 'state_df.csv'))
 
 count_func <- function(condition = '!is.na(state)'){
@@ -186,6 +190,7 @@ acs_ind <- read_rds(here('data', 'acs_couple_policy.rds'))  %>%
   left_join(lgb_origin_index,  by = c('yrimmig' = 'year', 'bpldid' = 'Code')) 
 
 acs_count_mixed_bpld <- read_csv(here('data', 'acs_count_mixed.csv'))  %>%
+  filter(state != 'District of Columbia') %>%
   left_join(
     acs_ind %>%
       group_by(year, state, bpld, same_sex) %>% 
@@ -225,76 +230,23 @@ While mixed-citizenship couples generally face barriers to union formation [@lop
 
 The growth of this new union type calls for additional research to again understand how this population confirms or complicates existing theory. While the DOMA decision opened this union pathway to all, uptake is unlikely to be homogeneous and may reinforce existing inequalities. Namely, we bring in theories from cultural sociology to argue that, like all relationship forms, same-sex unions are a cultural object specific to time and place [@kalmijn_2007_explaining; @treas_2014_attitudes; @wang_2018_coming; @perelli-harris_2015_exploring]. By defining what is possible, state policies that exist at an immigrant's country of origin shape the cultural products to which they aspire. For example, legally entering into a same-sex union was neither thinkable nor desirable for many until quite recently; progressive LGB policies institutionalize this new cultural form and then expand support and participation in a recursive process [@baiocco_2014_desire; @abou-chadi_2019_rights]. On the other hand, regressive LGB policies can limit the horizon of union possibilities, instill fear of punishment for disclosing one's same-sex union, and negatively influence whether U.S. immigration officials view same-sex relationships from these countries as credible [@carron_2015_marriagebased]. Hence, we argue that the repeal of DOMA will likely function as a pathway to spousal visas only when an immigrant's country of origin's institutional context is affirming of LGB communities.
 
-```{r desc, fig.height = 3, fig.cap = 'Estimated counts of individuals in mixed-citizenship, same-same couples from the American Community Survey. The "Regressive" sample includes only countries with a LGB policy score less than 0, and the "Progressive" sample includes only those with a score greater than 3. The sample is limited to individuals aged 18 to 64. Immigrants in the sample are limited to those who immigrated to the U.S. after 1990 and after the age of 17.'}
-
-# bind_rows(
-#   acs_count_base %>%
-#     mutate(cat = case_when(origin_score > 3 ~ 'Progressive',
-#                              origin_score < 0 ~ 'Regressive')) %>%
-#     filter(mixed_citizenship == T & same_sex == T & !is.na(cat)) %>%
-#     group_by(year, cat) %>%
-#     summarize(n = sum(perwt)),
-#   acs_count_base %>%
-#     filter(mixed_citizenship == T & same_sex == T) %>%
-#     group_by(year) %>%
-#     summarize(n = sum(perwt)) %>%
-#     mutate(cat = 'Full sample')) %>%
-#   ggplot(aes(x = year, y = n/1000, color = cat, linetype = cat)) +
-#   geom_line() +
-#   geom_vline(xintercept = 2013, linetype = 2) +
-#   labs(x = 'Year', y = 'n (thousands)')
-
-  # acs_count_base %>%
-  #   mutate(cat = case_when(origin_score > 3 ~ 'Progressive',
-  #                            origin_score < 0 ~ 'Regressive')) %>%
-  #   filter(mixed_citizenship == T & same_sex == T & !is.na(cat)) %>%
-  #   filter(year == 2019) %>%
-  #   summarize(sum(perwt))
-
+```{r desc, fig.height = 3, fig.cap = 'Estimated counts of individuals in mixed-citizenship, same-same couples from the American Community Survey. The "Regressive" sample includes only countries with a LGB policy score less than 0, and the "Progressive" sample includes only those with a score greater than 3. The sample is limited to individuals aged 18 to 64 in the 50 U.S. states. Immigrants in the sample are limited to those who immigrated at age 18 or older.'}
 bind_rows(
-  acs_count_mixed_bpld %>%
+  acs_count_base %>%
     mutate(cat = case_when(origin_score > 3 ~ 'Progressive',
-                           origin_score < 0 ~ 'Regressive')) %>%
-    filter(!is.na(cat) & mixed == T & same_sex == T) %>%
+                             origin_score < 0 ~ 'Regressive')) %>%
+    filter(mixed_citizenship == T & same_sex == T & !is.na(cat)) %>%
     group_by(year, cat) %>%
-    summarize(n = sum(n)),
-   acs_count_mixed_bpld %>%
-    filter(mixed == T & same_sex == T) %>%
+    summarize(n = sum(perwt)),
+  acs_count_base %>%
+    filter(mixed_citizenship == T & same_sex == T) %>%
     group_by(year) %>%
-    summarize(n = sum(n)) %>%
-    mutate(cat = 'Full sample')
-) %>% 
+    summarize(n = sum(perwt)) %>%
+    mutate(cat = 'Full sample')) %>%
   ggplot(aes(x = year, y = n/1000, color = cat, linetype = cat)) +
   geom_line() +
   geom_vline(xintercept = 2013, linetype = 2) +
   labs(x = 'Year', y = 'n (thousands)')
-  
-
-
-# Individual -level
-# bind_rows(
-#   count_origin_high %>%
-#     filter(mixed == T & same_sex == T) %>%
-#     group_by(year) %>%
-#     summarize(n = sum(n)) %>%
-#     mutate(cat = 'Progressive'),
-#   count_origin_low %>%
-#     filter(mixed == T & same_sex == T) %>%
-#     group_by(year) %>%
-#     summarize(n = sum(n)) %>%
-#     mutate(cat = 'Regressive'),
-#   acs_count_mixed %>%
-#     filter(mixed == T & same_sex == T) %>%
-#     group_by(year) %>%
-#     summarize(n = sum(n)) %>%
-#     mutate(cat = 'Full sample')) %>% 
-#   ggplot(aes(x = year, y = n/1000, color = cat, linetype = cat)) +
-#   geom_line() +
-#   geom_vline(xintercept = 2013, linetype = 2) +
-#   labs(x = 'Year', y = 'n (thousands)')
-
-# acs_count_mixed_bpld %>% 
-#   filter(origin_score > 3)
 ```
 
 To test our theory, we apply cutting-edge methods of causal inference. Using waves 2008 to 2019 of the ACS, we employ a triple-difference, quasi-Poisson model with two-way fixed effects to estimate the effect of the post-2013 legal context in the U.S. on numbers of mixed-citizenship same-sex couples reported in the ACS. By controlling for incidence of mixed-citizenship and same-citizenship couples that we would not expect to be impacted by this policy, this design allows us to isolate the effect of DOMA's repeal specifically on unions of interest [@redpath_2022_spousal]. To assess the role of LGB policy at the country of origin, we rely on an original dataset indexing LGB policy changes in `r length(unique(acs_count_mixed_bpld$bpld[!is.na(acs_count_mixed_bpld$origin_score)]))` countries from 1991 to 2019 [@velasco_2018_human]. We stratify the sample by the LGB policy context at the country of origin to examine how the policy environment of the origin country moderates the effect of the end of DOMA.
@@ -350,7 +302,7 @@ Consequently, we expect that affirming LGB policies, generally, at the non-citiz
 
 ## Sample
 
-We employ data from the 2008 to 2019 American Community Survey [@ruggles_2021]. Each year, the ACS surveys a 1-percent representative sample of the U.S. population about a variety of individual and household attributes. We focus on counts of individuals in mixed-citizenship same-sex couples, comparing to those in same-citizenship or different-sex couples. Our counts include only cohabiting individuals who identify themselves as spouses or unmarried partners, since the ACS does not allow identification of same-sex couples that do not reside together. "Mixed-citizenship" couples include either two citizens or two non-citizens, and "same-sex" couples include two individuals who report the same sex. We exclude individuals who immigrated before the age of 18, before the year 1991, and those younger than 18 or older than 64 in each survey year.
+We employ data from the 2008 to 2019 American Community Survey [@ruggles_2021]. Each year, the ACS surveys a 1-percent representative sample of the U.S. population about a variety of individual and household attributes. We focus on counts of individuals in mixed-citizenship same-sex couples, comparing to those in same-citizenship or different-sex couples. Our counts include only cohabiting individuals who identify themselves as spouses or unmarried partners, since the ACS does not allow identification of same-sex couples that do not reside together. "Mixed-citizenship" couples include either two citizens or two non-citizens, and "same-sex" couples include two individuals who report the same sex. We exclude individuals younger than 18 or older than 64 in each survey year, and for immigrants we exclude those who immigrated before the age of 18.
 
 Beginning in 2008 the Census Bureau made changes to ACS gender and partnership questions in order to prevent such errors [@u.s.censusbureau_2013], so we rely on data only from 2008 onward. In addition, following @gates_2009, we remove all respondents that had either their relationship or sex variable imputed by the Census Bureau. We test sensitivity to hypothetical sex misreporting in the Appendix. See Table \@ref(tab:data-tab) for sample sizes.  
 
@@ -368,18 +320,18 @@ acs_count_mixed %>%
 
 ## Analytic Strategy
 
-Our analytic strategy proceeds in two parts. First, how does LGB policy at country of origin moderate the effect of the repeal of DOMA on the incidence of same-sex, mixed-citizenship couples in the U.S.? To isolate the effect of the 2013 DOMA repeal, we employ a triple difference, or difference-in-differences-in-differences (DDD), quasi-Poisson design [@hausman_1984_econometric; @olden_forthcoming_triple].  
+Our analytic strategy proceeds in two parts. First, how does LGB policy at country of origin moderate the effect of the repeal of DOMA on the incidence of same-sex, mixed-citizenship couples in the U.S.? To isolate the effect of the 2013 DOMA repeal, we employ a triple difference, or difference-in-differences-in-differences (DDD), quasi-Poisson design [@hausman_1984_econometric; @olden_2022_triple].  
 
-This design has a number of advantages over other choices, which we compare conceptually in Figure \@ref(fig:method-desc). A simple difference (D) design comparing numbers of mixed-citizenship same-sex couples before and after 2013 descriptively quantifies the trend show in Figure \@ref(fig:desc), but it fails to account for numbers of mixed-citizenship or same-sex couples overall, which both rose in this period as well. A difference-in-differences (DD) design accounts for one of these: Among individuals in same-sex couples, we take the difference between those in mixed- and same-citizenship couples before 2013, and again after 2013. If numbers in mixed-citizenship couples rose more quickly after 2013, then we should see a positive effect. But perhaps the effect is relevant to all mixed-citizenship couples, rather than specific for those in same-sex couples. In order to account for this, a DDD design takes yet another difference: Starting with the pre-2013 difference from the DD design just described, then subtract it from a corresponding difference among different-sex couples. Taking the same double-difference after 2013 allows us to calculate the final triple-difference, finding the rise in same-sex mixed-citizenship couples relative to different-sex or same-citizenship couples.  
+This design has a number of advantages over other choices, which we compare conceptually in Figure \@ref(fig:method-desc). A simple difference (D) design comparing numbers of mixed-citizenship same-sex couples before and after 2013 descriptively quantifies the trend show in Figure \@ref(fig:desc), but it fails to account for numbers of mixed-citizenship or same-sex couples overall, which both rose in this period as well. A difference-in-differences (DD) design accounts for one of these: Among individuals in same-sex couples, we take the difference in counts before and after 2013 for those in mixed- and then those in same-citizenship couples, and then we calculate the difference in these differences. If numbers in mixed-citizenship couples rose more quickly after 2013, then we should see a positive effect. But perhaps the effect is relevant to all mixed-citizenship couples, rather than specific for those in same-sex couples. In order to account for this, a DDD design takes yet another difference: Starting with the same-sex-only DD quantity, we subtract it from a corresponding DD estimate for different-sex couples. This results in a the triple-difference (DDD), representing the rise in same-sex mixed-citizenship couples relative to different-sex or same-citizenship couples.  
 
-Estimating this difference using a linear model is not ideal, because absolute numbers of same-sex couples are small. Rather than considering absolute trends, we are interested in the *relative* rise in incidence of mixed-citizenship same-sex couples. Hence we model counts as draws from a Poisson distribution; after transformation, coefficients from a Poisson model can be interpreted as percent increases. We estimate the Poisson model using quasi-maximum likelihood estimation (QMLE). Unlike Maximum Likelihood Estimation (MLE), this estimation method does not assume the mean and variance of the distribution are equal, adjusting standard errors accordingly [@cameron_2005_microeconometrics, p. 667]. We include two-way fixed effects, with indicators for survey year and state-group, and cluster standard errors at the state-group level.
+Estimating this difference using a linear model is not ideal, because absolute numbers of same-sex couples are small. Rather than considering absolute trends, we are interested in the *relative* rise in incidence of mixed-citizenship same-sex couples. Hence we model counts as draws from a Poisson distribution; after transformation, coefficients from a Poisson model can be interpreted as percent increases. We estimate the Poisson model using quasi-maximum likelihood estimation (QMLE). Unlike Maximum Likelihood Estimation (MLE), this estimation method does not assume the mean and variance of the distribution are equal, adjusting standard errors accordingly [@cameron_2005_microeconometrics, p. 667]. To remove sources of time-invariant confounding, we include two-way fixed effects, with indicators for survey year and state-group. We also cluster standard errors at the state-group level.
 
-```{r method-desc, fig.height = 3.5, fig.cap = 'Conceptual comparison of simple-difference (D), difference-in-differences (DD), and triple-difference (DDD) designs. The trend of interest is shown in orange.'}
+```{r method-desc, fig.height = 3.5, fig.cap = 'Conceptual comparison of simple-difference (D), difference-in-differences (DD), and triple-difference (DDD) designs. The trend of interest is shown in orange, and the vertical dashed line represents the moment the treatment is applied.'}
 df <- data.frame(year = c(2008, 2013, 2019),
            same_mixed = c(100, 150, 250),
-           same_same = c(300, 310, 320),
-           dif_mixed= c(400, 420, 440),
-           dif_same = c(600, 605, 610)) %>%
+           same_same = c(300, 310, 330),
+           dif_mixed= c(400, 420, 450),
+           dif_same = c(580, 600, 620)) %>%
   pivot_longer(-year, names_to = 'group', values_to = 'n')%>%
   arrange(group)
 
@@ -388,17 +340,21 @@ dplot <- df %>%
   ggplot(aes(x = year, y = n)) +
   geom_line(color = palette_dark[2]) +
   scale_y_continuous(limits = c(0, 650), breaks = NULL) +
-  scale_x_continuous(limits = c(2004, 2023), breaks = NULL) +
+  scale_x_continuous(limits = c(2007, 2022), breaks = NULL) +
   labs(x = 'Time', y = 'n',
        title = 'Simple difference (D)') +
   geom_vline(xintercept = 2013, linetype = 2) +
   #ggbrace::geom_brace(aes(c(4,7), c(4, 4.5), label="my label"), inherit.data=F, labelsize=5)
   # ggbrace::stat_brace(rotate = 90, labelsize = 3, width = 2,
   #                     aes(label = "simple difference")) +
-  ggbrace::geom_brace(aes(c(2020, 2022), c(100, 250), 
-                          label="A"), 
-                      rotate = 90,
-                      inherit.data=F, labelsize=3)
+  ggbrace::geom_brace(aes(c(2020, 2021), c(100, 250),
+                           label="A"),
+                       rotate = 90,
+                       inherit.data=F, labelsize=3)
+  # ggbrace::geom_brace(aes(c(2020, 2021), c(100, 250), 
+  #                         label="A"), 
+  #                     rotate = 90,
+  #                     inherit.data=F, labelsize=3)
 
 df2 <-  df %>%
   filter(group %in% c('same_mixed', 'same_same'))
@@ -406,43 +362,67 @@ ddplot <- df2 %>%
   ggplot(aes(x = year, y = n, group = group)) +
   geom_line(color = ifelse(df2$group == 'same_mixed', palette_dark[2], black)) +
   scale_y_continuous(limits = c(0, 650), breaks = NULL) +
-  scale_x_continuous(limits = c(2004, 2023), breaks = NULL) +
+  scale_x_continuous(limits = c(2007, 2022), breaks = NULL) +
   labs(x = 'Time', y = '',
        title = 'Diff-in-diff (DD)') +
   geom_vline(xintercept = 2013, linetype = 2) +
-  ggbrace::geom_brace(aes(c(2005, 2007), c(100, 300), 
-                           label="B"), 
-                       rotate = 270, 
+  ggbrace::geom_brace(aes(c(2020, 2021), c(100, 250),
+                           label="A"),
+                       rotate = 90,
                        inherit.data=F, labelsize=3) +
-  ggbrace::geom_brace(aes(c(2020, 2022), c(250, 320), 
-                          label = "C"), 
-                      rotate = 90, 
+  ggbrace::geom_brace(aes(c(2020, 2021), c(300, 330),
+                          label = "B"),
+                      rotate = 90,
                       inherit.data=F, labelsize=3)
+  # ggbrace::geom_brace(aes(c(2006, 2007), c(100, 300), 
+  #                          label="B"), 
+  #                      rotate = 270, 
+  #                      inherit.data=F, labelsize=3) +
+  # ggbrace::geom_brace(aes(c(2020, 2021), c(250, 330), 
+  #                         label = "C"), 
+  #                     rotate = 90, 
+  #                     inherit.data=F, labelsize=3)
 
 dddplot <- df %>%
    ggplot(aes(x = year, y = n, group = group)) +
    geom_line(color = ifelse(df$group == 'same_mixed', palette_dark[2], black)) +
    scale_y_continuous(limits = c(0, 650), breaks = NULL) +
-   scale_x_continuous(limits = c(2004, 2023), breaks = NULL) +
+   scale_x_continuous(limits = c(2007, 2022), breaks = NULL) +
    labs(x = 'Time', y = '',
         title = 'Triple-diff (DDD)') +
    geom_vline(xintercept = 2013, linetype = 2) +
-   ggbrace::geom_brace(aes(c(2005, 2007), c(100, 300), 
-                           label="B"), 
-                       rotate = 270, 
+  ggbrace::geom_brace(aes(c(2020, 2021), c(100, 250),
+                           label="A"),
+                       rotate = 90,
                        inherit.data=F, labelsize=3) +
-   ggbrace::geom_brace(aes(c(2020, 2022), c(250, 320), 
-                           label = "C"), 
-                       rotate = 90, 
+  ggbrace::geom_brace(aes(c(2020, 2021), c(300, 330),
+                          label = "B"),
+                      rotate = 90,
+                      inherit.data=F, labelsize=3) +
+  ggbrace::geom_brace(aes(c(2020, 2021), c(400, 450),
+                           label="C"),
+                       rotate = 90,
                        inherit.data=F, labelsize=3) +
-   ggbrace::geom_brace(aes(c(2005, 2007), c(400, 600), 
-                           label="D"), 
-                       rotate = 270, 
-                       inherit.data=F, labelsize=3) +
-   ggbrace::geom_brace(aes(c(2020, 2022), c(440, 610), 
-                           label = "E"), 
-                       rotate = 90, 
-                       inherit.data=F, labelsize=3)
+  ggbrace::geom_brace(aes(c(2020, 2021), c(580, 620),
+                          label = "D"),
+                      rotate = 90,
+                      inherit.data=F, labelsize=3)
+   # ggbrace::geom_brace(aes(c(2006, 2007), c(100, 300), 
+   #                         label="B"), 
+   #                     rotate = 270, 
+   #                     inherit.data=F, labelsize=3) +
+   # ggbrace::geom_brace(aes(c(2020, 2021), c(250, 330), 
+   #                         label = "C"), 
+   #                     rotate = 90, 
+   #                     inherit.data=F, labelsize=3) +
+   # ggbrace::geom_brace(aes(c(2006, 2007), c(400, 600), 
+   #                         label="D"), 
+   #                     rotate = 270, 
+   #                     inherit.data=F, labelsize=3) +
+   # ggbrace::geom_brace(aes(c(2020, 2021), c(450, 620), 
+   #                         label = "E"), 
+   #                     rotate = 90, 
+   #                     inherit.data=F, labelsize=3)
 
 textsize <- 4
   
@@ -459,7 +439,7 @@ ddplot_text <- ggplot() +
            x = 1,
            y = 1,
            size = textsize,
-           label = latex2exp::TeX("\\delta = B - C")) + 
+           label = latex2exp::TeX("\\delta = A - B")) + 
   theme_void() 
 
 dddplot_text <- ggplot() +                      
@@ -467,7 +447,7 @@ dddplot_text <- ggplot() +
            x = 1,
            y = 1,
            size = textsize,
-           label = latex2exp::TeX("\\delta = (B - C) - (D - E)")) + 
+           label = latex2exp::TeX("\\delta = (A - B) - (C - D)")) + 
   theme_void() 
  
 (dplot + ddplot + dddplot) /
@@ -491,7 +471,7 @@ where $y_{gst}$ is the count of individuals in group $g$ in state $s$ in survey 
 
 <!-- $$\mathbb E[y_{gst}] = \exp(\beta_0 + \beta_1 \bbm 1_{\{t \geq 2013\}} + \beta_2 \bbm 1_{\{t \geq 2013\}}$$ -->
 
-We focus on heterogeneity of this effect: how it varies by the LGB policy context of non-citizens' country of origin. We measure the origin country policy environment using a modified LGBT Policy Index [@velasco_2018_human] for 1991 to 2019. The index comprises 16 policies, with both progressive policies (civil unions, constitutional protection, conversion therapy ban, employment protection, equal age of consent, hate-crime protection, incitement to hate banned, joint adoption, LGB military, marriage equality, same-sex acts legal) and regressive ones (anti-propaganda laws, death penalty, LGB military ban, marriage ban, unequal age of consent). The index is created by summing the net total of progressive policies (scored $+1$) over regressive policies (scored $-1$). For policies that exist in only certain parts of a country, fractional values are used. For the `r length(unique(acs_count_mixed_bpld$bpld))` countries of origin for our sample, the country index ranges from `r min(acs_count_mixed_bpld$origin_score, na.rm = T)` to `r max(acs_count_mixed_bpld$origin_score, na.rm = T)`, with a mean of `r mean(acs_count_mixed_bpld$origin_score, na.rm = T)`. Individuals are assigned the policy score for their country of origin in their year of immigration.
+We focus on heterogeneity of this effect: how it varies by the LGB policy context of non-citizens' country of origin. We measure the origin country policy environment using a modified LGBT Policy Index [@velasco_2018_human] for 1991 to 2019. The index comprises 16 policies, with both progressive policies (civil unions, constitutional protection, conversion therapy ban, employment protection, equal age of consent, hate-crime protection, incitement to hate banned, joint adoption, LGB military, marriage equality, same-sex acts legal) and regressive ones (anti-propaganda laws, death penalty, LGB military ban, marriage ban, unequal age of consent). The index is created by summing the net total of progressive policies (scored $+1$) over regressive policies (scored $-1$). For policies that exist in only certain parts of a country, fractional values are used. For the `r length(unique(acs_count_mixed_bpld$bpld))` countries of origin for our sample, the country index ranges from `r min(acs_count_mixed_bpld$origin_score, na.rm = T)` to `r max(acs_count_mixed_bpld$origin_score, na.rm = T)`, with a mean of `r mean(acs_count_mixed_bpld$origin_score, na.rm = T)`. Individuals are assigned the policy score for their country of origin in their year of immigration. Immigrants who arrived in the U.S. before 1991 are assigned the score for 1991; national LGB policy was generally very stable before the 1990s.  
 
 To see how the incidence of mixed-citizenship, same-sex unions varies by origin-country LGB policy context, we stratify our sample by this index. Foreign-born respondents are labeled depending on the LGB policy score at their year of immigration: Individuals coming from countries with a policy score less than 0 get a "regressive" label, while those with a score greater than 3 get a "progressive" label. U.S.-born respondents do not receive a label and are included in all analyses. We then estimate equation \ref{eq:main} twice more: once for counts including only "progressive"-origin respondents (plus U.S.-born), and once for only "repressive"-origin respondents (plus U.S.-born).
 
@@ -511,6 +491,112 @@ We rely on three state-level controls to account for alternative explanations. W
 # Results
 
 ## Main Effects
+
+
+
+```{r mod-setup}
+count_origin_high <- count_func('origin_score > 3 | is.na(origin_score)') 
+count_origin_low <- count_func('origin_score < 0 |  is.na(origin_score)')
+```
+
+
+```{r D-mod}
+mod_mixed <- acs_count_mixed %>%
+  filter(same_sex == T, mixed == T) %>%
+  glm(n ~ post_2013 + group_fe + as.factor(year), 
+                        data = ., 
+                        family = 'quasipoisson') %>%
+  coeftest(., vcov = vcovCL(., cluster = ~group_fe)) 
+
+mod_os_high <- count_origin_high %>%
+  filter(same_sex == T, mixed == T) %>%
+  glm(n ~ post_2013 + 
+        group_fe + as.factor(year), 
+        data = ., 
+        family = 'quasipoisson') %>%
+  coeftest(., vcov = vcovCL(., cluster = ~group_fe))
+
+mod_os_low <- count_origin_low %>%
+  filter(same_sex == T, mixed == T) %>%
+  glm(n ~ post_2013 + 
+        group_fe + as.factor(year), 
+        data = ., 
+        family = 'quasipoisson') %>%
+  coeftest(., vcov = vcovCL(., cluster = ~group_fe))
+
+
+huxreg(list('Full sample' = mod_mixed, 'Progressive' = mod_os_high, 'Regressive' = mod_os_low),
+       coefs = c('Post-2013' = 'post_2013TRUE'),
+  note = '{stars}. The "Regressive" sample includes only countries with a LGB policy score less than 0, and the "Progressive" sample includes only those with a score greater than 3. Group-clustered standard errors shown in parentheses. Source: American Community Survey 2008-2019. Authors\' calculations.',
+       stars = c(`†` = 0.1, `*` = 0.05, `**` = 0.01, `***` = 0.001),
+       statistics = c('Observations' = 'nobs')) %>%
+  huxtable::set_width(1) %>%
+  set_wrap(T) %>%
+  set_all_padding(0) %>%
+  huxtable::set_caption('Simple-difference (D), quasi-Poisson regressions of counts of 
+                        individuals in mixed-citizenship same-sex couples, stratifying the sample by policy environment at year of immigration. The sample includes only mixed-citizenship same-sex couples.')
+
+base_effect_d <- tidy(mod_mixed) %>%
+  filter(term == 'post_2013TRUE') %>%
+  pull(estimate) 
+high_effect_d <- tidy(mod_os_high) %>%
+  filter(term == 'post_2013TRUE') %>%
+  pull(estimate) 
+```
+
+```{r DD-mod}
+mod_mixed <- acs_count_mixed %>%
+  filter(same_sex == T) %>%
+  glm(n ~ I(post_2013*mixed) + 
+        post_2013 + group_fe + as.factor(year), 
+                        data = ., 
+                        family = 'quasipoisson') %>%
+  coeftest(., vcov = vcovCL(., cluster = ~group_fe)) 
+
+mod_os_high <- count_origin_high %>%
+  filter(same_sex == T) %>%
+  glm(n ~  I(post_2013*mixed) + 
+        post_2013 + 
+        group_fe + as.factor(year), 
+        data = ., 
+        family = 'quasipoisson') %>%
+  coeftest(., vcov = vcovCL(., cluster = ~group_fe))
+
+
+mod_os_low <- count_origin_low %>%
+  filter(same_sex == T) %>%
+  glm(n ~  I(post_2013*mixed) + 
+        post_2013 + 
+        group_fe + as.factor(year), 
+        data = ., 
+        family = 'quasipoisson') %>%
+  coeftest(., vcov = vcovCL(., cluster = ~group_fe))
+
+
+huxreg(list('Full sample' = mod_mixed, 'Progressive' = mod_os_high, 'Regressive' = mod_os_low),
+       coefs = c('Post-2013 × Mixed-citizenship' = 'I(post_2013 * mixed)',
+                'Post-2013' = 'post_2013TRUE'),
+  note = '{stars}. The "Regressive" sample includes only countries with a LGB policy score less than 0, and the "Progressive" sample includes only those with a score greater than 3. Group-clustered standard errors shown in parentheses. Source: American Community Survey 2008-2019. Authors\' calculations.',
+       stars = c(`†` = 0.1, `*` = 0.05, `**` = 0.01, `***` = 0.001),
+       statistics = c('Observations' = 'nobs')) %>%
+  huxtable::set_width(1) %>%
+  set_wrap(T) %>%
+  set_all_padding(0) %>%
+  huxtable::set_caption('Difference-in-difference (DD), quasi-Poisson regressions of counts of individuals in 
+                        mixed-citizenship same-sex couples, stratifying the sample by policy environment at year of immigration')
+
+base_effect_dd <- tidy(mod_mixed) %>%
+  filter(term == 'I(post_2013 * mixed)') %>%
+  pull(estimate) 
+high_effect_dd <- tidy(mod_os_high) %>%
+  filter(term == 'I(post_2013 * mixed)') %>%
+  pull(estimate) 
+```
+
+We first present simple-difference (D) and difference-in-differences (DD) results, before presenting the more rigorous triple-difference (DDD) results. All of these models include two-way fixed effects and cluster standard errors at the state-group level. Table \@ref(tab:D-mod) shows the simple-difference result. The coefficient for 2013 represents the log-change in incidence of individuals in mixed-citizenship same sex couples. For the full sample, this group saw a $100 \times [\exp(`r base_effect_d`) -1] =$ `r 100*(exp(base_effect_d) - 1)` percent after 2013. But for those originating in countries with progressive LGB policy (defined as those with an LGB policy score greater than 3), the increase was much greater, at `r 100*(exp(high_effect_d) - 1)` percent. The increase for those coming from regressive countries (those with a policy score less than 0) is not significant. 
+
+Table \@ref(tab:DD-mod) shows corresponding results for the DD analysis. These models control for the rise in same-sex same-citizenship couples, since their numbers also rose after the end of DOMA. Now the coefficient of interest is the two-way interaction between indicators for post-2013 and mixed-citizenship. The relative rise is less strong than in the D models, but the relative increase for progressive countries is still striking. Relative to same-citizenship same-sex couples, mixed-citizenship same-sex couples saw a `r 100*(exp(base_effect_dd) - 1)` percent increase overall but a `r 100*(exp(high_effect_dd) - 1)` percent increase for those originating in progressive countries.  
+
 
 ```{r mod-tab}
 # mod_mixed <- acs_count_mixed %>%
@@ -604,7 +690,7 @@ mod_mixed <- acs_count_mixed %>%
                         family = 'quasipoisson') %>%
   coeftest(., vcov = vcovCL(., cluster = ~group_fe)) 
 
-count_origin_high <- count_func('origin_score > 3 | is.na(origin_score)') 
+# count_origin_high <- count_func('origin_score > 3 | is.na(origin_score)') 
 
 
 mod_os_high <- glm(n ~  I(post_2013*same_sex*mixed) + 
@@ -616,7 +702,7 @@ mod_os_high <- glm(n ~  I(post_2013*same_sex*mixed) +
                         family = 'quasipoisson') %>%
   coeftest(., vcov = vcovCL(., cluster = ~group_fe))
 
-count_origin_low <- count_func('origin_score < 0 |  is.na(origin_score)')
+# count_origin_low <- count_func('origin_score < 0 |  is.na(origin_score)')
 
 mod_os_low <- glm(n ~  I(post_2013*same_sex*mixed) + 
                         I(post_2013*same_sex) + 
@@ -639,8 +725,8 @@ huxreg(list('Full sample' = mod_mixed, 'Progressive' = mod_os_high, 'Regressive'
   huxtable::set_width(1) %>%
   set_wrap(T) %>%
   set_all_padding(0) %>%
-  huxtable::set_caption('Quasi-Poisson DDD regressions of counts of 
-                        mixed-citizenship same-sex couples, stratifying the sample by policy environment at year of immigration')
+  huxtable::set_caption('Triple-differences (DDD), quasi-Poisson regressions of counts of 
+                        individuals in mixed-citizenship same-sex couples, stratifying the sample by policy environment at year of immigration')
   # theme_compact()
 
 base_effect <- tidy(mod_mixed) %>%
@@ -651,11 +737,9 @@ high_effect <- tidy(mod_os_high) %>%
   pull(estimate) 
 ```
 
+Finally, Table \@ref(tab:mod-tab) presents results from our DDD specifications. While the DD models control for numbers in same-sex couples overall, the DDD models also control for numbers in mixed-citizenship couples, regardless of sex composition. Here, the coefficient of interest is the three-way interaction between indicators for post-2013, same-sex, and mixed citizenship. For the full sample, the incidence of individuals in mixed-citizenship, same-sex couples grew by $100 \times [\exp(`r base_effect`) -1] =$ `r 100*(exp(base_effect) - 1)` percent after 2013, relative to those in couples that were not same-sex or mixed-citizenship. When we focus on individuals from progressive countries, the result is even stronger, at `r 100*(exp(high_effect) - 1)` percent. However, those from regressive countries saw no significant increase.  
 
-
-Table \@ref(tab:mod-tab) presents results from our DDD specifications. For the full sample, the incidence of individuals in mixed-citizenship, same-sex couples grew by $100 \times [\exp(`r base_effect`) -1] =$ `r 100*(exp(base_effect) - 1)` percent after 2013, relative to those in couples that were not same-sex or mixed-citizenship. The result is even stronger if the sample is limited to individuals from progressive countries (defined as those with an LGB policy score greater than 3), at `r 100*(exp(high_effect) - 1)` percent. However, those from regressive countries (with a policy score less than 0) saw no significant increase.  
-
-Although the two-way fixed effects in our specifications help allay concerns of confounders, it is still possible that time-varying state- and group-level variables may be confounding results. We test the robustness of our results by re-specifying our models while adjusting for state per-capita income, annual unemployment rates, and state LGB policy. Table \@ref(tab:controls-tab) replicates Table \@ref(tab:mod-tab), but with these additional controls. Coefficients are only slightly attenuated, and substantive conclusions do not change. Notably, the coefficient for state LGB policy is small and nonsignificant; in these models, state LGB policy does not appear related to the incidence of same-sex unions.
+Although the two-way fixed effects in our specifications help allay concerns of confounders, it is still possible that time-varying state- and group-level variables may be confounding results. We test the robustness of our results by re-specifying our models while adjusting for state per-capita income, annual unemployment rates, and state LGB policy. Table \@ref(tab:controls-tab) replicates Table \@ref(tab:mod-tab), but with these additional controls. Substantive conclusions do not change. Notably, the coefficient for state LGB policy is small and nonsignificant; in these models, state LGB policy does not appear related to the incidence of same-sex unions.
 
 Figure \@ref(fig:lag-plot) presents dynamic models of the effect of interest, with state controls. These models replace the post-2013 indicator variable with a categorical variable for survey year, with years grouped into pairs for statistical power. The left panel shows this lag-lead specification for the full sample. We see that coefficients for the three-way interaction between year, same-sex, and mixed-citizenship become significantly positive only after 2013. The right panel presents the same specification, but for the stratified samples as in Table \@ref(tab:controls-tab). Here, we see a clear upward trend for non-citizens from progressive countries, while the trend for those from regressive countries hovers close to 0. Also of note across all samples is the lower coefficient for the years 2018-2019, perhaps demonstrating a "Trump effect" reducing LGB immigration or the willingness of LGB citizens and non-citizens to enter into unions.
 
@@ -710,8 +794,8 @@ huxreg(list('Full sample' = mod_mixed, 'Progressive' = mod_os_high, 'Regressive'
   huxtable::set_width(1) %>%
   set_wrap(T) %>%
   set_all_padding(0) %>%
-  huxtable::set_caption('With state-level controls: quasi-Poisson DDD regressions 
-  of counts of mixed-citizenship same-sex couples, stratifying by 
+  huxtable::set_caption('With state-level controls: triple-difference (DDD), quasi-Poisson 
+  regressions of counts of individuals in mixed-citizenship same-sex couples, stratifying by 
   state-country-year-group average policy environment')
 ```
 
@@ -962,7 +1046,7 @@ lapply(policy_list, function(x){
   write_csv(here('did', 'policy_combos.csv'))
 ```
 
-```{r policy-combos, fig.cap = 'Stratified by specific policy: quasi-Poisson DDD regressions of counts of mixed-citizenship same-sex couples. Estimates and 95-percent confidence intervals are for the inverse variance-weighted average difference between samples that include individuals experiencing a policy and those who are not, for coefficients for the three-way interaction between indicators for same-sex, mixed-citizenship, and post-2013 survey year'}
+```{r policy-combos, fig.cap = 'Stratified by specific policy: quasi-Poisson DDD regressions of counts of individuals in mixed-citizenship same-sex couples. Estimates and 95-percent confidence intervals are for the inverse variance-weighted average difference between samples that include individuals experiencing a policy and those who are not, for coefficients for the three-way interaction between indicators for same-sex, mixed-citizenship, and post-2013 survey year'}
 policy_combos_out <- read_csv(here('did', 'policy_combos.csv')) 
   # group_by(n) %>% 
   # slice(rep(1:n(), first(n))) %>% ungroup()
@@ -1272,37 +1356,12 @@ Published papers using the ACS to study same-sex couples overwhelmingly use the 
 
 In a Census Bureau working paper, @kreider_2015 use personal information such as names and addresses match same-sex couples from the 2010 ACS to Social Security administrative data. They find that 7 percent of unmarried couples coded as same-sex in the ACS are coded as different-sex in the administrative data, and 57 percent of married same-sex couples. A follow-up study [@kreider_2017] shows that these mismatch rates appear to have fallen: In a 2016 ACS test module that included explicit categories for different- and same-sex spouses and partners, 31 percent of married and 3 percent of unmarried same-sex couples had inconsistent sex responses.  
 
-To test the robustness of our results these levels of misreporting, we re-assign up to 60 percent of counts of individuals in same-sex couples to counts in different-sex couples, within state, year, and citizenship group. We then re-fit the models reported in the main paper. Coefficients for the three-way interaction of interest are shown in Figure \@ref(fig:misreporting-plot). Results are extremely robust to even high levels of sex misreporting.  
+To test the robustness of our results these levels of misreporting, we re-assign up to 60 percent of counts of individuals in same-sex couples to counts in different-sex couples, within state, year, and citizenship group. We then re-fit the models reported in the main paper, with state-level controls. Coefficients for the three-way interaction of interest are shown in Figure \@ref(fig:misreporting-plot). Results are extremely robust to even high levels of sex misreporting. Since we model a relative rather than absolute change, this robustness makes sense.   
 
 
 ```{r misreporting, eval = F}
-count_origin_high <- count_func('origin_score > 3 | is.na(origin_score)') 
-count_origin_low <- count_func('origin_score < 0 |  is.na(origin_score)')
-
-
-# count_origin_high <- 
-#   acs_count_mixed_bpld %>%
-#   filter(origin_score > 3 | is.na(origin_score)) %>%
-#   group_by(state, year, same_sex, mixed, post_2013, group_fe) %>%
-#   summarize(n = sum(n)) %>%
-#   ungroup() %>%
-#   complete(state, year, same_sex, mixed) %>%
-#   mutate(across(n, function(x) ifelse(is.na(x), 0, x)),
-#          post_2013 = year > 2013,
-#          group_fe = paste(state, same_sex, mixed, sep = '_')) %>%
-#   left_join(state_df)
-# 
-# count_origin_low <- 
-#   acs_count_mixed_bpld %>%
-#   filter(origin_score < 0 | is.na(origin_score)) %>%
-#   group_by(state, year, same_sex, mixed, post_2013, group_fe) %>%
-#   summarize(n = sum(n)) %>%
-#   ungroup() %>%
-#   complete(state, year, same_sex, mixed) %>%
-#   mutate(across(n, function(x) ifelse(is.na(x), 0, x)),
-#          post_2013 = year > 2013,
-#          group_fe = paste(state, same_sex, mixed, sep = '_')) %>%
-#   left_join(state_df)
+# count_origin_high <- count_func('origin_score > 3 | is.na(origin_score)') 
+# count_origin_low <- count_func('origin_score < 0 |  is.na(origin_score)')
 
 misreport <- function(dataset, rates = seq(0, 0.6, length.out = 7)){
   df <- dataset %>%
@@ -1338,6 +1397,7 @@ for(rate_loop in as.character(unique(data_list[[1]]$rate))){
     mis_list[[paste0(rate_loop, dataset_num, '1')]] <- data_list[[dataset_num]] %>%
       filter(rate == rate_loop) %>%
       glm(n ~ I(post_2013*same_sex*mixed) + I(post_2013*same_sex) + I(post_2013*mixed) + 
+            
           post_2013 + group_fe + as.factor(year), 
                           data = ., 
                           family = 'quasipoisson') %>%
@@ -1350,7 +1410,7 @@ for(rate_loop in as.character(unique(data_list[[1]]$rate))){
     
     mis_list[[paste0(rate_loop, dataset_num, '2')]] <- data_list[[dataset_num]] %>%
       filter(rate == rate_loop) %>%
-      glm(n ~ I(post_2013*same_sex*mixed) + I(post_2013*same_sex) + I(post_2013*mixed) + 
+      glm(n ~ I(post_2013*same_sex*mixed) + I(post_2013*same_sex) + I(post_2013*mixed) +
           state_policy + state_income + state_unemploy +
           post_2013 + group_fe + as.factor(year), 
                           data = ., 
@@ -1368,13 +1428,14 @@ for(rate_loop in as.character(unique(data_list[[1]]$rate))){
 write_csv(bind_rows(mis_list), here('did', 'misreporting_df.csv'))
 ```
 
-```{r misreporting-plot, fig.cap = 'Coefficients for the three-way interaction between indicators for same-sex, mixed-citizenship, and post-2013 survey year from Table 2, with counts of individuals in same-sex couples in the sample reduced by 10 to 60 percent'}
-misreporting_df <- read_csv(here('did', 'misreporting_df.csv'))
+```{r misreporting-plot, fig.cap = 'Coefficients for the three-way interaction between indicators for same-sex, mixed-citizenship, and post-2013 survey year from Table 5, with counts of individuals in same-sex couples in the sample reduced by 10 to 60 percent'}
+misreporting_df <- read_csv(here('did', 'misreporting_df.csv')) %>%
+  filter(model == 'With controls')
 
 ggplot(misreporting_df, aes(x = rate, y = estimate, color = policy)) +
   geom_pointrange(aes(ymin = estimate - 1.96*std.error, ymax = estimate + 1.96*std.error), 
                   position = position_dodge(.02)) +
-  facet_wrap(~model, ncol= 1) +
+  # facet_wrap(~model, ncol= 1) +
   geom_hline(yintercept = 0) +
   labs(x = 'Hypothetical misreporting rate', y = 'Coefficient for 3-way interaction')
 ```
