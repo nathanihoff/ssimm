@@ -2,13 +2,13 @@
 output:
   bookdown::pdf_document2:
     toc: no
-    number_sections: yes
+    number_sections: no
     pandoc_args: !expr rmdfiltr::add_wordcount_filter(rmdfiltr::add_citeproc_filter(args = NULL))
     latex_engine: xelatex
     keep_tex: no
 
 header-includes:
-#  - \usepackage{setspace}\doublespace
+  - \usepackage{setspace}\doublespace
   - \usepackage{bbm}
 editor_options: 
   
@@ -32,53 +32,46 @@ author:
 
 ---
 
+\newpage
 
-Previous work shows that Western publics usually prefers "high-skill" over "low-skill" immigrants, but also view refugees fleeing for their lives as "deserving." We're curious how lesbian, gay, or bisexual identity moderates these relationships. Does the public find LGB immigrants to be more deserving of visas if they're fleeing violence than if they work in prestigious occupations? And does it consider refugees fleeing due to their sexual identity more deserving (perhaps because of some notion of cultural similarity) than those fleeing political persecution? 
+**Overview**: Following federal policy changes, numbers of immigrants in same-sex couples have exploded, growing by 140 percent between 2008 and 2019 (from 44 thousand to 107 thousand), while those in different-sex couples grew by only 22 percent [@hoffmann_2021_making]. How do Americans view this new type of immigrant?  Previous work has shown that immigrants with economic potential and humanitarian merit are seen as deserving of entry. Little work has considered how Americans view cultural aspects of immigrants, such as sexual identity. The goal of the proposed study is to disentangle Americans' preferences for migrants with economic potential, humanitarian merit, or cultural similarity, using sexual minority migrants as a case study.  
 
-To test this, we envision presenting survey respondents with six profiles. We will vary skill (low/high), reason for migration (work/asylum), and sexual identity (straight/LGB). We will set this up as a conjoint survey experiment with vignettes, following @lawlor_2021_deservingness and @donnaloja_2022_british, where respondents are forced to choose one of the two profiles.  
-
-It could also be interesting to look at how effects vary by respondents' education level and political affiliation.  
-
-# Literature Review
-Questions of immigrant deservingness have a recent but vibrant history. Researchers consider two interrelated types of deservingness: deserving legal status, and deserving welfare benefits. In the legal status line of research, @hainmueller_2007_educated provide some of the first (albeit nonexperimental) work on the topic using the 2003 European Social Survey ($n$ = about 28,000). They study answers to the following question in 22 countries: "To what extent do you think [respondent’s country] should allow people from [source] to come and live here?” They find that more highly educated and occupationally skilled respondents are more likely to support immigration -- even high-skilled immigration, in contrast to conventional wisdom about labor force competition. They argue that results are driven by differences in cultural beliefs and values.  
-
-In a more rigorous test in the U.S. context, @hainmueller_2010_attitudes conduct a survey experiment on 1,601 respondents to answer questions about randomly assigned, hypothetical immigrants with different skill levels. They aim to test two theories: a labor market competition model, which supposes that workers oppose immigrants with similar skills to their own, and the fiscal burden model, which predicts that higher-income people should oppose immigration in countries with more generous welfare. Their results are at odds with both theories: both low- and high-skill natives want high-skill immigrants
-
-@helbling_2014_why conduct another survey experiment of 1,864 people in Switzerland. They randomize the skill level of hypothetical visa applicants, then ask respondents to give a general assessment form 0 to 100. Results corroborate those of @hainmueller_2010_attitudes: they find no support for a labor competition, and only weak support for a fiscal burden model.  
+<!-- According to American Community Survey data, numbers of different-sex couples including immigrants increased by 22 percent from 2013 to 2019 (from 7.8 million to 9.5 million), while those of corresponding same-sex couples grew from 44 thousand to 107 thousand in the same period, an increase of 140 percent.  -->
 
 
-@hainmueller_2015_hidden assess the first conjoint survey experiment ($n$ = 1,407) to address this set of questions. Rather than asking respondents to assess an immigrant profile in isolation, their conjoint design forces respondents to choose one out of two hypothetical applicants to admit to the U.S. They find that respondents view highly educated immigrants favorably, and are more likely to reject those without employment plans, who enter without authorization, are Iraqi, or do not speak English. Results vary little by respondent characteristics. The authors frame their results as supporting "norms-based," "sociotropic" explanations.  
 
-@bansak_2016_how focus on *refugee* deservingness to immigrate to Europe. They use a conjoint experiment of 18,000 Europeans in 15 European countries. They find greater support for immigrants with better "economic potential" (higher-skill occupations, stronger language skills, younger), but at the same respondents favor immigrants coming for "humanitarian" rather than "economic" reasons. There is also distinct anti-Muslim sentiment.  
+**Background**: Two recent policy changes have contributed to a rapid rise of lesbian, gay, and bisexual (LGB) immigrants in the United States. In 2011, President Obama moved to make queer refugees a "population of concern" for the U.S. [@vogler_2016]. In 2013, the Defense of Marriage Act ended, allowing U.S. citizens to sponsor the visa of a same-sex partner for the first time [@edwards_2013]. Since then, numbers of immigrants in same-sex couples have exploded. According to American Community Survey data, numbers of different-sex couples including immigrants increased by 22 percent from 2013 to 2019 (from 7.8 million to 9.5 million), while those of corresponding same-sex couples grew from 44 thousand to 107 thousand in the same period, an increase of 140 percent [@hoffmann_2021_making]. How do Americans evaluate the deservingness of such individuals to migrate to the United States?  
 
-@donnaloja_2022_british tests citizenship deservingness in the UK in a conjoint survey experiment of 1,597. She finds a penalty for Muslims and people with no occupation. Although respondents were less likely to award citizenship if they had voted to leave the EU, were older, less educated, and lower, variation by respondent attributes were small.  
+Previous experimental work has attempted to assess how native-born respondents assess the "deservingness" of migrants to gain legal entry to their country. This work broadly supports three theories of deservingness: *economic potential*, *humanitarian merit*, and *cultural similarity*.  
+The *economic potential* theory has the most empirical support. Numerous studies find that highly educated migrants working in prestigious, high-earning professions are seen as most deserving of entry [@hainmueller_2010_attitudes; @helbling_2014_why; @hainmueller_2015_hidden; @donnaloja_2022_british]. Although economic potential is not a legal consideration when awarding refugee status, respondents find hypothetical refugees with economic potential to be more deserving [@bansak_2016_how; @lawlor_2021_deservingness].  
 
-@fraser_2022_role consider refugees in the Japanese context, with a rating-based conjoint survey experiment on 2,953. They also ask respondents a series of questions to assess their "humanitarianism." They find respondents with high humanitarianism are more likely to support admitting refugees than economic migrants, and prefer refugees fleeing natural disaster and war than political repression. However, @hedegaard_2022_attitudes finds opposite results in Denmark: Respondents are less likely to support climate migrants than typical refugees. But these two groups are both considered more deserving than economic migrants.    
+Work on refugees has pointed to the importance of *humanitarian merit* in matters of deservingness. While @bansak_2016_how find greater support in Europe for immigrants with better economic potential, they also find that respondents favor immigrants coming for "humanitarian" rather than "economic" reasons. In the Danish context, @hedegaard_2022_attitudes finds that respondents are less likely to support climate migrants than typical refugees, but these two groups are both considered more deserving than economic migrants. In Japan, @fraser_2022_role find that immigrants fleeing natural disaster are seen as more deserving than those migrating due to political protest, labor shortage, or civil war.  
 
-Research on immigrant welfare deservingness has yielded similar findings: When deciding whom to give benefits, citizens prefer economically active, culturally similar immigrants. @reeskens_2019_inevitable implement a vignette survey experiment on 23,000 Dutch respondents. They focus on welfare deservingness for unemployed immigrant and Dutch-born hypothetical profiles, with each respondent evaluating only one vignette. They find that immigrants are invariably rated as less deserving than native-born, even when they have otherwise favorable characteristics such as actively looking for a job or unemployed due to unfair firing.  
+A theory of *cultural similarity* has been evaluated less frequently thus far. In addition to finding a premium for economic potential, @hainmueller_2015_hidden find a penalty for hypothetical immigrants who are Iraqi or do not speak English. The authors frame their results as supporting "norms-based," "sociotropic" explanations. An anti-Muslim bias has been found in other studies as well [@bansak_2016_how; @donnaloja_2022_british]. Other dimensions of cultural similarity have yet to be explored.  
 
-@magni_2022_boundaries considers what factors reduce welfare discrimination against immigrants in the U.S., UK, France, and Italy. A conjoint survey experiment asked 5,000 respondents which of two hypothetical unemployed individuals were more deserving of welfare support. Results show that natives are clearly favored over immigrants. Among immigrants, those with a long work history are considered more deserving, but higher education and a proactive work attitude do not decrease the gap.   
+Economic, humanitarian, and cultural theories of immigrant deservingness have yet to be convincingly disentangled. Part of the issue is that many of these aspects of countries and individuals are correlated. Immigrants originating in wealthier countries tend to be considered to have both more economic potential and cultural similarity. Humanitarian migrants usually originate in less wealthy countries that are regarded as having less cultural similarity or economic potential. And besides religion, few studies have assessed cultural similarity theory.  
 
-@lawlor_2021_deservingness consider both welfare and legal status deservingness in conjunction, assessing how evaluations of migrant deservingness vary between refugees and asylum seekers in Canada. They use a conjoint survey experiment with vignettes for 1,153 Canadians. They ask whether a hypothetical refugee and hypothetical asylum seeker should be allowed to stay, and how many of five government services they should have access to. They find that, for refugees, the economic contribution is more important than economic deservingness (e.g., actively looking for employment). But for asylum seekers, inclusion of deservingness cues (persecution due to sexual orientation or religion) outweigh economic contributions.  
+Despite the recent rise of LGB immigrants in the U.S., sexuality has been under-explored in studies of immigrant deservingness.^[@lawlor_2021_deservingness include persecution due to sexual orientation (along with religion) as a “humanitarian deservingness cues” for hypothetical asylum seeker profiles, but not for refugee profiles, and they do not disaggregate these two cues. @hedegaard_2022_attitudes list "sexuality" as a possible form of persecution for hypothetical refugee profiles, along with race, religion, nationality, or political orientation.] We propose using sexual minority status as a measure of cultural similarity that overcomes these issues. Sexual minorities are present throughout the world, avoiding issues of country-level correlates. The present era is characterized by rapidly changing policies and attitudes regarding sexual minorities, as well as substantial global heterogeneity. A large majority of Americans now support same-sex marriage and other rights for same-sex couples [@xx]. The proposed study will be one of the first survey experiments to consider immigrant sexuality explicitly.
 
-There have also been a number of studies on topics closely related to deservingness. @grigorieff_2020_does use an experiment to find that providing accurate information about immigration to U.S. citizens improves their attitudes toward current authorized immigrants. @kyriakidou_2021_hierarchies uses focus groups to uncover hierarchies of deservingness for Greek respondents in conceptualizing the European refugee crisis. @vandermeer_2021_welfare consider welfare deservingness in the Netherlands, but only in blanket comparisons between immigrants and natives, finding that immigrants are rated as less deserving [corroborating @reeskens_2019_inevitable]. With a specific focus on asylum seekers associated with terrorism, @rowen_2022_victim conducts a (non-conjoint) survey experiment on 1,000 U.S. respondents, asking to evaluate whether low- or high-level Taliban members who qualify for refugee status deserve a visa. They find that a majority of respondents did not want to deny visas to low-level Taliban associates, but high status were seen as not deserving of asylum.
+**Research Design**: We will use a conjoint vignette survey [@hainmueller_2014_causal]. Then general structure is similar to @hainmueller_2015_hidden, but we use the vignette variation showcased by @helbling_2014_why, @lawlor_2021_deservingness and @fraser_2022_role.  
 
+We vary four attributes. Two are controls: gender has two levels (male and female) and country has two levels (Saudi Arabia and Russia). The other two attributes test our hypotheses: Skill has three levels (has an MD and works as a cardiologist; has a high school degree and works as a restaurant manager; and has a primary school education and works in construction), and reason for migration has five levels (identifies as gay, left because homosexuality is criminalized; identifies as gay, left because spoken out against authoritarian government; identifies as gay, could not find work; identifies as straight, spoken out against authoritarian government; identifies as straight, could not find work). In all, this creates $2 \times 2 \times 3 \times 5 = 60$ potential profiles for respondents to evaluate.  
 
-## Summary
+We will present respondents with two vignettes, and they will indicate which one they see as more deserving of being admitted to the United States. One example profile might read: "Immigrant 1 wishes to be admitted as an immigrant to the U.S. She comes from Russia, has a high school degree and works as a restaurant manager. She identifies as gay. She had to leave he country because she has spoken out against the authoritarian government and feared for her life."  
 
-@hainmueller_2015_hidden provide support for a cultural similarity argument: respondents were unfavorable toward Iraqi immigrants and those who do not speak English. They frame their results as supporting "norms-based," "sociotropic" explanations. Despite these results, few other studies have considered cultural dimensions of deservingness, continue to focus on (and corroborate) economic deservingness. Few studies have directly assessed cultural similarity, outside of religion.  
+**Pretest Results**: Our pilot study...  
 
-Furthermore, none of these studies explicitly focuses on queer migrants. @lawlor_2021_deservingness include persecution due to sexual orientation (along with religion) as a “humanitarian deservingness cues” for hypothetical asylum seeker profiles, but not for refugee profiles. They do not disaggregate these two cues. @hedegaard_2022_attitudes list "sexuality" as a possible form of persecution for hypothetical refugee profiles, along with race, religion, nationality, or political orientation.
+**Contribution**: This study contributes to literature on immigrant deservingness and sexual minorities.  
 
 \newpage
 
-# Method
+# Appendix
 
-We will use a conjoint vignette survey. Then general structure is similar to @hainmueller_2015_hidden, but we use the vignette variation showcased by @helbling_2014_why, @lawlor_2021_deservingness and @fraser_2022_role. 
+## Survey 
 
-Please carefully read the following two descriptions of potential immigrants to the U.S. Then indicate which one you personally would prefer to see admitted to the United States.  
+*1. Please carefully read the following two descriptions of potential immigrants to the U.S. Then indicate which one you personally would prefer to see admitted to the United States.*  
 
-> Immigrant [1/2] wishes to be admitted as an immigrant to the U.S. [He/she] [skill]. He has left [country] because [he/she] [reason].  
+> Immigrant [1/2] wishes to be admitted as an immigrant to the U.S. [He/she] comes from [country], [skill]. [He/she] [reason].  
 
 - Gender
     + he/him
@@ -90,22 +83,23 @@ Please carefully read the following two descriptions of potential immigrants to 
 
 - Skill
     + has an MD and works as a cardiologist
-    + has a high school degree and manages a restaurant
-    + has a primary school education and works as a day laborer
+    + has a high school degree and works as a restaurant manager
+    + has a primary school education and works in construction
     
 - Reason
-    + identifies as gay. [He/she] and had to leave [his/her] country because homosexuality is criminalized and [he/she] feared for [his/her] life. 
-    + identifies as gay. [He/she] and had to leave [his/her] country because [he/she] has spoken out against the authoritarian government and feared for [his/her] life.
-    + identifies as gay. [He/she] and had to leave [his/her] country because [he/she] could not find work.
-    + identifies as straight. [He/she] and had to leave [his/her] country because he has spoken out against the authoritarian government and feared for [his/her] life.
-    + identifies as straight. [He/she] and had to leave [his/her] country because [he/she] could not find work.  
+    + identifies as gay. [He/she] had to leave [his/her] country because homosexuality is criminalized and [he/she] feared for [his/her] life. 
+    + identifies as gay. [He/she] had to leave [his/her] country because [he/she] has spoken out against the authoritarian government and feared for [his/her] life.
+    + identifies as gay. [He/she] had to leave [his/her] country because [he/she] could not find work.
+    + identifies as straight. [He/she] had to leave [his/her] country because he has spoken out against the authoritarian government and feared for [his/her] life.
+    + identifies as straight. [He/she] had to leave [his/her] country because [he/she] could not find work.  
 
 
-On a scale from 1 to 7, where 1 signifies that the U.S. should absolutely not admit immigrant 1 and 7 signifies that the U.S. should definitely admit this immigrant, how would you rate immigrant 1?  
+2. *On a scale from 1 to 7, where 1 signifies that the U.S. should absolutely not admit immigrant 1 and 7 signifies that the U.S. should definitely admit this immigrant, how would you rate immigrant 1?*  
+3. *Using the same scale, how would you rate immigrant 2?*  
+4. *Please write a justification for why you made the choice and ratings you did.*  
+5. *Was anything unclear in these instructions, or did you have any problems completing this task?*
 
-Using the same scale, how would you rate immigrant 2?
-
-
+## Power analysis
 
 
 
