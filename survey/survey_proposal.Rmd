@@ -56,13 +56,13 @@ Economic, humanitarian, and cultural theories of immigrant deservingness have ye
 
 We propose using a conjoint survey experiment to isolate these components of deservingness. Despite the recent rise of LGB immigrants in the U.S., sexuality has been under-explored in studies of immigrant deservingness.^[@lawlor_2021_deservingness include persecution due to sexual orientation (along with religion) as a “humanitarian deservingness cues” for hypothetical asylum seeker profiles, but not for refugee profiles, and they do not disaggregate these two cues. @hedegaard_2022_attitudes list "sexuality" as a possible form of persecution for hypothetical refugee profiles, along with race, religion, nationality, or political orientation.] We will use sexual minority status as a measure of cultural similarity that overcomes these issues. Sexual minorities are present throughout the world, avoiding issues of country-level correlates. The present era is characterized by rapidly changing policies and attitudes regarding sexual minorities, as well as substantial global heterogeneity. A large majority of Americans now support same-sex marriage and other rights for same-sex couples [@xx]. The proposed study will be one of the first survey experiments to consider immigrant sexuality explicitly.
 
-**Research Design**: We will use a conjoint survey experiment, which allows isolation of these components [@hainmueller_2014_causal]. Respondents will read two vignettes describing hypothetical immigrants and choose the one they prefer to gain entry to the United States [@lawlor_2021_deservingness; @fraser_2022_role]. They will also give a numerical rating (between 1 and 7) of each profile's deservingness and have space to justify their decisions with open-ended text. Respondents will all be U.S. citizens, and the survey will also ask them their gender, age, party identification, and sexuality.  
+**Research Design**: We will use a conjoint survey experiment, which allows isolation of these components [@hainmueller_2014_causal]. Respondents will read two vignettes describing hypothetical immigrants and choose the one they prefer to gain entry to the United States [@lawlor_2021_deservingness; @fraser_2022_role]. They will also give a numerical rating (between 1 and 7) of each profile's deservingness and have space to justify their decisions with open-ended text. Respondents will all be U.S. citizens, and they will be asked whether they identify as a sexual or gender minority.   
 
 For the immigrant profiles, we will vary four attributes. Two are controls: gender has two levels (man and woman) and country GDP has three levels (wealthy, middle-income, and poor). The other two attributes test our hypotheses: Skill has three levels (has an MD and works as a cardiologist; has a high school degree and works as a restaurant manager; and has a primary school education and works in construction), and reason for migration has five levels (identifies as gay, left because homosexuality is criminalized; identifies as gay, left because spoken out against authoritarian government; identifies as gay, could not find work; identifies as straight, spoken out against authoritarian government; identifies as straight, could not find work). In all, this creates $2 \times 3 \times 3 \times 5 = 90$ potential profiles for respondents to evaluate.  
 
-We will present respondents with two vignettes, and they will indicate which one they see as more deserving of being admitted to the United States. One example profile might read: "Immigrant 1 wishes to be admitted as an immigrant to the U.S. She comes from a wealthy country, has a high school degree and works as a restaurant manager. She identifies as gay. She had to leave her country because she has spoken out against the authoritarian government and feared for her life."  
+We will present respondents with two vignettes, and they will indicate which one they see as more deserving of being admitted to the United States. One example profile might read: "Immigrant 1 wishes to be admitted as an immigrant to the U.S. She comes from a wealthy country, has a high school degree and works as a restaurant manager. She identifies as gay. She had to leave her country because she has spoken out against the authoritarian government and feared for her life." Further details about the survey instrument are in the Appendix.  
 
-Further details about the survey instrument are in the Appendix.
+In addition to estimating average marginal component effects (AMCEs) for the attributes of interest [@hainmueller_2014_causal], we will test for the presence of heterogeneous effects for subsamples of respondents [@leeper_2020_measuring], including by political ideology, educational level, and sexual/gender identity.
 
 **Pretest Results**: Our pilot study...  
 
@@ -114,28 +114,7 @@ Further details about the survey instrument are in the Appendix.
 4. *Please write a justification for why you made the choice and ratings you did.*  
 5. *Was anything unclear in these instructions, or did you have any problems completing this task?*  
 
-6. *What is your gender? (choose one)*
-    a. man
-    b. woman
-    c. other
-
-7. *What is your age? (open ended numerical)*
-
-<!-- 8. What is your race? (choose one or more)   -->
-<!--     a. White   -->
-<!--     b. Black or African American   -->
-<!--     c. American Indian or Alaska Native   -->
-<!--     d. Asian   -->
-<!--     e. Native Hawaiian or Other Pacific Islander -->
-<!--     f. Some other race -->
-
-8. *What is your political party identification?*  
-    a. Democrat
-    b. Republican
-    c. independent
-    d. other
-
-10. *Do you identify as a sexual or gender minority (e.g. lesbian, gay, bisexual, transgender, or queer)?* 
+6. *Do you identify as a sexual or gender minority (e.g. lesbian, gay, bisexual, transgender, or queer)?* 
     a. yes
     b. no
     c. unsure
