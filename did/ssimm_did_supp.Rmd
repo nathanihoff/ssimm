@@ -21,10 +21,10 @@ header-includes:
   - \usepackage{bbm}
   - \usepackage{fancyhdr}
   - \usepackage{amsmath}
-  - \pagestyle{fancy}
-  - \setlength{\headheight}{15pt}
-  - \lhead{Hoffmann and Velasco}
-  - \rhead{`r format(Sys.time(), '%B %e, %Y')`}
+  # - \pagestyle{fancy}
+  # - \setlength{\headheight}{15pt}
+  # - \lhead{Hoffmann and Velasco}
+  # - \rhead{`r format(Sys.time(), '%B %e, %Y')`}
 editor_options: 
   
   chunk_output_type: console
@@ -40,10 +40,10 @@ bibliography: "/Users/nathan/Google Drive/Projects/2020 Same-Sex Immigrant Coupl
 csl: american-sociological-association.csl
 title: "Online Appendix"
 subtitle: "Policy Effects on Mixed-Citizenship, Same-Sex Unions: A Triple-Difference Analysis"
-date: "`r format(Sys.time(), '%B %e, %Y')`"
-author:
-- Nathan I. Hoffmann, Department of Sociology, University of California, Los Angeles
-- Kristopher Velasco, Department of Sociology, Princeton University
+# date: "`r format(Sys.time(), '%B %e, %Y')`"
+# author:
+# - Nathan I. Hoffmann, Department of Sociology, University of California, Los Angeles
+# - Kristopher Velasco, Department of Sociology, Princeton University
 
 ---
 
