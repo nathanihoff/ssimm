@@ -96,7 +96,7 @@ In addition to estimating average marginal component effects (AMCEs) for the att
 - Skill
     + has an MD and works as a cardiologist
     + has a high school degree and works as a restaurant manager
-    + has a primary school education and works in construction
+    + has a primary school education and works in custodial
     
 - Reason
     + identifies as gay. [He/she] had to leave [his/her] country because homosexuality is criminalized and [he/she] feared for [his/her] life. 
@@ -109,9 +109,12 @@ In addition to estimating average marginal component effects (AMCEs) for the att
 2. *On a scale from 1 to 7, where 1 signifies that the U.S. should absolutely not admit immigrant 1 and 7 signifies that the U.S. should definitely admit this immigrant, how would you rate immigrant 1?*  
 3. *Using the same scale, how would you rate immigrant 2?*  
 4. *Please write a justification for why you made the choice and ratings you did.*  
-5. *Was anything unclear in these instructions, or did you have any problems completing this task?*  
+5. *On a scale from 1 to 7, where 1 signifies having no shared values and 7 signifies a great deal of shared values, to what degree do you think immigrant 1 has shared values with the U.S.?*  
+6. *Using the same scale, how would you rate immigrant 2?*  
+7. *Please write a justification for why you made the choice and ratings you did.* 
+8. *Was anything unclear in these instructions, or did you have any problems completing this task?*  
 
-6. *Do you identify as a sexual or gender minority (e.g. lesbian, gay, bisexual, transgender, or queer)?* 
+9. *Do you identify as a sexual or gender minority (e.g. lesbian, gay, bisexual, transgender, or queer)?* 
     a. yes
     b. no
     c. unsure
