@@ -6,6 +6,7 @@ output:
     pandoc_args: !expr rmdfiltr::add_wordcount_filter(rmdfiltr::add_citeproc_filter(args = NULL))
     latex_engine: xelatex
     keep_tex: no
+
 header-includes:
   - \usepackage{setspace}\doublespace
   - \usepackage{bbm}
@@ -21,16 +22,19 @@ indent: yes
 link-citations: yes
 linkcolor: blue
 bibliography: "/Users/nathan/Google Drive/Projects/2020 Same-Sex Immigrant Couples/ssimm/Same-Sex Immigration.bib"
+
 title: "TESS Proposal: Skill, Sexuality, and Immigrant Deservingness"
+
 date: "`r format(Sys.time(), '%B %e, %Y')`"
 author:
 - Nathan I. Hoffmann, Department of Sociology, University of California, Los Angeles
 - Kristopher Velasco, Department of Sociology, Princeton University
+
 ---
 
 \newpage
 
-**Overview**: Do Americans view gay and lesbian migrants as more deserving to enter the country than their straight counterparts? This question has yet to be evaluated, but is important to address for two reasons. First, recent changes in federal policy have contributed toward significant increases in queer migrants coming to the U.S. [@hoffmann_2021_making; @vogler_2016]. Despite these growths, how Americans view this type of migrant is unknown. Second, while Americans are increasingly polarized on their views toward migration, support for gay and lesbian migrants may be cross-cutting. Strong majorities now support related issues like marriage equality and even the Trump Administration discursively promoted pro-gay elements in U.S. foreign policy -- enhancing the image of the U.S. as a tolerant society even during rising ethnonationalism that inhibit other types of migrants. Therefore, this project proposes to investigate whether sexual minorities are perceived as more deserving, even after accounting for known predictors of deservingness like economic potential, humanitarian aid, and cultural proximity. The goal of the proposed study is to disentangle Americans' preferences for migrants with economic potential, humanitarian merit, or cultural similarity, using sexual minority migrants as a case study.  
+**Overview**: Following federal policy changes, numbers of immigrants in same-sex couples have exploded, growing by 140 percent between 2008 and 2019 (from 44 thousand to 107 thousand), while those in different-sex couples grew by only 22 percent [@hoffmann_2021_making]. How do Americans view this new type of immigrant?  Previous work has shown that immigrants with economic potential and humanitarian merit are seen as deserving of entry. Little work has considered how Americans view cultural aspects of immigrants, such as sexual identity. The goal of the proposed study is to disentangle Americans' preferences for migrants with economic potential, humanitarian merit, or cultural similarity, using sexual minority migrants as a case study.  
 
 <!-- According to American Community Survey data, numbers of different-sex couples including immigrants increased by 22 percent from 2013 to 2019 (from 7.8 million to 9.5 million), while those of corresponding same-sex couples grew from 44 thousand to 107 thousand in the same period, an increase of 140 percent.  -->
 
