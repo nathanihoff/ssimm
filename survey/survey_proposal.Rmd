@@ -67,7 +67,7 @@ To assess the degree to which sexuality matters as a sign of cultural similarity
 
 **Research Design**: We will use a conjoint survey experiment, which allows isolation of these components [@hainmueller_2014_causal]. Respondents will read two vignettes describing hypothetical immigrants and choose the one they prefer to gain entry to the United States [@lawlor_2021_deservingness; @fraser_2022_role]. 
 
-For the immigrant profiles, we will vary four attributes. Two are controls: gender has two levels (man and woman) and country GDP has two levels (middle-income and poor). The other attributes test our hypotheses. Skill has three levels (has an MD and works as a cardiologist; has a high school degree and works as a restaurant manager; and has a primary school education and works in custodial). Language has two levels (speaks English and does not speak English), religion has two levels (Christian and Muslim), and sexuality has two levels (gay and lesbian). Finally, reason for migration has two levels (because he/she could not find work; because he/she fears government persecution). In all, this creates 192 potential profiles for respondents to evaluate.  
+For the immigrant profiles, we will vary four attributes. Two are controls: gender has two levels (man and woman) and country GDP has two levels (middle-income and low-income). The other attributes test our hypotheses. Skill has three levels (has an MD and works as a cardiologist; has a high school degree and works as a restaurant manager; and has a primary school education and works in custodial). Language has two levels (speaks English and does not speak English), religion has two levels (Christian and Muslim), and sexuality has two levels (gay and lesbian). Finally, reason for migration has two levels (because he/she could not find work; because he/she fears government persecution). In all, this creates 192 potential profiles for respondents to evaluate.  
 
 We will present respondents with two vignettes, and they will indicate which one they see as more deserving of being admitted to the United States. One example profile might read: "Immigrant 1 is a woman from a middle-income country. She has a primary school education and works as a teacher. She speaks English, is Muslim, and identifies as lesbian. She had to leave her country because she could not find work."  
 
@@ -96,11 +96,13 @@ We are requesting a U.S. citizen subsample and the LGBT question from the Core A
 
 ## Survey Instrument
 
+\setlength\parindent{0pt}
+
 Include panel question on LGBT identity. Each respondent will be shown two sets of profiles. For each set, they will be asked the following five questions:
 
 \vspace{1cm}
 
-*1. Please carefully read the following two descriptions of potential immigrants to the U.S. Then indicate which one you personally would prefer to see admitted to the United States.*  
+*1. Please carefully read the following two descriptions of potential immigrants to the United States. Then indicate which one you personally would prefer to see admitted to the United States.*  
 
 
 > Immigrant [1/2] wishes to be admitted as an immigrant to the U.S. [He/she] comes from a [GDP] country, [Skill]. [He/she] [Language], is [Religion], and identifies as [Sexuality]. [He/she] had to leave [his/her] country because [he/she] [reason].  
@@ -116,7 +118,7 @@ Gender & \tabitem man \\
  \\
 Country GDP
 & \tabitem middle-income \\
-& \tabitem poor \\
+& \tabitem low-income \\
 
  \\
 Skill
@@ -140,7 +142,7 @@ Sexuality
  \\
 Reason for migration
 & \tabitem feared government persecution \\
-& \tabitem could not find work \\
+& \tabitem could not find work due to high unemployment \\
 \hline
 \end{tabular}
 
@@ -152,11 +154,16 @@ Example:
 \bf{Immigrant 1} & \bf{Immigrant 2} \\
 \hline
 Immigrant 1 is a woman from a middle-income country. She has a primary school education and works as a teacher. She speaks English, is Muslim, and identifies as lesbian. She had to leave her country because she could not find work.
-& Immigrant 2 is a man from a poor country. He has an MD and works as a cardiologist. He does not speak English, is Christian, and identifies as straight (that is, not gay). He has to leave his country because he feared government persecution. \\
+& Immigrant 2 is a man from a low-income country. He has an MD and works as a cardiologist. He does not speak English, is Christian, and identifies as straight (that is, not gay). He has to leave his country because he feared government persecution. \\
  \hline
 \end{tabular}  
 
-\vspace{1cm}
+\vspace{1cm}  
+
+Based on their descriptions, which of these two immigrants would you personally would prefer to see admitted to the United States?  
+
+- Immigrant 1
+- Immigrant 2
   
 The following two questions are about **immigrant 1**:  
 
