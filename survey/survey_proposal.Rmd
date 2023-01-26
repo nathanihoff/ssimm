@@ -68,10 +68,10 @@ To assess the degree to which sexuality matters as a sign of cultural similarity
 **Research Design**: We will use a conjoint survey experiment, which allows isolation of these components [@hainmueller_2014_causal]. Respondents will read two vignettes describing hypothetical immigrants and choose the one they prefer to gain entry to the United States [@lawlor_2021_deservingness; @fraser_2022_role]. 
 
 
-For the immigrant profiles, we will vary four attributes. Two are controls: gender has two levels (man and woman) and country GDP has two levels (middle-income and poor). The other attributes test our hypotheses. Skill has three levels (has an MD and works as a cardiologist; has a high school degree and works as a restaurant manager; and has a primary school education and works as a cleaner). Language has two levels (speaks English and does not speak English), religion has two levels (Christian and Muslim), and sexuality has two levels (gay/lesbian and straight). Finally, reason for migration has two levels (because he/she could not find work; because he/she fears government persecution). In all, this creates 192 potential profiles for respondents to evaluate.  
+For the immigrant profiles, we will vary four attributes. Two are controls: gender has two levels (man and woman) and country GDP has two levels (moderately wealthy and poor). The other attributes test our hypotheses. Skill has three levels (has an MD and works as a cardiologist; has a high school degree and works as a restaurant manager; and has a primary school education and works as a cleaner). Language has two levels (speaks English and does not speak English), religion has two levels (Christian and Muslim), and sexuality has two levels (gay/lesbian and straight). Finally, reason for migration has two levels (could not find work due to high unemployment; feared government persecution). In all, this creates 192 potential profiles for respondents to evaluate.  
 
 
-We will present respondents with two vignettes. They will then indicate which one they see as more deserving of being admitted to the United States. One example profile might read: "Immigrant 1 is a woman from a middle-income country. She has a primary school education and works as a teacher. She speaks English, is Muslim, and identifies as lesbian. She had to leave her country because she could not find work."  
+We will present respondents with two vignettes. They will then indicate which one they see as more deserving of being admitted to the United States. One example profile might read: "Immigrant 1 wishes to be admitted as an immigrant to the United States. She comes from a moderately wealthy country, has a primary school education, and works as a cleaner. She does not speak English, is Christian, and identifies as lesbian. She had to leave her country because she could not find work due to high unemployment."  
 
 After choosing which profile they wish to see admitted to the U.S., respondents will give a rating between 1 and 7 of each profile's deservingness and a rating of perceived sharing of American values. Further details about the survey instrument are in the Appendix.  
 
@@ -119,7 +119,7 @@ Gender & \tabitem man \\
 & \tabitem woman \\
  \\
 Country GDP
-& \tabitem middle-income \\
+& \tabitem moderately wealthy \\
 & \tabitem low-income \\
 
  \\
@@ -155,7 +155,7 @@ Example:
 \hline
 \bf{Immigrant 1} & \bf{Immigrant 2} \\
 \hline
-Immigrant 1 is a woman from a middle-income country. She has a primary school education and works as a teacher. She speaks English, is Muslim, and identifies as lesbian. She had to leave her country because she could not find work.
+Immigrant 1 is a woman from a moderately wealthy country. She has a primary school education and works as a teacher. She speaks English, is Muslim, and identifies as lesbian. She had to leave her country because she could not find work.
 & Immigrant 2 is a man from a low-income country. He has an MD and works as a cardiologist. He does not speak English, is Christian, and identifies as straight (that is, not gay). He has to leave his country because he feared government persecution. \\
  \hline
 \end{tabular}  
