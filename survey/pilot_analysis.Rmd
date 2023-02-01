@@ -1,0 +1,125 @@
+---
+output:
+  bookdown::pdf_document2:
+  # bookdown::word_document2:
+  #   reference_docx: "word-template.docx"
+    toc: no
+    number_sections: no
+    pandoc_args: !expr rmdfiltr::add_wordcount_filter(rmdfiltr::add_citeproc_filter(args = NULL))
+    latex_engine: xelatex
+    keep_tex: no
+
+header-includes:
+  - \usepackage{setspace}\doublespace
+  - \usepackage{bbm}
+editor_options: 
+  
+  chunk_output_type: console
+citeproc: no
+# fontfamily: mathpazo
+mainfont: "Times New Roman"
+fontsize: 12pt
+geometry: margin=1in
+indent: yes
+link-citations: yes
+linkcolor: blue
+bibliography: "/Users/nathan/Google Drive/Projects/2020 Same-Sex Immigrant Couples/ssimm/Same-Sex Immigration.bib"
+
+title: "Pilot Study Analysis"
+subtitle: "TESS Proposal: Skill, Sexuality, and Immigrant Deservingness"
+
+date: "`r format(Sys.time(), '%B %e, %Y')`"
+author:
+- Nathan I. Hoffmann, Department of Sociology, University of California, Los Angeles
+- Kristopher Velasco, Department of Sociology, Princeton University
+
+---
+
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = F, warning = F, message = F, cache = T, 
+                      dpi = 300)
+library(here)
+library(huxtable)
+library(haven)
+library(patchwork)
+library(cregg)
+library(tidyverse)
+
+options("yaml.eval.expr" = TRUE)
+
+theme_set(theme_classic(base_family = 'Palatino') + 
+            theme(legend.title=element_blank(),
+                  panel.grid.major.y = element_line('grey80'),
+                  legend.background = element_rect(fill = "transparent")))
+ggplot <- function(...) ggplot2::ggplot(...) + scale_color_brewer(palette="Dark2") +
+  scale_fill_brewer(palette="Dark2")
+```
+
+```{r load}
+prolific_demo <- read_csv(here('survey', 'prolific_demo.csv')) 
+pilot_raw <- read_csv(here('survey', 'pilot.csv')) %>%
+  mutate(StartDate = lubridate::mdy_hm(StartDate)) %>%
+  filter(prolific_pid %in% prolific_demo$`Participant id`) %>%
+  filter(str_detect(tolower(attention_color_5_TEXT), 'green') & str_detect(as.character(attention_number_6_TEXT), '9')) 
+
+pilot <- pilot_raw %>%
+  #mutate(choice1 = Q3, choice2 = Q3, choice3 = Q13, choice4 = Q13) %>%
+  pivot_longer(c(gender1:reason4), names_to = c('.value', 'number'), names_pattern = ('(.*)(\\d+)')) %>%
+  filter(!is.na(gender)) %>%
+  mutate(chosen = case_when(
+    choice_a == 'Immigrant 1' & number == 1 ~ 1,
+    choice_a == 'Immigrant 2' & number == 2 ~ 1,
+    choice_b == 'Immigrant 3' & number == 3 ~ 1,
+    choice_b == 'Immigrant 4' & number == 4 ~ 1,
+    T ~ 0),
+    sexuality = factor(ifelse(sexuality %in% c('lesbian', 'gay'), 'lesbian or gay', 'straight'), 
+                       levels = c('straight', 'lesbian or gay')),
+    across(c(gender, sexuality, gdp, skill, lang, religion, reason, resp_politics, resp_sexuality), function(x) factor(x))) 
+
+
+plot(mm(pilot, chosen ~ gender + sexuality + gdp + skill + lang + religion + reason, 
+        id = ~prolific_pid), 
+     vline = 0.5)
+plot(cj(pilot, chosen ~ gender + sexuality + reason + gdp + skill + lang + religion + reason, 
+        id = ~prolific_pid))
+plot(cj(pilot, chosen ~ gender + sexuality + reason + gdp + skill + lang + religion + reason, 
+        id = ~prolific_pid, by = ~resp_politics),
+        group = 'resp_politics')
+plot(cj(pilot, chosen ~ gender + sexuality + reason + gdp + skill + lang + religion + reason, 
+        id = ~prolific_pid, by = ~resp_sexuality),
+        group = 'resp_sexuality')
+
+# count(pilot_raw, resp_politics)
+
+  # mutate(trial = ifelse(number %in% c(1,2), 1, 2),
+  #        number = ifelse(number == 3, 1, number),
+  #        number = ifelse(number == 4, 2, number),
+  #        ) %>%
+  # pivot_wider(names_from = number, values_from = c(gender:reason)) %>%
+  # mutate(choice = ifelse(trial == 1, Q3, Q13),
+  #        choice = ifelse(choice %in% c('Immigrant 1', 'Immigrant 3'), 1, 2))
+
+# count(pilot, choice, sexuality_1, sexuality_2)
+# 
+# pilot %>% 
+#   filter(sexuality_1 == 'LG' & sexuality_2 == 'straight') %>%
+#   summarize(mean(choice == 1))
+# 
+# pilot %>% 
+#   filter(sexuality_1 == 'straight' & sexuality_2 == 'LG') %>%
+#   summarize(mean(choice == 2))
+# 
+# pilot %>% 
+#   filter(sexuality_1 == 'LG' & sexuality_2 == 'straight') %>%
+#   bind_rows(pilot %>%
+#               filter(sexuality_1 == 'straight' & sexuality_2 == 'LG') %>%
+#               mutate(choice = ifelse(choice == 1, 2, 1))) %>%
+#   #group_by(Q25) %>%
+#   summarize(mean(choice == 1))
+
+
+```
+
+
+
