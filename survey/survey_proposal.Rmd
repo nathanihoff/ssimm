@@ -23,7 +23,7 @@ geometry: margin=1in
 indent: yes
 link-citations: yes
 linkcolor: blue
-bibliography: "/Users/nathan/Google Drive/Projects/2020 Same-Sex Immigrant Couples/ssimm/Same-Sex Immigration.bib"
+bibliography: "/Users/nathan/My Drive/Projects/2020 Same-Sex Immigrant Couples/ssimm/Same-Sex Immigration.bib"
 
 title: "TESS Proposal: Skill, Sexuality, and Immigrant Deservingness"
 
@@ -35,6 +35,29 @@ author:
 ---
 
 \newcommand{\tabitem}{~~\llap{\textbullet}~~}
+
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = F, warning = F, message = F, cache = T, 
+                      dpi = 300)
+library(here)
+library(huxtable)
+library(haven)
+library(patchwork)
+library(cregg)
+library(rdss)
+library(DeclareDesign)
+library(tidyverse)
+
+options("yaml.eval.expr" = TRUE)
+
+theme_set(theme_classic(base_family = 'Palatino') + 
+            theme(legend.title=element_blank(),
+                  panel.grid.major.y = element_line('grey80'),
+                  legend.background = element_rect(fill = "transparent")))
+ggplot <- function(...) ggplot2::ggplot(...) + scale_color_brewer(palette="Dark2") +
+  scale_fill_brewer(palette="Dark2")
+```
 
 \newpage
 
@@ -65,21 +88,20 @@ We propose using a conjoint survey experiment to isolate these components of des
 
 To assess the degree to which sexuality matters as a sign of cultural similarity, we will randomize two other attributes of cultural similarity: language and religion. And while we theorize that the deservingness of this type of immigrant may cut across typical divisions, we still anticipate some heterogeneous effects across respondents. Namely, we hypothesize that respondents with greater cultural affinity with and support for LG communities will also view LG migrants as more deserving as well. We will measure these signals of cultural closeness as: levels of education, sexual/gender minority status, political ideology, and religiosity.
 
-**Research Design**: We will use a conjoint survey experiment, which allows isolation of these components [@hainmueller_2014_causal]. Respondents will read two vignettes describing hypothetical immigrants and choose the one they prefer to gain entry to the United States [@lawlor_2021_deservingness; @fraser_2022_role]. 
-
+**Research Design**: We will use a conjoint survey experiment, which allows isolation of these components [@hainmueller_2014_causal]. Respondents will read two vignettes describing hypothetical immigrants and choose the one they prefer to gain entry to the United States [@lawlor_2021_deservingness; @fraser_2022_role].  
 
 For the immigrant profiles, we will vary four attributes. Two are controls: gender has two levels (man and woman) and country GDP has two levels (moderately wealthy and poor). The other attributes test our hypotheses. Skill has three levels (has an MD and works as a cardiologist; has a high school degree and works as a restaurant manager; and has a primary school education and works as a cleaner). Language has two levels (speaks English and does not speak English), religion has two levels (Christian and Muslim), and sexuality has two levels (gay/lesbian and straight). Finally, reason for migration has two levels (could not find work due to high unemployment; feared government persecution). In all, this creates 192 potential profiles for respondents to evaluate.  
 
 
 We will present respondents with two vignettes. They will then indicate which one they see as more deserving of being admitted to the United States. One example profile might read: "Immigrant 1 wishes to be admitted as an immigrant to the United States. She comes from a moderately wealthy country, has a primary school education, and works as a cleaner. She does not speak English, is Christian, and identifies as lesbian. She had to leave her country because she could not find work due to high unemployment."  
 
-After choosing which profile they wish to see admitted to the U.S., respondents will give a rating between 1 and 7 of each profile's deservingness and a rating of perceived sharing of American values. Further details about the survey instrument are in the Appendix.  
+After choosing which profile they wish to see admitted to the U.S., respondents will choose which profile they believe has greater shared values with the U.S. Further details about the survey instrument are in the Appendix.  
 
-In addition to estimating average marginal component effects (AMCEs) for the attributes of interest [@hainmueller_2014_causal], we will test for the presence of heterogeneous effects for subsamples of respondents [@leeper_2020_measuring], including by political ideology, educational level, sexual/gender identity, and religiosity.   
+In addition to estimating average marginal component effects (AMCEs) for the attributes of interest [@hainmueller_2014_causal], we will estimate two other quantities. We will look at the interaction effect [@egami_2019_causal] between profile sexuality and reason for migration; we expect that sexual minorities fleeing persecution will be seen as more deserving than those looking for work, and this difference may be greater for sexual minorities than straight immigrants. We will also test for the presence of heterogeneous effects for subsamples of respondents [@leeper_2020_measuring], including by political ideology, educational level, sexual/gender identity, and religiosity.  
 
-We are requesting a U.S. citizen subsample and the LGBT question from the Core Adult Profile. Each respondent will be shown the survey instrument twice, for a total of ten questions plus two sets of vignettes. With these 12 items and the subsample request, we anticipate a sample size of 1,710 evaluating 3,420 sets of profiles, which our power analysis suggests is sufficient to detect our effects of interest.  
+We are requesting a U.S. citizen subsample and the LGBT question from the Core Adult Profile. Each respondent will be shown the survey instrument four times, for a total of eight questions plus four sets of vignettes. With these 12 items and the subsample request, we anticipate a sample size of 1,710 evaluating 13,680 sets of profiles, which our `DeclareDesign` [@blair_2023_research] power analysis suggests is sufficient to detect our effect of interest at a sufficient level of 85 percent (see appendix).  
 
-**Pretest Results**: Our pilot study...  
+**Pilot Study Results**: We conducted a pilot study of 100 respondents using Prolific Academic, showing each respondent two sets of profiles. For lesbian or gay profiles, we see an effect size of 0.032 in the expected direction; respondents are 3.2 percent more likely to choose a gay or lesbian immigrant over a straight one.  Subgroup analysis using marginal means [@leeper_2020_measuring] shows that Republicans, Christians, and straight respondents see lesbian and gay migrants as less deserving. See appendix for figures.  
 
 **Contribution**: This study contributes to literature on immigrant deservingness and sexual minorities. Despite the rapid rise of LG immigrants in the U.S., we know little about how the American public views these immigrants. Furthermore, previous studies of immigrant deservingness have rarely considered how cultural similarity might shape respondents' choices. This research will clarify this area for scholars of immigration and sexual minorities, inform policymakers of public opinion, and provide activists for immigrant and queer rights with tools to shape their advocacy work.
 
@@ -100,11 +122,11 @@ We are requesting a U.S. citizen subsample and the LGBT question from the Core A
 
 \setlength\parindent{0pt}
 
-Include panel question on LGBT identity. Each respondent will be shown two sets of profiles. For each set, they will be asked the following five questions:
+Include panel question on LGBT identity. Each respondent will be shown four sets of profiles. For each set, they will be asked the following two questions:
 
 \vspace{1cm}
 
-*1. Please carefully read the following two descriptions of potential immigrants to the United States. Then indicate which one you personally would prefer to see admitted to the United States.*  
+*Please carefully read the following two descriptions of potential immigrants to the United States. Then indicate which one you personally would prefer to see admitted to the United States.*  
 
 
 > Immigrant [1/2] wishes to be admitted as an immigrant to the U.S. [He/she] comes from a [GDP] country, [Skill]. [He/she] [Language], is [Religion], and identifies as [Sexuality]. [He/she] had to leave [his/her] country because [he/she] [reason].  
@@ -156,36 +178,274 @@ Example:
 \bf{Immigrant 1} & \bf{Immigrant 2} \\
 \hline
 Immigrant 1 is a woman from a moderately wealthy country. She has a primary school education and works as a teacher. She speaks English, is Muslim, and identifies as lesbian. She had to leave her country because she could not find work.
-& Immigrant 2 is a man from a low-income country. He has an MD and works as a cardiologist. He does not speak English, is Christian, and identifies as straight (that is, not gay). He has to leave his country because he feared government persecution. \\
+& Immigrant 2 is a man from a low-income country. He has an MD and works as a cardiologist. He does not speak English, is Christian, and identifies as straight (that is, not gay). He had to leave his country because he feared government persecution. \\
  \hline
 \end{tabular}  
 
 \vspace{1cm}  
 
-Based on their descriptions, which of these two immigrants would you personally would prefer to see admitted to the United States?  
+1. *Based on their descriptions, which of these two immigrants would you personally prefer to see admitted to the United States?*  
 
-- Immigrant 1
-- Immigrant 2
+- Immigrant 1 should be admitted
+- Immigrant 2 should be admitted
   
-The following two questions are about **immigrant 1**:  
+2. *Based on their descriptions, which of these two immigrants do you think has greater shared values with the United States?*  
 
-2. *On a scale from 1 to 7, where 1 signifies that the U.S. should absolutely not admit immigrant 1 and 7 signifies that the U.S. should definitely admit this immigrant, how would you rate immigrant 1?*  
+- Immigrant 1 has greater shared values with the U.S.
+- Immigrant 2 has greater shared values with the U.S.
 
-3. *On a scale from 1 to 7, where 1 signifies having no shared values and 7 signifies a great deal of shared values, to what degree do you think immigrant 1 has shared values with the U.S.?*  
+\newpage
+
+## Pilot Study Results
+
+We conducted a pilot study of 100 U.S. citizens using Prolific Academic, showing each respondent two sets of profiles as described in the survey instrument above. We also asked respondents key questions that are included in the TESS standard data delivery (political ideology and religion) and AmeriSpeak Core Adult Profile (sexuality).
+
+```{r load}
+prolific_demo <- read_csv(here('survey', 'prolific_demo.csv')) 
+pilot_raw <- read_csv(here('survey', 'pilot.csv')) %>%
+  mutate(StartDate = lubridate::mdy_hm(StartDate)) %>%
+  filter(prolific_pid %in% prolific_demo$`Participant id`) %>%
+  filter(str_detect(tolower(attention_color_5_TEXT), 'green') & str_detect(as.character(attention_number_6_TEXT), '9')) 
+
+pilot <- pilot_raw %>%
+  #mutate(choice1 = Q3, choice2 = Q3, choice3 = Q13, choice4 = Q13) %>%
+  pivot_longer(c(gender1:reason4, rating1:value2, rating3:value4), names_to = c('.value', 'number'), names_pattern = ('(.*)(\\d+)')) %>%
+  filter(!is.na(gender)) %>%
+  mutate(chosen = case_when(
+    choice_a == 'Immigrant 1' & number == 1 ~ 1,
+    choice_a == 'Immigrant 2' & number == 2 ~ 1,
+    choice_b == 'Immigrant 3' & number == 3 ~ 1,
+    choice_b == 'Immigrant 4' & number == 4 ~ 1,
+    T ~ 0),
+    sexuality = factor(ifelse(sexuality %in% c('lesbian', 'gay'), 'lesbian or gay', 'straight'), 
+                       levels = c('straight', 'lesbian or gay')),
+    across(c(gender, sexuality, gdp, skill, lang, religion, reason), function(x) factor(x)),
+    across(c(rating, value), function(x) as.numeric(substr(x, 1,1)))) %>%
+  mutate(skill = recode(skill, 
+                        'has a high school degree, and works as a restaurant manager' = 'high school',
+                        'has a primary school education, and works as a cleaner' = 'primary school',
+                        'has an MD, and works as a cardiologist' = 'MD'),
+         reason = recode(reason, 'could not find work due to high unemployment' = 'could not find work'),
+         resp_religion = factor(case_when(
+           resp_religion %in% c('Other Christian', 'Protestant (Baptist, Methodist, Non-denominational, Lutheran, Presbyterian, Pentecostal, Episcopalian, Reformed, Church of Christ, Jehovah’s Witness, etc.)',
+                                'Roman Catholic (Catholic)') ~ 'Christian',
+           resp_religion %in% c('Agnostic (not sure if there is a God)',
+                                'Atheist (do not believe in God)',
+                                'Nothing in particular') ~ 'Atheist/not religious',
+           T ~ 'Other')),
+         resp_politics = factor(ifelse(
+             resp_politics %in% c('Independent', 'None of these'), 'other',
+             resp_politics)),
+         resp_sexuality = factor(case_when(
+           resp_sexuality %in% c("I don't know the answer", 'Something else') ~ 'Other',
+           resp_sexuality %in% c('Bisexual', 'Lesbian or gay') ~ 'Lesbian/gay/bisexual',
+           resp_sexuality == 'Straight (that is, not gay or lesbian)' ~ 'Straight'
+         ))
+  )
 
 
-The following two questions are about **immigrant 2**:  
-
-4. *On a scale from 1 to 7, where 1 signifies that the U.S. should absolutely not admit immigrant 1 and 7 signifies that the U.S. should definitely admit this immigrant, how would you rate immigrant 1?*  
-
-5. *On a scale from 1 to 7, where 1 signifies having no shared values and 7 signifies a great deal of shared values, to what degree do you think immigrant 1 has shared values with the U.S.?*
 
 
+```
 
+
+```{r general, fig.height = 3, fig.cap = 'Estimated marginal means and AMCEs for Prolific Academic pilot study of 100 respondents each shown 2 sets of profiles. Standard errors are clustered within respondent.'}
+(plot(mm(pilot, chosen ~  sexuality, 
+        id = ~prolific_pid)) + geom_vline(xintercept = 0.5, size = .2)) +
+  plot(cj(pilot, chosen ~  sexuality, 
+        id = ~prolific_pid)) &
+  theme()
+```
+
+```{r interaction, fig.height = 3, fig.cap = 'Marginal means of the interaction between sexuality and the reason for migration'}
+int_cj <- cj(pilot, chosen ~ sexuality, id = ~prolific_pid, estimate = 'mm', by = ~reason)
+int_cj_dif <- cj(pilot, chosen ~ sexuality, id = ~prolific_pid, estimate = 'mm_diff', by = ~reason)
+rbind(int_cj, int_cj_dif) %>%
+  mutate(BY = recode(BY, 'could not find work' = 'work',
+                     'feared government persecution' = 'persecution',
+                     'feared government persecution - could not find work' = 'persecution - work')) %>%
+  plot() + 
+  ggplot2::facet_wrap(~BY, ncol = 3) +
+  # geom_vline(xintercept = 0.5, size = .2)
+  geom_vline(aes(xintercept = ifelse(statistic == 'mm', 0.5, 0)), size = .2)
+```
+
+\newpage
+
+```{r subgroup-politics, fig.height = 5, fig.cap = 'Marginal means for subgroups'}
+(plot(cj(pilot, chosen ~ sexuality, estimate = 'mm',
+        id = ~prolific_pid, by = ~ resp_politics),
+        group = 'resp_politics') +
+  geom_vline(xintercept = .5, size = .2) +
+  theme(legend.position = 'right')) /
+(plot(cj(pilot, chosen ~ sexuality, estimate = 'mm',
+        id = ~prolific_pid, by = ~resp_religion),
+        group = 'resp_religion') +
+  geom_vline(xintercept = .5, size = .2) +
+  theme(legend.position = 'right')) /
+(plot(cj(pilot, chosen ~ sexuality, estimate = 'mm',
+        id = ~prolific_pid, by = ~ resp_sexuality),
+        group = 'resp_sexuality') +
+  geom_vline(xintercept = .5, size = .2) +
+  theme(legend.position = 'right'))
+```
+
+\newpage
 
 ## Power analysis
 
+```{r power-calc, eval = F}
+set.seed(185)
 
+conjoint_power <- function(n, pairs, interaction = F){
+  
+  # helper
+  Y_function <- function(data) {
+    data %>%
+      group_by(pair) %>%
+      mutate(Y = if_else(E == max(E), 1, 0)) %>%
+      ungroup
+  }
+  
+  # design declaration
+  # You can change the number of subjects, or pairs to be rated
+  # You can also change how many attributes and what their levels are.  
+  # You can change what your beliefs are about what the effects will be
+  design <- 
+    declare_population(
+      subject = add_level(N = n),
+      pair = add_level(N = pairs),
+      candidate = add_level(N = 2, U = runif(N))
+    ) +
+    declare_assignment(woman = complete_ra(N, conditions = c(1, 0))) +
+    declare_assignment(LG = complete_ra(N, conditions = c(1,0))) +
+    declare_assignment(persecution = complete_ra(N, conditions = c(1,0))) +
+    declare_assignment(moderately_wealthy = complete_ra(N, conditions = c(1,0))) +
+    declare_assignment(primary_ed = complete_ra(N, conditions = c(1,0))) +
+    declare_assignment(English = complete_ra(N, conditions = c(1,0))) +
+    declare_assignment(Muslim = complete_ra(N, conditions = c(1,0))) +
+    declare_assignment(education = complete_ra(N, conditions = c('primary', 'college', 'HS'))) +
+    declare_step(
+      E = 
+        -0.091 * woman  + 
+        0.032 * LG  +
+        0.23 * persecution +
+        -0.052 * moderately_wealthy +
+        -.15 * primary_ed +
+        -.15 * (education == "primary") +
+        0.18 * (education == "college") +
+        0.016 * English +
+        0.045 * Muslim +
+        U,
+      handler = fabricate) +
+    declare_measurement(handler = Y_function) +
+    declare_estimator(Y ~ woman + LG + persecution + moderately_wealthy + education + English + Muslim,
+                      model = lm_robust, term = TRUE)
+  
+  
+  # Simulate the experiment 500 times
+  simulations <- simulate_design(design)
+
+  # Calculate diagnosands -- here i just did the power
+  simulations %>%
+    group_by(term) %>%
+    summarise(power = mean(p.value <= 0.05)) %>%
+    mutate(N = n,
+           pairs = pairs)
+  
+  diagnose_design(design)
+}
+
+
+power_analysis <- conjoint_power(n = 1710, pairs = 4)
+
+write_csv(power_analysis$diagnosands_df, here('survey', 'power_analysis.csv'))
+```
+
+```{r power2, eval = F}
+library(rdss) # for helper functions
+library(cjoint)
+
+set.seed(1859)
+
+# Design features
+N_subjects <- 1710
+N_tasks <- 4
+
+# Attributes and levels
+levels_list =
+  list(
+    gender = c("man", "woman"),
+    sexuality = c("straight", "lesbian or gay"),
+    reason = c('work', 'persecution'),
+    gdp = c('middle', 'low'),
+    skill = c('primary', 'HS', 'college'),
+    language = c('English', 'no English'),
+    religion = c('Christian', 'Muslim')
+  )
+
+# Conjectured utility function
+conjoint_utility <-
+  function(data){
+    data %>%
+      mutate(U = -0.091 * (gender == 'woman')  + 
+      0.032 * (sexuality == 'lesbian or gay') +
+      0.23 * (reason == 'persecution') +
+      -0.052 * (gdp == 'middle') +
+      -.15 * (skill == "primary") +
+      0.18 * (skill == "college") +
+      0.016 * (language == 'English') +
+      0.045 * (religion == 'Muslim') +
+      uij)
+  }
+
+declaration_out <-
+  declare_model(
+    subject = add_level(N = N_subjects),
+    task = add_level(N = N_tasks, task = 1:N_tasks),
+    profile = add_level(
+      N = 2,
+      profile = 1:2,
+      uij = rnorm(N, sd = 1)
+    )
+  ) +
+  declare_inquiry(handler = conjoint_inquiries,
+                  levels_list = levels_list,
+                  utility_fn = conjoint_utility) +
+  declare_assignment(handler = conjoint_assignment,
+                     levels_list = levels_list) +
+  declare_measurement(handler = conjoint_measurement,
+                      utility_fn = conjoint_utility) +
+  declare_estimator(choice ~ gender + sexuality + gdp + skill + language + religion + reason,
+                    respondent.id = "subject",
+                    .method = amce)
+
+dignose_out <- diagnose_design(declaration_out, sims = 500)
+
+write_csv(dignose_out$diagnosands_df, here('survey', 'power_analysis2.csv'))
+```
+
+
+```{r, power}
+# read_csv(here('survey', 'power_analysis2.csv')) %>%
+#   select(inquiry, mean_estimand, mean_estimate, bias, sd_estimate, rmse, power, coverage) %>%
+#   kableExtra::kable(booktabs = T, digits = 3, line.sep = '',
+#                     caption = 'DeclareDesign power analysis of the lesbian/gay attribute in a conjoint design, based on 500 simulations of 1,710 respondents being shown 4 sets of profiles. We assume that all effect sizes estimated in our pilot study are the true effect sizes.') %>%
+#   kableExtra::kable_styling(latex_options = "hold_position") %>%
+#   kableExtra::row_spec(7, bold = T)
+
+
+read_csv(here('survey', 'power_analysis.csv')) %>%
+  #filter(term == 'LG') %>%
+  select_if(~ !any(is.na(.))) %>%
+  select(-c(design, estimator, outcome, `se(mean_estimate)`, `se(sd_estimate)`)) %>%
+  mutate(term = ifelse(term == 'LG', 'Lesbian or gay', term)) %>%
+  kableExtra::kable(booktabs = T, digits = 3, linesep = '',
+                    caption = 'DeclareDesign power analysis of the lesbian/gay attribute in a conjoint design, based on 500 simulations of 1,710 respondents being shown 4 sets of profiles. We assume that all effect sizes estimated in our pilot study are the true effect sizes.') %>%
+  kableExtra::kable_styling(latex_options = "hold_position") %>%
+  kableExtra::row_spec(5, bold = T)
+
+```
 
 
 
