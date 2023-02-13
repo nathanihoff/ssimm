@@ -23,7 +23,7 @@ geometry: margin=1in
 indent: yes
 link-citations: yes
 linkcolor: blue
-bibliography: "/Users/nathan/Google Drive/Projects/2020 Same-Sex Immigrant Couples/ssimm/Same-Sex Immigration.bib"
+bibliography: "/Users/nathan/My Drive/Projects/2020 Same-Sex Immigrant Couples/ssimm/Same-Sex Immigration.bib"
 
 title: "Pilot Study Analysis"
 subtitle: "TESS Proposal: Skill, Sexuality, and Immigrant Deservingness"
@@ -44,6 +44,8 @@ library(huxtable)
 library(haven)
 library(patchwork)
 library(cregg)
+library(rdss)
+library(DeclareDesign)
 library(tidyverse)
 
 options("yaml.eval.expr" = TRUE)
@@ -65,7 +67,7 @@ pilot_raw <- read_csv(here('survey', 'pilot.csv')) %>%
 
 pilot <- pilot_raw %>%
   #mutate(choice1 = Q3, choice2 = Q3, choice3 = Q13, choice4 = Q13) %>%
-  pivot_longer(c(gender1:reason4), names_to = c('.value', 'number'), names_pattern = ('(.*)(\\d+)')) %>%
+  pivot_longer(c(gender1:reason4, rating1:value2, rating3:value4), names_to = c('.value', 'number'), names_pattern = ('(.*)(\\d+)')) %>%
   filter(!is.na(gender)) %>%
   mutate(chosen = case_when(
     choice_a == 'Immigrant 1' & number == 1 ~ 1,
@@ -75,14 +77,74 @@ pilot <- pilot_raw %>%
     T ~ 0),
     sexuality = factor(ifelse(sexuality %in% c('lesbian', 'gay'), 'lesbian or gay', 'straight'), 
                        levels = c('straight', 'lesbian or gay')),
-    across(c(gender, sexuality, gdp, skill, lang, religion, reason, resp_politics, resp_sexuality), function(x) factor(x))) 
+    across(c(gender, sexuality, gdp, skill, lang, religion, reason, resp_politics, resp_sexuality), function(x) factor(x)),
+    across(c(rating, value), function(x) as.numeric(substr(x, 1,1)))) %>%
+  mutate(skill = recode(skill, 
+                        'has a high school degree, and works as a restaurant manager' = 'high school',
+                        'has a primary school education, and works as a cleaner' = 'primary school',
+                        'has an MD, and works as a cardiologist' = 'MD'),
+         reason = recode(reason, 'could not find work due to high unemployment' = 'could not find work'))
 
 
+
+
+
+
+```
+
+
+```{r general}
 plot(mm(pilot, chosen ~ gender + sexuality + gdp + skill + lang + religion + reason, 
         id = ~prolific_pid), 
      vline = 0.5)
 plot(cj(pilot, chosen ~ gender + sexuality + reason + gdp + skill + lang + religion + reason, 
         id = ~prolific_pid))
+```
+
+```{r interaction}
+int_cj <- cj(pilot, chosen ~ sexuality, id = ~prolific_pid, estimate = 'amce', by = ~reason)
+int_cj_dif <- cj(pilot, chosen ~ sexuality, id = ~prolific_pid, estimate = 'amce_diff', by = ~reason)
+plot(rbind(int_cj, int_cj_dif)) + ggplot2::facet_wrap(~BY, ncol = 3L)
+
+int_cj <- cj(pilot, chosen ~ gender + gdp + skill + lang + religion + reason, 
+             id = ~prolific_pid, estimate = 'mm', by = ~sexuality)
+int_cj_dif <- cj(pilot, chosen ~ gender + gdp + skill + lang + religion + reason, 
+                 id = ~prolific_pid, estimate = 'mm_diff', by = ~sexuality)
+plot(rbind(int_cj, int_cj_dif)) + 
+  facet_wrap(~BY, scales = 'free_x') +
+  geom_vline(aes(xintercept = ifelse(statistic == 'mm', 0.5, 0)), linetype = 2)
+
+
+cj(pilot, chosen ~ reason, 
+             id = ~prolific_pid, estimate = 'amce_diff', by = ~sexuality)
+
+cj(pilot, chosen ~ reason, 
+             id = ~prolific_pid, estimate = 'amce', by = ~sexuality)
+```
+
+```{r ratings}
+plot(mm(pilot, rating ~ gender + sexuality + gdp + skill + lang + religion + reason, 
+        id = ~prolific_pid), 
+     vline = mean(pilot$rating))+ labs(title = 'Deservingness')
+plot(cj(pilot, rating ~ gender + sexuality + reason + gdp + skill + lang + religion + reason, 
+        id = ~prolific_pid))
+```
+
+```{r values}
+plot(mm(pilot, value ~ gender + sexuality + gdp + skill + lang + religion + reason, 
+        id = ~prolific_pid), 
+     vline = mean(pilot$value)) + labs(title = 'Shared values')
+plot(cj(pilot, value ~ gender + sexuality + reason + gdp + skill + lang + religion + reason, 
+        id = ~prolific_pid)) +
+  labs(title = 'Shared values')
+
+pilot %>%
+  group_by(sexuality) %>%
+  summarize(mean(value))
+```
+
+
+```{r subgroups}
 plot(cj(pilot, chosen ~ gender + sexuality + reason + gdp + skill + lang + religion + reason, 
         id = ~prolific_pid, by = ~resp_politics),
         group = 'resp_politics')
@@ -117,9 +179,263 @@ plot(cj(pilot, chosen ~ gender + sexuality + reason + gdp + skill + lang + relig
 #               mutate(choice = ifelse(choice == 1, 2, 1))) %>%
 #   #group_by(Q25) %>%
 #   summarize(mean(choice == 1))
-
-
 ```
 
+```{r power, eval = F}
+# Design features
+N_subjects <- 1710
+N_tasks <- 2
+
+# Attributes and levels
+levels_list =
+  list(
+    gender = c("man", "woman"),
+    sexuality = c("straight", "lesbian or gay"),
+    reason = c('work', 'persecution'),
+    gdp = c('middle', 'low'),
+    skill = c('primary', 'HS', 'college'),
+    language = c('English', 'no English'),
+    religion = c('Christian', 'Muslim')
+  )
+
+# Conjectured utility function
+conjoint_utility <-
+  function(data){
+    data %>%
+      mutate(U =  -0.091 * (gender == 'woman')  + 
+      0.032 * (sexuality == 'lesbian or gay') +
+      # 0.23 * persecution +
+      # -0.052 * moderately_wealthy +
+      # -.15 * primary_ed +
+      # -.15 * (education == "primary") +
+      # 0.18 * (education == "college") +
+      # 0.016 * English +
+      # 0.045 * Muslim +
+      U, + uij)
+  }
+
+declaration_17.5 <-
+  declare_model(
+    subject = add_level(N = N_subjects),
+    task = add_level(N = N_tasks, task = 1:N_tasks),
+    profile = add_level(
+      N = 2,
+      profile = 1:2,
+      uij = rnorm(N, sd = 1)
+    )
+  ) +
+  declare_inquiry(handler = conjoint_inquiries,
+                  levels_list = levels_list,
+                  utility_fn = conjoint_utility) +
+  declare_assignment(handler = conjoint_assignment,
+                     levels_list = levels_list) +
+  declare_measurement(handler = conjoint_measurement,
+                      utility_fn = conjoint_utility) +
+  declare_estimator(choice ~ gender + party + region,
+                    respondent.id = "subject",
+                    .method = amce)
+
+
+
+# Design features
+N_subjects <- 500
+N_tasks <- 3
+
+# Attributes and levels
+levels_list =
+  list(
+    gender = c("Man", "Woman"),
+    party = c("Left", "Right"),
+    region = c("North", "South", "East", "West")
+  )
+
+# Conjectured utility function
+conjoint_utility <-
+  function(data){
+    data %>%
+      mutate(U = 0.25*(gender == "Woman")*(region %in% c("North", "East")) +
+               0.5*(party == "Right")*(region %in% c("North", "South")) + uij)
+  }
+
+declaration_17.5 <-
+  declare_model(
+    subject = add_level(N = N_subjects),
+    task = add_level(N = N_tasks, task = 1:N_tasks),
+    profile = add_level(
+      N = 2,
+      profile = 1:2,
+      uij = rnorm(N, sd = 1)
+    )
+  ) +
+  declare_inquiry(handler = conjoint_inquiries,
+                  levels_list = levels_list,
+                  utility_fn = conjoint_utility) +
+  declare_assignment(handler = conjoint_assignment,
+                     levels_list = levels_list) +
+  declare_measurement(handler = conjoint_measurement,
+                      utility_fn = conjoint_utility) +
+  declare_estimator(choice ~ gender + party + region,
+                    #respondent.id = "subject",
+                    .method = amce)
+
+diagnosis_17.4 <- diagnose_design(declaration_17.5)
+```
+
+```{r power2, eval = F}
+conjoint_power <- function(n, pairs, interaction = F){
+  
+  # helper
+  Y_function <- function(data) {
+    data %>%
+      group_by(pair) %>%
+      mutate(Y = if_else(E == max(E), 1, 0)) %>%
+      ungroup
+  }
+  
+  # design declaration
+  # You can change the number of subjects, or pairs to be rated
+  # You can also change how many attributes and what their levels are.  
+  # You can change what your beliefs are about what the effects will be
+  design <- 
+    declare_population(
+      subject = add_level(N = n),
+      pair = add_level(N = pairs),
+      candidate = add_level(N = 2, U = runif(N))
+    ) +
+    declare_assignment(woman = complete_ra(N, conditions = c(1, 0))) +
+    declare_assignment(LG = complete_ra(N, conditions = c(1,0))) +
+    declare_assignment(persecution = complete_ra(N, conditions = c(1,0))) +
+    declare_assignment(moderately_wealthy = complete_ra(N, conditions = c(1,0))) +
+    declare_assignment(primary_ed = complete_ra(N, conditions = c(1,0))) +
+    declare_assignment(English = complete_ra(N, conditions = c(1,0))) +
+    declare_assignment(Muslim = complete_ra(N, conditions = c(1,0))) +
+    declare_assignment(education = complete_ra(N, conditions = c('primary', 'college', 'HS'))) +
+    declare_step(
+      E = 
+        -0.091 * woman  + 
+        0.032 * LG  +
+        0.23 * persecution +
+        -0.052 * moderately_wealthy +
+        -.15 * primary_ed +
+        -.15 * (education == "primary") +
+        0.18 * (education == "college") +
+        0.016 * English +
+        0.045 * Muslim +
+        U,
+      handler = fabricate) +
+    declare_measurement(handler = Y_function) +
+    declare_estimator(Y ~ woman + LG + persecution + moderately_wealthy + education + English + Muslim,
+                      model = lm_robust, term = TRUE)
+  
+  
+  # Simulate the experiment 500 times
+  simulations <- simulate_design(design)
+  
+  # Calculate diagnosands -- here i just did the power
+  simulations %>%
+    group_by(term) %>%
+    summarise(power = mean(p.value <= 0.05)) %>%
+    mutate(N = n, 
+           pairs = pairs)
+}
+
+power_2 <- conjoint_power(n = 1710, pairs = 2)
+power_3 <- conjoint_power(n = 1710, pairs = 3)
+power_4 <- conjoint_power(n = 1710, pairs = 4)
+
+power_2_small <- conjoint_power(n = 1485, pairs = 2)
+power_3_small <- conjoint_power(n = 1485, pairs = 3)
+power_4_small <- conjoint_power(n = 1485, pairs = 4)
+
+power_2_large <- conjoint_power(n = 2000, pairs = 2)
+power_3_large <- conjoint_power(n = 2000, pairs = 3)
+power_4_large <- conjoint_power(n = 2000, pairs = 4)
+
+bind_rows(power_2, power_3, power_4, power_2_small, power_3_small, power_4_small,
+          power_2_large, power_3_large, power_4_large) %>%
+  filter(term == 'LG')
+
+# diagnose_design(design)
+```
+
+```{r power-interaction, eval = F}
+conjoint_power <- function(n, pairs, sims = 500){
+  
+  # helper
+  Y_function <- function(data) {
+    data %>%
+      group_by(pair) %>%
+      mutate(Y = if_else(E == max(E), 1, 0)) %>%
+      ungroup
+  }
+  
+  # design declaration
+  # You can change the number of subjects, or pairs to be rated
+  # You can also change how many attributes and what their levels are.  
+  # You can change what your beliefs are about what the effects will be
+  design <- 
+    declare_population(
+      subject = add_level(N = n),
+      pair = add_level(N = pairs),
+      candidate = add_level(N = 2, U = runif(N))
+    ) +
+    declare_assignment(woman = complete_ra(N, conditions = c(1, 0))) +
+    declare_assignment(LG = complete_ra(N, conditions = c(1,0))) +
+    declare_assignment(persecution = complete_ra(N, conditions = c(1,0))) +
+    declare_assignment(moderately_wealthy = complete_ra(N, conditions = c(1,0))) +
+    declare_assignment(primary_ed = complete_ra(N, conditions = c(1,0))) +
+    declare_assignment(English = complete_ra(N, conditions = c(1,0))) +
+    declare_assignment(Muslim = complete_ra(N, conditions = c(1,0))) +
+    declare_assignment(education = complete_ra(N, conditions = c('primary', 'college', 'HS'))) +
+    declare_step(
+      E = 
+        -0.091 * woman  + 
+        0.12 * LG * persecution  +
+        0.03 * LG +
+        0.15 * persecution +
+        #0.23 * persecution +
+        -0.052 * moderately_wealthy +
+        -.15 * primary_ed +
+        -.15 * (education == "primary") +
+        0.18 * (education == "college") +
+        0.016 * English +
+        0.045 * Muslim +
+        U,
+      handler = fabricate) +
+    declare_measurement(handler = Y_function) +
+    declare_estimator(Y ~ woman + LG*persecution + moderately_wealthy + education + English + Muslim,
+                      model = lm_robust, term = TRUE)
+  
+  
+  # Simulate the experiment 500 times
+  simulations <- simulate_design(design, sims = sims)
+  # 
+  # Calculate diagnosands -- here i just did the power
+  simulations %>%
+    group_by(term) %>%
+    summarise(power = mean(p.value <= 0.05)) %>%
+    mutate(N = n,
+           pairs = pairs)
+  
+  # diagnose_design(design, sims = sims)
+}
+
+
+power_2 <- conjoint_power(n = 1710, pairs = 2)
+power_3 <- conjoint_power(n = 1710, pairs = 3)
+power_4 <- conjoint_power(n = 1710, pairs = 4)
+
+power_2_small <- conjoint_power(n = 1485, pairs = 2)
+power_3_small <- conjoint_power(n = 1485, pairs = 3)
+power_4_small <- conjoint_power(n = 1485, pairs = 4)
+
+power_2_large <- conjoint_power(n = 2000, pairs = 2)
+power_3_large <- conjoint_power(n = 2000, pairs = 3)
+power_4_large <- conjoint_power(n = 2000, pairs = 4)
+
+bind_rows(power_2, power_3, power_4, power_2_small, power_3_small, power_4_small,
+          power_2_large, power_3_large, power_4_large) %>%
+  filter(term == 'LG')
+```
 
 
