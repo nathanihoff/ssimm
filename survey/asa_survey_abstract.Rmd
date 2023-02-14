@@ -8,9 +8,7 @@ output:
     pandoc_args: !expr rmdfiltr::add_wordcount_filter(rmdfiltr::add_citeproc_filter(args = NULL))
     latex_engine: xelatex
     keep_tex: no
-
 header-includes:
-#  - \usepackage{setspace}\doublespace
   - \usepackage{bbm}
 editor_options: 
   
@@ -25,15 +23,12 @@ link-citations: yes
 linkcolor: blue
 bibliography: "/Users/nathan/My Drive/Projects/2020 Same-Sex Immigrant Couples/ssimm/Same-Sex Immigration.bib"
 csl: chicago-author-date.csl
-
 title: "Skill, Sexuality, and Immigrant Deservingness"
 subtitle: "ASA 2023 Submission"
-
 # date: "`r format(Sys.time(), '%B %e, %Y')`"
 author:
 - Nathan I. Hoffmann, Department of Sociology, University of California, Los Angeles
 - Kristopher Velasco, Department of Sociology, Princeton University
-
 ---
 
 \newcommand{\tabitem}{~~\llap{\textbullet}~~}
@@ -98,6 +93,7 @@ It is therefore important to disentangle cultural theories of immigrant deservin
 # Methods 
 
 We use a conjoint survey experiment to isolate these components of deservingness [@hainmueller_2014_causal]. A conjoint design allows reliable estimation of causal effects of multiple attributes on hypothetical choices [@bansak_2021_conjoint]. It also allows estimation of interaction effects [@egami_2019_causal] and heterogeneous effects based on respondent attributes [@leeper_2020_measuring].  
+
 Despite the recent rise of LG immigrants in the U.S., sexuality has been under-explored in studies of immigrant deservingness.^[@lawlor_2021_deservingness include persecution due to sexual orientation (along with religion) as a “humanitarian deservingness cues” for hypothetical asylum seeker profiles, but not for refugee profiles, and they do not disaggregate these two cues. @hedegaard_2022_attitudes list "sexuality" as a possible form of persecution for hypothetical refugee profiles, along with race, religion, nationality, or political orientation.]. We use sexual minority status as a measure of cultural similarity that overcomes these issues. Sexual minorities are present throughout the world, avoiding issues of country-level correlates. The present era is characterized by rapidly changing policies and attitudes regarding sexual minorities, as well as substantial global heterogeneity. A large majority of Americans now support same-sex marriage and other rights for same-sex couples [@ofosu_2019_samesex]. The proposed study will be one of the first survey experiments to consider immigrant sexuality explicitly.  
 
 To assess the degree to which sexuality matters as a sign of cultural similarity, we randomize two other attributes of cultural similarity: language and religion. To examine the cultural similarity theory explicitly, we also ask respondents to choose which profile they see as more culturally similar to the U.S. Furthermore, while we theorize that the deservingness of this type of immigrant may cut across typical divisions, we anticipate some heterogeneous effects across respondents. Namely, we hypothesize that respondents with greater cultural affinity with and support for LG communities will view LG migrants as more deserving. We measure the following signals of respondents' cultural closeness: educational attainment, sexual/gender minority status, political party affiliation, and religiosity.  
@@ -114,10 +110,9 @@ After choosing which profile they wish to see admitted to the U.S., respondents 
 
 In addition to estimating average marginal component effects (AMCEs) for the attributes of interest [@hainmueller_2014_causal], we estimate two other quantities. We look at the interaction effect [@egami_2019_causal] between profile sexuality and reason for migration; we expect that sexual minorities fleeing persecution will be seen as more deserving than those looking for work, and this difference may be greater for sexual minorities than straight immigrants. We also test for the presence of heterogeneous effects for subsamples of respondents [@leeper_2020_measuring], including by political party affiliation, educational level, sexual/gender identity, and religiosity.  
 
-We have applied to Time-sharing Experiments for the Social Sciences (TESS). If our application is success, they will send our survey to a representative sample of adults in the United States using NORC's AmeriSpeak Panel. If TESS does not choose our proposal, we will use university research funds to conduct our survey.   
-
 Each respondent is shown the survey instrument four times, for a total of eight questions plus four sets of vignettes. We anticipate a sample size of 1,710 evaluating 13,680 sets of profiles, which our `DeclareDesign` [@blair_2023_research] power analysis suggests is sufficient to detect our effect of interest at a sufficient level of 85 percent (see appendix).  
 
+We have applied to Time-sharing Experiments for the Social Sciences (TESS). If our application is success, they will send our survey to a representative sample of adults in the United States using NORC's AmeriSpeak Panel. If TESS does not choose our proposal, we will use university research funds to conduct our survey.   
 
 # Preliminary Results 
 
