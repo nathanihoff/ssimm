@@ -1,0 +1,795 @@
+---
+output:
+  beamer_presentation:
+    keep_tex: no
+    incremental: no
+    toc: no
+    latex_engine: pdflatex
+    slide_level: 2
+    include:
+      in_header: ucla_beamer.tex
+    fig_width: 12.5
+    
+
+# header-includes:
+#   - \AtBeginDocument{\title[Mixed-Citizenship, Same-Sex Unions]{Policy Effects on Mixed-Citizenship, Same-Sex Unions: A Triple DIfferences Analysis}}
+#   -\AtBeginDocument{\author[Hoffmann \& Velasco]{ Nathan I. Hoffmann, Sociology, UCLA
+#  \\ Kristopher Velasco, Sociology, Princeton}}
+
+
+title: "Policy Effects on Mixed-Citizenship, Same-Sex Unions: A Triple-Difference Analysis"
+subtitle: "ESS 2023"
+
+
+author: |
+  | Nathan I. Hoffmann, Department of Sociology, UCLA
+  | Kristopher Velasco, Depatment of Sociology, Princeton
+
+date: "UCLA & Princeton"
+---
+
+```{r setup, include=F}
+library(knitr)
+library(broom)
+library(srvyr)
+library(huxtable)
+library(sandwich)
+library(lmtest)
+library(here)
+library(stargazer)
+library(patchwork)
+library(flextable)
+library(tidyverse)
+library(kableExtra)
+
+knitr::opts_chunk$set(echo = F, warning = F, message = F, cache = T, # results = 'asis',
+                      cache.lazy = F, dpi = 600)
+
+# knitr::opts_chunk$set(error=TRUE) 
+
+options("yaml.eval.expr" = TRUE)
+
+uclablue = '#2774AE'
+gray = '#808080'
+black = '#000000'
+uclagold = '#FFB81C'
+ucla_palette = c(uclablue, black, gray)
+
+# theme_set(theme_cowplot(font_family = 'Palatino') + 
+theme_set(theme_classic(base_size = 21) + 
+            theme(legend.title=element_blank(), 
+                  panel.grid.major.y = element_line('grey80'),
+                  legend.background = element_rect(fill = "transparent"),
+                  rect = element_rect(fill = "transparent"),
+                  plot.background = element_rect(fill = "transparent", color = NA),
+                  panel.background = element_rect(fill = "transparent", color = NA)))
+
+# ggplot <- function(...) ggplot2::ggplot(...) + scale_color_brewer(palette="Dark2") +
+#   scale_fill_brewer(palette="Dark2")
+ggplot <- function(...) ggplot2::ggplot(...) + 
+  scale_color_manual(values = ucla_palette) +
+  scale_fill_manual(values = ucla_palette)
+
+update_geom_defaults("line", list(size = 1.75))
+update_geom_defaults("pointrange", list(size = 1.3))
+
+
+
+# library(colorspace)
+# colorspace_palette = 'RdPu'
+# ggplot <- function(...) ggplot2::ggplot(...) +
+#   scale_color_discrete_sequential(palette=colorspace_palette) +
+#   scale_fill_discrete_sequential(palette=colorspace_palette)
+
+options(scipen=999, digits=2)
+knit_hooks$set(inline = function(x) {
+  prettyNum(x, big.mark=",")
+})
+knitr::opts_chunk$set(error=TRUE) 
+
+set_flextable_defaults(font.family = 'Times New Roman',
+                       # padding.bottom = 1,
+                       # padding.top = 1,
+                       # padding.left = 3,
+                       # padding.right = 1,
+                       theme_fun = 'theme_booktabs',
+                       digits = 3, 
+                       big.mark = ',',
+                       line_spacing = 1)
+
+defOut <- knitr::knit_hooks$get("plot")  # save the default plot hook 
+knitr::knit_hooks$set(plot = function(x, options) {  # set new plot hook ...
+  x <- defOut(x, options)  # first apply the default hook
+  if(!is.null(options$wrapfigure)) {  # then, if option wrapfigure is given ...
+    # create the new opening string for the wrapfigure environment ...
+    wf <- sprintf("\\begin{wrapfigure}{%s}{%g\\textwidth}", options$wrapfigure[[1]], options$wrapfigure[[2]])
+    x  <- gsub("\\begin{figure}", wf, x, fixed = T)  # and replace the default one with it.
+    x  <- gsub("{figure}", "{wrapfigure}", x, fixed = T)  # also replace the environment ending
+  }
+  return(x)
+})
+```
+
+```{r load, include = F}
+acs_count_base <- read_csv(here('data', 'acs_count_base.csv')) %>%
+  filter(is.na(yrimmig) | !is.na(origin_score)) %>%
+  filter(state != 'District of Columbia') %>%
+  mutate(across(equal_age:propaganda, function(x) round(x)),
+         yrmarr = as.numeric(yrmarr))
+
+
+state_df <- read_csv(here('data', 'state_df.csv'))
+
+count_func <- function(condition = '!is.na(state)'){
+  acs_count_base %>%
+    rename(mixed = mixed_citizenship) %>%
+    filter(eval(rlang::parse_expr(condition))) %>%
+    group_by(state, year, same_sex, mixed) %>%
+    summarize(n = sum(perwt), 
+              n_unweighted = n(),
+              n_ar = sum(perwt[qcitizen != 'Allocated' & qeduc != 'Consistency edit' & allocated == F]), 
+              n_unweighted_ar = sum(qcitizen != 'Allocated' & qeduc != 'Consistency edit' & allocated == F)) %>%
+    ungroup() %>%
+    complete(state, year, same_sex, mixed) %>%
+    mutate(across(n:n_unweighted_ar, function(x) ifelse(is.na(x), 0, x))) %>%
+    mutate(post_2013 = year > 2013,
+           group_fe = paste(state, same_sex, mixed, sep = '_')) %>%
+    left_join(state_df)
+}
+
+# acs_count_base %>%
+#   filter(state == 'Alabama', year == 2008) %>%
+#   group_by(same_sex, mixed_citizenship, bpldnew) %>%
+#     summarize(n = sum(perwt), 
+#               n_unweighted = n(),
+#               n_ar = sum(perwt[qcitizen != 'Allocated' & qeduc != 'Consistency edit' & allocated == F]), 
+#               n_unweighted_ar = sum(qcitizen != 'Allocated' & qeduc != 'Consistency edit' & allocated == F)) %>%
+#   group_by(same_sex, mixed_citizenship) %>%
+#    summarize(n = sum(n),
+#             n_unweighted = sum(n_unweighted),
+#             n_ar = sum(n_ar),
+#             n_unweighted_ar = sum(n_unweighted_ar))
+
+acs_count_mixed <- count_func()
+
+
+
+
+# acs_count_mixed <- read_csv(here('data', 'acs_count_mixed.csv')) %>%
+#   group_by(state, year, same_sex, mixed) %>%
+#   summarize(n = sum(n),
+#             n_unweighted = sum(n_unweighted),
+#             n_ar = sum(n_ar),
+#             n_unweighted_ar = sum(n_unweighted_ar)) %>%
+#   mutate(post_2013 = year > 2013,
+#          group_fe = paste(state, same_sex, mixed, sep = '_'))
+# acs_prop <- read.csv(here('data', 'acs_prop_yrimmig_policy.csv')) %>%
+#   mutate(post_2013 = (yrimmig > 2013))
+# acs_prop_state <- read.csv(here('data', 'acs_dyad_policy.csv'))
+
+lgb_origin_index <- read_csv(here('data', 'lgb_origin_index.csv'))
+acs_ind <- read_rds(here('data', 'acs_couple_policy.rds'))  %>%
+  mutate(post_2013 = year > 2013
+         # mixed =  mixed_citizenship = (citizen_main == 'Not a citizen' & citizen_partner != 'Not a citizen') | 
+         #   (citizen_main != 'Not a citizen' & citizen_partner == 'Not a citizen')
+         ) %>%
+  left_join(lgb_origin_index,  by = c('yrimmig' = 'year', 'bpldid' = 'Code')) 
+
+acs_count_mixed_bpld <- read_csv(here('data', 'acs_count_mixed.csv'))  %>%
+  filter(state != 'District of Columbia') %>%
+  left_join(
+    acs_ind %>%
+      group_by(year, state, bpld, same_sex) %>% 
+      summarize(across(c(equal_age:propaganda, origin_score), mean, na.rm = T))
+      #summarize(origin_score = mean(origin_score))
+  ) %>%
+  filter(!is.na(origin_score) | bpld %in% unique({.$state}))
+
+
+
+
+```
+
+```{r intro-stats}
+total_same_mixed <- acs_count_mixed_bpld %>%
+    filter(mixed == T & same_sex == T) %>%
+    group_by(year) %>%
+    summarize(n = sum(n)) %>%
+  pull(n)
+
+total_dif_mixed <- acs_count_mixed_bpld %>%
+    filter(mixed == T & same_sex == F) %>%
+    group_by(year) %>%
+    summarize(n = sum(n)) %>%
+  pull(n)
+```
+
+# Introduction
+## Introduction
+- In 2013, the U.S. Supreme Court struck down the Defense of Marriage Act
+    + Allowing same-sex couples to apply for spousal/marriage visas
+- From 2013 to 2019, 197% increase in mixed-citizenship same-sex couples, compared to 8% for different-sex (ACS)
+- But from where do these couples come? 
+    + Do LGB policy environments at country of origin contribute toward the incidence of mixed-citizenship, same-sex unions within the U.S.?
+
+
+## Introduction
+```{r total-pop}
+# 
+# bind_rows(
+#   acs_count_mixed_bpld %>%
+#     mutate(cat = case_when(origin_score > 3 ~ 'Progressive',
+#                            origin_score < 0 ~ 'Regressive')) %>%
+#     filter(!is.na(cat) & mixed == T & same_sex == T) %>%
+#     group_by(year, cat) %>%
+#     summarize(n = sum(n)),
+#    acs_count_mixed_bpld %>%
+#     filter(mixed == T & same_sex == T) %>%
+#     group_by(year) %>%
+#     summarize(n = sum(n)) %>%
+#     mutate(cat = 'Full sample')
+# ) %>% 
+#   ggplot(aes(x = year, y = n/1000, color = cat, linetype = cat)) +
+#   geom_line() +
+#   geom_vline(xintercept = 2013, linetype = 2) +
+#   labs(x = 'Year', y = 'n (thousands)')
+
+bind_rows(
+  acs_count_base %>%
+    mutate(cat = case_when(origin_score > 3 ~ 'Progressive',
+                             origin_score < 0 ~ 'Regressive')) %>%
+    filter(mixed_citizenship == T & same_sex == T & !is.na(cat)) %>%
+    group_by(year, cat) %>%
+    summarize(n = sum(perwt)),
+  acs_count_base %>%
+    filter(mixed_citizenship == T & same_sex == T) %>%
+    group_by(year) %>%
+    summarize(n = sum(perwt)) %>%
+    mutate(cat = 'Full sample')) %>%
+  ggplot(aes(x = year, y = n/1000, color = cat, linetype = cat)) +
+  geom_line() +
+  geom_vline(xintercept = 2013, linetype = 2) +
+  labs(x = 'Year', y = 'n (thousands)')
+```
+
+# Background
+## How Country-Origin LGB Policies Influence Mixed-Citizenship, Same-Sex Unions
+
+- Policies both influence and are constituted by cultural environments  
+- Policy environments influence the desire to join a same-sex union
+    +  Progressive policies like marriage equality legitimize these social relationships and increase accessibility.
+    + Regressive policies may limit aspirations for same-sex union and public disclosure of such unions
+- Policy environments influence the capacity to migrate
+    +  Progressive policies may enhance human, economic, and political capitals that enable migration
+    +  Regressive policies may limit "outness" of one's same-sex union -- potentially undermining credibility in visa applications.
+
+
+## Our Contribution
+
+- Migration theory typically emphasizes economic and network theories  
+- We aim to demonstrate how culture and identity interact with policy to shape migratory pathways
+- Continue advancing research on queer migration; recognizing populations besides refugees and asylum-seekers
+- Expand understandings of union formation by incorporating mixed-citizenship, same-sex couples
+
+
+# Data and Method
+## Data
+- All couples in the 2008 to 2019 American Community Survey (ACS)
+    + 18 to 64 at time of survey
+    + For immigrants, only those who immigrated at age 18 or older
+
+- Individuals in same-sex couples are identified as respondents who live with a same-sex married or unmarried partner
+    + Necessarily excludes single and non-cohabiting LGB individuals
+
+
+## Data
+- Data structure: state-year-group counts ($n$ = 2448)
+  + Groups: same- or different-sex $\times$ same- or mixed-citizenship
+  + e.g. number of people in same-sex mixed-citizenship couples in Arizona in 2012
+- Explanatory variable: country of origin LGB policy index (sum of 16 policies) (Velasco 2020)
+  + Ranges from -3 to 10, with a mean of 1.7
+  + Progressive policies such civil unions, marriage equality, and hate-crime protection
+  + Regressive policies such as anti-propaganda laws
+
+## Sample sizes
+```{r data-tab}
+options(scipen=999, digits=2)
+acs_count_mixed %>%
+  mutate(Composition = if_else(same_sex == T, 'Same sex', 'Different sex'),
+         Citizenship = if_else(mixed == T, 'Mixed citizenship', 'Same citizenship')) %>%
+  group_by(Composition, Citizenship) %>%
+  summarize(`n (unweighted)` = sum(n_unweighted),
+            `n (weighted)` = sum(n)) %>%
+  kable(booktabs = T,
+        format.args = list(big.mark = ",")) %>%
+   kable_styling(position = "center")
+  # flextable() %>%
+  # flextable::autofit() 
+  # flextable::set_caption('Unweighted and weighted sample sizes from American Community Survey (ACS) data, 2008-2019')
+```
+
+
+
+## Method
+- Difference-in-differences-in-differences (DDD) using quasi-Poisson regression
+  + Following Redpath (2022), model incidence of mixed-citizenship same-sex couples after 2013 relative to those before 2013 and same-citizenship or different-sex couples
+- Stratify by policy environment
+  + include only country-state-year mixed-citizenship groups with progressive (>3) or regressive (<0) policy scores
+  + include only groups with specific policies
+
+## Method
+$$\begin{aligned}
+y_{gst} = &\exp[\beta_0 + \beta_1 post_t + \beta_2 (M_g \times post_t) + \beta_3 (S_g \times post_t)  \\
+&+ \beta_4 ( M_g \times S_g \times post_t) + \alpha_{gs} + \gamma_{t} + \epsilon_{gst}]
+\end{aligned}$$  
+
+- Where
+  + $y_{gst}$: count of individuals in group $g$ in state $s$ in survey year $t$  
+  + $post_t$: indicator  for $t > 2013$  
+  + $M_g$: indicator for group $g$ being mixed-citizenship  
+  + $S_g$: indicator for group $g$ being same-sex  
+  + $\alpha_{gs}$: group-state fixed effects  
+  + $\gamma_t$: survey year fixed effects  
+  + $\epsilon_{gst}$ is an error term such that $\mathbb E(\epsilon_{gst}) = 0$ 
+
+- Coefficient of interest is $\beta_4$: the 3-way interaction between indicators for post-2013, same-sex, and mixed-citizenship. The incidence ratio $\exp(\beta_4)$ estimates the relative increase in mixed-citizenship same-sex couples after 2013 relative to other couples.
+
+
+# Results
+## Results
+\begin{center}
+  \huge{\textcolor{uclablue}{Results}}
+\end{center}
+  
+
+## Main Effects
+```{r mod-tab-setup, include = F}
+count_origin_high <- count_func('origin_score > 3 | is.na(origin_score)') 
+count_origin_low <- count_func('origin_score < 0 |  is.na(origin_score)')
+
+# D
+mod_mixed <- acs_count_mixed %>%
+  filter(same_sex == T, mixed == T) %>%
+  glm(n ~ post_2013 + group_fe + as.factor(year), 
+                        data = ., 
+                        family = 'quasipoisson') %>%
+  coeftest(., vcov = vcovCL(., cluster = ~group_fe)) 
+
+mod_os_high <- count_origin_high %>%
+  filter(same_sex == T, mixed == T) %>%
+  glm(n ~ post_2013 + 
+        group_fe + as.factor(year), 
+        data = ., 
+        family = 'quasipoisson') %>%
+  coeftest(., vcov = vcovCL(., cluster = ~group_fe))
+
+mod_os_low <- count_origin_low %>%
+  filter(same_sex == T, mixed == T) %>%
+  glm(n ~ post_2013 + 
+        group_fe + as.factor(year), 
+        data = ., 
+        family = 'quasipoisson') %>%
+  coeftest(., vcov = vcovCL(., cluster = ~group_fe))
+
+dlist <- list('Full sample' = mod_mixed, 'Progressive' = mod_os_high, 'Regressive' = mod_os_low)
+
+base_effect_d <- tidy(mod_mixed) %>%
+  filter(term == 'post_2013TRUE') %>%
+  pull(estimate) 
+high_effect_d <- tidy(mod_os_high) %>%
+  filter(term == 'post_2013TRUE') %>%
+  pull(estimate)
+
+## DD
+mod_mixed <- acs_count_mixed %>%
+  filter(same_sex == T) %>%
+  glm(n ~ I(post_2013*mixed) + 
+        post_2013 + group_fe + as.factor(year), 
+                        data = ., 
+                        family = 'quasipoisson') %>%
+  coeftest(., vcov = vcovCL(., cluster = ~group_fe)) 
+
+mod_os_high <- count_origin_high %>%
+  filter(same_sex == T) %>%
+  glm(n ~  I(post_2013*mixed) + 
+        post_2013 + 
+        group_fe + as.factor(year), 
+        data = ., 
+        family = 'quasipoisson') %>%
+  coeftest(., vcov = vcovCL(., cluster = ~group_fe))
+
+
+mod_os_low <- count_origin_low %>%
+  filter(same_sex == T) %>%
+  glm(n ~  I(post_2013*mixed) + 
+        post_2013 + 
+        group_fe + as.factor(year), 
+        data = ., 
+        family = 'quasipoisson') %>%
+  coeftest(., vcov = vcovCL(., cluster = ~group_fe))
+
+ddlist <- list('Full sample' = mod_mixed, 'Progressive' = mod_os_high, 'Regressive' = mod_os_low)
+
+base_effect_dd <- tidy(mod_mixed) %>%
+  filter(term == 'I(post_2013 * mixed)') %>%
+  pull(estimate) 
+high_effect_dd <- tidy(mod_os_high) %>%
+  filter(term == 'I(post_2013 * mixed)') %>%
+  pull(estimate) 
+
+
+# DDD
+mod_mixed <- acs_count_mixed %>%
+  glm(n ~ I(post_2013*same_sex*mixed) + I(post_2013*same_sex) + I(post_2013*mixed) + 
+        post_2013 + group_fe + as.factor(year), 
+                        data = ., 
+                        family = 'quasipoisson') %>%
+  coeftest(., vcov = vcovCL(., cluster = ~group_fe)) 
+
+
+
+mod_os_high <- glm(n ~  I(post_2013*same_sex*mixed) + 
+                        I(post_2013*same_sex) + 
+                        I(post_2013*mixed) + 
+                        post_2013 + 
+                        group_fe + as.factor(year), 
+                        data = count_origin_high, 
+                        family = 'quasipoisson') %>%
+  coeftest(., vcov = vcovCL(., cluster = ~group_fe))
+
+
+mod_os_low <- glm(n ~  I(post_2013*same_sex*mixed) + 
+                        I(post_2013*same_sex) + 
+                        I(post_2013*mixed) + 
+                        post_2013 + 
+                        group_fe + as.factor(year), 
+                        data = count_origin_low, 
+                        family = 'quasipoisson') %>%
+coeftest(., vcov = vcovCL(., cluster = ~group_fe)) 
+```
+
+```{r mod-tab, eval = T}
+bind_rows(
+  mutate(tidy(mod_mixed, conf.int = T), name = 'Full sample'),
+  mutate(tidy(mod_os_high, conf.int = T), name = 'Progressive (>3)'),
+  mutate(tidy(mod_os_low, conf.int = T), name = 'Regressive (<0)')) %>%
+  filter(term %in% c('I(post_2013 * same_sex * mixed)')) %>% 
+  #, 'I(post_2013 * same_sex)', 'I(post_2013 * mixed)', 'post_2013TRUE')) %>%
+  mutate(term = recode(term, 
+                'I(post_2013 * same_sex * mixed)' = 'Post-2013 × Same-sex × Mixed-citizenship' ,
+                'I(post_2013 * same_sex)' ='Post-2013 × Same-sex',
+                'I(post_2013 * mixed)' = 'Post-2013 × Mixed-citizenship',
+                'post_2013TRUE' = 'Post-2013')) %>%
+  mutate(name = factor(name, levels = c('Regressive (<0)', 'Progressive (>3)',
+                                        'Full sample'))) %>%
+  ggplot(aes(x = name, y = estimate)) +
+  geom_pointrange(aes(ymin = conf.low, ymax = conf.high)) +
+  geom_hline(yintercept = 0, linetype = 2) +
+  coord_flip() + 
+  #facet_wrap(~name, ncol = 3) +
+  labs(x = '', y = '', title = 'Post-2013 × Same-sex × Mixed-citizenship')
+
+```
+
+## Dynamic Models
+```{r lag-plot-1}
+base_plot <- acs_count_mixed %>%
+  mutate(year = floor(year/2)*2) %>%
+  group_by(state, year, same_sex, mixed, group_fe) %>%
+  summarize(n = sum(n)) %>%
+  ungroup() %>%
+  mutate(year = factor(floor(year/2)*2, 
+            levels = c('2018', '2016', '2014', '2012', '2010', '2008'))) %>%
+  glm(n ~ as.factor(year):same_sex:mixed + 
+                        as.factor(year):same_sex + 
+                        as.factor(year):mixed + 
+                        as.factor(year) + group_fe,
+                        data = ., 
+                        family = 'quasipoisson') %>%
+  coeftest(., vcov = vcovCL(., cluster = ~group_fe)) %>%
+  tidy(conf.int = T) %>% 
+  filter(str_detect(term, ':same_sexTRUE:mixedTRUE')) %>%
+  mutate(term = str_extract(term, '\\d\\d\\d\\d'),
+         year = as.numeric(term)) %>%
+  ggplot(aes(x = year, y = estimate)) +
+    geom_pointrange(aes(ymin = conf.low, ymax = conf.high)) +
+    geom_hline(yintercept = 0) +
+    geom_vline(xintercept = 2013, linetype = 2) +
+    theme(legend.position = "none") +
+    labs(x = 'Year', y = 'Estimate', title = 'Full sample') 
+
+
+
+extra_pois_mixed_high <- glm(n ~ as.factor(year):same_sex:mixed + 
+                        as.factor(year):same_sex + 
+                        as.factor(year):mixed + 
+                        as.factor(year) + group_fe,
+                        data = mutate(count_origin_high, 
+                                      year = factor(floor(year/2)*2, 
+                                                    levels = c('2018', '2016', '2014', '2012', '2010', '2008'))), 
+                        family = 'quasipoisson')
+
+extra_pois_mixed_low <- glm(n ~ as.factor(year):same_sex:mixed + 
+                        as.factor(year):same_sex + 
+                        as.factor(year):mixed + 
+                        as.factor(year) + group_fe,
+                        data = mutate(count_origin_low, 
+                                      year = factor(floor(year/2)*2, 
+                                                    levels = c('2018', '2016', '2014', '2012', '2010', '2008'))), 
+                        family = 'quasipoisson')
+
+strat_plot <- bind_rows(
+  extra_pois_mixed_high %>%
+    coeftest(., vcov = vcovCL(., cluster = ~group_fe)) %>%
+    tidy(conf.int = T) %>% 
+    filter(str_detect(term, ':same_sexTRUE:mixedTRUE')) %>%
+    mutate(year = as.numeric(str_extract(term, '\\d\\d\\d\\d')),
+           mod = 'Score > 3'),
+  extra_pois_mixed_low %>%
+    coeftest(., vcov = vcovCL(., cluster = ~group_fe)) %>%
+    tidy(conf.int = T) %>%  
+    filter(str_detect(term, ':same_sexTRUE:mixedTRUE')) %>%
+    mutate(year = as.numeric(str_extract(term, '\\d\\d\\d\\d')),
+           mod = 'Score < 0')) %>%
+  ggplot(aes(x = year, y = estimate, color = mod)) + #shape = mod)) +
+  geom_pointrange(aes(ymin = conf.low, ymax = conf.high), position=position_dodge(width=.5)) +
+  geom_hline(yintercept = 0) +
+  geom_vline(xintercept = 2013, linetype = 2)  + 
+  theme(legend.position=c(.18,.9)) +
+  labs(x = 'Year', y = 'Estimate', title = 'Stratified')
+
+p_combined <- base_plot + strat_plot
+p_ranges_y <- c(ggplot_build(p_combined[[1]])$layout$panel_scales_y[[1]]$range$range,
+                ggplot_build(p_combined[[2]])$layout$panel_scales_y[[1]]$range$range)
+base_plot & 
+  ylim(min(p_ranges_y), max(p_ranges_y))
+```
+
+## Dynamic Models
+```{r lag-plot-2}
+strat_plot +
+    scale_color_manual(values = ucla_palette[c(3,1)]) +
+  scale_fill_manual(values = ucla_palette[c(3,1)]) & 
+  ylim(min(p_ranges_y), max(p_ranges_y))
+```
+
+## Specific Policies
+- What about the effects of specific policies?
+- Stratify by every existing policy combination in the sample (148) 
+- Find the precision-weighted average effect size for the three-way interaction of interest for all regressions on samples that include the policy and all regressions that do not:
+
+$$\begin{aligned}
+\overline \delta = \frac{\sum_{i=1}^m \delta_i \text{se}_i^{-2}}{\sum_{i=1}^m \text{se}_i^{-2}}, &&
+\overline {\text{se}} = \sqrt{\frac{1}{\sum_{i=1}^m \text{se}_i^{-2}}}.
+\end{aligned}$$
+
+- quasi average partial effect (log scale):
+$$\overline \delta_{\text{policy}} - \overline \delta_{\text{no policy}}$$
+
+
+
+## Specific Policies: Progressive
+```{r policies-plot-1}
+policy_combos_out <- read_csv(here('did', 'policy_combos_controls.csv')) 
+  # group_by(n) %>% 
+  # slice(rep(1:n(), first(n))) %>% ungroup()
+
+variables <- names(subset(policy_combos_out, select = equal_age:propaganda))
+
+policy_dif_list <- list()
+for(var_name in variables){
+  policy_est_df <- policy_combos_out %>%
+    mutate(weight = 1/std.error^2) %>%
+    group_by(!!sym(var_name)) %>%
+    summarize(estimate = sum(estimate*weight)/sum(weight),
+              std.error = sqrt(1/sum(weight)))
+    #summarize(estimate = mean(estimate), std.error = sqrt(mean(std.error^2)), n())
+  # print(var_name)
+  # print(policy_est_df)
+  policy_dif_list[[var_name]] <- data.frame(policy = names(policy_est_df)[1],
+             est_dif = policy_est_df$estimate[2] - policy_est_df$estimate[1],
+             est_dif_se = sqrt(policy_est_df$std.error[2]^2 +
+                                 policy_est_df$std.error[1]^2))
+
+}
+
+# # Weighted
+# policy_dif_list <- list()
+# for(var_name in variables){
+#   policy_est_df <- policy_combos_out %>%
+#     group_by(!!sym(var_name)) %>%
+#     summarize(estimate = weighted.mean(estimate, w = n), 
+#               std.error = weighted.mean(std.error^2, w = n))
+#   policy_dif_list[[var_name]] <- data.frame(policy = names(policy_est_df)[1],
+#              est_dif = policy_est_df$estimate[2] - policy_est_df$estimate[1],
+#              est_dif_se = sqrt(policy_est_df$std.error[2]^2 + 
+#                                  policy_est_df$std.error[1]^2))
+#   
+# }
+
+prog_policies <- c('equal_age', 'constitution', 'employment_discrim', 'hate_crimes',
+                   'incite_hate', 'joint_adoption', 'lgb_military', 'marriage_equality',
+                   'samesex_legal', 'civil_unions', 'conversion_therapies')
+rep_policies <- c('unequal_age', 'death_penalty', 'lgb_military_ban', 
+                  'marriage_ban', 'propaganda')
+
+policy_df <- bind_rows(policy_dif_list) %>%
+  mutate(type = if_else(policy %in% prog_policies, 'Progressive', 'Regressive'),
+         policy_name = recode(policy, 
+                         equal_age = 'Equal age of consent', 
+                         unequal_age = 'Unequal age of consent',
+                         constitution = 'Constitutional protection',
+                         conversion_therapies = 'Conversion therapy ban',
+                         death_penalty = 'Death penalty',
+                         employment_discrim = 'Employment protection',
+                         hate_crimes = 'Hate-crime protection',
+                         incite_hate = 'Incitement to hate banned',
+                         joint_adoption = 'Joint adoption',
+                         lgb_military = 'LGB military',
+                         lgb_military_ban = 'LGB military ban',
+                         marriage_equality = 'Marriage equality',
+                         marriage_ban = 'Marriage ban',
+                         samesex_legal = 'Same-sex acts legal',
+                         civil_unions = 'Civil unions',
+                         propaganda = 'Anti-propaganda laws'),
+         lower = est_dif - 1.96*est_dif_se,
+         upper = est_dif + 1.96*est_dif_se)
+
+policy_df %>%
+  filter(type == 'Progressive') %>%
+  # arrange(desc(estimate)) %>%
+  # head(10) %>%
+  ggplot(aes(reorder(policy_name, est_dif), y = est_dif)) +
+  geom_hline(yintercept = 0, linetype = 2) +
+  geom_pointrange(aes(ymin = lower, ymax = upper)) +
+  coord_flip() +
+  # facet_wrap(~type, scales = 'free_y') +
+  labs(x = '', y = '') +
+  ylim(c(-.4, 0.75))
+```
+
+## Specific Policies: Regressive
+
+```{r policies-plot-2}
+policy_df %>% 
+  filter(type == 'Regressive') %>%
+  # arrange(desc(estimate)) %>%
+  # head(10) %>%
+  ggplot(aes(reorder(policy_name, est_dif), y = est_dif)) +
+  geom_hline(yintercept = 0, linetype = 2) +
+  geom_pointrange(aes(ymin = lower, ymax = upper)) +
+  coord_flip() +
+  # facet_wrap(~type, scales = 'free_y') +
+  labs(x = '', y = '') +
+  ylim(c(-.4, 0.75))
+```
+
+
+# Discussion
+
+- Rise in mixed-citizenship, same sex couples after the 2013 end of DOMA, but only for immigrants from progressive countries
+- Stronger effects for civil unions and marriage equality
+- Culture, identity, and policy can affect migration and union formation
+- Broadening focus of queer migration studies to immigrants from progressive countries
+
+
+## Next steps
+- Adjust for possible state- and group-level confounders
+- Stratify by state LGB policy environment
+- Incorporate 2020 data
+
+
+## 
+\begin{center}
+  \huge{\textcolor{uclablue}{Thank You}}
+\end{center}
+
+- Nathan I. Hoffmann ([nathanihoff\@ucla.edu](mailto:nathanihoff@ucla.edu))
+- Kristopher Velasco ([kvelasco\@princeton.edu](mailto:kvelasco\@princeton.edu))  
+- **Preprint: LINK**
+
+
+``` {=latex}
+\end{frame}
+\appendix
+\begin{frame}<0| handout:0>
+```
+
+
+# Supplementary Material
+## Country-Level Descriptives
+```{r desc-country}
+distance <- acs_ind_survey %>%
+  mutate(same_sex = if_else(same_sex == T, 'Same-Sex', 'Different-Sex')) %>%
+  group_by(year, same_sex) %>%
+  summarize(var = survey_mean(distw, vartype = "ci", na.rm = T)) %>%
+  mutate(var_name = 'C. Distance to Country of Origin (km)')
+
+unemp <- acs_ind_survey %>%
+  mutate(same_sex = if_else(same_sex == T, 'Same-Sex', 'Different-Sex')) %>%
+  group_by(year, same_sex) %>%
+  summarize(var = -survey_mean(unemp_dif, vartype = "ci", na.rm = T)) %>%
+  mutate(var_name = 'B. Unemployment Rate Difference with U.S.')
+
+prop_stock <- acs_ind_survey %>%
+  mutate(same_sex = if_else(same_sex == T, 'Same-Sex', 'Different-Sex')) %>%
+  group_by(year, same_sex) %>%
+  summarize(var = survey_mean(stock_prop, vartype = "ci", na.rm = T)) %>%
+  mutate(var_name = 'D. Proportion U.S. Immigrant Stock')
+
+wage_dif <- acs_ind_survey %>%
+  mutate(same_sex = if_else(same_sex == T, 'Same-Sex', 'Different-Sex')) %>%
+  group_by(year, same_sex) %>%
+  summarize(var = -survey_mean(wage_dif, vartype = "ci", na.rm = T)) %>%
+  mutate(var_name = 'A. GDP Difference with U.S.')
+
+vdem <- acs_ind_survey %>%
+  mutate(same_sex = if_else(same_sex == T, 'Same-Sex', 'Different-Sex')) %>%
+  group_by(year, same_sex) %>%
+  summarize(var = survey_mean(vdem, vartype = "ci", na.rm = T)) %>%
+  mutate(var_name = 'E. Democracy Score (V-Dem)')
+
+
+bind_rows(wage_dif, vdem, prop_stock, distance) %>%
+  rename(Year = year) %>%
+  ggplot(aes(x = Year, y = var, linetype = same_sex,
+             color = same_sex, fill = same_sex)) +
+  geom_line() +
+  geom_ribbon(aes(ymin = var_low, ymax = var_upp, group = same_sex, col = NULL), alpha = .2) +
+  facet_wrap(~var_name, scales = "free", ncol = 2) +
+  ylab('') +
+  theme( # legend.justification=c(1,0),
+  #     legend.position=c(.22,.82),
+  #     legend.background = element_rect(fill = alpha("white", 0.5))
+      legend.position="bottom")
+ 
+```
+
+## Individual Descriptives
+```{r desc-ind}
+income <- acs_ind_survey %>%
+  mutate(same_sex = if_else(same_sex == T, 'Same-Sex', 'Different-Sex')) %>%
+  group_by(year, same_sex) %>%
+  summarize(var = survey_mean(inctot, vartype = "ci", na.rm = T)) %>%
+  mutate(var_name = 'C. Annual Gross Income (Thousands)')
+
+hs <- acs_ind_survey %>%
+  mutate(same_sex = if_else(same_sex == T, 'Same-Sex', 'Different-Sex'),
+         hs = if_else(educ %in% c('HS', 'some col', 'college'), 1, 0)) %>%
+  group_by(year, same_sex) %>%
+  summarize(var = survey_mean(hs, vartype = "ci", na.rm = T)) %>%
+  mutate(var_name = 'A. High School Completion')
+
+college <- acs_ind_survey %>%
+  mutate(same_sex = if_else(same_sex == T, 'Same-Sex', 'Different-Sex'),
+         college = if_else(educ == 'college', 1, 0)) %>%
+  group_by(year, same_sex) %>%
+  summarize(var = survey_mean(college, vartype = "ci", na.rm = T)) %>%
+  mutate(var_name = 'B. College Completion')
+
+# state_income <- acs_ind_survey %>%
+#   mutate(same_sex = if_else(same_sex == T, 'Same-Sex', 'Different-Sex')) %>%
+#   group_by(year, same_sex) %>%
+#   summarize(var = survey_mean(state_income, vartype = "ci", na.rm = T)) %>%
+#   mutate(var_name = 'U.S. State of Residence Per Capita Income')
+
+hwsei <- acs_ind_survey %>%
+  mutate(same_sex = if_else(same_sex == T, 'Same-Sex', 'Different-Sex')) %>%
+  group_by(year, same_sex) %>%
+  summarize(var = survey_mean(hwsei, vartype = "ci", na.rm = T)) %>%
+  mutate(var_name = 'D. Hauser and Warren Socioeconomic Index')
+
+
+bind_rows(income, hs, college, hwsei) %>%
+  rename(Year = year) %>%
+  ggplot(aes(x = Year, y = var, linetype = same_sex, color = same_sex, fill = same_sex)) +
+  geom_line() +
+  geom_ribbon(aes(ymin = var_low, ymax = var_upp, 
+                  group = same_sex, col = NULL), alpha = .2) +
+  facet_wrap(~var_name, scales = "free", ncol = 2) +
+  ylab('') +
+  theme( # legend.justification=c(1,0),
+  #     legend.position=c(.22,.82),
+  #     legend.background = element_rect(fill = alpha("white", 0.5))
+      legend.position="bottom")
+```
