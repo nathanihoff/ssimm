@@ -186,7 +186,14 @@ acs_count_mixed_bpld <- read_csv(here('data', 'acs_count_mixed.csv'))  %>%
   filter(!is.na(origin_score) | bpld %in% unique({.$state}))
 
 
+acs_ind <- read_rds(here('data', 'acs_couple_policy.rds'))  %>%
+  mutate(post_2013 = year > 2013
+         # mixed =  mixed_citizenship = (citizen_main == 'Not a citizen' & citizen_partner != 'Not a citizen') | 
+         #   (citizen_main != 'Not a citizen' & citizen_partner == 'Not a citizen')
+         ) %>%
+  left_join(lgb_origin_index,  by = c('yrimmig' = 'year', 'bpldid' = 'Code')) 
 
+acs_ind_survey <- acs_ind %>% as_survey_design(ids = cluster, weights = perwt)
 
 ```
 
@@ -319,20 +326,20 @@ acs_count_mixed %>%
 
 ## Method
 $$\begin{aligned}
-y_{gst} = &\exp[\beta_0 + \beta_1 post_t + \beta_2 (M_g \times post_t) + \beta_3 (S_g \times post_t)  \\
-&+ \beta_4 ( M_g \times S_g \times post_t) + \alpha_{gs} + \gamma_{t} + \epsilon_{gst}]
+y_{gst} = &\exp[\beta_0 + \beta_1 post_t + \beta_2 (M_g \times post_t) + \beta_3 (S_g \times post_t) \\
+&+ \delta ( M_g \times S_g \times post_t) + \alpha_{gs} + \gamma_{t} + \zeta ' \mathbf x_{st} + \epsilon_{gst}]
 \end{aligned}$$  
 
 - Where
   + $y_{gst}$: count of individuals in group $g$ in state $s$ in survey year $t$  
-  + $post_t$: indicator  for $t > 2013$  
+  + $post_t$: indicator for $t > 2013$  
   + $M_g$: indicator for group $g$ being mixed-citizenship  
   + $S_g$: indicator for group $g$ being same-sex  
-  + $\alpha_{gs}$: group-state fixed effects  
-  + $\gamma_t$: survey year fixed effects  
+  + $\alpha_{gs}$ and $\gamma_t$: group-state and year fixed effects  
+  + $\mathbf x_{st}$: state-level controls in year $t$ (unemployment rate, per-capita income, and local LGB policy)
   + $\epsilon_{gst}$ is an error term such that $\mathbb E(\epsilon_{gst}) = 0$ 
 
-- Coefficient of interest is $\beta_4$: the 3-way interaction between indicators for post-2013, same-sex, and mixed-citizenship. The incidence ratio $\exp(\beta_4)$ estimates the relative increase in mixed-citizenship same-sex couples after 2013 relative to other couples.
+- Coefficient of interest is $\beta_4$. The incidence ratio $\exp(\beta_4)$ estimates the relative increase in mixed-citizenship same-sex couples after 2013 relative to other couples.
 
 
 # Results
@@ -343,95 +350,27 @@ y_{gst} = &\exp[\beta_0 + \beta_1 post_t + \beta_2 (M_g \times post_t) + \beta_3
   
 
 ## Main Effects
-```{r mod-tab-setup, include = F}
+```{r mod-tab}
 count_origin_high <- count_func('origin_score > 3 | is.na(origin_score)') 
 count_origin_low <- count_func('origin_score < 0 |  is.na(origin_score)')
 
-# D
 mod_mixed <- acs_count_mixed %>%
-  filter(same_sex == T, mixed == T) %>%
-  glm(n ~ post_2013 + group_fe + as.factor(year), 
-                        data = ., 
-                        family = 'quasipoisson') %>%
-  coeftest(., vcov = vcovCL(., cluster = ~group_fe)) 
-
-mod_os_high <- count_origin_high %>%
-  filter(same_sex == T, mixed == T) %>%
-  glm(n ~ post_2013 + 
-        group_fe + as.factor(year), 
-        data = ., 
-        family = 'quasipoisson') %>%
-  coeftest(., vcov = vcovCL(., cluster = ~group_fe))
-
-mod_os_low <- count_origin_low %>%
-  filter(same_sex == T, mixed == T) %>%
-  glm(n ~ post_2013 + 
-        group_fe + as.factor(year), 
-        data = ., 
-        family = 'quasipoisson') %>%
-  coeftest(., vcov = vcovCL(., cluster = ~group_fe))
-
-dlist <- list('Full sample' = mod_mixed, 'Progressive' = mod_os_high, 'Regressive' = mod_os_low)
-
-base_effect_d <- tidy(mod_mixed) %>%
-  filter(term == 'post_2013TRUE') %>%
-  pull(estimate) 
-high_effect_d <- tidy(mod_os_high) %>%
-  filter(term == 'post_2013TRUE') %>%
-  pull(estimate)
-
-## DD
-mod_mixed <- acs_count_mixed %>%
-  filter(same_sex == T) %>%
-  glm(n ~ I(post_2013*mixed) + 
-        post_2013 + group_fe + as.factor(year), 
-                        data = ., 
-                        family = 'quasipoisson') %>%
-  coeftest(., vcov = vcovCL(., cluster = ~group_fe)) 
-
-mod_os_high <- count_origin_high %>%
-  filter(same_sex == T) %>%
-  glm(n ~  I(post_2013*mixed) + 
+  glm(n ~ I(post_2013*same_sex*mixed) + 
+        I(post_2013*same_sex) + 
+        I(post_2013*mixed) + 
         post_2013 + 
+        state_policy + state_income + state_unemploy +
         group_fe + as.factor(year), 
-        data = ., 
-        family = 'quasipoisson') %>%
-  coeftest(., vcov = vcovCL(., cluster = ~group_fe))
-
-
-mod_os_low <- count_origin_low %>%
-  filter(same_sex == T) %>%
-  glm(n ~  I(post_2013*mixed) + 
-        post_2013 + 
-        group_fe + as.factor(year), 
-        data = ., 
-        family = 'quasipoisson') %>%
-  coeftest(., vcov = vcovCL(., cluster = ~group_fe))
-
-ddlist <- list('Full sample' = mod_mixed, 'Progressive' = mod_os_high, 'Regressive' = mod_os_low)
-
-base_effect_dd <- tidy(mod_mixed) %>%
-  filter(term == 'I(post_2013 * mixed)') %>%
-  pull(estimate) 
-high_effect_dd <- tidy(mod_os_high) %>%
-  filter(term == 'I(post_2013 * mixed)') %>%
-  pull(estimate) 
-
-
-# DDD
-mod_mixed <- acs_count_mixed %>%
-  glm(n ~ I(post_2013*same_sex*mixed) + I(post_2013*same_sex) + I(post_2013*mixed) + 
-        post_2013 + group_fe + as.factor(year), 
                         data = ., 
                         family = 'quasipoisson') %>%
   coeftest(., vcov = vcovCL(., cluster = ~group_fe)) 
-
 
 
 mod_os_high <- glm(n ~  I(post_2013*same_sex*mixed) + 
                         I(post_2013*same_sex) + 
                         I(post_2013*mixed) + 
                         post_2013 + 
+                        state_policy + state_income + state_unemploy +
                         group_fe + as.factor(year), 
                         data = count_origin_high, 
                         family = 'quasipoisson') %>%
@@ -442,13 +381,12 @@ mod_os_low <- glm(n ~  I(post_2013*same_sex*mixed) +
                         I(post_2013*same_sex) + 
                         I(post_2013*mixed) + 
                         post_2013 + 
+                        state_policy + state_income + state_unemploy +
                         group_fe + as.factor(year), 
                         data = count_origin_low, 
                         family = 'quasipoisson') %>%
 coeftest(., vcov = vcovCL(., cluster = ~group_fe)) 
-```
 
-```{r mod-tab, eval = T}
 bind_rows(
   mutate(tidy(mod_mixed, conf.int = T), name = 'Full sample'),
   mutate(tidy(mod_os_high, conf.int = T), name = 'Progressive (>3)'),
@@ -475,7 +413,7 @@ bind_rows(
 ```{r lag-plot-1}
 base_plot <- acs_count_mixed %>%
   mutate(year = floor(year/2)*2) %>%
-  group_by(state, year, same_sex, mixed, group_fe) %>%
+  group_by(state, year, same_sex, mixed, group_fe, state_policy, state_income, state_unemploy) %>%
   summarize(n = sum(n)) %>%
   ungroup() %>%
   mutate(year = factor(floor(year/2)*2, 
@@ -483,7 +421,7 @@ base_plot <- acs_count_mixed %>%
   glm(n ~ as.factor(year):same_sex:mixed + 
                         as.factor(year):same_sex + 
                         as.factor(year):mixed + 
-                        as.factor(year) + group_fe,
+                        as.factor(year) + group_fe + state_policy + state_income + state_unemploy,
                         data = ., 
                         family = 'quasipoisson') %>%
   coeftest(., vcov = vcovCL(., cluster = ~group_fe)) %>%
@@ -503,7 +441,7 @@ base_plot <- acs_count_mixed %>%
 extra_pois_mixed_high <- glm(n ~ as.factor(year):same_sex:mixed + 
                         as.factor(year):same_sex + 
                         as.factor(year):mixed + 
-                        as.factor(year) + group_fe,
+                        as.factor(year) + group_fe + state_policy + state_income + state_unemploy,
                         data = mutate(count_origin_high, 
                                       year = factor(floor(year/2)*2, 
                                                     levels = c('2018', '2016', '2014', '2012', '2010', '2008'))), 
@@ -512,7 +450,7 @@ extra_pois_mixed_high <- glm(n ~ as.factor(year):same_sex:mixed +
 extra_pois_mixed_low <- glm(n ~ as.factor(year):same_sex:mixed + 
                         as.factor(year):same_sex + 
                         as.factor(year):mixed + 
-                        as.factor(year) + group_fe,
+                        as.factor(year) + group_fe + state_policy + state_income + state_unemploy,
                         data = mutate(count_origin_low, 
                                       year = factor(floor(year/2)*2, 
                                                     levels = c('2018', '2016', '2014', '2012', '2010', '2008'))), 
@@ -531,12 +469,13 @@ strat_plot <- bind_rows(
     filter(str_detect(term, ':same_sexTRUE:mixedTRUE')) %>%
     mutate(year = as.numeric(str_extract(term, '\\d\\d\\d\\d')),
            mod = 'Score < 0')) %>%
-  ggplot(aes(x = year, y = estimate, color = mod)) + #shape = mod)) +
-  geom_pointrange(aes(ymin = conf.low, ymax = conf.high), position=position_dodge(width=.5)) +
+  ggplot(aes(x = year, y = estimate, color = mod, shape = mod)) +
+  geom_pointrange(aes(ymin = conf.low, ymax = conf.high), 
+                  position=position_dodge(width=.5)) +
   geom_hline(yintercept = 0) +
   geom_vline(xintercept = 2013, linetype = 2)  + 
   theme(legend.position=c(.18,.9)) +
-  labs(x = 'Year', y = 'Estimate', title = 'Stratified')
+  labs(x = 'Year', y = 'Estimate', title = 'Stratified') 
 
 p_combined <- base_plot + strat_plot
 p_ranges_y <- c(ggplot_build(p_combined[[1]])$layout$panel_scales_y[[1]]$range$range,
@@ -668,15 +607,10 @@ policy_df %>%
 # Discussion
 
 - Rise in mixed-citizenship, same sex couples after the 2013 end of DOMA, but only for immigrants from progressive countries
-- Stronger effects for civil unions and marriage equality
+- Stronger effects for marriage equality and joint adoption
 - Culture, identity, and policy can affect migration and union formation
 - Broadening focus of queer migration studies to immigrants from progressive countries
 
-
-## Next steps
-- Adjust for possible state- and group-level confounders
-- Stratify by state LGB policy environment
-- Incorporate 2020 data
 
 
 ## 
@@ -686,7 +620,7 @@ policy_df %>%
 
 - Nathan I. Hoffmann ([nathanihoff\@ucla.edu](mailto:nathanihoff@ucla.edu))
 - Kristopher Velasco ([kvelasco\@princeton.edu](mailto:kvelasco\@princeton.edu))  
-- **Preprint: LINK**
+- **Preprint: tinyurl.com/hv-ddd**
 
 
 ``` {=latex}
