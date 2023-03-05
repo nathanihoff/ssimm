@@ -38,7 +38,7 @@ geometry: margin=1in
 indent: yes
 # link-citations: yes
 # linkcolor: blue
-bibliography: "/Users/nathan/Google Drive/Projects/2020 Same-Sex Immigrant Couples/ssimm/Same-Sex Immigration.bib"
+bibliography: "/Users/nathan/My Drive/Projects/2020 Same-Sex Immigrant Couples/ssimm/Same-Sex Immigration.bib"
 #csl: american-sociological-association.csl
 csl: chicago-author-date.csl
 
