@@ -813,9 +813,9 @@ low_test_p <- low_test$`Pr(>Chisq)`[2]
 
 6. <https://www.lgbtmap.org/>  
 
-7. We include evidence for the parallel trends assumption for the DD models in the Online Appendix; a pre-trend test provides support for parallel trends in the progressive subsample.
+7. We include evidence for the parallel trends assumption for the DD models in the Online Appendix; a pre-trend test provides support for parallel trends.
 
-8.  We test that coefficients for 2010 and 2012 are both equal to 0, $\delta_{2010} = \delta_{2012} = 0$. This pre-trend test follows a $\chi^2$ distribution. For the full sample, the $\chi^2$ value is `r base_test$Chisq[2]` with a p-value of `r base_test_p`. For the progressive subsample, the $\chi^2$ value is `r high_test$Chisq[2]` with a p-value of `r high_test_p`.
+8.  We test that coefficients for 2010 and 2012 are both equal to 0, $\delta_{2010} = \delta_{2012} = 0$. This pre-trend test follows a $\chi^2$ distribution. For the full sample, the $\chi^2$ value is `r base_test$Chisq[2]` with a p-value of `r base_test_p`. For the progressive subsample, the $\chi^2$ value is `r high_test$Chisq[2]` with a p-value of `r high_test_p`. In both cases, we fail to reject the hypothesis that both coefficients are equal to 0, providing support for the parallel trends assumption.
 
 \newpage
 
