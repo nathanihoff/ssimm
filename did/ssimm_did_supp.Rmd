@@ -925,7 +925,7 @@ huxreg(list('Full sample' = mod_mixed, 'Progressive' = mod_os_high, 'Regressive'
 
 \newpage
 
-## Parallel Trends Assumption for DD Model
+# Parallel Trends Assumption for DD Model
 ```{r lag-plot-dd, fig.cap = 'Dynamic specification of DD quasi-Poisson regression with two-way fixed effects, displaying the coefficient for the Year × Mixed-citizenship interaction. Survey years are aggregated into pairs, with 2008-2009 as the base category.'}
 count_origin_high <- count_func('origin_score > 3 | is.na(origin_score)') 
 count_origin_low <- count_func('origin_score < 0 |  is.na(origin_score)')
@@ -1030,6 +1030,64 @@ low_test_p <- low_test$`Pr(>Chisq)`[2]
 ```
 
 For the DD dynamic models, we test that coefficients for 2010 and 2012 are both equal to 0, $\delta_{2010} = \delta_{2012} = 0$. This pre-trend test follows a $\chi^2$ distribution. For the full sample, the $\chi^2$ value is `r base_test$Chisq[2]` with a p-value of `r base_test_p`. Unlike for the triple-difference model, the pre-trend test for the DD model for the full sample fails; we reject the hypothesis that parallel trends hold before 2013. For the progressive subsample, the $\chi^2$ value is `r high_test$Chisq[2]` with a p-value of `r high_test_p`; here the pre-trend test provides evidence of parallel trends.  
+
+\newpage
+
+# 2015 Placebo
+```{r placebo-2015}
+count_origin_high <- count_func('origin_score > 3 | is.na(origin_score)') %>%
+  mutate(post_2015 = year > 2015)
+count_origin_low <- count_func('origin_score < 0 |  is.na(origin_score)') %>%
+  mutate(post_2015 = year > 2015)
+
+mod_mixed <- acs_count_mixed %>%
+  mutate(post_2015 = year > 2015) %>%
+  glm(n ~ I(post_2015*same_sex*mixed) + I(post_2015*same_sex) + I(post_2015*mixed) + state_policy + state_income + state_unemploy +
+        post_2015 + group_fe + as.factor(year), 
+                        data = ., 
+                        family = 'quasipoisson') %>%
+  coeftest(., vcov = vcovCL(., cluster = ~group_fe)) 
+
+
+
+mod_os_high <- glm(n ~  I(post_2015*same_sex*mixed) + 
+                        I(post_2015*same_sex) + 
+                        I(post_2015*mixed) + 
+                        post_2015 + state_policy + state_income + state_unemploy +
+                        group_fe + as.factor(year), 
+                        data = count_origin_high, 
+                        family = 'quasipoisson') %>%
+  coeftest(., vcov = vcovCL(., cluster = ~group_fe))
+
+
+mod_os_low <- glm(n ~  I(post_2015*same_sex*mixed) + 
+                        I(post_2015*same_sex) + 
+                        I(post_2015*mixed) + 
+                        post_2015 + state_policy + state_income + state_unemploy +
+                        group_fe + as.factor(year), 
+                        data = count_origin_low, 
+                        family = 'quasipoisson') %>%
+coeftest(., vcov = vcovCL(., cluster = ~group_fe)) 
+
+dddlist <- list('Full sample' = mod_mixed, 'Progressive' = mod_os_high, 'Regressive' = mod_os_low)
+
+huxreg(dddlist,
+       coefs = c('Post-2015 × Same-sex × Mixed-citizenship' = 'I(post_2015 * same_sex * mixed)',
+                'Post-2015 × Same-sex'  = 'I(post_2015 * same_sex)',
+                'Post-2015 × Mixed-citizenship'  = 'I(post_2015 * mixed)',
+                'Post-2015' = 'post_2015TRUE',
+                'State LGB policy' = 'state_policy',
+                'State unemployment' = 'state_unemploy',
+                'State per-capita income' = 'state_income'),
+  note = '{stars}. The "Regressive" sample includes only countries with a LGB policy score less than 0, and the "Progressive" sample includes only those with a score greater than 3. Group-clustered standard errors shown in parentheses. Source: American Community Survey 2008-2019. Authors\' calculations.',
+       stars = c(`†` = 0.1, `*` = 0.05, `**` = 0.01, `***` = 0.001),
+       statistics = c('Observations' = 'nobs')) %>%
+  huxtable::set_width(1) %>%
+  set_wrap(T) %>%
+  set_all_padding(0) %>% set_caption_pos('topleft') %>%
+  huxtable::set_caption('2015 instead of 2013 intervention: Triple-differences (DDD), quasi-Poisson regressions of counts of individuals in mixed-citizenship, same-sex couples, stratifying the sample by policy environment at year of immigration')
+
+```
 
 \newpage
 
