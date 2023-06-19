@@ -1,0 +1,182 @@
+---
+output:
+  bookdown::pdf_document2:
+  # bookdown::word_document2:
+  #   reference_docx: "word-template.docx"
+    toc: no
+    number_sections: no
+    pandoc_args: !expr rmdfiltr::add_wordcount_filter(rmdfiltr::add_citeproc_filter(args = NULL))
+    latex_engine: xelatex
+    keep_tex: no
+
+header-includes:
+ # - \usepackage{setspace}\doublespace
+  # - \usepackage{bbm}
+  # - \usepackage{fancyhdr}
+  # - \pagestyle{fancy}
+  # - \setlength{\headheight}{15pt}
+  # - \lhead{TESS Proposal}
+  # - \rhead{Sexuality, Cultural Similarity, and Immigrant Deservingness}
+editor_options: 
+  
+  chunk_output_type: console
+citeproc: no
+# fontfamily: mathpazo
+# mainfont: "Times New Roman"
+# fontsize: 12pt
+geometry: margin=1in
+indent: yes
+link-citations: yes
+linkcolor: blue
+bibliography: "/Users/nathan/My Drive/Projects/2020 Same-Sex Immigrant Couples/ssimm/Same-Sex Immigration.bib"
+# csl: chicago-author-date.csl
+
+title: "Sexuality, Cultural Similarity, and Immigrant Deservingness"
+subtitle: "OSF Preregistration"
+
+# date: "`r format(Sys.time(), '%B %e, %Y')`"
+# author:
+# - Nathan I. Hoffmann, Department of Sociology, University of California, Los Angeles
+# - Kristopher Velasco, Department of Sociology, Princeton University
+
+---
+
+\newcommand{\tabitem}{~~\llap{\textbullet}~~}
+
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = F, warning = F, message = F, cache = T, 
+                      dpi = 300)
+library(here)
+library(huxtable)
+library(haven)
+library(patchwork)
+library(cregg)
+library(rdss)
+library(DeclareDesign)
+library(tidyverse)
+
+options("yaml.eval.expr" = TRUE)
+
+theme_set(theme_classic(base_family = 'Palatino') + 
+            theme(legend.title=element_blank(),
+                  panel.grid.major.y = element_line('grey80'),
+                  legend.background = element_rect(fill = "transparent")))
+ggplot <- function(...) ggplot2::ggplot(...) + scale_color_brewer(palette="Dark2") +
+  scale_fill_brewer(palette="Dark2")
+```
+
+<!-- \thispagestyle{empty} -->
+
+<!-- \newpage -->
+
+<!-- \clearpage -->
+<!-- \setcounter{page}{1} -->
+
+# Description
+
+This study will investigate whether Americans view lesbian and gay (LG) migrants as more deserving to enter the United States than their straight counterparts. Data will come from a conjoint survey experiment of 1,650 U.S. citizens, fielded using Prolific Academic. Participants will be shown a pair of hypothetical profiles with attributes randomized and be asked to choose one for admission. They will also be asked which they believe has more shared values with the U.S. They will complete this task four times and answer sociodemographic and immigration opinion questions. The study aims to investigate whether respondents prioritize cultural similarity, economic potential, or humanitarian merit when making these decisions. It will also study heterogeneous effects using the following respondent characteristics: educational attainment, sexual/gender minority status, political party affiliation, religion, opinions on immigration, and education.
+
+
+
+# Hypotheses
+*List specific, concise, and testable hypotheses. Please state if the hypotheses are directional or non-directional. If directional, state the direction. A predicted effect is also appropriate here. If a specific interaction or moderation is important to your research, you can list that as a separate hypothesis.*  
+
+We will calculate average marginal component effects (AMCEs) for the main effects and marginal means for interactions and heterogeneous effects. A positive AMCE for lesbian/gay identity implies that presentation of a lesbian/gay profile increases respondents' favorability toward admitting that immigrant, relative to a straight profile. A higher marginal mean for lesbian/gay identity implies greater likelihood of choosing lesbian/gay immigrants for admission.  
+
+- H1 (main effect): Lesbian/gay identity will have a positive AMCE, relative to straight identity.  
+
+- H2 (mediation): Respondents who are more likely to choose lesbian/gay profiles for admission will choose them as having more shared values with the U.S., on average. Controlling for cultural similarity will attenuate the AMCE for lesbian/gay identity.  
+
+- H3 (interaction): For lesbian/gay profiles, persecution will have a higher marginal mean than work as a reason for migration.  
+
+Heterogeneous effects for marginal means for lesbian/gay identity:  
+
+- H4a (political ideology): Democrats will have a higher marginal mean than Republicans  
+- H4b (religion): Christians will have a lower marginal mean than other groups  
+- H4c (sexuality): Lesbian/gay/bisexual respondents will have a higher marginal mean than straight respondents  
+- H4d (opinion): Respondents who worry about immigration contributing to overpopulation will have higher marginal means   
+- H4e (education): Respondents with a bachelor's degree will have a higher marginal mean than other education levels
+
+
+# Study design
+*Describe your study design. The key is to be as detailed as is necessary given the specific parameters of the design. There may be some overlap between this question and the following questions. That is OK, as long as sufficient detail is given in one of the areas to provide all of the requested information. Examples include two-group, factorial, randomized block, and repeated measures. Is it a between (unpaired), within-subject (paired), or mixed design? Describe any counterbalancing required.*  
+
+We will use a conjoint survey experiment. Respondents will be asked to read two vignettes describing hypothetical immigrants and choose the one they prefer to gain entry to the United States. Each respondent will complete this task four times.   
+
+# Randomization
+*If you are doing a randomized study, state how you will randomize, and at what level. Typical randomization techniques include: simple, block, stratified, and adaptive covariate randomization. If randomization is required for the study, the method should be specified here, not simply the source of random numbers.*  
+
+We will use simple randomization of seven attributes. In all, this creates 192 potential profiles for respondents to evaluate.  
+
+# Data collection procedures
+*Please describe the process by which you will collect your data and your inclusion and exclusion criteria. If you are using human subjects, this should include the population from which you obtain subjects, recruitment efforts, payment for participation, how subjects will be selected for eligibility from the initial pool, and your study timeline. For studies that don't include human subjects, include information about how you will collect samples, duration of data gathering efforts, source or location of samples, or batch numbers you will use.*  
+
+We will administer the survey to U.S. citizen respondents from Prolific Academic. 
+
+# Sample size
+*Describe the sample size of your study. How many units will be analyzed in the study? This could be the number of people, birds, classrooms, plots, or countries included. If the units are not individuals, then describe the size requirements for each unit. If you are using a clustered or multilevel design, describe how many units are you collecting at each level of the analysis. This might be the number of samples or a range, minimum, or maximum.*  
+
+We will ask 1,650 respondents to evaluate four pairs of profiles for a total of 6,600 conjoint tasks.
+
+# Sample size rationale
+*This could include a power analysis or an arbitrary constraint such as time, money, or personnel.*  
+
+We performed a power analysis using the Shiny App Power Analysis Tool created by Stefanelli and Lukac (2020). With 1,650 respondents, 4 tasks, and an effect size of 0.032 (as estimated in the pilot study) for an attribute with two levels, the power analysis suggests that the predicted statistical power is 93 percent.  
+Source: https://mblukac.shinyapps.io/conjoints-power-shiny/
+
+
+
+# Manipulated variables
+*Precisely define all variables you plan to manipulate and the levels or treatment arms of each variable. This is not applicable to any observational study.*  
+
+- Gender: man or woman  
+- Country GDP: moderately wealthy or poor  
+- Skill: has an MD and works as a cardiologist; has a high school degree and works as a   restaurant manager; or has a primary school education and works as a cleaner  
+- Language: speaks English or does not speak English  
+- Religion: Christian or Muslim  
+- Sexuality: Lesbian/gay or straight  
+- Reason for migration: could not find work due to high unemployment or feared government persecution  
+
+# Measured variables
+*Precisely define each variable that you will measure. This will include outcome measures, as well as any measured predictors or covariates.*  
+We measure respondent gender, whether they are naturalized or U.S.-born citizens, political party affiliation, sexual orientation, education, religion, religious service attendance, how many lesbian or gay people they know, and opinions on immigration. See attached survey instrument for details.  
+
+**ATTACH SURVEY INSTRUMENT**  
+
+# Indices
+*If applicable, please define how measures will be combined into an index (or even a mean) and what measures will be used. Include either a formula or a precise description of the method. If you are using a more complicated statistical method to combine measures (e.g. a factor analysis), please note that here but describe the exact method in the analysis plan section.*  
+
+NA
+
+
+# Statistical models
+*What statistical model will you use to test each hypothesis? Please include the type of model (e.g. ANOVA, RMANOVA, MANOVA, multiple regression, SEM, etc) and the specification of the model. This includes each variable that will be included, all interactions, subgroup analyses, pairwise or complex contrasts, and any follow-up tests from omnibus tests. If you plan on using any positive controls, negative controls, or manipulation checks you may mention that here. Provide enough detail so that another person could run the same analysis with the information provided. Remember that in your final article any test not included here must be noted as exploratory and that you must report the results of all tests.*
+
+H1 and H2 will use average marginal component effects (AMCEs) and H3 and H4 will use marginal means, all with within-respondent clustering. The package `cregg` will be used to calculate these. See attached code. We will also present results that weight by respondent characteristics to estimate U.S. population-representative effects.  
+
+**ATTACH STATISTICAL ATTACHMENT**
+
+# Transformations
+*If you plan on transforming, centering, recoding the data, or requiring a coding scheme for categorical variables, please describe that process.*  
+There are no transformations planned.  
+
+# Inference criteria
+*What criteria will you use to make inferences? Please describe the information you’ll use (e.g. specify the p-values, Bayes factors, specific model fit indices), as well as cut-off criterion, where appropriate. Will you be using one or two tailed tests for each of your analyses? If you are comparing multiple conditions or testing multiple hypotheses, will you account for this?*  
+
+We will use the standard $p<.05$ criteria for determining whether the AMCEs are significantly different from 0 and whether the marginal means for attribute values of interest are significantly different those for other values.  
+
+
+# Data exclusion
+*How will you determine which data points or samples if any to exclude from your analyses? How will outliers be handled? Will you use any awareness check?*  
+Our survey uses two attention checks, and we will exclude respondents who fail either check. We will also exclude conjoint tasks where the respondent is shown two of the same profile (we anticipate 0.5% or 34 tasks).
+
+
+# Missing data
+*How will you deal with incomplete or missing data?*  
+Our survey will not allow respondents to skip questions. If a respondent does not complete the survey, their survey will be discarded and not count toward the sample of 1,650.  
+
+
+# Exploratory analysis
+*If you plan to explore your data to look for unspecified differences or relationships, you may include those plans here. If you list an exploratory test here, you are not obligated to report its results. But if you do report it you are obligated to describe it as an exploratory result.*  
+We also plan to explore how responses vary by the respondent attributes not mentioned in the hypotheses (gender, attendance of religious services, naturalized vs. U.S.-born citizens, other opinions on immigration, whether the respondent knows someone who is lesbian or gay).
