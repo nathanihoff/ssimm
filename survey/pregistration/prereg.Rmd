@@ -8,7 +8,6 @@ output:
     pandoc_args: !expr rmdfiltr::add_wordcount_filter(rmdfiltr::add_citeproc_filter(args = NULL))
     latex_engine: xelatex
     keep_tex: no
-
 header-includes:
  # - \usepackage{setspace}\doublespace
   # - \usepackage{bbm}
@@ -30,15 +29,10 @@ link-citations: yes
 linkcolor: blue
 bibliography: "/Users/nathan/My Drive/Projects/2020 Same-Sex Immigrant Couples/ssimm/Same-Sex Immigration.bib"
 # csl: chicago-author-date.csl
-
 title: "Sexuality, Cultural Similarity, and Immigrant Deservingness"
 subtitle: "OSF Preregistration"
-
 # date: "`r format(Sys.time(), '%B %e, %Y')`"
 # author:
-# - Nathan I. Hoffmann, Department of Sociology, University of California, Los Angeles
-# - Kristopher Velasco, Department of Sociology, Princeton University
-
 ---
 
 \newcommand{\tabitem}{~~\llap{\textbullet}~~}
@@ -75,7 +69,7 @@ ggplot <- function(...) ggplot2::ggplot(...) + scale_color_brewer(palette="Dark2
 
 # Description
 
-This study will investigate whether Americans view lesbian and gay (LG) migrants as more deserving to enter the United States than their straight counterparts. Data will come from a conjoint survey experiment of 1,650 U.S. citizens, fielded using Prolific Academic. Participants will be shown a pair of hypothetical profiles with attributes randomized and be asked to choose one for admission. They will also be asked which they believe has more shared values with the U.S. They will complete this task four times and answer sociodemographic and immigration opinion questions. The study aims to investigate whether respondents prioritize cultural similarity, economic potential, or humanitarian merit when making these decisions. It will also study heterogeneous effects using the following respondent characteristics: educational attainment, sexual/gender minority status, political party affiliation, religion, opinions on immigration, and education.
+This study will investigate whether Americans view lesbian and gay (LG) migrants as more deserving to enter the United States than their straight counterparts. Data will come from a conjoint survey experiment of 1,650 U.S. citizens, fielded using Prolific Academic. Participants will be shown a pair of hypothetical profiles with attributes randomized and be asked to choose one for admission. They will also be asked which one they believe has more shared values with the U.S. They will complete this task four times and answer sociodemographic and immigration opinion questions. The study aims to investigate whether respondents prioritize cultural similarity, economic potential, or humanitarian merit when making these decisions. It will also study heterogeneous effects using the following respondent characteristics: educational attainment, sexual/gender minority status, political party affiliation, religion, opinions on immigration, and education.
 
 
 
