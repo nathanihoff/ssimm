@@ -216,7 +216,7 @@ survey <- survey_raw %>%
 ```
 
 
-```{r general, fig.height = 3, fig.cap = 'Estimated marginal means and AMCEs for Prolific Academic survey study of 100 respondents each shown 2 sets of profiles. Standard errors are clustered within respondent.'}
+```{r general, fig.height = 3, fig.cap = 'Estimated marginal means and AMCEs. Standard errors are clustered within respondent.'}
 (plot(mm(survey, chosen ~  sexuality, 
         id = ~prolific_pid)) + geom_vline(xintercept = 0.5, size = .2)) +
   plot(cj(survey, chosen ~  sexuality, 
@@ -224,6 +224,14 @@ survey <- survey_raw %>%
   theme()
 
 
+
+```
+
+```{r all-acmes, fig.height = 3, fig.cap = 'Estimated  AMCEs for for all attributes. Standard errors are clustered within respondent.'}
+
+  plot(cj(survey, chosen ~  sexuality + gender + gdp + skill + lang + religion + reason, 
+        id = ~prolific_pid)) &
+  theme()
 
 ```
 
