@@ -20,11 +20,11 @@ header-includes:
   # - \usepackage{endnotes}
   #- \let\footnote=\endnote
   #- \usepackage{endfloat}
-  # - \usepackage{fancyhdr}
-  # - \pagestyle{fancy}
+  - \usepackage{fancyhdr}
+  - \pagestyle{fancy}
   # - \setlength{\headheight}{13.6pt}
-  # - \rhead{\textit{Hoffmann and Velasco}}
-  # - \lhead{\textit{`r format(Sys.time(), '%B %e, %Y')`}}
+  - \lhead{Hoffmann and Velasco}
+  - \rhead{\textit{International Migration Review}}
   - \usepackage{float}
   # - \let\counterwithout\relax
   # - \let\counterwithin\relax
@@ -42,15 +42,15 @@ geometry: margin=1in
 indent: yes
 link-citations: yes
 linkcolor: blue
-bibliography: zotero.bib  
-csl: apa.csl
+bibliography: "/Users/nathan/My Drive/Projects/2020 Same-Sex Immigrant Couples/ssimm/Same-Sex Immigration.bib"  
+# csl: american-sociological-association.csl
 title: "Online Appendix"
 subtitle:  "Sexuality, Migration, and LGB Policy: A Portrait of Immigrants in Same-Sex Couples in the United States"
 # date: "`r format(Sys.time(), '%B %e, %Y')`"
- 
-# author:
-# - Nathan I. Hoffmann, Department of Sociology, University of California, Los Angeles
-# - Kristopher Velasco, Department of Sociology, Princeton University
+
+author:
+- Nathan I. Hoffmann, Department of Sociology, University of California, Los Angeles
+- Kristopher Velasco, Department of Sociology, Princeton University
 ---
 
 <!-- Turn off hyphenation -->
@@ -163,9 +163,9 @@ acs_prop_state %>%
   select(`Percent in same-sex couples` = prop_same_sex, 
          `State LGB policy score` = state_policy,
          `Country LGB policy score` = origin_score,
-         `Distance (km)` = distw, 
-         `Contiguous border` = contig, `Common official language` = comlang_off, 
-         `Common ethnic language` = comlang_ethno, `Ever colonial relationship` = colony,
+         # `Distance (km)` = distw, 
+         # `Contiguous border` = contig, `Common official language` = comlang_off, 
+         # `Common ethnic language` = comlang_ethno, `Ever colonial relationship` = colony,
          `Per-cap. GDP difference` = wage_dif, `Unemployment difference` = unemp_dif, 
          `Liberal democracy (V-Dem)` = vdem, `Proportion same-country stock` = stock_prop,
          `State unemployment rate` = state_unemploy, `State per-capita income` = state_income) %>%
@@ -193,9 +193,9 @@ acs_ind %>%
          `Number of children` = nchild, `Annual gross income (thousands)` = inctot, 
          `IHS-transformed income` = ihs_income, 
          `No income` = no_income, `Year of immigration` = yrimmig,
-         `Distance (km)` = distw, 
-         `Contiguous border` = contig, `Common official language` = comlang_off, 
-         `Common ethnic language` = comlang_ethno, `Ever colonial relationship` = colony,
+         # `Distance (km)` = distw, 
+         # `Contiguous border` = contig, `Common official language` = comlang_off, 
+         # `Common ethnic language` = comlang_ethno, `Ever colonial relationship` = colony,
          `Per-cap. GDP difference` = wage_dif, `Unemployment difference` = unemp_dif, 
          `Liberal democracy (V-Dem)` = vdem, `Proportion same-country stock` = stock_prop,
          `State unemployment rate` = state_unemploy, `State per-capita income` = state_income) %>%
@@ -227,7 +227,7 @@ acs_ind %>%
 <!-- Finally, Tables \@ref(tab:desc-top-same) and \@ref(tab:desc-top-dif) show the top sending countries in the data by absolute numbers of same- and different-sex couples. Although there are some differences, the most common sending countries for immigrants to the U.S. dominate the lists. -->
 
 
-```{r desc-fig, fig.cap = 'Selection descriptive statistics for immigrants in couples 2008-2019, with survey weights and 95% confidence intervals. Each panel subtracts the ACS year- and country-level average from each immigrant originating from that country. Values above 0 indicate positive selection. All currency in 1000s of 1999 dollars.'}
+```{r desc-fig, fig.cap = "Selection descriptive statistics for immigrants in couples 2008-2019, with survey weights and 95% confidence intervals. Each panel subtracts the ACS year- and country-level average from each immigrant originating from that country. Values above 0 indicate positive selection. All currency in 1000s of 1999 dollars."}
 
 
 income <- acs_ind_survey %>%
@@ -272,9 +272,11 @@ bind_rows(income, hs, college, hwsei) %>%
 
 
 ```
+
+
 \newpage
 
-```{r scatter-state, fig.cap = "Proportion of immigrants from each country in same-sex couples in each state, in each survey year, from 2008 to 2019. The left panel's horizontal axis represents the origin country policy score in the mean year of immigration for that group, while the right panel's horizontal axis represents the state policy score in the survey year. Points are jittered for clarity, and percentages above 5 are not shown."}
+```{r scatter-state, fig.cap = "Proportion of immigrants from each country in same-sex couples in each U.S. state, in each survey year, from 2008 to 2019. The left panel's horizontal axis represents the state policy score in the survey year, while the right panel's horizontal axis represents the origin country policy score in the mean year of immigration for that group. Lines come from bivariate OSL regressions of percentage on score. Points are jittered for clarity, and percentages above 5 are not shown."}
 set.seed(1850)
 state_plot_1 <- acs_prop_state %>%
   ggplot(aes(x = state_policy, y = prop_same_sex, color = year)) +
@@ -283,7 +285,7 @@ state_plot_1 <- acs_prop_state %>%
   geom_smooth(method = "lm", color = 'black') +
   scale_color_continuous(low = 'black', high = 'green') +
   ylim(0, 5) +
-   labs(x = 'LGB policy score for U.S. state of residence', 
+   labs(x = 'LGB policy score for state of residence', 
        y = 'Percentage of immigrants in same-sex couples')
   
 
@@ -343,9 +345,9 @@ acs_ind %>%
 
 # Adjusting Proportions for Hypothetical Sex Misreporting
 
-Published papers using the ACS to study same-sex couples overwhelmingly use the method by @gates_2009 employed our main paper to adjust for misreporting, where we drop all respondents that had either their relationship or sex variable allocated by the Census Bureau. However here we implement a novel method to adjust proportions of estimated immigrants in same-sex couples, based on the estimated mismatch rates from two U.S. Census Bureau studies. Beginning in 2019, the ACS provides explicit categories for "Opposite-sex husband/wife/spouse," "Opposite-sex unmarried partner," "Same-sex husband/wife/spouse," and "Same-sex unmarried partner" [@walker_2021], so sex misreporting in the 2019 data is unlikely. Hence in most sensitivity analyses below, 2019 estimates are not adjusted for misreporting.  
+Published papers using the ACS to study same-sex couples overwhelmingly use the method by @gates_2009 employed in our main paper to adjust for misreporting, where we drop all respondents that had either their relationship or sex variable allocated by the Census Bureau. However here we implement a novel method to adjust proportions of estimated immigrants in same-sex couples, based on the estimated mismatch rates from two U.S. Census Bureau studies. Beginning in 2019, the ACS provides explicit categories for "Opposite-sex husband/wife/spouse," "Opposite-sex unmarried partner," "Same-sex husband/wife/spouse," and "Same-sex unmarried partner" [@walker_2021], so sex misreporting in the 2019 data is unlikely. Hence in most sensitivity analyses below, 2019 estimates are not adjusted for misreporting.  
 
-In a Census Bureau working paper, @kreider_2015 use personal information such as names and addresses match same-sex couples from the 2010 ACS to Social Security administrative data. They find that 57 percent of married couples coded as same-sex in the ACS are coded as different-sex in the administrative data. The corresponding sex mismatch rate for unmarried same-sex couples is 7 percent. (Our data include `r sum(acs_wide$related_partner == 'Spouse' & acs_wide$same_sex == T)` married and `r sum(acs_wide$related_partner == 'Unmarried Partner' & acs_wide$same_sex == T)` unmarried same-sex immigrant couples.) A follow-up study [@kreider_2017] shows that these mismatch rates appear to have fallen: In a 2016 ACS test module that included explicit categories for different- and same-sex spouses and partners, 31 percent of married and 3 percent of unmarried same-sex couples had inconsistent sex responses. This decreasing mismatch rate may be due to the greater numbers of same-sex couples openly identifying themselves as well as the growing popularity of responding to the ACS via Internet (see Table \@ref(tab:respmode)), a response mode introduced in 2013 which is now the default [@u.s.censusbureau_2017]. In the 2016 test of the ACS, the mismatch rate for mail-in responses was 47 and 6 percent for married and unmarried same-sex couples, respectively, whereas for Internet responses they were only 22 and 2.4 percent [@kreider_2017]. A computer-assisted telephone interviewing (CATI) or computer-assisted personal interviewing (CAPI) response mode is sometimes administered as well, but the 2016 study did not assess its error rate. In the 2010 ACS, @kreider_2015 find CATI/CAPI sex reporting mismatch for 46 and 13 percent for married and unmarried same-sex couples, respectively. In our sample of immigrants in same-sex couples, `r sum(acs_ind$respmode == 'Mail' & acs_ind$same_sex == T)` responded by mail, `r with(filter(acs_ind, same_sex == T), sum(respmode == 'CATI/CAPI'))` responded by CAPI/CATI, and `r sum(acs_ind$respmode == 'Internet' & acs_ind$same_sex == T)` responded by Internet survey. Response mode proportions by couple type are shown in Table \ref{tab:respmode}.  
+In a Census Bureau working paper, @kreider_2015 use personal information such as names and addresses to match same-sex couples from the 2010 ACS to Social Security administrative data. They find that 57 percent of married couples coded as same-sex in the ACS are coded as different-sex in the administrative data. The corresponding sex mismatch rate for unmarried same-sex couples is 7 percent. (Our data include `r sum(acs_wide$related_partner == 'Spouse' & acs_wide$same_sex == T)` married and `r sum(acs_wide$related_partner == 'Unmarried Partner' & acs_wide$same_sex == T)` unmarried same-sex immigrant couples.) A follow-up study [@kreider_2017] shows that these mismatch rates appear to have fallen: In a 2016 ACS test module that included explicit categories for different- and same-sex spouses and partners, 31 percent of married and 3 percent of unmarried same-sex couples had inconsistent sex responses. This decreasing mismatch rate may be due to the greater numbers of same-sex couples openly identifying themselves as well as the growing popularity of responding to the ACS via Internet (see Table \@ref(tab:respmode)), a response mode introduced in 2013 which is now the default [@u.s.censusbureau_2017]. In the 2016 test of the ACS, the mismatch rate for mail-in responses was 47 and 6 percent for married and unmarried same-sex couples, respectively, whereas for Internet responses they were only 22 and 2.4 percent [@kreider_2017]. A computer-assisted telephone interviewing (CATI) or computer-assisted personal interviewing (CAPI) response mode is sometimes administered as well, but the 2016 study did not assess its error rate. In the 2010 ACS, @kreider_2015 find CATI/CAPI sex reporting mismatch for 46 and 13 percent for married and unmarried same-sex couples, respectively. In our sample of immigrants in same-sex couples, `r sum(acs_ind$respmode == 'Mail' & acs_ind$same_sex == T)` responded by mail, `r with(filter(acs_ind, same_sex == T), sum(respmode == 'CATI/CAPI'))` responded by CAPI/CATI, and `r sum(acs_ind$respmode == 'Internet' & acs_ind$same_sex == T)` responded by Internet survey. Response mode proportions by couple type are shown in Table \ref{tab:respmode}.  
 
 ```{r respmode}
 acs_ind %>%
@@ -378,8 +380,8 @@ sens_df <- list()
 
 
 for(i in 1:nrow(mis_df)){
-  sens_mod <- lm(prop_same_sex_adj2 ~ distw + contig + comlang_off + comlang_ethno + colony +
-                   wage_dif + unemp_dif + vdem  + stock_prop + bpld +
+  sens_mod <- lm(prop_same_sex_adj2 ~ wage_dif + unemp_dif + vdem  + stock_prop + bpld +
+                   #distw + contig + comlang_off + comlang_ethno + colony +
                      post_2013*origin_score,
          data = acs_prop %>%
            mutate(prop_same_sex_adj2 = (n_spouse_pre_2019_same_sex*(1-mis_df[i,1]) + 
@@ -387,8 +389,8 @@ for(i in 1:nrow(mis_df)){
                                          n_partner_pre_2019_same_sex*(1-mis_df[i,2]) +
                                          n_partner_2019_same_sex)/n_total * 100))
   
-  sens_mod2 <- lm(prop_same_sex_adj2 ~ state_policy + origin_score + distw + contig + 
-                          comlang_off + comlang_ethno + colony +
+  sens_mod2 <- lm(prop_same_sex_adj2 ~ state_policy + origin_score + # distw + contig + 
+                          # comlang_off + comlang_ethno + colony +
                           wage_dif + unemp_dif + vdem + stock_prop +
                            state_unemploy + state_income + Country + state, 
                        data = acs_prop_state %>%
@@ -423,7 +425,7 @@ sens_df <- bind_rows(sens_df) %>%
 
 # sens_df2 <- list()
 # for(i in 1:nrow(mis_df)){
-#   sens_mod <- lm(prop_same_sex_adj2 ~ distw + contig + comlang_off + comlang_ethno + colony +
+#   sens_mod <- lm(prop_same_sex_adj2 ~ distw + contig + # comlang_off + comlang_ethno + colony +
 #                    wage_dif + unemp_dif + vdem + origin_score + stock_prop + bpld,
 #          data = acs_prop %>%
 #                       mutate(prop_same_sex_adj2 = (prop_spouse_same_sex*(1-mis_df[i,1]) +
@@ -520,7 +522,7 @@ plot2 <- sens_df %>%
 (plot1 + plot2) & theme(text = element_text(size = 9))
 ```
 
-Figure \@ref(fig:sens) takes Model 5 from Table 3 (which includes country and state controls and fixed effects) and reduces the proportions of same-sex couples in the data for pre-2019 data. It varies the percentage of misreported same-sex married couples from 0 to 90 percent and of unmarried couples from 0 to 14 percent; the horizontal axis shows a weighted average of misreporting between these two groups. Highlighted in dashed bars are the empirical mismatch rates found in the two studies by @kreider_2015 and @kreider_2017. We see that even extremely high misreporting rates in the pre-2019 ACS do not render these coefficients insignificant. 
+Figure \@ref(fig:sens) takes Model 5 from Table 3 (which includes country and state controls and fixed effects) and reduces the proportions of same-sex couples in the data for pre-2019 data. It varies the percentage of misreported same-sex married couples from 0 to 90 percent and of unmarried couples from 0 to 14 percent; the horizontal axis shows a weighted average of misreporting between these two groups. Highlighted in dashed bars are the empirical mismatch rates found in the two studies by @kreider_2015 and @kreider_2017. We see that even high misreporting rates in the pre-2019 ACS do not render these coefficients nonsignificant. 
 
 Table \ref{tab:mismatch} shows the mismatch rates estimated by @kreider_2015 and @kreider_2015. In the  analysis below (Table \@ref(tab:state-props-adj)), we use these apparent mismatch rates to adjust proportions used in models in Table 3 of the main paper. Each proportion is adjusted separately by marital status and response mode. For example, all internet respondents coded as being in married same-sex couples have their final proportion reduced by 22.5%. For mail-in responses, the proportions are reduced by the average between the two studies (`r (59+47.4)/2` percent for married and `r (7+5.6)/2` percent for unmarried couples). Results are quite robust to high levels of misreporting.
 
@@ -553,26 +555,26 @@ state_prop2 <- lm(prop_same_sex_adj ~ origin_score + state_policy, data = acs_pr
 #                         origin_score + state_policy, 
 #                        data = acs_prop_state)
 
-state_prop_fe <- lm(prop_same_sex_adj ~ state_policy + origin_score + distw + contig + 
-                          comlang_off + comlang_ethno + colony +
+state_prop_fe <- lm(prop_same_sex_adj ~ state_policy + origin_score + # distw + contig + 
+                          # comlang_off + comlang_ethno + colony +
                           wage_dif + unemp_dif + vdem + stock_prop +
                            state_unemploy + state_income + Country + state, 
                        data = acs_prop_state)
 
-state_prop_fe2 <- lm(prop_same_sex_adj ~ state_policy*origin_score + distw + contig + 
-                          comlang_off + comlang_ethno + colony +
+state_prop_fe2 <- lm(prop_same_sex_adj ~ state_policy*origin_score + # distw + contig + 
+                          # comlang_off + comlang_ethno + colony +
                           wage_dif + unemp_dif + vdem + stock_prop +
                            state_unemploy + state_income + Country + state, 
                        data = acs_prop_state)
 
-state_prop_fe2_2013 <- lm(prop_same_sex_adj ~ state_policy*origin_score + post_2013 + distw + contig + 
-                          comlang_off + comlang_ethno + colony +
+state_prop_fe2_2013 <- lm(prop_same_sex_adj ~ state_policy*origin_score + post_2013 + # distw + contig + 
+                          # comlang_off + comlang_ethno + colony +
                           wage_dif + unemp_dif + vdem + stock_prop +
                            state_unemploy + state_income + Country + state, 
                        data = acs_prop_state)
 
-state_prop_2013 <- lm(prop_same_sex_adj ~ post_2013 + state_policy + origin_score + distw + contig + 
-                          comlang_off + comlang_ethno + colony +
+state_prop_2013 <- lm(prop_same_sex_adj ~ post_2013 + state_policy + origin_score + # distw + contig + 
+                          # comlang_off + comlang_ethno + colony +
                           wage_dif + unemp_dif + vdem + stock_prop +
                            state_unemploy + state_income + Country + state, 
                        data = acs_prop_state)
@@ -606,7 +608,7 @@ stargazer(mod_list,
           keep.stat = c('n'),
           star.cutoffs = c(0.1, 0.05, 0.01, 0.001),
           star.char = c('†', '*', '**', '***'),
-          notes = c("\\parbox[t]{\\textwidth}{\\textit{Note}: †\\textit{p}<0.1; *\\textit{p}<0.05; **\\textit{p}<0.01; ***\\textit{p}<0.001. Country and state two-way clustered standard errors are shown in parentheses. State controls include unemployment rate and per-capita income. Country controls include population-weighted distance, contiguous border, common official language, common ethnic language, colonial relationship, per-capita GDP differential, unemployment differential, proportion same-country stock, and democracy.}", 
+          notes = c("\\parbox[t]{\\textwidth}{\\textit{Note}: †\\textit{p}<0.1; *\\textit{p}<0.05; **\\textit{p}<0.01; ***\\textit{p}<0.001. Country and state two-way clustered standard errors are shown in parentheses. State controls include unemployment rate and per-capita income. Country controls include per-capita GDP differential, unemployment differential, proportion same-country stock, and democracy.}", 
                     "\\textit{Source}: American Community Survey 2008-2019. Authors' calculations."), 
           notes.label = '',
           notes.align = 'l',
@@ -635,26 +637,26 @@ state_prop <- lm(prop_same_sex ~ state_policy, data = acs_prop_state, weights = 
 
 state_prop2 <- lm(prop_same_sex ~ origin_score + state_policy, data = acs_prop_state, weights = stock_prop)
 
-state_prop_fe <- lm(prop_same_sex ~ state_policy + origin_score + distw + contig + 
-                          comlang_off + comlang_ethno + colony +
+state_prop_fe <- lm(prop_same_sex ~ state_policy + origin_score + # distw + contig + 
+                          # comlang_off + comlang_ethno + colony +
                           wage_dif + unemp_dif + vdem + stock_prop +
                            state_unemploy + state_income + Country + state, 
                        data = acs_prop_state, weights = stock_prop)
 
-state_prop_fe2 <- lm(prop_same_sex ~ state_policy*origin_score + distw + contig + 
-                          comlang_off + comlang_ethno + colony +
+state_prop_fe2 <- lm(prop_same_sex ~ state_policy*origin_score + # distw + contig + 
+                          # comlang_off + comlang_ethno + colony +
                           wage_dif + unemp_dif + vdem + stock_prop +
                            state_unemploy + state_income + Country + state, 
                        data = acs_prop_state, weights = stock_prop)
 
-state_prop_fe2_2013 <- lm(prop_same_sex ~ state_policy*origin_score + post_2013 + distw + contig + 
-                          comlang_off + comlang_ethno + colony +
+state_prop_fe2_2013 <- lm(prop_same_sex ~ state_policy*origin_score + post_2013 + # distw + contig + 
+                          # comlang_off + comlang_ethno + colony +
                           wage_dif + unemp_dif + vdem + stock_prop +
                            state_unemploy + state_income + Country + state, 
                        data = acs_prop_state, weights = stock_prop)
 
-state_prop_2013 <- lm(prop_same_sex ~ post_2013 + state_policy + origin_score + distw + contig + 
-                          comlang_off + comlang_ethno + colony +
+state_prop_2013 <- lm(prop_same_sex ~ post_2013 + state_policy + origin_score + # distw + contig + 
+                          # comlang_off + comlang_ethno + colony +
                           wage_dif + unemp_dif + vdem + stock_prop +
                            state_unemploy + state_income + Country + state, 
                        data = acs_prop_state, weights = stock_prop)
@@ -684,7 +686,7 @@ stargazer(mod_list,
           keep.stat = c('n'),
           star.cutoffs = c(0.1, 0.05, 0.01, 0.001),
           star.char = c('†', '*', '**', '***'),
-          notes = c("\\parbox[t]{\\textwidth}{\\textit{Note}: †\\textit{p}<0.1; *\\textit{p}<0.05; **\\textit{p}<0.01; ***\\textit{p}<0.001. Country and state two-way clustered standard errors are shown in parentheses. State controls include unemployment rate and per-capita income. Country controls include population-weighted distance, contiguous border, common official language, common ethnic language, colonial relationship, wage differential, unemployment differential, proportion same-country stock, and democracy.}", 
+          notes = c("\\parbox[t]{\\textwidth}{\\textit{Note}: †\\textit{p}<0.1; *\\textit{p}<0.05; **\\textit{p}<0.01; ***\\textit{p}<0.001. Country and state two-way clustered standard errors are shown in parentheses. State controls include unemployment rate and per-capita income. Country controls include wage differential, unemployment differential, proportion same-country stock, and democracy.}", 
                     "\\textit{Source}: American Community Survey 2008-2019. Authors' calculations."), 
           notes.label = '',
           notes.align = 'l',
@@ -710,26 +712,26 @@ state_prop <- lm(prop_spouse_same_sex ~ state_policy, data = acs_prop_state)
 state_prop2 <- lm(prop_spouse_same_sex ~ origin_score + state_policy, data = acs_prop_state)
 
 
-state_prop_fe <- lm(prop_spouse_same_sex ~ state_policy + origin_score + distw + contig + 
-                          comlang_off + comlang_ethno + colony +
+state_prop_fe <- lm(prop_spouse_same_sex ~ state_policy + origin_score + # distw + contig + 
+                          # comlang_off + comlang_ethno + colony +
                           wage_dif + unemp_dif + vdem + stock_prop +
                            state_unemploy + state_income + Country + state, 
                        data = acs_prop_state)
 
-state_prop_fe2 <- lm(prop_spouse_same_sex ~ state_policy*origin_score + distw + contig + 
-                          comlang_off + comlang_ethno + colony +
+state_prop_fe2 <- lm(prop_spouse_same_sex ~ state_policy*origin_score + # distw + contig + 
+                          # comlang_off + comlang_ethno + colony +
                           wage_dif + unemp_dif + vdem + stock_prop +
                            state_unemploy + state_income + Country + state, 
                        data = acs_prop_state)
 
-state_prop_fe2_2013 <- lm(prop_spouse_same_sex ~ state_policy*origin_score + post_2013 + distw + contig + 
-                          comlang_off + comlang_ethno + colony +
+state_prop_fe2_2013 <- lm(prop_spouse_same_sex ~ state_policy*origin_score + post_2013 + # distw + contig + 
+                          # comlang_off + comlang_ethno + colony +
                           wage_dif + unemp_dif + vdem + stock_prop +
                            state_unemploy + state_income + Country + state, 
                        data = acs_prop_state)
 
-state_prop_2013 <- lm(prop_spouse_same_sex ~ post_2013 + state_policy + origin_score + distw + contig + 
-                          comlang_off + comlang_ethno + colony +
+state_prop_2013 <- lm(prop_spouse_same_sex ~ post_2013 + state_policy + origin_score + # distw + contig + 
+                          # comlang_off + comlang_ethno + colony +
                           wage_dif + unemp_dif + vdem + stock_prop +
                            state_unemploy + state_income + Country + state, 
                        data = acs_prop_state)
@@ -759,7 +761,7 @@ stargazer(mod_list,
           keep.stat = c('n'),
           star.cutoffs = c(0.1, 0.05, 0.01, 0.001),
           star.char = c('†', '*', '**', '***'),
-          notes = c("\\parbox[t]{\\textwidth}{\\textit{Note}: †\\textit{p}<0.1; *\\textit{p}<0.05; **\\textit{p}<0.01; ***\\textit{p}<0.001. Country and state two-way clustered standard errors are shown in parentheses. State controls include unemployment rate and per-capita income. Country controls include population-weighted distance, contiguous border, common official language, common ethnic language, colonial relationship, wage differential, unemployment differential, proportion same-country stock, and democracy.}", 
+          notes = c("\\parbox[t]{\\textwidth}{\\textit{Note}: †\\textit{p}<0.1; *\\textit{p}<0.05; **\\textit{p}<0.01; ***\\textit{p}<0.001. Country and state two-way clustered standard errors are shown in parentheses. State controls include unemployment rate and per-capita income. Country controls include wage differential, unemployment differential, proportion same-country stock, and democracy.}", 
                     "\\textit{Source}: American Community Survey 2008-2019. Authors' calculations."), 
           notes.label = '',
           notes.align = 'l',
@@ -777,26 +779,26 @@ state_prop <- lm(prop_same_sex_oneimm ~ state_policy, data = acs_prop_state)
 state_prop2 <- lm(prop_same_sex_oneimm ~ origin_score + state_policy, data = acs_prop_state)
 
 
-state_prop_fe <- lm(prop_same_sex_oneimm ~ state_policy + origin_score + distw + contig + 
-                          comlang_off + comlang_ethno + colony +
+state_prop_fe <- lm(prop_same_sex_oneimm ~ state_policy + origin_score + # distw + contig + 
+                          # comlang_off + comlang_ethno + colony +
                           wage_dif + unemp_dif + vdem + stock_prop +
                            state_unemploy + state_income + Country + state, 
                        data = acs_prop_state)
 
-state_prop_fe2 <- lm(prop_same_sex_oneimm ~ state_policy*origin_score + distw + contig + 
-                          comlang_off + comlang_ethno + colony +
+state_prop_fe2 <- lm(prop_same_sex_oneimm ~ state_policy*origin_score + # distw + contig + 
+                          # comlang_off + comlang_ethno + colony +
                           wage_dif + unemp_dif + vdem + stock_prop +
                            state_unemploy + state_income + Country + state, 
                        data = acs_prop_state)
 
-state_prop_fe2_2013 <- lm(prop_same_sex_oneimm ~ state_policy*origin_score + post_2013 + distw + contig + 
-                          comlang_off + comlang_ethno + colony +
+state_prop_fe2_2013 <- lm(prop_same_sex_oneimm ~ state_policy*origin_score + post_2013 + # distw + contig + 
+                          # comlang_off + comlang_ethno + colony +
                           wage_dif + unemp_dif + vdem + stock_prop +
                            state_unemploy + state_income + Country + state, 
                        data = acs_prop_state)
 
-state_prop_2013 <- lm(prop_same_sex_oneimm ~ post_2013 + state_policy + origin_score + distw + contig + 
-                          comlang_off + comlang_ethno + colony +
+state_prop_2013 <- lm(prop_same_sex_oneimm ~ post_2013 + state_policy + origin_score + # distw + contig + 
+                          # comlang_off + comlang_ethno + colony +
                           wage_dif + unemp_dif + vdem + stock_prop +
                            state_unemploy + state_income + Country + state, 
                        data = acs_prop_state)
@@ -826,7 +828,7 @@ stargazer(mod_list,
           keep.stat = c('n'),
           star.cutoffs = c(0.1, 0.05, 0.01, 0.001),
           star.char = c('†', '*', '**', '***'),
-          notes = c("\\parbox[t]{\\textwidth}{\\textit{Note}: †\\textit{p}<0.1; *\\textit{p}<0.05; **\\textit{p}<0.01; ***\\textit{p}<0.001. Country and state two-way clustered standard errors are shown in parentheses. State controls include unemployment rate and per-capita income. Country controls include population-weighted distance, contiguous border, common official language, common ethnic language, colonial relationship, wage differential, unemployment differential, proportion same-country stock, and democracy.}", 
+          notes = c("\\parbox[t]{\\textwidth}{\\textit{Note}: †\\textit{p}<0.1; *\\textit{p}<0.05; **\\textit{p}<0.01; ***\\textit{p}<0.001. Country and state two-way clustered standard errors are shown in parentheses. State controls include unemployment rate and per-capita income. Country controls include wage differential, unemployment differential, proportion same-country stock, and democracy.}", 
                     "\\textit{Source}: American Community Survey 2008-2019. Authors' calculations."), 
           notes.label = '',
           notes.align = 'l',
@@ -844,26 +846,26 @@ state_prop <- lm(prop_same_sex_twoimm ~ state_policy, data = acs_prop_state)
 state_prop2 <- lm(prop_same_sex_twoimm ~ origin_score + state_policy, data = acs_prop_state)
 
 
-state_prop_fe <- lm(prop_same_sex_twoimm ~ state_policy + origin_score + distw + contig + 
-                          comlang_off + comlang_ethno + colony +
+state_prop_fe <- lm(prop_same_sex_twoimm ~ state_policy + origin_score + # distw + contig + 
+                          # comlang_off + comlang_ethno + colony +
                           wage_dif + unemp_dif + vdem + stock_prop +
                            state_unemploy + state_income + Country + state, 
                        data = acs_prop_state)
 
-state_prop_fe2 <- lm(prop_same_sex_twoimm ~ state_policy*origin_score + distw + contig + 
-                          comlang_off + comlang_ethno + colony +
+state_prop_fe2 <- lm(prop_same_sex_twoimm ~ state_policy*origin_score + # distw + contig + 
+                          # comlang_off + comlang_ethno + colony +
                           wage_dif + unemp_dif + vdem + stock_prop +
                            state_unemploy + state_income + Country + state, 
                        data = acs_prop_state)
 
-state_prop_fe2_2013 <- lm(prop_same_sex_twoimm ~ state_policy*origin_score + post_2013 + distw + contig + 
-                          comlang_off + comlang_ethno + colony +
+state_prop_fe2_2013 <- lm(prop_same_sex_twoimm ~ state_policy*origin_score + post_2013 + # distw + contig + 
+                          # comlang_off + comlang_ethno + colony +
                           wage_dif + unemp_dif + vdem + stock_prop +
                            state_unemploy + state_income + Country + state, 
                        data = acs_prop_state)
 
-state_prop_2013 <- lm(prop_same_sex_twoimm ~ post_2013 + state_policy + origin_score + distw + contig + 
-                          comlang_off + comlang_ethno + colony +
+state_prop_2013 <- lm(prop_same_sex_twoimm ~ post_2013 + state_policy + origin_score + # distw + contig + 
+                          # comlang_off + comlang_ethno + colony +
                           wage_dif + unemp_dif + vdem + stock_prop +
                            state_unemploy + state_income + Country + state, 
                        data = acs_prop_state)
@@ -894,7 +896,7 @@ stargazer(mod_list,
           keep.stat = c('n'),
           star.cutoffs = c(0.1, 0.05, 0.01, 0.001),
           star.char = c('†', '*', '**', '***'),
-          notes = c("\\parbox[t]{\\textwidth}{\\textit{Note}: †\\textit{p}<0.1; *\\textit{p}<0.05; **\\textit{p}<0.01; ***\\textit{p}<0.001. Country and state two-way clustered standard errors are shown in parentheses. State controls include unemployment rate and per-capita income. Country controls include population-weighted distance, contiguous border, common official language, common ethnic language, colonial relationship, wage differential, unemployment differential, proportion same-country stock, and democracy.}", 
+          notes = c("\\parbox[t]{\\textwidth}{\\textit{Note}: †\\textit{p}<0.1; *\\textit{p}<0.05; **\\textit{p}<0.01; ***\\textit{p}<0.001. Country and state two-way clustered standard errors are shown in parentheses. State controls include unemployment rate and per-capita income. Country controls include wage differential, unemployment differential, proportion same-country stock, and democracy.}", 
                     "\\textit{Source}: American Community Survey 2008-2019. Authors' calculations."), 
           notes.label = '',
           notes.align = 'l',
@@ -934,26 +936,26 @@ state_prop2 <- lm(prop_same_sex ~ origin_score + state_policy, data = acs_prop_s
 #                         origin_score + state_policy, 
 #                        data = acs_prop_state_ex)
 
-state_prop_fe <- lm(prop_same_sex ~ state_policy + origin_score + distw + contig + 
-                          comlang_off + comlang_ethno + colony +
+state_prop_fe <- lm(prop_same_sex ~ state_policy + origin_score + # distw + contig + 
+                          # comlang_off + comlang_ethno + colony +
                           wage_dif + unemp_dif + vdem + stock_prop +
                            state_unemploy + state_income + Country + state, 
                        data = acs_prop_state_ex)
 
-state_prop_fe2 <- lm(prop_same_sex ~ state_policy*origin_score + distw + contig + 
-                          comlang_off + comlang_ethno + colony +
+state_prop_fe2 <- lm(prop_same_sex ~ state_policy*origin_score + # distw + contig + 
+                          # comlang_off + comlang_ethno + colony +
                           wage_dif + unemp_dif + vdem + stock_prop +
                            state_unemploy + state_income + Country + state, 
                        data = acs_prop_state_ex)
 
-state_prop_fe2_2013 <- lm(prop_same_sex ~ state_policy*origin_score + post_2013 + distw + contig + 
-                          comlang_off + comlang_ethno + colony +
+state_prop_fe2_2013 <- lm(prop_same_sex ~ state_policy*origin_score + post_2013 + # distw + contig + 
+                          # comlang_off + comlang_ethno + colony +
                           wage_dif + unemp_dif + vdem + stock_prop +
                            state_unemploy + state_income + Country + state, 
                        data = acs_prop_state_ex)
 
-state_prop_2013 <- lm(prop_same_sex ~ post_2013 + state_policy + origin_score + distw + contig + 
-                          comlang_off + comlang_ethno + colony +
+state_prop_2013 <- lm(prop_same_sex ~ post_2013 + state_policy + origin_score + # distw + contig + 
+                          # comlang_off + comlang_ethno + colony +
                           wage_dif + unemp_dif + vdem + stock_prop +
                            state_unemploy + state_income + Country + state, 
                        data = acs_prop_state_ex)
@@ -985,7 +987,7 @@ stargazer(mod_list,
           keep.stat = c('n'),
           star.cutoffs = c(0.1, 0.05, 0.01, 0.001),
           star.char = c('†', '*', '**', '***'),
-          notes = c("\\parbox[t]{\\textwidth}{\\textit{Note}: †\\textit{p}<0.1; *\\textit{p}<0.05; **\\textit{p}<0.01; ***\\textit{p}<0.001. Country and state two-way clustered standard errors are shown in parentheses. State controls include unemployment rate and per-capita income. Country controls include population-weighted distance, contiguous border, common official language, common ethnic language, colonial relationship, wage differential, unemployment differential, proportion same-country stock, and democracy.}", 
+          notes = c("\\parbox[t]{\\textwidth}{\\textit{Note}: †\\textit{p}<0.1; *\\textit{p}<0.05; **\\textit{p}<0.01; ***\\textit{p}<0.001. Country and state two-way clustered standard errors are shown in parentheses. State controls include unemployment rate and per-capita income. Country controls include wage differential, unemployment differential, proportion same-country stock, and democracy.}", 
                     "\\textit{Source}: American Community Survey 2008-2019. Authors' calculations."), 
           notes.label = '',
           notes.align = 'l',
@@ -1010,26 +1012,26 @@ state_prop2 <- lm(prop_same_sex ~ origin_score_lag + state_policy_lag, data = ac
 #                         origin_score_lag + state_policy_lag, 
 #                        data = acs_prop_state)
 
-state_prop_fe <- lm(prop_same_sex ~ state_policy_lag + origin_score_lag + distw + contig + 
-                          comlang_off + comlang_ethno + colony +
+state_prop_fe <- lm(prop_same_sex ~ state_policy_lag + origin_score_lag + # distw + contig + 
+                          # comlang_off + comlang_ethno + colony +
                           wage_dif + unemp_dif + vdem + stock_prop +
                            state_unemploy + state_income + Country + state, 
                        data = acs_prop_state)
 
-state_prop_fe2 <- lm(prop_same_sex ~ state_policy_lag*origin_score_lag + distw + contig + 
-                          comlang_off + comlang_ethno + colony +
+state_prop_fe2 <- lm(prop_same_sex ~ state_policy_lag*origin_score_lag + # distw + contig + 
+                          # comlang_off + comlang_ethno + colony +
                           wage_dif + unemp_dif + vdem + stock_prop +
                            state_unemploy + state_income + Country + state, 
                        data = acs_prop_state)
 
-state_prop_fe2_2013 <- lm(prop_same_sex ~ state_policy_lag*origin_score_lag + post_2013 + distw + contig + 
-                          comlang_off + comlang_ethno + colony +
+state_prop_fe2_2013 <- lm(prop_same_sex ~ state_policy_lag*origin_score_lag + post_2013 + # + distw + contig + 
+                          # comlang_off + comlang_ethno + colony +
                           wage_dif + unemp_dif + vdem + stock_prop +
                            state_unemploy + state_income + Country + state, 
                        data = acs_prop_state)
 
-state_prop_2013 <- lm(prop_same_sex ~ post_2013 + state_policy_lag + origin_score_lag + distw + contig + 
-                          comlang_off + comlang_ethno + colony +
+state_prop_2013 <- lm(prop_same_sex ~ post_2013 + state_policy_lag + origin_score_lag + # distw + contig + 
+                          # comlang_off + comlang_ethno + colony +
                           wage_dif + unemp_dif + vdem + stock_prop +
                            state_unemploy + state_income + Country + state, 
                        data = acs_prop_state)
@@ -1061,7 +1063,7 @@ stargazer(mod_list,
           keep.stat = c('n'),
           star.cutoffs = c(0.1, 0.05, 0.01, 0.001),
           star.char = c('†', '*', '**', '***'),
-          notes = c("\\parbox[t]{\\textwidth}{\\textit{Note}: †\\textit{p}<0.1; *\\textit{p}<0.05; **\\textit{p}<0.01; ***\\textit{p}<0.001. Country and state two-way clustered standard errors are shown in parentheses. State controls include unemployment rate and per-capita income. Country controls include population-weighted distance, contiguous border, common official language, common ethnic language, colonial relationship, wage differential, unemployment differential, proportion same-country stock, and democracy.}", 
+          notes = c("\\parbox[t]{\\textwidth}{\\textit{Note}: †\\textit{p}<0.1; *\\textit{p}<0.05; **\\textit{p}<0.01; ***\\textit{p}<0.001. Country and state two-way clustered standard errors are shown in parentheses. State controls include unemployment rate and per-capita income. Country controls include wage differential, unemployment differential, proportion same-country stock, and democracy.}", 
                     "\\textit{Source}: American Community Survey 2008-2019. Authors' calculations."), 
           notes.label = '',
           notes.align = 'l',
@@ -1084,26 +1086,26 @@ state_prop <- lm(prop_same_sex_recent ~ state_policy, data = acs_prop_state)
 state_prop2 <- lm(prop_same_sex_recent ~ origin_score + state_policy, data = acs_prop_state)
 
 
-state_prop_fe <- lm(prop_same_sex_recent ~ state_policy + origin_score + distw + contig + 
-                          comlang_off + comlang_ethno + colony +
+state_prop_fe <- lm(prop_same_sex_recent ~ state_policy + origin_score + # distw + contig + 
+                          # comlang_off + comlang_ethno + colony +
                           wage_dif + unemp_dif + vdem + stock_prop +
                            state_unemploy + state_income + Country + state, 
                        data = acs_prop_state)
 
-state_prop_fe2 <- lm(prop_same_sex_recent ~ state_policy*origin_score + distw + contig + 
-                          comlang_off + comlang_ethno + colony +
+state_prop_fe2 <- lm(prop_same_sex_recent ~ state_policy*origin_score + # distw + contig + 
+                          # comlang_off + comlang_ethno + colony +
                           wage_dif + unemp_dif + vdem + stock_prop +
                            state_unemploy + state_income + Country + state, 
                        data = acs_prop_state)
 
-state_prop_fe2_2013 <- lm(prop_same_sex_recent ~ state_policy*origin_score + post_2013 + distw + contig + 
-                          comlang_off + comlang_ethno + colony +
+state_prop_fe2_2013 <- lm(prop_same_sex_recent ~ state_policy*origin_score + post_2013 + # distw + contig + 
+                          # comlang_off + comlang_ethno + colony +
                           wage_dif + unemp_dif + vdem + stock_prop +
                            state_unemploy + state_income + Country + state, 
                        data = acs_prop_state)
 
-state_prop_2013 <- lm(prop_same_sex_recent ~ post_2013 + state_policy + origin_score + distw + contig + 
-                          comlang_off + comlang_ethno + colony +
+state_prop_2013 <- lm(prop_same_sex_recent ~ post_2013 + state_policy + origin_score + # distw + contig + 
+                          # comlang_off + comlang_ethno + colony +
                           wage_dif + unemp_dif + vdem + stock_prop +
                            state_unemploy + state_income + Country + state, 
                        data = acs_prop_state)
@@ -1133,7 +1135,7 @@ stargazer(mod_list,
           keep.stat = c('n'),
           star.cutoffs = c(0.1, 0.05, 0.01, 0.001),
           star.char = c('†', '*', '**', '***'),
-          notes = c("\\parbox[t]{\\textwidth}{\\textit{Note}: †\\textit{p}<0.1; *\\textit{p}<0.05; **\\textit{p}<0.01; ***\\textit{p}<0.001. Country and state two-way clustered standard errors are shown in parentheses. State controls include unemployment rate and per-capita income. Country controls include population-weighted distance, contiguous border, common official language, common ethnic language, colonial relationship, wage differential, unemployment differential, proportion same-country stock, and democracy.}", 
+          notes = c("\\parbox[t]{\\textwidth}{\\textit{Note}: †\\textit{p}<0.1; *\\textit{p}<0.05; **\\textit{p}<0.01; ***\\textit{p}<0.001. Country and state two-way clustered standard errors are shown in parentheses. State controls include unemployment rate and per-capita income. Country controls include wage differential, unemployment differential, proportion same-country stock, and democracy.}", 
                     "\\textit{Source}: American Community Survey 2008-2019. Authors' calculations."), 
           notes.label = '',
           notes.align = 'l',
@@ -1162,26 +1164,26 @@ state_prop <- lm(prop_same_sex ~ state_policy, data = acs_prop_state_full)
 
 state_prop2 <- lm(prop_same_sex ~ origin_score + state_policy, data = acs_prop_state_full)
 
-state_prop_fe <- lm(prop_same_sex ~ state_policy + origin_score + distw + contig + 
-                          comlang_off + comlang_ethno + colony +
+state_prop_fe <- lm(prop_same_sex ~ state_policy + origin_score + # distw + contig + 
+                          # comlang_off + comlang_ethno + colony +
                           wage_dif + unemp_dif + vdem + stock_prop +
                            state_unemploy + state_income + bpld + sname, 
                        data = acs_prop_state_full)
 
-state_prop_fe2 <- lm(prop_same_sex ~ state_policy*origin_score + distw + contig + 
-                          comlang_off + comlang_ethno + colony +
+state_prop_fe2 <- lm(prop_same_sex ~ state_policy*origin_score + # distw + contig + 
+                          # comlang_off + comlang_ethno + colony +
                           wage_dif + unemp_dif + vdem + stock_prop +
                            state_unemploy + state_income + bpld + sname, 
                        data = acs_prop_state_full)
 
-state_prop_fe2_2013 <- lm(prop_same_sex ~ state_policy*origin_score + post_2013 + distw + contig + 
-                          comlang_off + comlang_ethno + colony +
+state_prop_fe2_2013 <- lm(prop_same_sex ~ state_policy*origin_score + post_2013 + # distw + contig + 
+                          # comlang_off + comlang_ethno + colony +
                           wage_dif + unemp_dif + vdem + stock_prop +
                            state_unemploy + state_income + bpld + sname, 
                        data = acs_prop_state_full)
 
-state_prop_2013 <- lm(prop_same_sex ~ post_2013 + state_policy + origin_score + distw + contig + 
-                          comlang_off + comlang_ethno + colony +
+state_prop_2013 <- lm(prop_same_sex ~ post_2013 + state_policy + origin_score + # distw + contig + 
+                          # comlang_off + comlang_ethno + colony +
                           wage_dif + unemp_dif + vdem + stock_prop +
                            state_unemploy + state_income + bpld + sname, 
                        data = acs_prop_state_full)
@@ -1207,11 +1209,11 @@ stargazer(mod_list,
                                'State LGB policy score',
                                'State score × country-score',
                                'Post-2013',
-                               'Distance (km)',
-                               'Contiguous border',
-                               'Common official language',
-                               'Common ethnic language',
-                               'Ever colonial relationship',
+                               # 'Distance (km)',
+                               # 'Contiguous border',
+                               # 'Common official language',
+                               # 'Common ethnic language',
+                               # 'Ever colonial relationship',
                                'Per-cap. GDP difference',
                                'Unemployment difference',
                                'Liberal democracy (V-Dem)',
@@ -1219,8 +1221,8 @@ stargazer(mod_list,
                                'State unemployment rate',
                                'State per-capita income'),
           dep.var.labels = "Percent in same-sex couples by state-country-year",
-          add.lines = list(c('State controls and FEs?', 'no', 'no', 'no', rep('yes', 4)),
-                           c('Country controls and FEs?', 'no', 'no', 'no', rep('yes', 4))),
+          add.lines = list(c('State FEs?', 'no', 'no', 'no', rep('yes', 4)),
+                           c('Country FEs?', 'no', 'no', 'no', rep('yes', 4))),
           se = robust_list,
           keep.stat = c('n'),
           star.cutoffs = c(0.1, 0.05, 0.01, 0.001),

@@ -122,10 +122,10 @@ totals <- acs_wide %>%
   group_by(same_sex,year) %>%
   count(wt = hhwt) 
 
-filter(totals, same_sex == T)
-filter(totals, same_sex == F)
+# filter(totals, same_sex == T)
+# filter(totals, same_sex == F)
 
-length(unique(lgbt_policy$Country))
+#length(unique(lgbt_policy$Country))
 ```
 `r filter(totals, year == 2013, same_sex == F) %>% pull(n)/1e6` million  
 `r filter(totals, year == 2019, same_sex == F) %>% pull(n)/1e6` million  

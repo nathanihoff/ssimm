@@ -19,7 +19,7 @@ acs <- read_dta('/Users/nathan/Data/ACS/acs_2008_2020.dta') %>%
       related == 101 ~ 'main',
       related %in% c(201, 1114) ~ 'partner'),
     age = as.numeric(age),
-    yrimmig = ifelse(yrimmig == 0, NA, as.numeric(yrimmig)),
+    yrimmig = ifelse(yrimmig == 0, NA, as.numeric(yrimmƒig)),
     nchild = as.numeric(nchild),
     year = as.numeric(year),
     bpldid = as.numeric(bpld),

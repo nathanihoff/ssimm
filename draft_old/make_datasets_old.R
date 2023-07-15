@@ -98,7 +98,7 @@ acs_oneimm <- acs_wide %>%
   ))
 
 
-# Keep only couples with one immigrant, individual-level
+# Keep only couples with at least one immigrant, individual-level
 acs_coupled_imms <- acs_wide %>%
   filter(imm_couple == 'one' | imm_couple == 'two') %>%
   pivot_longer(-c(year, serial, nchild, hhwt, ssmc,

@@ -35,7 +35,7 @@ acs <- read_dta('/Users/nathan/Data/ACS/acs_2008_2020.dta') %>%
       educ %in% 7:9 ~ 'some col',
       educ %in% 10:11 ~ 'college'),
     bpldid = case_when(bpld %in% c(41000, 41100, 41410) ~ 41300, # England, Scotland, Northern Ireland
-                       as_factor(bpld) == 'Korea' ~ 50220,
+                       as_factor(bpld) == 'Korea' ~ 50200,
                        T ~ bpldid)) %>%
   filter(year != 2020)
 
@@ -87,14 +87,56 @@ acs_wide %>%
   filter(allocated == F) %>%
   write_csv(here('data', 'acs_wide_small.csv'))
 
+# acs_coupled_imms <- acs_wide %>%
+#   filter(imm_couple == 'one' | imm_couple == 'two') %>%
+#   pivot_longer(-c(year, serial, nchild, hhwt, ssmc,
+#                   cluster, strata, metro, region, state, stateicp, ftotinc, respmode,
+#                   same_sex, imm_couple, married, allocated),
+#                names_to = c('.value', 'position'),
+#                names_sep = '_') %>% 
+#   # filter(yrimmig >= 1991) %>%
+#   mutate(immigrant = case_when(citizen %in% c('N/A', 'Born abroad of American parents') ~ 'nonimmigrant',
+#                                citizen %in% c('Naturalized citizen', 'Not a citizen') ~ 'immigrant')) %>% 
+#   filter(immigrant == 'immigrant') %>%
+#   mutate(years_in_us = year - yrimmig) 
+
+# acs_couple_policy <- acs_coupled_imms %>%
+#   left_join(yearly_prop, by = c('yrimmig' = 'year', 'bpldid')) %>%
+#   # filter(yrimmig >= 1991) %>%
+#   # mutate(pre_1991 = yrimmig < 1991,
+#   #   yrimmig = ifelse(yrimmig >= 1991, 
+#   #                         round(yrimmig),
+#   #                         1991)) %>%
+#   left_join(lgbt_policy, by = c('yrimmig' = 'year', 'bpldid' = 'Code')) %>%
+#   left_join(state_policy,by = c('year' = 'Year', 'state' = 'State')) %>%
+#   left_join(unemploy) %>%
+#   left_join(state_income_df) %>%
+#   # adding (log) income variables
+#   mutate(pos_income = ifelse(inctot >= 0, inctot, 0),
+#          no_income = (inctot <= 0),
+#          ihs_income = log(pos_income + sqrt(pos_income^2 + 1))) %>%
+#   drop_na(state_policy_binned, same_sex, origin_score, sex, age, educ, qrelate, qsex,
+#           nchild, ihs_income, no_income, yrimmig, 
+#           distw, contig, comlang_off, comlang_ethno,
+#           wage_dif, unemp_dif, vdem, stock_prop,
+#           state_unemploy, state_income) %>%
+#   filter(allocated == F)
+
+# write_rds(acs_couple_policy, here('data', 'acs_couple_policy.rds'))
 
 
 ## Counts for poisson model ####
 lgbt_policy <- read.csv(here('data', 'lgb_origin_index.csv')) %>%
   rename(origin_score = origin_couple_score) %>%
-  mutate(iso_o = countrycode::countrycode(Country, origin = 'country.name', destination = 'iso3c'))
+  mutate(iso_o = countrycode::countrycode(Country, origin = 'country.name', destination = 'iso3c')) %>%
+  group_by(Code) %>%
+  mutate(origin_score_lag1 = lead(origin_score),
+         origin_score_lag2 = lead(origin_score, 2),
+         origin_score_lag5 = lead(origin_score, 5))
 
-acs_wide_small <- read_csv(here('data', 'acs_wide_small.csv'))
+
+acs_wide_small <- read_csv(here('data', 'acs_wide_small.csv')) 
+  
 
 
 acs_count_base <- acs_wide_small %>%
@@ -117,6 +159,7 @@ acs_count_base <- acs_wide_small %>%
   filter(age >= 18 & age <= 64) %>%
   filter(across(c(state, year, same_sex), 
                 ~ !is.na(.x))) %>%
+  # mutate(bpldidnew = ifelse(bpld == 'Korea', 50200, bpldidnew)) %>%
   mutate(yrimmigmod = if_else(yrimmigmod < 1991, 1991, yrimmigmod)) %>%
   left_join(lgbt_policy, by = c('yrimmigmod' = 'year', 'bpldidnew' = 'Code'))
 

@@ -1,0 +1,193 @@
+year,n,cat,policy_name,progressive
+2008,20636,equal_age,Equal age of consent,TRUE
+2009,21797,equal_age,Equal age of consent,TRUE
+2010,23560,equal_age,Equal age of consent,TRUE
+2011,22285,equal_age,Equal age of consent,TRUE
+2012,24576,equal_age,Equal age of consent,TRUE
+2013,36158,equal_age,Equal age of consent,TRUE
+2014,37519,equal_age,Equal age of consent,TRUE
+2015,51667,equal_age,Equal age of consent,TRUE
+2016,58515,equal_age,Equal age of consent,TRUE
+2017,66367,equal_age,Equal age of consent,TRUE
+2018,72313,equal_age,Equal age of consent,TRUE
+2019,73087,equal_age,Equal age of consent,TRUE
+2008,5147,unequal_age,Unequal age of consent,FALSE
+2009,6067,unequal_age,Unequal age of consent,FALSE
+2010,5137,unequal_age,Unequal age of consent,FALSE
+2011,4991,unequal_age,Unequal age of consent,FALSE
+2012,6215,unequal_age,Unequal age of consent,FALSE
+2013,8251,unequal_age,Unequal age of consent,FALSE
+2014,7225,unequal_age,Unequal age of consent,FALSE
+2015,7684,unequal_age,Unequal age of consent,FALSE
+2016,9373,unequal_age,Unequal age of consent,FALSE
+2017,8772,unequal_age,Unequal age of consent,FALSE
+2018,8749,unequal_age,Unequal age of consent,FALSE
+2019,10246,unequal_age,Unequal age of consent,FALSE
+2008,593,constitution,Constitutional protection,TRUE
+2009,1081,constitution,Constitutional protection,TRUE
+2010,632,constitution,Constitutional protection,TRUE
+2011,503,constitution,Constitutional protection,TRUE
+2012,735,constitution,Constitutional protection,TRUE
+2013,1971,constitution,Constitutional protection,TRUE
+2014,2313,constitution,Constitutional protection,TRUE
+2015,4398,constitution,Constitutional protection,TRUE
+2016,7088,constitution,Constitutional protection,TRUE
+2017,8733,constitution,Constitutional protection,TRUE
+2018,9761,constitution,Constitutional protection,TRUE
+2019,10512,constitution,Constitutional protection,TRUE
+2008,1147,conversion_therapies,Conversion therapy ban,TRUE
+2009,1135,conversion_therapies,Conversion therapy ban,TRUE
+2010,708,conversion_therapies,Conversion therapy ban,TRUE
+2011,1958,conversion_therapies,Conversion therapy ban,TRUE
+2012,610,conversion_therapies,Conversion therapy ban,TRUE
+2013,2352,conversion_therapies,Conversion therapy ban,TRUE
+2014,1564,conversion_therapies,Conversion therapy ban,TRUE
+2015,3208,conversion_therapies,Conversion therapy ban,TRUE
+2016,5245,conversion_therapies,Conversion therapy ban,TRUE
+2017,5937,conversion_therapies,Conversion therapy ban,TRUE
+2018,9097,conversion_therapies,Conversion therapy ban,TRUE
+2019,7070,conversion_therapies,Conversion therapy ban,TRUE
+2008,357,death_penalty,Death penalty,FALSE
+2009,841,death_penalty,Death penalty,FALSE
+2010,931,death_penalty,Death penalty,FALSE
+2011,239,death_penalty,Death penalty,FALSE
+2012,914,death_penalty,Death penalty,FALSE
+2013,631,death_penalty,Death penalty,FALSE
+2014,970,death_penalty,Death penalty,FALSE
+2015,1479,death_penalty,Death penalty,FALSE
+2016,1906,death_penalty,Death penalty,FALSE
+2017,2381,death_penalty,Death penalty,FALSE
+2018,1477,death_penalty,Death penalty,FALSE
+2019,2205,death_penalty,Death penalty,FALSE
+2008,4931,employment_discrim,Employment protection,TRUE
+2009,7505,employment_discrim,Employment protection,TRUE
+2010,8711,employment_discrim,Employment protection,TRUE
+2011,6984,employment_discrim,Employment protection,TRUE
+2012,8494,employment_discrim,Employment protection,TRUE
+2013,12897,employment_discrim,Employment protection,TRUE
+2014,16544,employment_discrim,Employment protection,TRUE
+2015,26920,employment_discrim,Employment protection,TRUE
+2016,32944,employment_discrim,Employment protection,TRUE
+2017,37627,employment_discrim,Employment protection,TRUE
+2018,41559,employment_discrim,Employment protection,TRUE
+2019,42946,employment_discrim,Employment protection,TRUE
+2008,2906,hate_crimes,Hate-crime protection,TRUE
+2009,3952,hate_crimes,Hate-crime protection,TRUE
+2010,4069,hate_crimes,Hate-crime protection,TRUE
+2011,4683,hate_crimes,Hate-crime protection,TRUE
+2012,5178,hate_crimes,Hate-crime protection,TRUE
+2013,6304,hate_crimes,Hate-crime protection,TRUE
+2014,7470,hate_crimes,Hate-crime protection,TRUE
+2015,13569,hate_crimes,Hate-crime protection,TRUE
+2016,17324,hate_crimes,Hate-crime protection,TRUE
+2017,17951,hate_crimes,Hate-crime protection,TRUE
+2018,22664,hate_crimes,Hate-crime protection,TRUE
+2019,25307,hate_crimes,Hate-crime protection,TRUE
+2008,3122,incite_hate,Incitement to hate ban,TRUE
+2009,3673,incite_hate,Incitement to hate ban,TRUE
+2010,4150,incite_hate,Incitement to hate ban,TRUE
+2011,3099,incite_hate,Incitement to hate ban,TRUE
+2012,5246,incite_hate,Incitement to hate ban,TRUE
+2013,4660,incite_hate,Incitement to hate ban,TRUE
+2014,7171,incite_hate,Incitement to hate ban,TRUE
+2015,14220,incite_hate,Incitement to hate ban,TRUE
+2016,17812,incite_hate,Incitement to hate ban,TRUE
+2017,18843,incite_hate,Incitement to hate ban,TRUE
+2018,22548,incite_hate,Incitement to hate ban,TRUE
+2019,25881,incite_hate,Incitement to hate ban,TRUE
+2008,1384,joint_adoption,Joint adoption,TRUE
+2009,2151,joint_adoption,Joint adoption,TRUE
+2010,1848,joint_adoption,Joint adoption,TRUE
+2011,2239,joint_adoption,Joint adoption,TRUE
+2012,2686,joint_adoption,Joint adoption,TRUE
+2013,4187,joint_adoption,Joint adoption,TRUE
+2014,4841,joint_adoption,Joint adoption,TRUE
+2015,8224,joint_adoption,Joint adoption,TRUE
+2016,13925,joint_adoption,Joint adoption,TRUE
+2017,14063,joint_adoption,Joint adoption,TRUE
+2018,17794,joint_adoption,Joint adoption,TRUE
+2019,21106,joint_adoption,Joint adoption,TRUE
+2008,8300,lgb_military,LGB military,TRUE
+2009,9547,lgb_military,LGB military,TRUE
+2010,9466,lgb_military,LGB military,TRUE
+2011,9177,lgb_military,LGB military,TRUE
+2012,12960,lgb_military,LGB military,TRUE
+2013,13400,lgb_military,LGB military,TRUE
+2014,16849,lgb_military,LGB military,TRUE
+2015,24579,lgb_military,LGB military,TRUE
+2016,27573,lgb_military,LGB military,TRUE
+2017,34682,lgb_military,LGB military,TRUE
+2018,35572,lgb_military,LGB military,TRUE
+2019,36744,lgb_military,LGB military,TRUE
+2008,6529,lgb_military_ban,LGB military ban,FALSE
+2009,6724,lgb_military_ban,LGB military ban,FALSE
+2010,5767,lgb_military_ban,LGB military ban,FALSE
+2011,7967,lgb_military_ban,LGB military ban,FALSE
+2012,5423,lgb_military_ban,LGB military ban,FALSE
+2013,11584,lgb_military_ban,LGB military ban,FALSE
+2014,10763,lgb_military_ban,LGB military ban,FALSE
+2015,12331,lgb_military_ban,LGB military ban,FALSE
+2016,13054,lgb_military_ban,LGB military ban,FALSE
+2017,15347,lgb_military_ban,LGB military ban,FALSE
+2018,18523,lgb_military_ban,LGB military ban,FALSE
+2019,14336,lgb_military_ban,LGB military ban,FALSE
+2008,886,marriage_equality,Marriage equality,TRUE
+2009,1918,marriage_equality,Marriage equality,TRUE
+2010,1435,marriage_equality,Marriage equality,TRUE
+2011,1773,marriage_equality,Marriage equality,TRUE
+2012,1393,marriage_equality,Marriage equality,TRUE
+2013,3037,marriage_equality,Marriage equality,TRUE
+2014,3770,marriage_equality,Marriage equality,TRUE
+2015,5579,marriage_equality,Marriage equality,TRUE
+2016,9304,marriage_equality,Marriage equality,TRUE
+2017,11997,marriage_equality,Marriage equality,TRUE
+2018,14612,marriage_equality,Marriage equality,TRUE
+2019,18867,marriage_equality,Marriage equality,TRUE
+2008,3326,marriage_ban,Marriage ban,FALSE
+2009,2746,marriage_ban,Marriage ban,FALSE
+2010,3118,marriage_ban,Marriage ban,FALSE
+2011,2291,marriage_ban,Marriage ban,FALSE
+2012,4776,marriage_ban,Marriage ban,FALSE
+2013,3421,marriage_ban,Marriage ban,FALSE
+2014,2866,marriage_ban,Marriage ban,FALSE
+2015,7202,marriage_ban,Marriage ban,FALSE
+2016,6114,marriage_ban,Marriage ban,FALSE
+2017,11581,marriage_ban,Marriage ban,FALSE
+2018,8791,marriage_ban,Marriage ban,FALSE
+2019,11681,marriage_ban,Marriage ban,FALSE
+2008,25305,samesex_legal,Same-sex acts legal,TRUE
+2009,27457,samesex_legal,Same-sex acts legal,TRUE
+2010,27834,samesex_legal,Same-sex acts legal,TRUE
+2011,26457,samesex_legal,Same-sex acts legal,TRUE
+2012,30827,samesex_legal,Same-sex acts legal,TRUE
+2013,43468,samesex_legal,Same-sex acts legal,TRUE
+2014,43939,samesex_legal,Same-sex acts legal,TRUE
+2015,57847,samesex_legal,Same-sex acts legal,TRUE
+2016,67624,samesex_legal,Same-sex acts legal,TRUE
+2017,74079,samesex_legal,Same-sex acts legal,TRUE
+2018,79858,samesex_legal,Same-sex acts legal,TRUE
+2019,82633,samesex_legal,Same-sex acts legal,TRUE
+2008,1959,civil_unions,Civil unions,TRUE
+2009,3249,civil_unions,Civil unions,TRUE
+2010,3736,civil_unions,Civil unions,TRUE
+2011,3265,civil_unions,Civil unions,TRUE
+2012,5127,civil_unions,Civil unions,TRUE
+2013,4674,civil_unions,Civil unions,TRUE
+2014,6270,civil_unions,Civil unions,TRUE
+2015,13760,civil_unions,Civil unions,TRUE
+2016,15379,civil_unions,Civil unions,TRUE
+2017,17283,civil_unions,Civil unions,TRUE
+2018,20189,civil_unions,Civil unions,TRUE
+2019,20862,civil_unions,Civil unions,TRUE
+2008,602,propaganda,Anti-propaganda laws,FALSE
+2009,751,propaganda,Anti-propaganda laws,FALSE
+2010,525,propaganda,Anti-propaganda laws,FALSE
+2011,418,propaganda,Anti-propaganda laws,FALSE
+2012,969,propaganda,Anti-propaganda laws,FALSE
+2013,720,propaganda,Anti-propaganda laws,FALSE
+2014,971,propaganda,Anti-propaganda laws,FALSE
+2015,2378,propaganda,Anti-propaganda laws,FALSE
+2016,2319,propaganda,Anti-propaganda laws,FALSE
+2017,3857,propaganda,Anti-propaganda laws,FALSE
+2018,3930,propaganda,Anti-propaganda laws,FALSE
+2019,3481,propaganda,Anti-propaganda laws,FALSE

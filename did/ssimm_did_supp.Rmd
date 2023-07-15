@@ -21,6 +21,7 @@ header-includes:
   - \usepackage{bbm}
   - \usepackage{fancyhdr}
   - \usepackage{amsmath}
+  - \usepackage{float}
   # - \pagestyle{fancy}
   # - \setlength{\headheight}{15pt}
   # - \lhead{Hoffmann and Velasco}
@@ -31,13 +32,13 @@ editor_options:
 citeproc: no
 # fontfamily: mathpazo
 mainfont: "Times New Roman"
-fontsize: 12pt
+fontsize: 11pt
 geometry: margin=1in
 indent: yes
 link-citations: yes
 linkcolor: blue
 bibliography: "/Users/nathan/My Drive/Projects/2020 Same-Sex Immigrant Couples/ssimm/Same-Sex Immigration.bib"
-csl: american-sociological-association.csl
+csl: chicago-author-date.csl
 title: "Online Appendix"
 subtitle: "Policy Effects on Mixed-Citizenship, Same-Sex Unions: A Triple-Difference Analysis"
 # date: "`r format(Sys.time(), '%B %e, %Y')`"
@@ -64,7 +65,7 @@ library(flextable)
 library(tidyverse)
 library(kableExtra)
 
-knitr::opts_chunk$set(echo = F, warning = F, message = F, cache = T, # results = 'asis',
+knitr::opts_chunk$set(echo = F, warning = F, message = F, cache = T, # results = 'asis', 
                       cache.lazy = F, dpi = 600)
 
 # knitr::opts_chunk$set(error=TRUE) 
@@ -120,6 +121,9 @@ knitr::knit_hooks$set(plot = function(x, options) {  # set new plot hook ...
   }
   return(x)
 })
+
+
+huxtable::set_default_properties(font_size = 10)
 ```
 
 ```{r load, include = F}
@@ -127,7 +131,8 @@ acs_count_base <- read_csv(here('data', 'acs_count_base.csv')) %>%
   filter(is.na(yrimmig) | !is.na(origin_score)) %>%
   filter(state != 'District of Columbia') %>%
   mutate(across(equal_age:propaganda, function(x) round(x)),
-         yrmarr = as.numeric(yrmarr))
+         yrmarr = as.numeric(yrmarr),
+         marr_minus_imm = yrmarr - yrimmigmod)
 
 state_df <- read_csv(here('data', 'state_df.csv'))
 
@@ -178,22 +183,22 @@ acs_count_mixed <- count_func()
 #   mutate(post_2013 = (yrimmig > 2013))
 # acs_prop_state <- read.csv(here('data', 'acs_dyad_policy.csv'))
 
-lgb_origin_index <- read_csv(here('data', 'lgb_origin_index.csv'))
-acs_ind <- read_rds(here('data', 'acs_couple_policy.rds'))  %>%
-  mutate(post_2013 = year > 2013
-         # mixed =  mixed_citizenship = (citizen_main == 'Not a citizen' & citizen_partner != 'Not a citizen') | 
-         #   (citizen_main != 'Not a citizen' & citizen_partner == 'Not a citizen')
-         ) %>%
-  left_join(lgb_origin_index,  by = c('yrimmig' = 'year', 'bpldid' = 'Code')) 
-
-acs_count_mixed_bpld <- read_csv(here('data', 'acs_count_mixed.csv'))  %>%
-  left_join(
-    acs_ind %>%
-      group_by(year, state, bpld, same_sex) %>% 
-      summarize(across(c(equal_age:propaganda, origin_score), mean, na.rm = T))
-      #summarize(origin_score = mean(origin_score))
-  ) %>%
-  filter(!is.na(origin_score) | bpld %in% unique({.$state}))
+# lgb_origin_index <- read_csv(here('data', 'lgb_origin_index.csv'))
+# acs_ind <- read_rds(here('data', 'acs_couple_policy.rds'))  %>%
+#   mutate(post_2013 = year > 2013
+#          # mixed =  mixed_citizenship = (citizen_main == 'Not a citizen' & citizen_partner != 'Not a citizen') | 
+#          #   (citizen_main != 'Not a citizen' & citizen_partner == 'Not a citizen')
+#          ) %>%
+#   left_join(lgb_origin_index,  by = c('yrimmig' = 'year', 'bpldid' = 'Code')) 
+# 
+# acs_count_mixed_bpld <- read_csv(here('data', 'acs_count_mixed.csv'))  %>%
+#   left_join(
+#     acs_ind %>%
+#       group_by(year, state, bpld, same_sex) %>% 
+#       summarize(across(c(equal_age:propaganda, origin_score), mean, na.rm = T))
+#       #summarize(origin_score = mean(origin_score))
+#   ) %>%
+#   filter(!is.na(origin_score) | bpld %in% unique({.$state}))
 
 
 ```
@@ -202,9 +207,218 @@ acs_count_mixed_bpld <- read_csv(here('data', 'acs_count_mixed.csv'))  %>%
 
 \newpage
 
+# Timing of Migration and Marriage
+```{r diff-hist, eval = F, fig.pos = 'H', out.extra = '', fig.cap = 'Distribution of difference in year of marriage and year of immigration for the noncitizen in mixed-citizenship couples'}
+marr_dif <- acs_count_base %>%
+  filter(mixed_citizenship == T) %>%
+  group_by(same_sex) %>%
+  summarize(marr_median = median(marr_minus_imm, na.rm = T))
+
+acs_count_base %>%
+  filter(mixed_citizenship == T) %>%
+  left_join(marr_dif) %>%
+  mutate(same_sex = ifelse(same_sex == T, 'Same-sex', 'Different-sex')) %>%
+  ggplot(aes(x = marr_minus_imm)) +
+  geom_histogram() +
+  geom_vline(aes(xintercept = marr_median)) +
+  facet_wrap(~same_sex, scales = 'free_y') +
+  labs(x = '(Year of Marriage) - (Year of Immigration)')
+```
+
+```{r diff-fig, eval = F, fig.pos = 'H', out.extra = '', fig.cap = 'Mean LGB policy score over difference in year of marriage and year of immigration. Lines are smoothed by categorizing data into two-year bins.'}
+acs_count_base %>%
+  filter(mixed_citizenship == T,
+         abs(marr_minus_imm) < 30) %>%
+  mutate(marr_minus_imm = floor(marr_minus_imm/2)*2) %>%
+  group_by(same_sex, marr_minus_imm) %>%
+  summarize(mean = mean(origin_score, na.rm = T),
+            se = sd(origin_score, na.rm = T)/sqrt(n()),
+            upper = mean + 1.96*se,
+            lower = mean - 1.96*se) %>%
+  filter(!is.na(se)) %>%
+  mutate(same_sex = ifelse(same_sex == T, 'Same-sex', 'Different-sex')) %>%
+  ggplot(aes(x = marr_minus_imm, y = mean)) +
+  geom_line() + 
+  geom_ribbon(aes(ymin = lower, ymax = upper), alpha = .3) +
+  facet_wrap(~same_sex) +
+  labs(x = '(Year of marriage) - (Year of immigration)', y = 'Mean LGB policy score of origin')
+```
+
+
+```{r diff-desc, eval = F, fig.pos = 'H', out.extra = '', fig.cap = "Estimated counts of individuals in mixed-citizenship, same-same, married couples from the American Community Survey, stratified by whether couples married before or after immigration of the non-citizen partner. The Regressive sample includes only countries with a LGB policy score less than 0, and the Progressive sample includes only those with a score greater than 3."}
+bind_rows(
+  acs_count_base %>%
+    mutate(cat = case_when(origin_score > 3 ~ 'Progressive',
+                             origin_score < 0 ~ 'Regressive'),
+           marr_before_imm = marr_minus_imm < 0) %>%
+    filter(mixed_citizenship == T & same_sex == T & !is.na(cat)) %>%
+    group_by(year, cat, marr_before_imm) %>%
+    summarize(n = sum(perwt)),
+  acs_count_base %>%
+    mutate(marr_before_imm = marr_minus_imm < 0) %>%
+    filter(mixed_citizenship == T & same_sex == T) %>%
+    group_by(year, marr_before_imm) %>%
+    summarize(n = sum(perwt)) %>%
+    mutate(cat = 'Full sample')) %>%
+  filter(!is.na(marr_before_imm)) %>%
+  mutate(marr_before_imm = ifelse(marr_before_imm == T, 'Marriage before immigration', 
+                                  'Marriage after immigration')) %>%
+  ggplot(aes(x = year, y = n/1000, color = cat, linetype = cat)) +
+  geom_line(size = .3, ) +
+  geom_vline(size = .3, xintercept = 2013, linetype = 2) +
+  facet_wrap(~marr_before_imm) +
+  labs(x = 'Year', y = 'n (thousands)') +
+  theme(legend.text=element_text(size = 8))
+```
+
+
+
+```{r marr-desc-tab}
+acs_count_base %>% 
+  filter(!is.na(marr_minus_imm), married == T, mixed_citizenship == T) %>%
+  mutate(marr_before = marr_minus_imm < 0) %>%
+  group_by(same_sex, marr_before) %>%
+  summarize(n_unweighted = n(),
+            n_weighted = sum(perwt)) %>%
+  mutate(same_sex = ifelse(same_sex == T, 'Yes', 'No'),
+         marr_before = ifelse(marr_before == T, 'Yes', 'No')) %>%
+  select(`Same-sex` = same_sex, `Married before immigration` = marr_before,
+         `n (unweighted)` = n_unweighted, `n (weighted)` = n_weighted) %>%
+  kable(booktabs = T,
+        format.args = list(big.mark = ","),
+        caption = 'Among married, mixed-citizenship couples, counts of same-sex and different-sex couples that were married before and after immigration.') %>%
+  kable_styling(latex_options = "HOLD_position")
+```
+
+
+
+```{r marr-before-tab}
+acs_count_mixed_marr_before <- count_func('marr_minus_imm < 0 | (married == T & mixed_citizenship == F)') 
+count_origin_high_marr_before <- count_func('(origin_score > 3 | is.na(origin_score)) & 
+                                            (marr_minus_imm < 0 | (married == T & mixed_citizenship == F))') 
+count_origin_low_marr_before <- count_func('(origin_score < 0 |  is.na(origin_score)) & 
+                                           (marr_minus_imm < 0 | (married == T & mixed_citizenship == F))')
+
+mod_mixed <- acs_count_mixed_marr_before %>%
+  glm(n ~ I(post_2013*same_sex*mixed) + 
+        I(post_2013*same_sex) + 
+        I(post_2013*mixed) + 
+        post_2013 + 
+        state_policy + state_income + state_unemploy +
+        group_fe + as.factor(year), 
+                        data = ., 
+                        family = 'quasipoisson') %>%
+  coeftest(., vcov = vcovCL(., cluster = ~group_fe)) 
+
+
+mod_os_high <- glm(n ~  I(post_2013*same_sex*mixed) + 
+                        I(post_2013*same_sex) + 
+                        I(post_2013*mixed) + 
+                        post_2013 + 
+                        state_policy + state_income + state_unemploy +
+                        group_fe + as.factor(year), 
+                        data = count_origin_high_marr_before, 
+                        family = 'quasipoisson') %>%
+  coeftest(., vcov = vcovCL(., cluster = ~group_fe))
+
+
+mod_os_low <- glm(n ~  I(post_2013*same_sex*mixed) + 
+                        I(post_2013*same_sex) + 
+                        I(post_2013*mixed) + 
+                        post_2013 + 
+                        state_policy + state_income + state_unemploy +
+                        group_fe + as.factor(year), 
+                        data = count_origin_low_marr_before, 
+                        family = 'quasipoisson') %>%
+coeftest(., vcov = vcovCL(., cluster = ~group_fe)) 
+
+
+huxreg(list('Full sample' = mod_mixed, 'Progressive' = mod_os_high, 'Regressive' = mod_os_low),
+       coefs = c('Post-2013 × Same-sex × Mixed-citizenship' = 'I(post_2013 * same_sex * mixed)',
+                'Post-2013 × Same-sex'  = 'I(post_2013 * same_sex)',
+                'Post-2013 × Mixed-citizenship'  = 'I(post_2013 * mixed)',
+                'Post-2013' = 'post_2013TRUE',
+                'State LGB policy' = 'state_policy',
+                'State unemployment' = 'state_unemploy',
+                'State per-capita income' = 'state_income'
+                ),
+  note = '{stars}. The "Regressive" sample includes only countries with a LGB policy score less than 0, and the "Progressive" sample includes only those with a score greater than 3. Group-clustered standard errors shown in parentheses. Source: American Community Survey 2008-2019. Authors\' calculations.',
+       stars = c(`†` = 0.1, `*` = 0.05, `**` = 0.01, `***` = 0.001),
+       statistics = c('Observations' = 'nobs')) %>%
+  huxtable::set_width(1) %>% set_latex_float('h!') %>%
+  set_wrap(T) %>%
+  set_all_padding(0) %>% set_caption_pos('topleft') %>%
+  huxtable::set_caption('Married before immigration: Triple-difference (DDD), quasi-Poisson 
+  regressions of counts of individuals in mixed-citizenship, same-sex couples, stratifying by 
+  state-country-year-group average policy environment. Models include controls for state LGB policy, state unemployment, and state per-capita income. The full sample is limited to married couples, and the mixed-citizenship sample is limited to couples where the non-citizen partner immigrated after marriage.')
+```
+
+```{r marr-after-tab}
+acs_count_mixed_marr_after <- count_func('marr_minus_imm >= 0 | (married == T & mixed_citizenship == F)') 
+count_origin_high_marr_after <- count_func('(origin_score > 3 | is.na(origin_score)) & 
+                                           (marr_minus_imm >= 0 | (married == T & mixed_citizenship == F))') 
+count_origin_low_marr_after <- count_func('(origin_score < 0 |  is.na(origin_score)) & 
+                                          (marr_minus_imm >= 0 | (married == T & mixed_citizenship == F))')
+
+mod_mixed <- acs_count_mixed_marr_after %>%
+  glm(n ~ I(post_2013*same_sex*mixed) + 
+        I(post_2013*same_sex) + 
+        I(post_2013*mixed) + 
+        post_2013 + 
+        state_policy + state_income + state_unemploy +
+        group_fe + as.factor(year), 
+                        data = ., 
+                        family = 'quasipoisson') %>%
+  coeftest(., vcov = vcovCL(., cluster = ~group_fe)) 
+
+
+mod_os_high <- glm(n ~  I(post_2013*same_sex*mixed) + 
+                        I(post_2013*same_sex) + 
+                        I(post_2013*mixed) + 
+                        post_2013 + 
+                        state_policy + state_income + state_unemploy +
+                        group_fe + as.factor(year), 
+                        data = count_origin_high_marr_after, 
+                        family = 'quasipoisson') %>%
+  coeftest(., vcov = vcovCL(., cluster = ~group_fe))
+
+
+mod_os_low <- glm(n ~  I(post_2013*same_sex*mixed) + 
+                        I(post_2013*same_sex) + 
+                        I(post_2013*mixed) + 
+                        post_2013 + 
+                        state_policy + state_income + state_unemploy +
+                        group_fe + as.factor(year), 
+                        data = count_origin_low_marr_after, 
+                        family = 'quasipoisson') %>%
+coeftest(., vcov = vcovCL(., cluster = ~group_fe)) 
+
+
+huxreg(list('Full sample' = mod_mixed, 'Progressive' = mod_os_high, 'Regressive' = mod_os_low),
+       coefs = c('Post-2013 × Same-sex × Mixed-citizenship' = 'I(post_2013 * same_sex * mixed)',
+                'Post-2013 × Same-sex'  = 'I(post_2013 * same_sex)',
+                'Post-2013 × Mixed-citizenship'  = 'I(post_2013 * mixed)',
+                'Post-2013' = 'post_2013TRUE',
+                'State LGB policy' = 'state_policy',
+                'State unemployment' = 'state_unemploy',
+                'State per-capita income' = 'state_income'
+                ),
+  note = "{stars}. The \"Regressive\" sample includes only countries with a LGB policy score less than 0, and the \"Progressive\" sample includes only those with a score greater than 3. Group-clustered standard errors shown in parentheses. Source: American Community Survey 2008-2019. Authors\' calculations.",
+       stars = c(`†` = 0.1, `*` = 0.05, `**` = 0.01, `***` = 0.001),
+       statistics = c('Observations' = 'nobs')) %>%
+  huxtable::set_width(1) %>% set_latex_float('h!') %>%
+  set_wrap(T) %>%
+  set_all_padding(0) %>% set_caption_pos('topleft') %>%
+  huxtable::set_caption('Married after immigration: Triple-difference (DDD), quasi-Poisson 
+  regressions of counts of individuals in mixed-citizenship, same-sex couples, stratifying by 
+  state-country-year-group average policy environment. The full sample is limited to married couples, and the mixed-citizenship sample is limited to couples where the non-citizen partner immigrated before or in the same year as marriage.')
+```
+
+\newpage
+
 # Sensitivity to Hypothetical Sex Misreporting
 
-Published papers using the ACS to study same-sex couples overwhelmingly use the method by @gates_2009 employed our main paper to adjust for misreporting, where we drop all respondents that had either their relationship or sex variable allocated by the Census Bureau. However here we implement a novel method to adjust proportions of estimated immigrants in same-sex couples, based on the estimated mismatch rates from two U.S. Census Bureau studies. Beginning in 2019, the ACS provides explicit categories for "Opposite-sex husband/wife/spouse," "Opposite-sex unmarried partner," "Same-sex husband/wife/spouse," and "Same-sex unmarried partner" [@walker_2021], so sex misreporting in the 2019 data is unlikely, but we still adjust mismatch rates in these years as well.  
+Published papers using the ACS to study same-sex couples overwhelmingly use the method by @gates_2009 employed in our main paper to adjust for misreporting, where we drop all respondents that had either their relationship or sex variable allocated by the Census Bureau. However here we implement a novel method to adjust proportions of estimated immigrants in same-sex couples, based on the estimated mismatch rates from two U.S. Census Bureau studies. Beginning in 2019, the ACS provides explicit categories for "Opposite-sex husband/wife/spouse," "Opposite-sex unmarried partner," "Same-sex husband/wife/spouse," and "Same-sex unmarried partner" [@walker_2021], so sex misreporting in the 2019 data is unlikely, but we still adjust mismatch rates in these years as well.  
 
 In a Census Bureau working paper, @kreider_2015 use personal information such as names and addresses match same-sex couples from the 2010 ACS to Social Security administrative data. They find that 7 percent of unmarried couples coded as same-sex in the ACS are coded as different-sex in the administrative data, and 57 percent of married same-sex couples. A follow-up study [@kreider_2017] shows that these mismatch rates appear to have fallen: In a 2016 ACS test module that included explicit categories for different- and same-sex spouses and partners, 31 percent of married and 3 percent of unmarried same-sex couples had inconsistent sex responses.  
 
@@ -280,7 +494,7 @@ for(rate_loop in as.character(unique(data_list[[1]]$rate))){
 write_csv(bind_rows(mis_list), here('did', 'misreporting_df.csv'))
 ```
 
-```{r misreporting-plot, fig.cap = 'Coefficients for the three-way interaction between indicators for same-sex, mixed-citizenship, and post-2013 survey year from Table 5, with counts of individuals in same-sex couples in the sample reduced by 10 to 60 percent'}
+```{r misreporting-plot, fig.height = 3, fig.pos = 'H', out.extra = '', fig.cap = 'Coefficients for the three-way interaction between indicators for same-sex, mixed-citizenship, and post-2013 survey year from Table 5, with counts of individuals in same-sex couples in the sample reduced by 10 to 60 percent'}
 misreporting_df <- read_csv(here('did', 'misreporting_df.csv')) %>%
   filter(model == 'With controls')
 
@@ -292,7 +506,7 @@ ggplot(misreporting_df, aes(x = rate, y = estimate, color = policy)) +
   labs(x = 'Hypothetical misreporting rate', y = 'Coefficient for 3-way interaction')
 ```
 
-<!-- \newpage -->
+<!--  -->
 
 <!-- # Simple-Difference and Difference-in-Differences with State-Level Controls -->
 <!-- ```{r D-mod} -->
@@ -334,7 +548,7 @@ ggplot(misreporting_df, aes(x = rate, y = estimate, color = policy)) +
 <!--   note = '{stars}. The "Regressive" sample includes only countries with a LGB policy score less than 0, and the "Progressive" sample includes only those with a score greater than 3. Group-clustered standard errors shown in parentheses. Source: American Community Survey 2008-2019. Authors\' calculations.', -->
 <!--        stars = c(`†` = 0.1, `*` = 0.05, `**` = 0.01, `***` = 0.001), -->
 <!--        statistics = c('Observations' = 'nobs')) %>% -->
-<!--   huxtable::set_width(1) %>% -->
+<!--   huxtable::set_width(1) %>% set_latex_float('h!') %>% -->
 <!--   set_wrap(T) %>%  -->
 <!--   set_all_padding(0) %>% set_caption_pos('topleft') %>% -->
 <!--   huxtable::set_caption('Simple-difference (D), quasi-Poisson regressions of counts of  -->
@@ -343,7 +557,7 @@ ggplot(misreporting_df, aes(x = rate, y = estimate, color = policy)) +
 
 <!-- ``` -->
 
-<!-- \newpage -->
+<!--  -->
 
 <!-- ```{r DD-mod} -->
 <!-- mod_mixed <- acs_count_mixed %>% -->
@@ -386,367 +600,12 @@ ggplot(misreporting_df, aes(x = rate, y = estimate, color = policy)) +
 <!--   note = '{stars}. The "Regressive" sample includes only countries with a LGB policy score less than 0, and the "Progressive" sample includes only those with a score greater than 3. Group-clustered standard errors shown in parentheses. Source: American Community Survey 2008-2019. Authors\' calculations.', -->
 <!--        stars = c(`†` = 0.1, `*` = 0.05, `**` = 0.01, `***` = 0.001), -->
 <!--        statistics = c('Observations' = 'nobs')) %>% -->
-<!--   huxtable::set_width(1) %>% -->
+<!--   huxtable::set_width(1) %>% set_latex_float('h!') %>% -->
 <!--   set_wrap(T) %>%  -->
 <!--   set_all_padding(0) %>% set_caption_pos('topleft') %>% -->
 <!--   huxtable::set_caption('Difference-in-difference (DD), quasi-Poisson regressions of counts of individuals in  -->
 <!--                         mixed-citizenship, same-sex couples couples, stratifying the sample by policy environment at year of immigration') -->
 <!-- ``` -->
-
-\newpage
-
-# Alternative Outcome Variables
-```{r nativity}
-count_func_mixed_nat <- function(condition = '!is.na(state)'){
-  acs_count_base %>%
-    mutate(mixed = imm_couple == 'one') %>%
-    filter(eval(rlang::parse_expr(condition))) %>%
-    group_by(state, year, same_sex, mixed) %>%
-    summarize(n = sum(perwt), 
-              n_unweighted = n(),
-              n_ar = sum(perwt[qcitizen != 'Allocated' & qeduc != 'Consistency edit' & allocated == F]), 
-              n_unweighted_ar = sum(qcitizen != 'Allocated' & qeduc != 'Consistency edit' & allocated == F)) %>%
-    ungroup() %>%
-    complete(state, year, same_sex, mixed) %>%
-    mutate(across(n:n_unweighted_ar, function(x) ifelse(is.na(x), 0, x))) %>%
-    mutate(post_2013 = year > 2013,
-           group_fe = paste(state, same_sex, mixed, sep = '_')) %>%
-    left_join(state_df)
-}
-
-
-mod_mixed <- count_func_mixed_nat() %>%
-  glm(n ~ I(post_2013*same_sex*mixed) + 
-        I(post_2013*same_sex) + 
-        I(post_2013*mixed) + 
-        post_2013 + 
-        state_policy + state_income + state_unemploy +
-        group_fe + as.factor(year), 
-                        data = ., 
-                        family = 'quasipoisson') %>%
-  coeftest(., vcov = vcovCL(., cluster = ~group_fe)) 
-
-
-mod_os_high <- glm(n ~  I(post_2013*same_sex*mixed) + 
-                        I(post_2013*same_sex) + 
-                        I(post_2013*mixed) + 
-                        post_2013 + 
-                        state_policy + state_income + state_unemploy +
-                        group_fe + as.factor(year), 
-                        data = count_func_mixed_nat('origin_score > 3 | is.na(origin_score)') , 
-                        family = 'quasipoisson') %>%
-  coeftest(., vcov = vcovCL(., cluster = ~group_fe))
-
-
-mod_os_low <- glm(n ~  I(post_2013*same_sex*mixed) + 
-                        I(post_2013*same_sex) + 
-                        I(post_2013*mixed) + 
-                        post_2013 + 
-                        state_policy + state_income + state_unemploy +
-                        group_fe + as.factor(year), 
-                        data = count_func_mixed_nat('origin_score < 0 |  is.na(origin_score)'), 
-                        family = 'quasipoisson') %>%
-coeftest(., vcov = vcovCL(., cluster = ~group_fe)) 
-
-
-huxreg(list('Full sample' = mod_mixed, 'Progressive' = mod_os_high, 'Regressive' = mod_os_low),
-       coefs = c('Post-2013 × Same-sex × Mixed-nativity' = 'I(post_2013 * same_sex * mixed)',
-                'Post-2013 × Same-sex'  = 'I(post_2013 * same_sex)',
-                'Post-2013 × Mixed-nativity'  = 'I(post_2013 * mixed)',
-                'Post-2013' = 'post_2013TRUE',
-                'State LGB policy' = 'state_policy',
-                'State unemployment' = 'state_unemploy',
-                'State per-capita income' = 'state_income'),
-  note = '{stars}. The "Regressive" sample includes only countries with a LGB policy score less than 0, and the "Progressive" sample includes only those with a score greater than 3. Group-clustered standard errors shown in parentheses. Source: American Community Survey 2008-2019. Authors\' calculations.',
-       stars = c(`†` = 0.1, `*` = 0.05, `**` = 0.01, `***` = 0.001),
-       statistics = c('Observations' = 'nobs')) %>%
-  huxtable::set_width(1) %>%
-  set_wrap(T) %>% 
-  set_all_padding(0) %>% set_caption_pos('topleft') %>%
-  huxtable::set_caption('Mixed vs. Same Nativity: Triple-difference (DDD), quasi-Poisson 
-  regressions of counts of individuals in mixed-nativity, same-sex couples couples, stratifying by 
-  state-country-year-group average policy environment')
-```
-
-\newpage
-
-```{r imm-containing}
-count_func_imm <- function(condition = '!is.na(state)'){
-  acs_count_base %>%
-    mutate(mixed = imm_couple %in% c('one', 'two')) %>%
-    filter(eval(rlang::parse_expr(condition))) %>%
-    group_by(state, year, same_sex, mixed) %>%
-    summarize(n = sum(perwt), 
-              n_unweighted = n(),
-              n_ar = sum(perwt[qcitizen != 'Allocated' & qeduc != 'Consistency edit' & allocated == F]), 
-              n_unweighted_ar = sum(qcitizen != 'Allocated' & qeduc != 'Consistency edit' & allocated == F)) %>%
-    ungroup() %>%
-    complete(state, year, same_sex, mixed) %>%
-    mutate(across(n:n_unweighted_ar, function(x) ifelse(is.na(x), 0, x))) %>%
-    mutate(post_2013 = year > 2013,
-           group_fe = paste(state, same_sex, mixed, sep = '_')) %>%
-    left_join(state_df)
-}
-
-mod_mixed <- count_func_imm() %>%
-  glm(n ~ I(post_2013*same_sex*mixed) + 
-        I(post_2013*same_sex) + 
-        I(post_2013*mixed) + 
-        post_2013 + 
-        state_policy + state_income + state_unemploy +
-        group_fe + as.factor(year), 
-                        data = ., 
-                        family = 'quasipoisson') %>%
-  coeftest(., vcov = vcovCL(., cluster = ~group_fe)) 
-
-
-mod_os_high <- glm(n ~  I(post_2013*same_sex*mixed) + 
-                        I(post_2013*same_sex) + 
-                        I(post_2013*mixed) + 
-                        post_2013 + 
-                        state_policy + state_income + state_unemploy +
-                        group_fe + as.factor(year), 
-                        data = count_func_imm('origin_score > 3 | is.na(origin_score)') , 
-                        family = 'quasipoisson') %>%
-  coeftest(., vcov = vcovCL(., cluster = ~group_fe))
-
-
-mod_os_low <- glm(n ~  I(post_2013*same_sex*mixed) + 
-                        I(post_2013*same_sex) + 
-                        I(post_2013*mixed) + 
-                        post_2013 + 
-                        state_policy + state_income + state_unemploy +
-                        group_fe + as.factor(year), 
-                        data = count_func_imm('origin_score < 0 |  is.na(origin_score)'), 
-                        family = 'quasipoisson') %>%
-coeftest(., vcov = vcovCL(., cluster = ~group_fe)) 
-
-
-huxreg(list('Full sample' = mod_mixed, 'Progressive' = mod_os_high, 'Regressive' = mod_os_low),
-       coefs = c('Post-2013 × Same-sex × Immigrant-containing' = 'I(post_2013 * same_sex * mixed)',
-                'Post-2013 × Same-sex'  = 'I(post_2013 * same_sex)',
-                'Post-2013 × Immigrant-containing'  = 'I(post_2013 * mixed)',
-                'Post-2013' = 'post_2013TRUE',
-                'State LGB policy' = 'state_policy',
-                'State unemployment' = 'state_unemploy',
-                'State per-capita income' = 'state_income'),
-  note = '{stars}. The "Regressive" sample includes only countries with a LGB policy score less than 0, and the "Progressive" sample includes only those with a score greater than 3. Group-clustered standard errors shown in parentheses. Source: American Community Survey 2008-2019. Authors\' calculations.',
-       stars = c(`†` = 0.1, `*` = 0.05, `**` = 0.01, `***` = 0.001),
-       statistics = c('Observations' = 'nobs')) %>%
-  huxtable::set_width(1) %>%
-  set_wrap(T) %>% 
-  set_all_padding(0) %>% set_caption_pos('topleft') %>%
-  huxtable::set_caption('Immigrant-containing couples vs. two U.S.-born: Triple-difference (DDD), quasi-Poisson regressions of counts of individuals 
-  in immigrant-containing, same-sex couples couples, stratifying by 
-  state-country-year-group average policy environment')
-```
-
-
-\newpage
-
-# Timing of Migration and Union Formation
-```{r diff-hist, fig.cap = 'Distribution of difference in year of marriage and year of immigration for the noncitizen in mixed-citizenship couples'}
-marr_dif <- acs_count_base %>%
-  filter(mixed_citizenship == T) %>%
-  group_by(same_sex) %>%
-  summarize(marr_median = median(marr_minus_imm, na.rm = T))
-
-acs_count_base %>%
-  filter(mixed_citizenship == T) %>%
-  left_join(marr_dif) %>%
-  mutate(same_sex = ifelse(same_sex == T, 'Same-sex', 'Different-sex')) %>%
-  ggplot(aes(x = marr_minus_imm)) +
-  geom_histogram() +
-  geom_vline(aes(xintercept = marr_median)) +
-  facet_wrap(~same_sex, scales = 'free_y') +
-  labs(x = '(Year of Marriage) - (Year of Immigration)')
-```
-
-```{r diff-fig, fig.cap = 'Mean LGB policy score over difference in year of marriage and year of immigration. Lines are smoothed by categorizing data into two-year bins.'}
-acs_count_base %>%
-  filter(mixed_citizenship == T,
-         abs(marr_minus_imm) < 30) %>%
-  mutate(marr_minus_imm = floor(marr_minus_imm/2)*2) %>%
-  group_by(same_sex, marr_minus_imm) %>%
-  summarize(mean = mean(origin_score, na.rm = T),
-            se = sd(origin_score, na.rm = T)/sqrt(n()),
-            upper = mean + 1.96*se,
-            lower = mean - 1.96*se) %>%
-  filter(!is.na(se)) %>%
-  mutate(same_sex = ifelse(same_sex == T, 'Same-sex', 'Different-sex')) %>%
-  ggplot(aes(x = marr_minus_imm, y = mean)) +
-  geom_line() + 
-  geom_ribbon(aes(ymin = lower, ymax = upper), alpha = .3) +
-  facet_wrap(~same_sex) +
-  labs(x = '(Year of marriage) - (Year of immigration)', y = 'Mean LGB policy score of origin')
-```
-
-
-```{r diff-desc, fig.cap = "Estimated counts of individuals in mixed-citizenship, same-same, married couples from the American Community Survey, stratified by whether couples married before or after immigration of the non-citizen partner. The Regressive sample includes only countries with a LGB policy score less than 0, and the Progressive sample includes only those with a score greater than 3."}
-bind_rows(
-  acs_count_base %>%
-    mutate(cat = case_when(origin_score > 3 ~ 'Progressive',
-                             origin_score < 0 ~ 'Regressive'),
-           marr_before_imm = marr_minus_imm < 0) %>%
-    filter(mixed_citizenship == T & same_sex == T & !is.na(cat)) %>%
-    group_by(year, cat, marr_before_imm) %>%
-    summarize(n = sum(perwt)),
-  acs_count_base %>%
-    mutate(marr_before_imm = marr_minus_imm < 0) %>%
-    filter(mixed_citizenship == T & same_sex == T) %>%
-    group_by(year, marr_before_imm) %>%
-    summarize(n = sum(perwt)) %>%
-    mutate(cat = 'Full sample')) %>%
-  filter(!is.na(marr_before_imm)) %>%
-  mutate(marr_before_imm = ifelse(marr_before_imm == T, 'Marriage before immigration', 
-                                  'Marriage after immigration')) %>%
-  ggplot(aes(x = year, y = n/1000, color = cat, linetype = cat)) +
-  geom_line(size = .3, ) +
-  geom_vline(size = .3, xintercept = 2013, linetype = 2) +
-  facet_wrap(~marr_before_imm) +
-  labs(x = 'Year', y = 'n (thousands)') +
-  theme(legend.text=element_text(size = 8))
-```
-
-
-
-```{r marr-desc-tab}
-acs_count_base %>% 
-  filter(!is.na(marr_minus_imm), married == T, mixed_citizenship == T) %>%
-  mutate(marr_before = marr_minus_imm < 0) %>%
-  group_by(same_sex, marr_before) %>%
-  summarize(n_unweighted = n(),
-            n_weighted = sum(perwt)) %>%
-  select(`Same-sex` = same_sex, `Married before immigration` = marr_before,
-         `n (unweighted)` = n_unweighted, `n (weighted)` = n_weighted) %>%
-  kable(booktabs = T,
-        format.args = list(big.mark = ","),
-        caption = 'Among married, mixed-citizenship couples, counts of same-sex and different-sex couples that were married before and after immigration.')
-```
-
-\newpage
-
-```{r marr-before-tab}
-acs_count_mixed_marr_before <- count_func('marr_minus_imm < 0 | (married == T & mixed_citizenship == F)') 
-count_origin_high_marr_before <- count_func('(origin_score > 3 | is.na(origin_score)) & 
-                                            (marr_minus_imm < 0 | (married == T & mixed_citizenship == F))') 
-count_origin_low_marr_before <- count_func('(origin_score < 0 |  is.na(origin_score)) & 
-                                           (marr_minus_imm < 0 | (married == T & mixed_citizenship == F))')
-
-mod_mixed <- acs_count_mixed_marr_before %>%
-  glm(n ~ I(post_2013*same_sex*mixed) + 
-        I(post_2013*same_sex) + 
-        I(post_2013*mixed) + 
-        post_2013 + 
-        state_policy + state_income + state_unemploy +
-        group_fe + as.factor(year), 
-                        data = ., 
-                        family = 'quasipoisson') %>%
-  coeftest(., vcov = vcovCL(., cluster = ~group_fe)) 
-
-
-mod_os_high <- glm(n ~  I(post_2013*same_sex*mixed) + 
-                        I(post_2013*same_sex) + 
-                        I(post_2013*mixed) + 
-                        post_2013 + 
-                        state_policy + state_income + state_unemploy +
-                        group_fe + as.factor(year), 
-                        data = count_origin_high_marr_before, 
-                        family = 'quasipoisson') %>%
-  coeftest(., vcov = vcovCL(., cluster = ~group_fe))
-
-
-mod_os_low <- glm(n ~  I(post_2013*same_sex*mixed) + 
-                        I(post_2013*same_sex) + 
-                        I(post_2013*mixed) + 
-                        post_2013 + 
-                        state_policy + state_income + state_unemploy +
-                        group_fe + as.factor(year), 
-                        data = count_origin_low_marr_before, 
-                        family = 'quasipoisson') %>%
-coeftest(., vcov = vcovCL(., cluster = ~group_fe)) 
-
-
-huxreg(list('Full sample' = mod_mixed, 'Progressive' = mod_os_high, 'Regressive' = mod_os_low),
-       coefs = c('Post-2013 × Same-sex × Mixed-citizenship' = 'I(post_2013 * same_sex * mixed)',
-                'Post-2013 × Same-sex'  = 'I(post_2013 * same_sex)',
-                'Post-2013 × Mixed-citizenship'  = 'I(post_2013 * mixed)',
-                'Post-2013' = 'post_2013TRUE',
-                'State LGB policy' = 'state_policy',
-                'State unemployment' = 'state_unemploy',
-                'State per-capita income' = 'state_income'
-                ),
-  note = '{stars}. The "Regressive" sample includes only countries with a LGB policy score less than 0, and the "Progressive" sample includes only those with a score greater than 3. Group-clustered standard errors shown in parentheses. Source: American Community Survey 2008-2019. Authors\' calculations.',
-       stars = c(`†` = 0.1, `*` = 0.05, `**` = 0.01, `***` = 0.001),
-       statistics = c('Observations' = 'nobs')) %>%
-  huxtable::set_width(1) %>%
-  set_wrap(T) %>%
-  set_all_padding(0) %>% set_caption_pos('topleft') %>%
-  huxtable::set_caption('Married before immigration: Triple-difference (DDD), quasi-Poisson 
-  regressions of counts of individuals in mixed-citizenship, same-sex couples, stratifying by 
-  state-country-year-group average policy environment. Models include controls for state LGB policy, state unemployment, and state per-capita income. The full sample is limited to married couples, and the mixed-citizenship sample is limited to couples where the non-citizen partner immigrated after marriage.')
-```
-\newpage
-```{r marr-after-tab}
-acs_count_mixed_marr_after <- count_func('marr_minus_imm >= 0 | (married == T & mixed_citizenship == F)') 
-count_origin_high_marr_after <- count_func('(origin_score > 3 | is.na(origin_score)) & 
-                                           (marr_minus_imm >= 0 | (married == T & mixed_citizenship == F))') 
-count_origin_low_marr_after <- count_func('(origin_score < 0 |  is.na(origin_score)) & 
-                                          (marr_minus_imm >= 0 | (married == T & mixed_citizenship == F))')
-
-mod_mixed <- acs_count_mixed_marr_after %>%
-  glm(n ~ I(post_2013*same_sex*mixed) + 
-        I(post_2013*same_sex) + 
-        I(post_2013*mixed) + 
-        post_2013 + 
-        state_policy + state_income + state_unemploy +
-        group_fe + as.factor(year), 
-                        data = ., 
-                        family = 'quasipoisson') %>%
-  coeftest(., vcov = vcovCL(., cluster = ~group_fe)) 
-
-
-mod_os_high <- glm(n ~  I(post_2013*same_sex*mixed) + 
-                        I(post_2013*same_sex) + 
-                        I(post_2013*mixed) + 
-                        post_2013 + 
-                        state_policy + state_income + state_unemploy +
-                        group_fe + as.factor(year), 
-                        data = count_origin_high_marr_after, 
-                        family = 'quasipoisson') %>%
-  coeftest(., vcov = vcovCL(., cluster = ~group_fe))
-
-
-mod_os_low <- glm(n ~  I(post_2013*same_sex*mixed) + 
-                        I(post_2013*same_sex) + 
-                        I(post_2013*mixed) + 
-                        post_2013 + 
-                        state_policy + state_income + state_unemploy +
-                        group_fe + as.factor(year), 
-                        data = count_origin_low_marr_after, 
-                        family = 'quasipoisson') %>%
-coeftest(., vcov = vcovCL(., cluster = ~group_fe)) 
-
-
-huxreg(list('Full sample' = mod_mixed, 'Progressive' = mod_os_high, 'Regressive' = mod_os_low),
-       coefs = c('Post-2013 × Same-sex × Mixed-citizenship' = 'I(post_2013 * same_sex * mixed)',
-                'Post-2013 × Same-sex'  = 'I(post_2013 * same_sex)',
-                'Post-2013 × Mixed-citizenship'  = 'I(post_2013 * mixed)',
-                'Post-2013' = 'post_2013TRUE',
-                'State LGB policy' = 'state_policy',
-                'State unemployment' = 'state_unemploy',
-                'State per-capita income' = 'state_income'
-                ),
-  note = "{stars}. The \"Regressive\" sample includes only countries with a LGB policy score less than 0, and the \"Progressive\" sample includes only those with a score greater than 3. Group-clustered standard errors shown in parentheses. Source: American Community Survey 2008-2019. Authors\' calculations.",
-       stars = c(`†` = 0.1, `*` = 0.05, `**` = 0.01, `***` = 0.001),
-       statistics = c('Observations' = 'nobs')) %>%
-  huxtable::set_width(1) %>%
-  set_wrap(T) %>%
-  set_all_padding(0) %>% set_caption_pos('topleft') %>%
-  huxtable::set_caption('Married after immigration: Triple-difference (DDD), quasi-Poisson 
-  regressions of counts of individuals in mixed-citizenship, same-sex couples, stratifying by 
-  state-country-year-group average policy environment. The full sample is limited to married couples, and the mixed-citizenship sample is limited to couples where the non-citizen partner immigrated before or in the same year as marriage.')
-```
 
 \newpage
 
@@ -800,14 +659,14 @@ huxreg(list('Full sample' = mod_mixed, 'Progressive' = mod_os_high, 'Regressive'
   note = '{stars}. The "Regressive" sample includes only countries with a LGB policy score less than 0, and the "Progressive" sample includes only those with a score greater than 3. Group-clustered standard errors shown in parentheses. Source: American Community Survey 2008-2019. Authors\' calculations.',
        stars = c(`†` = 0.1, `*` = 0.05, `**` = 0.01, `***` = 0.001),
        statistics = c('Observations' = 'nobs')) %>%
-  huxtable::set_width(1) %>%
+  huxtable::set_width(1) %>% set_latex_float('h!') %>%
   set_wrap(T) %>%
   set_all_padding(0) %>% set_caption_pos('topleft') %>%
   huxtable::set_caption('Country-of-origin LGB policy score lagged by one year: triple-difference (DDD), quasi-Poisson regressions of counts of individuals in mixed-citizenship, same-sex couples, stratifying by 
   state-country-year-group average policy environment')
 ```
 
-\newpage
+
 
 ```{r lag2-tab}
 count_origin_high <- count_func('origin_score_lag2 > 3 | is.na(origin_score_lag2)') 
@@ -858,14 +717,14 @@ huxreg(list('Full sample' = mod_mixed, 'Progressive' = mod_os_high, 'Regressive'
   note = '{stars}. The "Regressive" sample includes only countries with a LGB policy score less than 0, and the "Progressive" sample includes only those with a score greater than 3. Group-clustered standard errors shown in parentheses. Source: American Community Survey 2008-2019. Authors\' calculations.',
        stars = c(`†` = 0.1, `*` = 0.05, `**` = 0.01, `***` = 0.001),
        statistics = c('Observations' = 'nobs')) %>%
-  huxtable::set_width(1) %>%
+  huxtable::set_width(1) %>% set_latex_float('h!') %>%
   set_wrap(T) %>%
   set_all_padding(0) %>% set_caption_pos('topleft') %>%
   huxtable::set_caption('Country-of-origin LGB policy score lagged by two years: triple-difference (DDD), quasi-Poisson regressions of counts of individuals in mixed-citizenship, same-sex couples, stratifying by 
   state-country-year-group average policy environment')
 ```
 
-\newpage
+
 
 ```{r lag5-tab}
 count_origin_high <- count_func('origin_score_lag5 > 3 | is.na(origin_score_lag5)') 
@@ -916,7 +775,7 @@ huxreg(list('Full sample' = mod_mixed, 'Progressive' = mod_os_high, 'Regressive'
   note = '{stars}. The "Regressive" sample includes only countries with a LGB policy score less than 0, and the "Progressive" sample includes only those with a score greater than 3. Group-clustered standard errors shown in parentheses. Source: American Community Survey 2008-2019. Authors\' calculations.',
        stars = c(`†` = 0.1, `*` = 0.05, `**` = 0.01, `***` = 0.001),
        statistics = c('Observations' = 'nobs')) %>%
-  huxtable::set_width(1) %>%
+  huxtable::set_width(1) %>% set_latex_float('h!') %>%
   set_wrap(T) %>%
   set_all_padding(0) %>% set_caption_pos('topleft') %>%
   huxtable::set_caption('Country-of-origin LGB policy score lagged by five years: triple-difference (DDD), quasi-Poisson regressions of counts of individuals in mixed-citizenship, same-sex couples, stratifying by 
@@ -925,8 +784,12 @@ huxreg(list('Full sample' = mod_mixed, 'Progressive' = mod_os_high, 'Regressive'
 
 \newpage
 
+\newpage
+
+\newpage
+
 # Parallel Trends Assumption for DD Model
-```{r lag-plot-dd, fig.cap = 'Dynamic specifications of DD quasi-Poisson regression with two-way fixed effects for sample of only same-sex couples, displaying the coefficient for the Year × Mixed-citizenship interaction. Survey years are aggregated into pairs, with 2008-2009 as the base category.'}
+```{r lag-plot-dd, fig.height = 3, fig.pos = 'H', out.extra = '', fig.cap = 'Dynamic specifications of DD quasi-Poisson regression with two-way fixed effects for sample of only same-sex couples, displaying the coefficient for the Year × Mixed-citizenship interaction. Survey years are aggregated into pairs, with 2008-2009 as the base category.'}
 count_origin_high <- count_func('origin_score > 3 | is.na(origin_score)') 
 count_origin_low <- count_func('origin_score < 0 |  is.na(origin_score)')
 
@@ -1033,23 +896,45 @@ For the DD dynamic models, we test that coefficients for 2010 and 2012 are both 
 
 \newpage
 
-# Stratifying by U.S. State Policy
-```{r state-stratify}
-mod_mixed <- acs_count_mixed %>%
-  glm(n ~ I(post_2013*same_sex*mixed) + I(post_2013*same_sex) + I(post_2013*mixed) + 
-        post_2013 + group_fe + as.factor(year), 
+# Alternative Outcome Variables
+```{r nativity}
+count_func_mixed_nat <- function(condition = '!is.na(state)'){
+  acs_count_base %>%
+    mutate(mixed = imm_couple == 'one') %>%
+    filter(eval(rlang::parse_expr(condition))) %>%
+    group_by(state, year, same_sex, mixed) %>%
+    summarize(n = sum(perwt), 
+              n_unweighted = n(),
+              n_ar = sum(perwt[qcitizen != 'Allocated' & qeduc != 'Consistency edit' & allocated == F]), 
+              n_unweighted_ar = sum(qcitizen != 'Allocated' & qeduc != 'Consistency edit' & allocated == F)) %>%
+    ungroup() %>%
+    complete(state, year, same_sex, mixed) %>%
+    mutate(across(n:n_unweighted_ar, function(x) ifelse(is.na(x), 0, x))) %>%
+    mutate(post_2013 = year > 2013,
+           group_fe = paste(state, same_sex, mixed, sep = '_')) %>%
+    left_join(state_df)
+}
+
+
+mod_mixed <- count_func_mixed_nat() %>%
+  glm(n ~ I(post_2013*same_sex*mixed) + 
+        I(post_2013*same_sex) + 
+        I(post_2013*mixed) + 
+        post_2013 + 
+        state_policy + state_income + state_unemploy +
+        group_fe + as.factor(year), 
                         data = ., 
                         family = 'quasipoisson') %>%
   coeftest(., vcov = vcovCL(., cluster = ~group_fe)) 
-
 
 
 mod_os_high <- glm(n ~  I(post_2013*same_sex*mixed) + 
                         I(post_2013*same_sex) + 
                         I(post_2013*mixed) + 
                         post_2013 + 
+                        state_policy + state_income + state_unemploy +
                         group_fe + as.factor(year), 
-                        data = filter(acs_count_mixed, state_policy >= 3), 
+                        data = count_func_mixed_nat('origin_score > 3 | is.na(origin_score)') , 
                         family = 'quasipoisson') %>%
   coeftest(., vcov = vcovCL(., cluster = ~group_fe))
 
@@ -1058,28 +943,156 @@ mod_os_low <- glm(n ~  I(post_2013*same_sex*mixed) +
                         I(post_2013*same_sex) + 
                         I(post_2013*mixed) + 
                         post_2013 + 
+                        state_policy + state_income + state_unemploy +
                         group_fe + as.factor(year), 
-                        data = filter(acs_count_mixed, state_policy <= 0), 
+                        data = count_func_mixed_nat('origin_score < 0 |  is.na(origin_score)'), 
                         family = 'quasipoisson') %>%
 coeftest(., vcov = vcovCL(., cluster = ~group_fe)) 
 
-dddlist <- list('Full sample' = mod_mixed, 'Progressive States' = mod_os_high, 'Regressive States' = mod_os_low)
 
-huxreg(dddlist,
-       coefs = c('Post-2013 × Same-sex × Mixed-citizenship' = 'I(post_2013 * same_sex * mixed)',
+huxreg(list('Full sample' = mod_mixed, 'Progressive' = mod_os_high, 'Regressive' = mod_os_low),
+       coefs = c('Post-2013 × Same-sex × Mixed-nativity' = 'I(post_2013 * same_sex * mixed)',
                 'Post-2013 × Same-sex'  = 'I(post_2013 * same_sex)',
-                'Post-2013 × Mixed-citizenship'  = 'I(post_2013 * mixed)',
-                'Post-2013' = 'post_2013TRUE'),
-  note = '{stars}. The "Regressive" sample includes only U.S. states with a policy score less than 1, and the "Progressive" sample includes only those with a score greater than 2. Group-clustered standard errors shown in parentheses. Source: American Community Survey 2008-2019. Authors\' calculations.',
+                'Post-2013 × Mixed-nativity'  = 'I(post_2013 * mixed)',
+                'Post-2013' = 'post_2013TRUE',
+                'State LGB policy' = 'state_policy',
+                'State unemployment' = 'state_unemploy',
+                'State per-capita income' = 'state_income'),
+  note = '{stars}. The "Regressive" sample includes only countries with a LGB policy score less than 0, and the "Progressive" sample includes only those with a score greater than 3. Group-clustered standard errors shown in parentheses. Source: American Community Survey 2008-2019. Authors\' calculations.',
        stars = c(`†` = 0.1, `*` = 0.05, `**` = 0.01, `***` = 0.001),
        statistics = c('Observations' = 'nobs')) %>%
-  huxtable::set_width(1) %>%
-  set_wrap(T) %>%
+  huxtable::set_width(1) %>% set_latex_float('h!') %>%
+  set_wrap(T) %>% 
   set_all_padding(0) %>% set_caption_pos('topleft') %>%
-  huxtable::set_caption('Stratifying by U.S. state policy: Triple-differences (DDD), quasi-Poisson regressions of counts of 
-                        individuals in mixed-citizenship, same-sex couples')
-
+  huxtable::set_caption('Mixed vs. Same Nativity: Triple-difference (DDD), quasi-Poisson 
+  regressions of counts of individuals in mixed-nativity, same-sex couples couples, stratifying by 
+  state-country-year-group average policy environment')
 ```
+
+
+
+```{r imm-containing}
+count_func_imm <- function(condition = '!is.na(state)'){
+  acs_count_base %>%
+    mutate(mixed = imm_couple %in% c('one', 'two')) %>%
+    filter(eval(rlang::parse_expr(condition))) %>%
+    group_by(state, year, same_sex, mixed) %>%
+    summarize(n = sum(perwt), 
+              n_unweighted = n(),
+              n_ar = sum(perwt[qcitizen != 'Allocated' & qeduc != 'Consistency edit' & allocated == F]), 
+              n_unweighted_ar = sum(qcitizen != 'Allocated' & qeduc != 'Consistency edit' & allocated == F)) %>%
+    ungroup() %>%
+    complete(state, year, same_sex, mixed) %>%
+    mutate(across(n:n_unweighted_ar, function(x) ifelse(is.na(x), 0, x))) %>%
+    mutate(post_2013 = year > 2013,
+           group_fe = paste(state, same_sex, mixed, sep = '_')) %>%
+    left_join(state_df)
+}
+
+mod_mixed <- count_func_imm() %>%
+  glm(n ~ I(post_2013*same_sex*mixed) + 
+        I(post_2013*same_sex) + 
+        I(post_2013*mixed) + 
+        post_2013 + 
+        state_policy + state_income + state_unemploy +
+        group_fe + as.factor(year), 
+                        data = ., 
+                        family = 'quasipoisson') %>%
+  coeftest(., vcov = vcovCL(., cluster = ~group_fe)) 
+
+
+mod_os_high <- glm(n ~  I(post_2013*same_sex*mixed) + 
+                        I(post_2013*same_sex) + 
+                        I(post_2013*mixed) + 
+                        post_2013 + 
+                        state_policy + state_income + state_unemploy +
+                        group_fe + as.factor(year), 
+                        data = count_func_imm('origin_score > 3 | is.na(origin_score)') , 
+                        family = 'quasipoisson') %>%
+  coeftest(., vcov = vcovCL(., cluster = ~group_fe))
+
+
+mod_os_low <- glm(n ~  I(post_2013*same_sex*mixed) + 
+                        I(post_2013*same_sex) + 
+                        I(post_2013*mixed) + 
+                        post_2013 + 
+                        state_policy + state_income + state_unemploy +
+                        group_fe + as.factor(year), 
+                        data = count_func_imm('origin_score < 0 |  is.na(origin_score)'), 
+                        family = 'quasipoisson') %>%
+coeftest(., vcov = vcovCL(., cluster = ~group_fe)) 
+
+
+huxreg(list('Full sample' = mod_mixed, 'Progressive' = mod_os_high, 'Regressive' = mod_os_low),
+       coefs = c('Post-2013 × Same-sex × Immigrant-containing' = 'I(post_2013 * same_sex * mixed)',
+                'Post-2013 × Same-sex'  = 'I(post_2013 * same_sex)',
+                'Post-2013 × Immigrant-containing'  = 'I(post_2013 * mixed)',
+                'Post-2013' = 'post_2013TRUE',
+                'State LGB policy' = 'state_policy',
+                'State unemployment' = 'state_unemploy',
+                'State per-capita income' = 'state_income'),
+  note = '{stars}. The "Regressive" sample includes only countries with a LGB policy score less than 0, and the "Progressive" sample includes only those with a score greater than 3. Group-clustered standard errors shown in parentheses. Source: American Community Survey 2008-2019. Authors\' calculations.',
+       stars = c(`†` = 0.1, `*` = 0.05, `**` = 0.01, `***` = 0.001),
+       statistics = c('Observations' = 'nobs')) %>%
+  huxtable::set_width(1) %>% set_latex_float('h!') %>%
+  set_wrap(T) %>% 
+  set_all_padding(0) %>% set_caption_pos('topleft') %>%
+  huxtable::set_caption('Immigrant-containing couples vs. two U.S.-born: Triple-difference (DDD), quasi-Poisson regressions of counts of individuals 
+  in immigrant-containing, same-sex couples couples, stratifying by 
+  state-country-year-group average policy environment')
+```
+
+
+
+
+
+<!-- # Stratifying by U.S. State Policy -->
+<!-- ```{r state-stratify} -->
+<!-- mod_mixed <- acs_count_mixed %>% -->
+<!--   glm(n ~ I(post_2013*same_sex*mixed) + I(post_2013*same_sex) + I(post_2013*mixed) +  -->
+<!--         post_2013 + group_fe + as.factor(year),  -->
+<!--                         data = .,  -->
+<!--                         family = 'quasipoisson') %>% -->
+<!--   coeftest(., vcov = vcovCL(., cluster = ~group_fe))  -->
+
+
+
+<!-- mod_os_high <- glm(n ~  I(post_2013*same_sex*mixed) +  -->
+<!--                         I(post_2013*same_sex) +  -->
+<!--                         I(post_2013*mixed) +  -->
+<!--                         post_2013 +  -->
+<!--                         group_fe + as.factor(year),  -->
+<!--                         data = filter(acs_count_mixed, state_policy >= 3),  -->
+<!--                         family = 'quasipoisson') %>% -->
+<!--   coeftest(., vcov = vcovCL(., cluster = ~group_fe)) -->
+
+
+<!-- mod_os_low <- glm(n ~  I(post_2013*same_sex*mixed) +  -->
+<!--                         I(post_2013*same_sex) +  -->
+<!--                         I(post_2013*mixed) +  -->
+<!--                         post_2013 +  -->
+<!--                         group_fe + as.factor(year),  -->
+<!--                         data = filter(acs_count_mixed, state_policy <= 0),  -->
+<!--                         family = 'quasipoisson') %>% -->
+<!-- coeftest(., vcov = vcovCL(., cluster = ~group_fe))  -->
+
+<!-- dddlist <- list('Full sample' = mod_mixed, 'Progressive States' = mod_os_high, 'Regressive States' = mod_os_low) -->
+
+<!-- huxreg(dddlist, -->
+<!--        coefs = c('Post-2013 × Same-sex × Mixed-citizenship' = 'I(post_2013 * same_sex * mixed)', -->
+<!--                 'Post-2013 × Same-sex'  = 'I(post_2013 * same_sex)', -->
+<!--                 'Post-2013 × Mixed-citizenship'  = 'I(post_2013 * mixed)', -->
+<!--                 'Post-2013' = 'post_2013TRUE'), -->
+<!--   note = '{stars}. The "Regressive" sample includes only U.S. states with a policy score less than 1, and the "Progressive" sample includes only those with a score greater than 2. Group-clustered standard errors shown in parentheses. Source: American Community Survey 2008-2019. Authors\' calculations.', -->
+<!--        stars = c(`†` = 0.1, `*` = 0.05, `**` = 0.01, `***` = 0.001), -->
+<!--        statistics = c('Observations' = 'nobs')) %>% -->
+<!--   huxtable::set_width(1) %>% set_latex_float('h!') %>% -->
+<!--   set_wrap(T) %>% -->
+<!--   set_all_padding(0) %>% set_caption_pos('topleft') %>% -->
+<!--   huxtable::set_caption('Stratifying by U.S. state policy: Triple-differences (DDD), quasi-Poisson regressions of counts of  -->
+<!--                         individuals in mixed-citizenship, same-sex couples') -->
+
+<!-- ``` -->
 
 
 
@@ -1132,12 +1145,16 @@ huxreg(dddlist,
 <!--   note = '{stars}. The "Regressive" sample includes only countries with a LGB policy score less than 0, and the "Progressive" sample includes only those with a score greater than 3. Group-clustered standard errors shown in parentheses. Source: American Community Survey 2008-2019. Authors\' calculations.', -->
 <!--        stars = c(`†` = 0.1, `*` = 0.05, `**` = 0.01, `***` = 0.001), -->
 <!--        statistics = c('Observations' = 'nobs')) %>% -->
-<!--   huxtable::set_width(1) %>% -->
+<!--   huxtable::set_width(1) %>% set_latex_float('h!') %>% -->
 <!--   set_wrap(T) %>% -->
 <!--   set_all_padding(0) %>% set_caption_pos('topleft') %>% -->
 <!--   huxtable::set_caption('2015 instead of 2013 intervention: Triple-differences (DDD), quasi-Poisson regressions of counts of individuals in mixed-citizenship, same-sex couples, stratifying the sample by policy environment at year of immigration') -->
 
 <!-- ``` -->
+
+\newpage
+
+\newpage
 
 \newpage
 

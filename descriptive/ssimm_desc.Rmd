@@ -212,7 +212,7 @@ Both internationally and in the U.S., the policy landscape for same-sex couples 
 # Introduction
 In 2013, the U.S. Supreme Court overturned the Defense of Marriage Act and required the U.S. government to recognize marriages between same-sex spouses. Among many consequences, this decision radically changed the immigration landscape: For the first time, same-sex spouses of U.S. citizens and lawful permanent residents were eligible to file a spousal or fiancé(e) petition for an immigrant visa [@edwards_2013]. Since then, the U.S. population of immigrants in same-sex couples has grown rapidly [@redpath_2022_spousal]. According to American Community Survey data [@ruggles_2021], numbers of different-sex couples including immigrants increased by `r round((dif_2019/dif_2013 - 1)*100)` percent from 2013 to 2019 (from `r round(dif_2013 / 1e6,1)` million to `r round(dif_2019 / 1e6,1)` million), while those of corresponding same-sex couples grew by `r round((same_2019/same_2013 - 1)*100)` percent in the same period (from `r round(same_2013 /1e3, 1)` thousand to `r round(same_2019 /1e3, 1)` thousand). While some cursory descriptions exist [@gates_2013; @goldberg_2021], there is now a pressing need to understand the contours of this burgeoning population and the relevant forces shaping their migratory pathways.
 
-While immigrants in same-sex couples may resemble their heterosexual co-nationals and respond to similar migratory forces (e.g., economic benefits and network effects), there is good reason to suspect distinction. As the Supreme Court decision indicates, this population may be particularly responsive to changes in state policy. Indeed, the Supreme Court decision occurred against a backdrop of rapidly changing laws concerning same-sex couples -- and lesbian, gay, and bisexual (LGB) communities, generally -- both in the U.S. and abroad. As some countries have expanded rights and social recognition, others have imposed new forms of repression [@hadler_2018_world]. Emerging qualitative work demonstrates that changing LGB policy landscapes are salient factors influencing migration decisions, especially for asylees seeking refuge from more repressive contexts [@ahmad_2013; @carrillo_2018; @mai_2009; @gorman-murray_2009; @vogler_2016] but also for elite queer migrants [@choi_2022_global; @difeliciantonio_2016_situating]. However, there has yet to be a large-scale, representative investigation into how changing policy environments influence the migration patterns of individuals in same-sex couples into and across the U.S. Through studying the migration of same-sex couples, this study allows us to gain a fuller understanding of migratory pathways by underscoring the importance of political and "lifestyle" considerations in migration decisions [@benson_2012; @fitzgerald_2014].  
+While immigrants in same-sex couples may resemble their heterosexual co-nationals and respond to similar migratory forces (e.g., economic benefits and network effects), there is good reason to suspect distinction. As the Supreme Court decision indicates, this population may be particularly responsive to changes in state policy. Indeed, the Supreme Court decision occurred against a backdrop of rapidly changing laws concerning same-sex couples -- and lesbian, gay, and bisexual (LGB) communities, generally -- both in the U.S. and abroad. As some countries have expanded rights and social recognition, others have imposed new forms of repression [@hadler_2018_world]. Emerging qualitative work demonstrates that changing LGB policy landscapes are salient factors influencing migration decisions, especially for asylees seeking refuge from more repressive contexts [@carrillo_2018; @mai_2009; @gorman-murray_2009; @vogler_2016] but also for elite queer migrants [@choi_2022_global; @difeliciantonio_2016_situating]. However, there has yet to be a large-scale, representative investigation into how changing policy environments influence the migration patterns of individuals in same-sex couples into and across the U.S. Through studying the migration of same-sex couples, this study allows us to gain a fuller understanding of migratory pathways by underscoring the importance of political and "lifestyle" considerations in migration decisions [@benson_2012; @fitzgerald_2014].  
 
 How does the U.S. population of immigrants in same-sex couples differ from their different-sex counterparts? And how does country-of-origin and U.S.-state LGB policy relate to their relative numbers? To address our research questions, 
 <!-- we evaluate how LGB policies at country of origin and U.S. state of residence relate to the migratory patterns for immigrants cohabiting with a same-sex partner. We do so by  -->
@@ -496,26 +496,30 @@ state_prop2 <- lm(prop_same_sex ~ origin_score + state_policy, data = acs_prop_s
 #                         origin_score + state_policy, 
 #                        data = acs_prop_state)
 
-state_prop_fe <- lm(prop_same_sex ~ state_policy + origin_score + distw + contig + 
-                          comlang_off + comlang_ethno + colony +
+state_prop_fe <- lm(prop_same_sex ~ state_policy + origin_score + 
+                      # distw + contig + 
+                      #     comlang_off + comlang_ethno + colony +
                           wage_dif + unemp_dif + vdem + stock_prop +
                            state_unemploy + state_income + Country + state, 
                        data = acs_prop_state)
 
-state_prop_fe2 <- lm(prop_same_sex ~ state_policy*origin_score + distw + contig + 
-                          comlang_off + comlang_ethno + colony +
+state_prop_fe2 <- lm(prop_same_sex ~ state_policy*origin_score + 
+                       # distw + contig + 
+                       #    comlang_off + comlang_ethno + colony +
                           wage_dif + unemp_dif + vdem + stock_prop +
                            state_unemploy + state_income + Country + state, 
                        data = acs_prop_state)
 
-state_prop_fe2_2013 <- lm(prop_same_sex ~ state_policy*origin_score + post_2013 + distw + contig + 
-                          comlang_off + comlang_ethno + colony +
+state_prop_fe2_2013 <- lm(prop_same_sex ~ state_policy*origin_score + post_2013 + 
+                          #   distw + contig + 
+                          # comlang_off + comlang_ethno + colony +
                           wage_dif + unemp_dif + vdem + stock_prop +
                            state_unemploy + state_income + Country + state, 
                        data = acs_prop_state)
 
-state_prop_2013 <- lm(prop_same_sex ~ post_2013 + state_policy + origin_score + distw + contig + 
-                          comlang_off + comlang_ethno + colony +
+state_prop_2013 <- lm(prop_same_sex ~ post_2013 + state_policy + origin_score + 
+                        # distw + contig + 
+                        #   comlang_off + comlang_ethno + colony +
                           wage_dif + unemp_dif + vdem + stock_prop +
                            state_unemploy + state_income + Country + state, 
                        data = acs_prop_state)
