@@ -38,7 +38,7 @@ geometry: margin=1in
 indent: yes
 link-citations: no
 linkcolor: black
-bibliography: "/Users/nathan/My Drive/Projects/2020 Same-Sex Immigrant Couples/ssimm/Same-Sex Immigration.bib"  
+bibliography: "/Users/nathan/My Drive/Projects/2020 Same-Sex Immigrant Couples/Same-Sex Immigration.bib"  
 csl: apa.csl
 title: "Sexuality, Migration, and LGB Policy: A Portrait of Immigrants in Same-Sex Couples in the United States"
 # title: "How Immigrants in Same-Sex Couples Change our Understanding of Migration"
@@ -53,7 +53,7 @@ title: "Sexuality, Migration, and LGB Policy: A Portrait of Immigrants in Same-S
  
   
 # keywords: "migration, same-sex couples, LGB policy, sexuality"   
-# thanks: "The authors contributed equally to this paper. We thank Phillip Ayoub, Filiz Garip, Margaret Peters, Roger Waldinger, the Migration Working Group at UCLA, and participants at the Annual Meetings of the American Sociological Association and the Population Association of America for their helpful feedback."
+# thanks: "We thank the anonymous reviewers, Phillip Ayoub, Filiz Garip, Margaret Peters, Roger Waldinger, the Migration Working Group at UCLA, and participants at the 2021 Annual Meetings of the American Sociological Association and the Population Association of America for their helpful feedback."
 ---
 
 <!-- Turn off hyphenation -->
@@ -146,21 +146,6 @@ acs_prop <- read.csv(here('data', 'acs_prop.csv')) %>%
 acs_prop_state <- read.csv(here('data', 'acs_prop_state.csv')) %>%
   mutate(post_2013 = (year > 2013)) 
 
-# acs_dyad_policy <- read.csv(here('data', 'acs_dyad_policy.csv')) %>%
-#   mutate(post_2013 = (year > 2013))
-
-# data.frame(year= acs_dyad_policy$year, 
-#            state = acs_dyad_policy$state,
-#            old_inc = acs_dyad_policy$state_income, 
-#            new_inc = acs_prop_state$state_income) %>%
-#   filter(state == 'Alabama') %>%
-#   left_join(state_income_df) %>% View()
-
-
-# acs_oneimm <- read.csv(here('data', 'acs_oneimm.csv'))
-# acs_coupled_imms <- read.csv(here('data', 'acs_coupled_imms.csv'))
-# acs_prop_yrimmig <- read.csv(here('data', 'acs_prop_yrimmig.csv'))
-# acs_dyad <- read.csv(here('data', 'acs_dyad.csv'))
 
 
 acs_wide_survey <- acs_wide %>% as_survey_design(ids = cluster, weights = hhwt)
@@ -207,7 +192,7 @@ dif_2019 <- total_df %>%
 
 **Abstract**  
 
-Both internationally and in the U.S., the policy landscape for same-sex couples is changing rapidly, and surveys report swiftly increasing numbers of immigrants in same-sex couples in the U.S. Yet few researchers have examined immigrant-containing lesbian, gay, and bisexual (LGB) couples on a large scale, especially regarding their relationship to LGB policy. Are these immigrants disadvantaged and fleeing anti-LGB contexts, or are they empowered to migrate by progressive origin-country LGB policy? Using American Community Survey data from 2008 to 2019 and original datasets indexing LGB policy changes in 121 countries and all U.S. states, this study assesses and characterizes the scale of LGB migration to the U.S. as well as the role of LGB policy. Compared to those in different-sex couples, immigrants in same-sex couples come from richer, more democratic countries that are less represented among immigrants in the U.S. They also tend to be more highly educated, work in more prestigious occupations, and have higher incomes. While previous work largely focuses on LGB immigrants from repressive contexts, fixed-effect models show that higher proportions of these immigrants come from LGB-friendly countries, and they are more likely to live in progressive U.S. states. These findings highlight how sexuality as well as state policies seemingly unrelated to migration can shape migratory pathways.
+Both internationally and in the U.S., the policy landscape for same-sex couples is changing rapidly, and surveys report swiftly increasing numbers of immigrants in same-sex couples in the U.S. Yet few researchers have examined immigrant-containing lesbian, gay, and bisexual (LGB) couples on a large scale, especially regarding their relationship to LGB policy. Are these immigrants disadvantaged and fleeing anti-LGB contexts, or are they empowered to migrate by progressive origin-country LGB policy? Using American Community Survey data from 2008 to 2019 and original datasets indexing LGB policy changes in 122 countries and all U.S. states, this study assesses and characterizes the scale of LGB migration to the U.S. as well as the role of LGB policy. Compared to those in different-sex couples, immigrants in same-sex couples come from richer, more democratic countries that are less represented among immigrants in the U.S. They also tend to be more highly educated, work in more prestigious occupations, and have higher incomes. While previous work largely focuses on LGB immigrants from repressive contexts, fixed-effect models show that higher proportions of these immigrants come from LGB-friendly countries, and they are more likely to live in progressive U.S. states. These findings highlight how sexuality as well as state policies seemingly unrelated to migration can shape migratory pathways.
 
 # Introduction
 In 2013, the U.S. Supreme Court overturned the Defense of Marriage Act and required the U.S. government to recognize marriages between same-sex spouses. Among many consequences, this decision radically changed the immigration landscape: For the first time, same-sex spouses of U.S. citizens and lawful permanent residents were eligible to file a spousal or fiancé(e) petition for an immigrant visa [@edwards_2013]. Since then, the U.S. population of immigrants in same-sex couples has grown rapidly [@redpath_2022_spousal]. According to American Community Survey data [@ruggles_2021], numbers of different-sex couples including immigrants increased by `r round((dif_2019/dif_2013 - 1)*100)` percent from 2013 to 2019 (from `r round(dif_2013 / 1e6,1)` million to `r round(dif_2019 / 1e6,1)` million), while those of corresponding same-sex couples grew by `r round((same_2019/same_2013 - 1)*100)` percent in the same period (from `r round(same_2013 /1e3, 1)` thousand to `r round(same_2019 /1e3, 1)` thousand). While some cursory descriptions exist [@gates_2013; @goldberg_2021], there is now a pressing need to understand the contours of this burgeoning population and the relevant forces shaping their migratory pathways.
@@ -628,33 +613,39 @@ Although our focus is on same-sex couples, this study offers a broader correctio
 
 \newpage
 
+
 # Tables
 
-```{r tab-var, eval = F}
+```{r tab-var}
+# Creating tables
+
 country_tab_ci <- acs_ind_survey %>%
   filter(yrimmig >= 1991) %>%
   filter(allocated == F) %>%
   group_by(bpld, same_sex) %>%
-  summarize(survey_prop(vartype = 'ci'),
-            n_same_sex = n(),
-            origin_score =  weighted.mean(origin_score, na.rm = T, w = perwt)) %>%
+  summarize(survey_prop(proportion = F, vartype = 'ci'),
+            n_same_sex = n()) %>%
+  ungroup() %>%
+  complete(bpld, same_sex) %>%
   filter(same_sex == T) %>%
+  replace(is.na(.), 0) %>%
   mutate(across(c(coef, `_low`, `_upp`), function(x){x*100}))
 
 left_join(country_tab_ci, 
           acs_ind %>%
             filter(yrimmig >= 1991) %>%
             filter(allocated == F) %>%
-            count(bpld)) %>%
-  write_csv(here('descriptive/files', 'country_tab_ci.csv'))
+            group_by(bpld) %>%
+            summarize(n = n(),
+                      origin_score =  round(weighted.mean(origin_score, na.rm = T, w = perwt), 1))) %>%
+  write_csv(here('country_tab_ci.csv'))
 
 state_tab_ci <- acs_ind_survey %>%
   filter(yrimmig >= 1991) %>%
   filter(allocated == F) %>%
   group_by(state, same_sex) %>%
-  summarize(survey_prop(vartype = 'ci'),
-            n_same_sex = n(),
-            state_policy = weighted.mean(state_policy, na.rm = T, w = perwt)) %>%
+  summarize(survey_prop(proportion = F, vartype = 'ci'),
+            n_same_sex = n()) %>%
   filter(same_sex == T) %>%
   mutate(across(c(coef, `_low`, `_upp`), function(x){x*100}))
 
@@ -662,14 +653,15 @@ left_join(state_tab_ci,
           acs_ind %>%
             filter(yrimmig >= 1991) %>%
             filter(allocated == F) %>%
-            count(state)) %>%
-  write_csv(here('descriptive/files', 'state_tab_ci.csv'))
+            group_by(state) %>%
+            summarize(n = n(),
+                      state_policy = round(weighted.mean(state_policy, na.rm = T, w = perwt), 1))) %>%
+  write_csv(here('state_tab_ci.csv'))
 
 ```
 
 ```{r country-tab}
-country_tab_ci <- read_csv(here('descriptive/files', 'country_tab_ci.csv'))
-
+country_tab_ci <- read_csv(here('country_tab_ci.csv'))
 
 country_tab_ci %>% 
   mutate(`_low` = ifelse(`_low` < 0, 0, `_low`),
@@ -693,47 +685,13 @@ country_tab_ci %>%
   set_caption('Sending countries ranked by proportion immigrant couples with same-sex partners') %>%
   add_footer_lines('Source: American Community Survey 2008-2019. Authors\' calculations.') %>%
   flextable::autofit()
-  # as_hux() %>%
-  # set_bold(1, T)             %>%
-  # set_bottom_border(1, everywhere) %>%
-  # set_caption('Sending countries ranked by proportion immigrant couples with same-sex partners') %>%
-  # add_footnote('Source: American Community Survey 2008-2019. Authors\' calculations.', number_format = 0) %>%
-  # set_width(1)
-  
-
-
-  # kable(booktabs = T, 
-  #       linesep = '',
-  #       caption = 'Sending countries ranked by proportion immigrant couples with same-sex partners') %>%
-  #     footnote(general = "American Community Survey 2008-2019. Authors\' calculations.",
-  #          general_title = 'Source:',
-  #          footnote_as_chunk = T) 
-
-
-
-
-
-# acs_ind %>%
-#   filter(year == 2008) %>%
-#   group_by(bpld, same_sex) %>%
-#   count(wt = perwt) %>%
-#   pivot_wider(names_from = 'same_sex', values_from = 'n') %>%
-#   arrange(desc(`TRUE`)) %>%
-#   .[1:10,] %>%
-#   rownames_to_column() %>%
-#   left_join(acs_ind %>%
-#               filter(year == 2008) %>%
-#               group_by(bpld) %>%
-#               summarize(origin_score = mean(origin_score)) %>%
-#               select(bpld , origin_score))
 
 ```
 
 \newpage
 
 ```{r state-tab}
-state_tab_ci <- read_csv(here('descriptive/files', 'state_tab_ci.csv'))
-
+state_tab_ci <- read_csv(here('state_tab_ci.csv'))
 
 state_tab_ci %>% 
   mutate(`_low` = ifelse(`_low` < 0, 0, `_low`),
@@ -757,24 +715,6 @@ state_tab_ci %>%
   flextable::set_caption('States ranked by proportion immigrant couples with same-sex partners') %>%
   flextable::add_footer_lines('Source: American Community Survey 2008-2019. Authors\' calculations.') %>%
   flextable::autofit()
-
-# state_tab %>%
-#   as_hux() %>%
-#   set_bold(1, T) %>%
-#   set_bottom_border(1, everywhere) %>%
-#   set_caption('States ranked by proportion immigrant couples with same-sex partners') %>%
-#   add_footnote('Source: American Community Survey 2008-2019. Authors\' calculations.', number_format = 0) %>%
-#   set_width(1)
-
-# state_tab %>%
-#   kable(booktabs = T, 
-#         linesep = '',
-#         caption = 'States ranked by proportion immigrant couples with same-sex partners') %>%
-#       footnote(general = "American Community Survey 2008-2019. Authors\' calculations.",
-#            general_title = 'Source:',
-#            footnote_as_chunk = T) 
-
-
 ```
 
 
@@ -804,7 +744,8 @@ huxtable::huxreg(robust_list,
        statistics = c('Observations' = 'nobs')) %>%
   insert_row(c('State controls and FEs?', 'no', 'no', 'no', rep('yes', 4)), after = nrow(.) - 2) %>%
   insert_row(c('Country controls and FEs?', 'no', 'no', 'no', rep('yes', 4)), after = nrow(.) - 2) %>%
-  huxtable::set_caption('Percent same-sex in by country of origin, U.S. state, and survey year.') %>%
+  huxtable::set_caption('OLS regressions of percentage of immigrants in same-sex couples by country of
+origin, US state of residence, and survey year.') %>%
   huxtable::set_width(1) %>%
   huxtable::set_all_padding(0)
 ```
@@ -826,8 +767,6 @@ total_df %>%
   geom_ribbon(aes(ymin = n_low, ymax = n_upp, group = imm_couple, col = NULL), alpha = .2) +
   geom_vline(xintercept = 2013, linetype = 1) +
   facet_wrap(~same_sex, scales = "free") +
-  #xlim(2007, 2019) +
-  #scale_x_continuous(breaks = seq(2008, 2018, 2)) +
   theme(legend.position="bottom") +
   geom_blank(aes(y = 0))
 
@@ -880,15 +819,10 @@ bind_rows(wage_dif, vdem, prop_stock, unemp, distance) %>%
   geom_ribbon(aes(ymin = var_low, ymax = var_upp, group = same_sex, col = NULL), alpha = .2) +
   facet_wrap(~var_name, scales = "free", ncol = 2) +
   ylab('') +
-  theme( # legend.justification=c(1,0),
-  #     legend.position=c(.22,.82),
-  #     legend.background = element_rect(fill = alpha("white", 0.5))
-      legend.position="bottom",
+  theme(legend.position="bottom",
       text = element_text(size = 8))
  
 ```
-
-
 
 \newpage
 
@@ -913,12 +847,6 @@ college <- acs_ind_survey %>%
   summarize(var = survey_mean(college, vartype = "ci", na.rm = T)) %>%
   mutate(var_name = 'B. College Completion')
 
-# state_income <- acs_ind_survey %>%
-#   mutate(same_sex = if_else(same_sex == T, 'Same-Sex', 'Different-Sex')) %>%
-#   group_by(year, same_sex) %>%
-#   summarize(var = survey_mean(state_income, vartype = "ci", na.rm = T)) %>%
-#   mutate(var_name = 'U.S. State of Residence Per Capita Income')
-
 hwsei <- acs_ind_survey %>%
   mutate(same_sex = if_else(same_sex == T, 'Same-Sex', 'Different-Sex')) %>%
   group_by(year, same_sex) %>%
@@ -933,10 +861,7 @@ bind_rows(income, hs, college, hwsei) %>%
   geom_ribbon(aes(ymin = var_low, ymax = var_upp, group = same_sex, col = NULL), alpha = .2) +
   facet_wrap(~var_name, scales = "free", ncol = 2) +
   ylab('') +
-  theme( # legend.justification=c(1,0),
-  #     legend.position=c(.22,.82),
-  #     legend.background = element_rect(fill = alpha("white", 0.5))
-      legend.position="bottom",
+  theme(legend.position="bottom",
       text = element_text(size = 8))
 ```
 
@@ -996,32 +921,6 @@ country_tab$region <- recode(country_tab$region,
 )
 
 
-# 
-# # Adding immigrant data to the maps package data
-# sPDF <- joinCountryData2Map(country_tab,
-#                             joinCode = "NAME",
-#                             nameJoinColumn = "Country")
-# 
-# # Dropping Antarctica
-# new_world <- subset(sPDF, continent != "Antarctica")
-# 
-# mapDevice(titleSpace = 0) #create world map shaped window
-# 
-# mapParams <- mapCountryData(new_world,
-#                             nameColumnToPlot="prop_samesex",
-#                             catMethod = "fixedWidth",
-#                             numCats = 100, 
-#                             colourPalette = "white2Black",
-#                             addLegend = F,
-#                             mapTitle = '')
-# 
-# do.call(addMapLegend,
-#         c(mapParams,
-#           legendLabels = "limits",
-#           legendIntervals = "page",
-#           horizontal = F))
-
-
 world_map <- map_data('world') %>%
   filter(!(region %in% c('Antarctica', 'Greenland'))) 
 
@@ -1031,14 +930,11 @@ left_join(country_tab, world_map, by = 'region') %>%
   mutate(prop_samesex = NA)) %>%
   ggplot(mapping = aes(x = long, y = lat, group = group, 
                        fill = prop_samesex)) +
-                       #fill = case_when(prop_samsex == 0.0012515612315, 'white', prop_samesex))) +
-  #geom_polygon(color = "gray90", size = 0.1) +
   geom_polygon(color = "gray75", size = 0.1) +
   coord_fixed(1.3) +
   theme_map(font_family = 'Palatino') +
   labs(fill = "Same-sex (%)")+ 
   scale_fill_gradient(low = uclablue, high = uclagold, na.value = 'gray95') +
-  #scale_fill_gradient(low = "white", high = "black") +
   theme(legend.justification=c(0,0), legend.position=c(.1,.1),
          legend.title=element_text(size=9),
          legend.key.size = unit(0.3, 'cm'),
@@ -1058,14 +954,7 @@ state_tab <- acs_prop_state %>%
   summarize(prop_samesex = round(100 * sum(n_same_sex, na.rm = T) / 
                                    sum(n_same_sex + n_dif_sex, na.rm = T), 2))
   
-
-# state_tab$region <- tolower(state_tab$state)
-
-# Getting the map ready
-# us_states <- map_data("state")
-
-#state_imm <- left_join(us_states, state_tab)
-
+# test
 ggplot(state_tab, aes(map_id = state, fill = prop_samesex)) +
   geom_map(map = fiftystater::fifty_states) +
   expand_limits(x = fiftystater::fifty_states$long, y = fiftystater::fifty_states$lat) +
@@ -1078,22 +967,10 @@ ggplot(state_tab, aes(map_id = state, fill = prop_samesex)) +
     legend.key.size = unit(0.3, 'cm'),
     legend.text = element_text(size = 8))
 
-# ggplot(data = state_imm,
-#        mapping = aes(x = long, y = lat, group = group, fill = prop_samesex)) +
-#   geom_polygon(color = "gray75", size = 0.1) +
-#   coord_map(projection = "albers", lat0 = 39, lat1 = 45) +
-#   theme_map(font_family = 'Palatino') + 
-#   labs(fill = "Same-sex (%)") + 
-#   scale_fill_gradient(low = uclablue, high = uclagold, na.value = 'gray95') +
-#   #scale_fill_gradient(low = "white", high = "black") +
-#   theme(legend.justification=c(0,0), legend.position=c(.05,.0),
-#     legend.title=element_text(size=9),
-#     legend.key.size = unit(0.3, 'cm'),
-#     legend.text = element_text(size = 8))
 ```
 
 \newpage
-```{r state-sim-calc, eval = F}
+```{r state-sim-calc, eval = T}
 ## Varying origin score while keeping state score constant (at min and max)
 var1 <- 'origin_score'
 var <- 'state_policy'
@@ -1101,7 +978,7 @@ sim_country <- list()
 for(cat_loop in unique(acs_prop_state[,var1])){
     var_vals <- c(min(acs_prop_state[,var]), max(acs_prop_state[,var]))
     for(val in var_vals){
-      print(paste0(cat_loop, ' ', val))
+      # print(paste0(cat_loop, ' ', val))
       
         sim_dat <- acs_prop_state
         sim_dat[, var1] <- cat_loop
@@ -1122,7 +999,7 @@ for(cat_loop in unique(acs_prop_state[,var1])){
 }
 
 bind_rows(sim_country) %>%
-  write_csv(here('descriptive/files', 'sim_country.csv'))
+  write_csv(here('sim_country.csv'))
 
 ## Varying state score while keeping origin policy constant (at min and max)
 var1 <- 'state_policy'
@@ -1131,7 +1008,7 @@ sim_state <- list()
 for(cat_loop in unique(acs_prop_state[,var1])){
     var_vals <- c(min(acs_prop_state[,var]), max(acs_prop_state[,var]))
     for(val in var_vals){
-      print(paste0(cat_loop, ' ', val))
+      # print(paste0(cat_loop, ' ', val))
         sim_dat <- acs_prop_state
         sim_dat[, var1] <- cat_loop
         sim_dat[, var] <- val
@@ -1151,12 +1028,12 @@ for(cat_loop in unique(acs_prop_state[,var1])){
 }
 
 bind_rows(sim_state) %>%
-  write_csv(here('descriptive/files', 'sim_state.csv'))
+  write_csv(here('sim_state.csv'))
   
 ```
 
 ```{r state-sim, fig.cap='Predicted percentage of immigrants in same-sex couples by country-state, using Model 5 from Table 3. Country and state LGB policy score are set to the same value for the entire sample, and the predicted outcome is averaged over the entire sample. Ribbons represent asymptotic 95-percent confidence intervals.'}
-plot1 <- read_csv(here('descriptive/files', 'sim_country.csv'))  %>%
+plot1 <- read_csv(here('sim_country.csv'))  %>%
   mutate(state_policy = ifelse(state_policy == min(state_policy), 'Min. U.S. state policy', 'Max. U.S. state policy')) %>%
   ggplot(aes(x=origin_score, y=fit, linetype=state_policy)) +
   geom_line() + 
@@ -1166,7 +1043,7 @@ plot1 <- read_csv(here('descriptive/files', 'sim_country.csv'))  %>%
   ylab('Percentage of immigrants in same-sex couples') +
   theme(legend.position=c(.4,.8))
 
-plot2 <- read_csv(here('descriptive/files', 'sim_state.csv')) %>%
+plot2 <- read_csv(here('sim_state.csv')) %>%
   mutate(origin_score = ifelse(origin_score == min(origin_score), 'Min. country policy', 'Max. country policy')) %>%
   ggplot(aes(x=state_policy, y=fit, linetype=origin_score)) +
   geom_line() + 
@@ -1179,6 +1056,552 @@ plot2 <- read_csv(here('descriptive/files', 'sim_state.csv')) %>%
 
 plot1 + plot2 +  plot_layout(guides = 'keep') & theme(text = element_text(size = 9))
 ```
+
+<!-- # Tables -->
+
+<!-- ```{r tab-var, eval = T, include = F} -->
+<!-- country_tab_ci <- acs_ind_survey %>% -->
+<!--   filter(yrimmig >= 1991) %>% -->
+<!--   filter(allocated == F) %>% -->
+<!--   group_by(bpld, same_sex) %>% -->
+<!--   summarize(survey_prop(vartype = 'ci'), -->
+<!--             n_same_sex = n(), -->
+<!--             origin_score =  weighted.mean(origin_score, na.rm = T, w = perwt)) %>% -->
+<!--   filter(same_sex == T) %>% -->
+<!--   mutate(across(c(coef, `_low`, `_upp`), function(x){x*100})) -->
+
+<!-- left_join(country_tab_ci,  -->
+<!--           acs_ind %>% -->
+<!--             filter(yrimmig >= 1991) %>% -->
+<!--             filter(allocated == F) %>% -->
+<!--             count(bpld)) %>% -->
+<!--   write_csv(here('descriptive/files', 'country_tab_ci.csv')) -->
+
+<!-- state_tab_ci <- acs_ind_survey %>% -->
+<!--   filter(yrimmig >= 1991) %>% -->
+<!--   filter(allocated == F) %>% -->
+<!--   group_by(state, same_sex) %>% -->
+<!--   summarize(survey_prop(vartype = 'ci'), -->
+<!--             n_same_sex = n(), -->
+<!--             state_policy = weighted.mean(state_policy, na.rm = T, w = perwt)) %>% -->
+<!--   filter(same_sex == T) %>% -->
+<!--   mutate(across(c(coef, `_low`, `_upp`), function(x){x*100})) -->
+
+<!-- left_join(state_tab_ci,  -->
+<!--           acs_ind %>% -->
+<!--             filter(yrimmig >= 1991) %>% -->
+<!--             filter(allocated == F) %>% -->
+<!--             count(state)) %>% -->
+<!--   write_csv(here('descriptive/files', 'state_tab_ci.csv')) -->
+
+<!-- ``` -->
+
+<!-- ```{r country-tab} -->
+<!-- country_tab_ci <- read_csv(here('descriptive/files', 'country_tab_ci.csv')) -->
+
+
+<!-- country_tab_ci %>%  -->
+<!--   mutate(`_low` = ifelse(`_low` < 0, 0, `_low`), -->
+<!--          across(coef:`_upp`, function(x){ -->
+<!--            x = round(x, 2)  -->
+<!--            x =  case_when( -->
+<!--             nchar(x) == 4 ~ paste0(x, '%'), -->
+<!--             nchar(x) == 3 ~ paste0(x, '0%'), -->
+<!--             nchar(x) == 1 ~ paste0(x, '.00%')) }), -->
+<!--          `95% CI` = paste0('(', `_low`, ', ', `_upp`, ')')) %>% -->
+<!--   # filter(n >= 150) %>% -->
+<!--   arrange(desc(coef)) %>% -->
+<!--   rownames_to_column('Rank') %>% -->
+<!--   select(Rank, -->
+<!--          `Country of origin` = bpld, -->
+<!--          `Percentage same-sex` = coef, -->
+<!--          `95% CI`, -->
+<!--          `Mean country policy score` = origin_score) %>% -->
+<!--   .[1:10,] %>% -->
+<!--   flextable() %>%  -->
+<!--   set_caption('Sending countries ranked by proportion immigrant couples with same-sex partners') %>% -->
+<!--   add_footer_lines('Source: American Community Survey 2008-2019. Authors\' calculations.') %>% -->
+<!--   flextable::autofit() -->
+<!--   # as_hux() %>% -->
+<!--   # set_bold(1, T)             %>% -->
+<!--   # set_bottom_border(1, everywhere) %>% -->
+<!--   # set_caption('Sending countries ranked by proportion immigrant couples with same-sex partners') %>% -->
+<!--   # add_footnote('Source: American Community Survey 2008-2019. Authors\' calculations.', number_format = 0) %>% -->
+<!--   # set_width(1) -->
+
+
+
+<!--   # kable(booktabs = T,  -->
+<!--   #       linesep = '', -->
+<!--   #       caption = 'Sending countries ranked by proportion immigrant couples with same-sex partners') %>% -->
+<!--   #     footnote(general = "American Community Survey 2008-2019. Authors\' calculations.", -->
+<!--   #          general_title = 'Source:', -->
+<!--   #          footnote_as_chunk = T)  -->
+
+
+
+
+
+<!-- # acs_ind %>% -->
+<!-- #   filter(year == 2008) %>% -->
+<!-- #   group_by(bpld, same_sex) %>% -->
+<!-- #   count(wt = perwt) %>% -->
+<!-- #   pivot_wider(names_from = 'same_sex', values_from = 'n') %>% -->
+<!-- #   arrange(desc(`TRUE`)) %>% -->
+<!-- #   .[1:10,] %>% -->
+<!-- #   rownames_to_column() %>% -->
+<!-- #   left_join(acs_ind %>% -->
+<!-- #               filter(year == 2008) %>% -->
+<!-- #               group_by(bpld) %>% -->
+<!-- #               summarize(origin_score = mean(origin_score)) %>% -->
+<!-- #               select(bpld , origin_score)) -->
+
+<!-- ``` -->
+
+<!-- \newpage -->
+
+<!-- ```{r state-tab} -->
+<!-- state_tab_ci <- read_csv(here('descriptive/files', 'state_tab_ci.csv')) -->
+
+
+<!-- state_tab_ci %>%  -->
+<!--   mutate(`_low` = ifelse(`_low` < 0, 0, `_low`), -->
+<!--          across(coef:`_upp`, function(x){ -->
+<!--            x = round(x, 2)  -->
+<!--            x =  case_when( -->
+<!--             nchar(x) == 4 ~ paste0(x, '%'), -->
+<!--             nchar(x) == 3 ~ paste0(x, '0%'), -->
+<!--             nchar(x) == 1 ~ paste0(x, '.00%')) }), -->
+<!--          `95% CI` = paste0('(', `_low`, ', ', `_upp`, ')')) %>% -->
+<!--   # filter(n >= 500) %>% -->
+<!--   arrange(desc(coef)) %>% -->
+<!--   rownames_to_column('Rank') %>% -->
+<!--   select(Rank, -->
+<!--          `State` = state, -->
+<!--          `Percentage same-sex` = coef, -->
+<!--          `95% CI`, -->
+<!--          `Mean state policy score` = state_policy) %>% -->
+<!--   .[1:10,] %>% -->
+<!--   flextable() %>%  -->
+<!--   flextable::set_caption('States ranked by proportion immigrant couples with same-sex partners') %>% -->
+<!--   flextable::add_footer_lines('Source: American Community Survey 2008-2019. Authors\' calculations.') %>% -->
+<!--   flextable::autofit() -->
+
+<!-- # state_tab %>% -->
+<!-- #   as_hux() %>% -->
+<!-- #   set_bold(1, T) %>% -->
+<!-- #   set_bottom_border(1, everywhere) %>% -->
+<!-- #   set_caption('States ranked by proportion immigrant couples with same-sex partners') %>% -->
+<!-- #   add_footnote('Source: American Community Survey 2008-2019. Authors\' calculations.', number_format = 0) %>% -->
+<!-- #   set_width(1) -->
+
+<!-- # state_tab %>% -->
+<!-- #   kable(booktabs = T,  -->
+<!-- #         linesep = '', -->
+<!-- #         caption = 'States ranked by proportion immigrant couples with same-sex partners') %>% -->
+<!-- #       footnote(general = "American Community Survey 2008-2019. Authors\' calculations.", -->
+<!-- #            general_title = 'Source:', -->
+<!-- #            footnote_as_chunk = T)  -->
+
+
+<!-- ``` -->
+
+
+
+<!-- \newpage -->
+
+
+<!-- ```{r state-props} -->
+
+<!-- mod_list <- list(country_prop, state_prop, state_prop2, state_prop_fe, state_prop_fe2,  -->
+<!--                  state_prop_2013, state_prop_fe2_2013) -->
+
+<!-- robust_list <- list() -->
+<!-- for(mod_num in 1:length(mod_list)){ -->
+<!--   robust_list[[mod_num]] <- coeftest(mod_list[[mod_num]],  -->
+<!--                                      vcov = vcovCL(mod_list[[mod_num]], cluster = ~ state + Country),  -->
+<!--                                      save = T) -->
+<!-- } -->
+
+<!-- huxtable::huxreg(robust_list, -->
+<!--        coefs = c('Country LGB policy score' = 'origin_score',  -->
+<!--                  'State LGB policy score' = 'state_policy', -->
+<!--                  'State score × country-score' = 'state_policy:origin_score', -->
+<!--                  'Post-2013' = 'post_2013TRUE'), -->
+<!--        note = "{stars}. Country and state two-way clustered standard errors are shown in parentheses. State controls include unemployment rate and per-capita income. Country controls include population-weighted distance, contiguous border, common official language, common ethnic language, colonial relationship, per-capita GDP differential, unemployment differential, proportion same-country stock, and democracy. Source: American Community Survey 2008-2019. Authors' calculations.", -->
+<!--        stars = c(`†` = 0.1, `*` = 0.05, `**` = 0.01, `***` = 0.001), -->
+<!--        statistics = c('Observations' = 'nobs')) %>% -->
+<!--   insert_row(c('State controls and FEs?', 'no', 'no', 'no', rep('yes', 4)), after = nrow(.) - 2) %>% -->
+<!--   insert_row(c('Country controls and FEs?', 'no', 'no', 'no', rep('yes', 4)), after = nrow(.) - 2) %>% -->
+<!--   huxtable::set_caption('Percent same-sex in by country of origin, U.S. state, and survey year.') %>% -->
+<!--   huxtable::set_width(1) %>% -->
+<!--   huxtable::set_all_padding(0) -->
+<!-- ``` -->
+
+
+<!-- \newpage -->
+
+<!-- # Figures -->
+<!-- ```{r total-pop, fig.cap = 'Estimated totals of different- and same-sex couples containing one ("mixed status") or two immigrants, 2008-2019, with 95% confidence intervals. Vertical line placed at the year 2013, when DOMA was overturned.'} -->
+
+<!-- total_df %>% -->
+<!--   mutate(`Total population (thousands)` = n/1000, -->
+<!--          n_low = n_low/1000, n_upp = n_upp/1000, -->
+<!--          Year = year, -->
+<!--          imm_couple = if_else(imm_couple == 'one', 'Mixed-status couples', 'Two-immigrant couples')) %>% -->
+<!--   ggplot(aes(x = Year, y = `Total population (thousands)`,  -->
+<!--              linetype = imm_couple)) + -->
+<!--   geom_line() + -->
+<!--   geom_ribbon(aes(ymin = n_low, ymax = n_upp, group = imm_couple, col = NULL), alpha = .2) + -->
+<!--   geom_vline(xintercept = 2013, linetype = 1) + -->
+<!--   facet_wrap(~same_sex, scales = "free") + -->
+<!--   #xlim(2007, 2019) + -->
+<!--   #scale_x_continuous(breaks = seq(2008, 2018, 2)) + -->
+<!--   theme(legend.position="bottom") + -->
+<!--   geom_blank(aes(y = 0)) -->
+
+<!-- ``` -->
+
+
+
+<!-- \newpage -->
+
+
+
+<!-- ```{r desc-country, fig.height = 6, fig.cap = "Origin country-level descriptive statistics for immigrants in couples 2008-2019, for year of migration, with survey weights and 95% confidence intervals. Currency in thousands of 1999 dollars."} -->
+
+
+<!-- distance <- acs_ind_survey %>% -->
+<!--   mutate(same_sex = if_else(same_sex == T, 'Same-Sex', 'Different-Sex')) %>% -->
+<!--   group_by(year, same_sex) %>% -->
+<!--   summarize(var = survey_mean(distw, vartype = "ci", na.rm = T)) %>% -->
+<!--   mutate(var_name = 'C. Distance to Country of Origin (km)') -->
+
+<!-- unemp <- acs_ind_survey %>% -->
+<!--   mutate(same_sex = if_else(same_sex == T, 'Same-Sex', 'Different-Sex')) %>% -->
+<!--   group_by(year, same_sex) %>% -->
+<!--   summarize(var = survey_mean(unemp_dif, vartype = "ci", na.rm = T)) %>% -->
+<!--   mutate(var_name = 'B. Unemployment Rate Difference with U.S.') -->
+
+<!-- prop_stock <- acs_ind_survey %>% -->
+<!--   mutate(same_sex = if_else(same_sex == T, 'Same-Sex', 'Different-Sex')) %>% -->
+<!--   group_by(year, same_sex) %>% -->
+<!--   summarize(var = survey_mean(stock_prop, vartype = "ci", na.rm = T)) %>% -->
+<!--   mutate(var_name = 'D. Proportion U.S. Immigrant Stock') -->
+
+<!-- wage_dif <- acs_ind_survey %>% -->
+<!--   mutate(same_sex = if_else(same_sex == T, 'Same-Sex', 'Different-Sex')) %>% -->
+<!--   group_by(year, same_sex) %>% -->
+<!--   summarize(var = survey_mean(wage_dif, vartype = "ci", na.rm = T)) %>% -->
+<!--   mutate(var_name = 'A. GDP Difference with U.S.') -->
+
+<!-- vdem <- acs_ind_survey %>% -->
+<!--   mutate(same_sex = if_else(same_sex == T, 'Same-Sex', 'Different-Sex')) %>% -->
+<!--   group_by(year, same_sex) %>% -->
+<!--   summarize(var = survey_mean(vdem, vartype = "ci", na.rm = T)) %>% -->
+<!--   mutate(var_name = 'E. Democracy Score (V-Dem)') -->
+
+
+<!-- bind_rows(wage_dif, vdem, prop_stock, unemp, distance) %>% -->
+<!--   rename(Year = year) %>% -->
+<!--   ggplot(aes(x = Year, y = var, linetype = same_sex)) + -->
+<!--   geom_line() + -->
+<!--   geom_ribbon(aes(ymin = var_low, ymax = var_upp, group = same_sex, col = NULL), alpha = .2) + -->
+<!--   facet_wrap(~var_name, scales = "free", ncol = 2) + -->
+<!--   ylab('') + -->
+<!--   theme( # legend.justification=c(1,0), -->
+<!--   #     legend.position=c(.22,.82), -->
+<!--   #     legend.background = element_rect(fill = alpha("white", 0.5)) -->
+<!--       legend.position="bottom", -->
+<!--       text = element_text(size = 8)) -->
+
+<!-- ``` -->
+
+
+
+<!-- \newpage -->
+
+<!-- ```{r desc-ind, fig.cap = 'Individual descriptive statistics for immigrants in couples 2008-2019, with survey weights and 95% confidence intervals. Currency in thousands of 1999 dollars.'} -->
+<!-- income <- acs_ind_survey %>% -->
+<!--   mutate(same_sex = if_else(same_sex == T, 'Same-Sex', 'Different-Sex')) %>% -->
+<!--   group_by(year, same_sex) %>% -->
+<!--   summarize(var = survey_mean(inctot, vartype = "ci", na.rm = T)) %>% -->
+<!--   mutate(var_name = 'C. Annual Gross Income (Thousands)') -->
+
+<!-- hs <- acs_ind_survey %>% -->
+<!--   mutate(same_sex = if_else(same_sex == T, 'Same-Sex', 'Different-Sex'), -->
+<!--          hs = if_else(educ %in% c('HS', 'some col', 'college'), 1, 0)) %>% -->
+<!--   group_by(year, same_sex) %>% -->
+<!--   summarize(var = survey_mean(hs, vartype = "ci", na.rm = T)) %>% -->
+<!--   mutate(var_name = 'A. High School Completion') -->
+
+<!-- college <- acs_ind_survey %>% -->
+<!--   mutate(same_sex = if_else(same_sex == T, 'Same-Sex', 'Different-Sex'), -->
+<!--          college = if_else(educ == 'college', 1, 0)) %>% -->
+<!--   group_by(year, same_sex) %>% -->
+<!--   summarize(var = survey_mean(college, vartype = "ci", na.rm = T)) %>% -->
+<!--   mutate(var_name = 'B. College Completion') -->
+
+<!-- # state_income <- acs_ind_survey %>% -->
+<!-- #   mutate(same_sex = if_else(same_sex == T, 'Same-Sex', 'Different-Sex')) %>% -->
+<!-- #   group_by(year, same_sex) %>% -->
+<!-- #   summarize(var = survey_mean(state_income, vartype = "ci", na.rm = T)) %>% -->
+<!-- #   mutate(var_name = 'U.S. State of Residence Per Capita Income') -->
+
+<!-- hwsei <- acs_ind_survey %>% -->
+<!--   mutate(same_sex = if_else(same_sex == T, 'Same-Sex', 'Different-Sex')) %>% -->
+<!--   group_by(year, same_sex) %>% -->
+<!--   summarize(var = survey_mean(hwsei, vartype = "ci", na.rm = T)) %>% -->
+<!--   mutate(var_name = 'D. Hauser and Warren Socioeconomic Index') -->
+
+
+<!-- bind_rows(income, hs, college, hwsei) %>% -->
+<!--   rename(Year = year) %>% -->
+<!--   ggplot(aes(x = Year, y = var, linetype = same_sex)) + -->
+<!--   geom_line() + -->
+<!--   geom_ribbon(aes(ymin = var_low, ymax = var_upp, group = same_sex, col = NULL), alpha = .2) + -->
+<!--   facet_wrap(~var_name, scales = "free", ncol = 2) + -->
+<!--   ylab('') + -->
+<!--   theme( # legend.justification=c(1,0), -->
+<!--   #     legend.position=c(.22,.82), -->
+<!--   #     legend.background = element_rect(fill = alpha("white", 0.5)) -->
+<!--       legend.position="bottom", -->
+<!--       text = element_text(size = 8)) -->
+<!-- ``` -->
+
+<!-- \newpage  -->
+
+<!-- ```{r policy-desc, fig.cap = 'Mean country-of-origin and U.S. state policy index score for immigrants in same- and different-sex couples, 2008-2019, with 95% confidence intervals.'} -->
+
+
+<!-- origin_df <- acs_ind_survey %>% -->
+<!--   mutate(same_sex = if_else(same_sex == T, 'Same-Sex', 'Different-Sex')) %>% -->
+<!--   group_by(year, same_sex) %>% -->
+<!--   summarize(`Policy Score` = survey_mean(origin_score, vartype = "ci", na.rm = T)) %>% -->
+<!--   mutate(var = 'Country-of-Origin Index') -->
+
+<!-- state_df <- acs_ind_survey %>% -->
+<!--   mutate(same_sex = if_else(same_sex == T, 'Same-Sex', 'Different-Sex')) %>% -->
+<!--   group_by(year, same_sex) %>% -->
+<!--   summarize(`Policy Score` = survey_mean(state_policy, vartype = "ci", na.rm = T)) %>% -->
+<!--   mutate(var = 'U.S. State Index') -->
+
+<!-- bind_rows(origin_df, state_df) %>% -->
+<!--   rename(Year = year) %>% -->
+<!--   ggplot(aes(x = Year, y = `Policy Score`,  -->
+<!--              linetype = same_sex)) + -->
+<!--   geom_line() + -->
+<!--   geom_ribbon(aes(ymin = `Policy Score_low`, ymax = `Policy Score_upp`,  -->
+<!--                   group = same_sex, col = NULL), alpha = .2) + -->
+<!--   facet_wrap(~var, scales = "free") + -->
+<!--   theme(legend.justification=c(1,0), -->
+<!--         legend.position=c(.26,.6)) -->
+<!-- ``` -->
+
+<!-- \newpage -->
+
+<!-- ```{r country-map, fig.cap = 'Percentage of cohabiting immigrants in the U.S. in same-sex couples by country of origin, averaging over ACS survey years 2008 to 2019.'} -->
+<!-- country_tab <- acs_prop_state %>% -->
+<!--   mutate(bpld = if_else(bpld == "United Kingdom, ns", "England", bpld), -->
+<!--          bpld = if_else(bpldid == 46500, 'Russia', bpld), -->
+<!--          bpld = if_else(bpldid == 46510, 'Belarus', bpld)) %>% -->
+<!--   group_by(bpld) %>% -->
+<!--   summarize(prop_samesex = round(100 * sum(n_same_sex, na.rm = T) /  -->
+<!--                                    sum(n_same_sex + n_dif_sex, na.rm = T), 2)) %>% -->
+<!--   rename(region = bpld) -->
+
+<!-- country_tab$region <- recode(country_tab$region, -->
+<!--                               'Burma (Myanmar)' = 'Myanmar', -->
+<!--                               'England' = 'UK', -->
+<!--                               'Cambodia (Kampuchea)' = 'Cambodia', -->
+<!--                               'Egypt/United Arab Rep.' = 'Egypt',  -->
+<!--                               'Guyana/British Guiana' = 'Guyana', -->
+<!--                               'Korea' = 'South Korea', -->
+<!--                               'Republic of Georgia' = 'Georgia', -->
+<!--                               'South Africa (Union of)' = 'South Africa', -->
+<!--                               'Sri Lanka (Ceylon)' = 'Sri Lanka', -->
+<!--                               'Yemen Arab Republic (North)' = 'Yemen', -->
+<!--                               'Other USSR/"Russia"' = 'Russia' -->
+<!-- ) -->
+
+
+<!-- #  -->
+<!-- # # Adding immigrant data to the maps package data -->
+<!-- # sPDF <- joinCountryData2Map(country_tab, -->
+<!-- #                             joinCode = "NAME", -->
+<!-- #                             nameJoinColumn = "Country") -->
+<!-- #  -->
+<!-- # # Dropping Antarctica -->
+<!-- # new_world <- subset(sPDF, continent != "Antarctica") -->
+<!-- #  -->
+<!-- # mapDevice(titleSpace = 0) #create world map shaped window -->
+<!-- #  -->
+<!-- # mapParams <- mapCountryData(new_world, -->
+<!-- #                             nameColumnToPlot="prop_samesex", -->
+<!-- #                             catMethod = "fixedWidth", -->
+<!-- #                             numCats = 100,  -->
+<!-- #                             colourPalette = "white2Black", -->
+<!-- #                             addLegend = F, -->
+<!-- #                             mapTitle = '') -->
+<!-- #  -->
+<!-- # do.call(addMapLegend, -->
+<!-- #         c(mapParams, -->
+<!-- #           legendLabels = "limits", -->
+<!-- #           legendIntervals = "page", -->
+<!-- #           horizontal = F)) -->
+
+
+<!-- world_map <- map_data('world') %>% -->
+<!--   filter(!(region %in% c('Antarctica', 'Greenland')))  -->
+
+<!-- left_join(country_tab, world_map, by = 'region') %>% -->
+<!--   bind_rows(left_join(world_map, country_tab, by = 'region') %>% -->
+<!--   filter(is.na(prop_samesex)) %>% -->
+<!--   mutate(prop_samesex = NA)) %>% -->
+<!--   ggplot(mapping = aes(x = long, y = lat, group = group,  -->
+<!--                        fill = prop_samesex)) + -->
+<!--                        #fill = case_when(prop_samsex == 0.0012515612315, 'white', prop_samesex))) + -->
+<!--   #geom_polygon(color = "gray90", size = 0.1) + -->
+<!--   geom_polygon(color = "gray75", size = 0.1) + -->
+<!--   coord_fixed(1.3) + -->
+<!--   theme_map(font_family = 'Palatino') + -->
+<!--   labs(fill = "Same-sex (%)")+  -->
+<!--   scale_fill_gradient(low = uclablue, high = uclagold, na.value = 'gray95') + -->
+<!--   #scale_fill_gradient(low = "white", high = "black") + -->
+<!--   theme(legend.justification=c(0,0), legend.position=c(.1,.1), -->
+<!--          legend.title=element_text(size=9), -->
+<!--          legend.key.size = unit(0.3, 'cm'), -->
+<!--          legend.text = element_text(size = 8)) -->
+
+<!-- ``` -->
+
+<!-- \newpage -->
+
+<!-- ```{r state-map, fig.cap = 'Percentage of cohabiting immigrants in same-sex couples in U.S. states, averaging over ACS survey years 2008 to 2019.'} -->
+<!-- state_tab <- acs_prop_state %>% -->
+<!--   mutate(bpld = if_else(bpld == "United Kingdom, ns", "England", bpld), -->
+<!--          bpld = if_else(bpldid == 46500, 'Russia', bpld), -->
+<!--          bpld = if_else(bpldid == 46510, 'Belarus', bpld), -->
+<!--          state = tolower(state)) %>% -->
+<!--   group_by(state) %>% -->
+<!--   summarize(prop_samesex = round(100 * sum(n_same_sex, na.rm = T) /  -->
+<!--                                    sum(n_same_sex + n_dif_sex, na.rm = T), 2)) -->
+
+
+
+<!-- ggplot(state_tab, aes(map_id = state, fill = prop_samesex)) + -->
+<!--   geom_map(map = fiftystater::fifty_states) + -->
+<!--   expand_limits(x = fiftystater::fifty_states$long, y = fiftystater::fifty_states$lat) + -->
+<!--   coord_map() + -->
+<!--   scale_fill_gradient(low = uclablue, high = uclagold, na.value = 'gray95') + -->
+<!--   theme_map(font_family = 'Palatino') + -->
+<!--   labs(fill = "Same-sex (%)") +  -->
+<!--   theme(legend.justification=c(1,0), legend.position=c(1, 0), -->
+<!--     legend.title=element_text(size=9), -->
+<!--     legend.key.size = unit(0.3, 'cm'), -->
+<!--     legend.text = element_text(size = 8)) -->
+
+<!-- # ggplot(data = state_imm, -->
+<!-- #        mapping = aes(x = long, y = lat, group = group, fill = prop_samesex)) + -->
+<!-- #   geom_polygon(color = "gray75", size = 0.1) + -->
+<!-- #   coord_map(projection = "albers", lat0 = 39, lat1 = 45) + -->
+<!-- #   theme_map(font_family = 'Palatino') +  -->
+<!-- #   labs(fill = "Same-sex (%)") +  -->
+<!-- #   scale_fill_gradient(low = uclablue, high = uclagold, na.value = 'gray95') + -->
+<!-- #   #scale_fill_gradient(low = "white", high = "black") + -->
+<!-- #   theme(legend.justification=c(0,0), legend.position=c(.05,.0), -->
+<!-- #     legend.title=element_text(size=9), -->
+<!-- #     legend.key.size = unit(0.3, 'cm'), -->
+<!-- #     legend.text = element_text(size = 8)) -->
+<!-- ``` -->
+
+<!-- \newpage -->
+<!-- ```{r state-sim-calc, eval = T, include = F} -->
+<!-- ## Varying origin score while keeping state score constant (at min and max) -->
+<!-- var1 <- 'origin_score' -->
+<!-- var <- 'state_policy' -->
+<!-- sim_country <- list() -->
+<!-- for(cat_loop in unique(acs_prop_state[,var1])){ -->
+<!--     var_vals <- c(min(acs_prop_state[,var]), max(acs_prop_state[,var])) -->
+<!--     for(val in var_vals){ -->
+<!--       print(paste0(cat_loop, ' ', val)) -->
+
+<!--         sim_dat <- acs_prop_state -->
+<!--         sim_dat[, var1] <- cat_loop -->
+<!--         sim_dat[, var] <- val -->
+
+<!--         pred_dat <- predict(state_prop_fe2, newdata = sim_dat, se.fit = T, -->
+<!--                             type = 'response') %>% -->
+<!--           as.data.frame() -->
+
+<!--        sim_country[[paste0(var,cat_loop, val)]] <- pred_dat %>% -->
+<!--          summarize(fit = mean(fit, na.rm = T), -->
+<!--                    se.fit = sqrt(mean(se.fit^2, na.rm = T)), -->
+<!--                    fit.low = fit - 1.96*se.fit, -->
+<!--                    fit.high = fit + 1.96*se.fit, -->
+<!--                           origin_score = cat_loop, -->
+<!--                           state_policy = val) -->
+<!--     } -->
+<!-- } -->
+
+<!-- bind_rows(sim_country) %>% -->
+<!--   write_csv(here('descriptive/files', 'sim_country.csv')) -->
+
+<!-- ## Varying state score while keeping origin policy constant (at min and max) -->
+<!-- var1 <- 'state_policy' -->
+<!-- var <- 'origin_score' -->
+<!-- sim_state <- list() -->
+<!-- for(cat_loop in unique(acs_prop_state[,var1])){ -->
+<!--     var_vals <- c(min(acs_prop_state[,var]), max(acs_prop_state[,var])) -->
+<!--     for(val in var_vals){ -->
+<!--       print(paste0(cat_loop, ' ', val)) -->
+<!--         sim_dat <- acs_prop_state -->
+<!--         sim_dat[, var1] <- cat_loop -->
+<!--         sim_dat[, var] <- val -->
+
+<!--         pred_dat <- predict(state_prop_fe2, newdata = sim_dat, se.fit = T,  -->
+<!--                             type = 'response') %>% -->
+<!--           as.data.frame() -->
+
+<!--        sim_state[[paste0(var,cat_loop, val)]] <- pred_dat %>% -->
+<!--          summarize(fit = mean(fit, na.rm = T), -->
+<!--                    se.fit = sqrt(mean(se.fit^2, na.rm = T)), -->
+<!--                    fit.low = fit - 1.96*se.fit, -->
+<!--                    fit.high = fit + 1.96*se.fit, -->
+<!--                           state_policy = cat_loop, -->
+<!--                           origin_score = val)  -->
+<!--     } -->
+<!-- } -->
+
+<!-- bind_rows(sim_state) %>% -->
+<!--   write_csv(here('descriptive/files', 'sim_state.csv')) -->
+
+<!-- ``` -->
+
+<!-- ```{r state-sim, fig.cap='Predicted percentage of immigrants in same-sex couples by country-state, using Model 5 from Table 3. Country and state LGB policy score are set to the same value for the entire sample, and the predicted outcome is averaged over the entire sample. Ribbons represent asymptotic 95-percent confidence intervals.'} -->
+<!-- plot1 <- read_csv(here('descriptive/files', 'sim_country.csv'))  %>% -->
+<!--   mutate(state_policy = ifelse(state_policy == min(state_policy), 'Min. U.S. state policy', 'Max. U.S. state policy')) %>% -->
+<!--   ggplot(aes(x=origin_score, y=fit, linetype=state_policy)) + -->
+<!--   geom_line() +  -->
+<!--   geom_ribbon(aes(ymin=fit.low, ymax=fit.high,  -->
+<!--                   col = NULL), alpha = .2) + -->
+<!--   xlab('Country-of-origin LGB policy score') + -->
+<!--   ylab('Percentage of immigrants in same-sex couples') + -->
+<!--   theme(legend.position=c(.4,.8)) -->
+
+<!-- plot2 <- read_csv(here('descriptive/files', 'sim_state.csv')) %>% -->
+<!--   mutate(origin_score = ifelse(origin_score == min(origin_score), 'Min. country policy', 'Max. country policy')) %>% -->
+<!--   ggplot(aes(x=state_policy, y=fit, linetype=origin_score)) + -->
+<!--   geom_line() +  -->
+<!--   geom_ribbon(aes(ymin=fit.low, ymax=fit.high,  -->
+<!--                   col = NULL), alpha = .2) + -->
+<!--   xlab('U.S. state-of-residence LGB policy score') + -->
+<!--   ylab('') + -->
+<!--   theme(legend.position=c(.4,.8)) -->
+
+
+<!-- plot1 + plot2 +  plot_layout(guides = 'keep') & theme(text = element_text(size = 9)) -->
+<!-- ``` -->
 
 
 

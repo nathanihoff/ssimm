@@ -6,7 +6,6 @@ library(imputeTS)
 library(countrycode)
 library(RColorBrewer)
 library(haven)
-library(cowplot)
 library(srvyr)
 library(here)
 library(tidyverse)
@@ -19,7 +18,7 @@ acs <- read_dta('/Users/nathan/Data/ACS/acs_2008_2020.dta') %>%
       related == 101 ~ 'main',
       related %in% c(201, 1114) ~ 'partner'),
     age = as.numeric(age),
-    yrimmig = ifelse(yrimmig == 0, NA, as.numeric(yrimmƒig)),
+    yrimmig = ifelse(yrimmig == 0, NA, as.numeric(yrimmig)),
     nchild = as.numeric(nchild),
     year = as.numeric(year),
     bpldid = as.numeric(bpld),
@@ -77,14 +76,6 @@ acs_wide <- acs %>%
          allocated = (qrelate_main == 'Allocated' | qrelate_partner == 'Allocated' |
                         qsex_main == 'Allocated' | qsex_partner == 'Allocated'))
 
-# partner_df <- acs %>%
-#   group_by(serial, year) %>%
-#   summarize(n_p_rm = sum(related %in% c(201, 1114, 1115)))
-# 
-# 
-# acs_wide2 <- left_join(acs_wide, partner_df)
-# acs_wide2 <- acs_wide2 %>%
-#   filter(n_p_rm == 1)
 
 
 # Keep only couples with one immigrant
@@ -138,20 +129,6 @@ country_year_df <- acs_imm %>%
   mutate(bpldid = as.numeric(bpld)) %>%
   as_factor()
 
-# sample_n(country_year_df, 10)
-# average stock
-# country_df <- acs_imm %>%
-#   group_by(bpld, state) %>%
-#   count(wt = perwt) %>%
-#   mutate(state_stock_avg = n/11) %>%
-#   select(-n)
-# 
-# acs <- acs %>%
-#   left_join(country_year_df) %>%
-#   left_join(country_df)
-
-# select(acs, bpld, state, state_stock_year, state_stock_avg) %>% sample_n(10)
-
 
 # State proportions: Macro dataset of dyadic stock by state by year ####
 acs_dyad <- acs_coupled_imms %>%
@@ -185,15 +162,7 @@ acs_dyad <- acs_coupled_imms %>%
   pivot_wider(names_from = 'same_sex', values_from = 5:ncol(.)) %>% 
   replace(is.na(.), 0) %>%
   left_join(country_year_df) 
-  
-  
-  # count(wt = perwt, .drop = F) %>%
-  # ungroup() %>%
-  # mutate(same_sex = ifelse(same_sex == T, 'same_sex_stock', 'opp_sex_stock')) %>%
-  # pivot_wider(names_from = 'same_sex', values_from = 'n') %>%
-  # mutate(same_sex_stock = ifelse(is.na(same_sex_stock), 0, same_sex_stock),
-  #        opp_sex_stock = ifelse(is.na(opp_sex_stock), 0, opp_sex_stock)) %>%
-  # left_join(country_year_df) 
+
 
 acs_dyad_yrimmig <- acs_coupled_imms %>%
   filter(yrimmig >= 1991) %>%
@@ -201,29 +170,6 @@ acs_dyad_yrimmig <- acs_coupled_imms %>%
   summarize(mean_year_immig = weighted.mean(yrimmig, w = perwt, na.rm = T)) 
 
 acs_dyad <- left_join(acs_dyad, acs_dyad_yrimmig)
-
-# only immigrants in last year
-acs_dyad2 <- acs_coupled_imms %>%
-  filter(yrimmig >= 1991) %>%
-  filter(allocated == F) %>%
-  filter(year - yrimmig <= 1) %>%
-  group_by(bpld, state,  year, same_sex) %>%
-  count(wt = perwt, .drop = F) %>%
-  ungroup() %>%
-  mutate(same_sex = ifelse(same_sex == T, 'same_sex_stock', 'opp_sex_stock')) %>%
-  pivot_wider(names_from = 'same_sex', values_from = 'n') %>%
-  mutate(same_sex_stock = ifelse(is.na(same_sex_stock), 0, same_sex_stock),
-         opp_sex_stock = ifelse(is.na(opp_sex_stock), 0, opp_sex_stock)) %>%
-  left_join(country_year_df) 
-
-acs_dyad_yrimmig2 <- acs_coupled_imms %>%
-  filter(yrimmig >= 1991) %>%
-  filter(allocated == F) %>%
-  filter(year - yrimmig <= 1) %>%
-  group_by(bpld,  year) %>%
-  summarize(mean_year_immig = weighted.mean(yrimmig, w = perwt, na.rm = T)) 
-
-acs_dyad2 <- left_join(acs_dyad2, acs_dyad_yrimmig2)
 
 
 # Proportion same sex by year of immigration and country ####
@@ -237,123 +183,10 @@ country_yrimmig_df <- acs_imm %>%
   mutate(bpld = as_factor(bpld),
          yrimmig = as.numeric(yrimmig))
 
-# country_yrimmig_recent_df <- acs_imm %>%
-#   filter(yrimmig >= 1991) %>%
-#   mutate(bpld = as_factor(bpld),
-#          yrimmig = as.numeric(yrimmig)) %>%
-#   group_by(bpld, yrimmig) %>%
-#   summarize(n_total_recent = sum(perwt[year = yrimmig + 1]))
-  
 
 
-
-acs_prop_yrimmig <- acs_wide %>%
-  filter(imm_couple != 'none',
-         allocated == F) %>%
-  pivot_longer(-c(year, serial, nchild, hhwt, ssmc,
-                  cluster, strata, metro, region, state, stateicp, ftotinc, respmode,
-                  same_sex, imm_couple, married, allocated),
-               names_to = c('.value', 'position'),
-               names_sep = '_') %>%
-  filter(yrimmig >= 1991) %>%
-  group_by(yrimmig, bpld, same_sex) %>%
-  summarize(n = sum(perwt), 
-            n_spouse = sum(perwt[married == T]),
-            n_partner = sum(perwt[married == F]),
-            n_spouse_oneimm = sum(perwt[imm_couple == 'one' & married == T]),
-            n_partner_oneimm = sum(perwt[imm_couple == 'one' & married == F]),
-            n_spouse_twoimm = sum(perwt[imm_couple == 'two' & married == T]),
-            n_partner_twoimm = sum(perwt[imm_couple == 'two' & married == F]),
-            n_spouse_adj = sum(perwt[married == T & year == 2019]) +
-              sum(perwt[respmode == 'Mail' & married == T & year < 2019])*(1-(.59+.474)/2) +
-              sum(perwt[respmode == 'CATI/CAPI' & married == T & year < 2019])*(1-.46) +
-              sum(perwt[respmode == 'Internet' & married == T & year < 2019])*(1-.225),
-            n_partner_adj = sum(perwt[married == F & year == 2019]) +
-              sum(perwt[married == F & respmode == 'Mail' & year < 2019])*(1-(.07+.056)/2) +
-              sum(perwt[married == F & respmode == 'CATI/CAPI' & year < 2019])*(1-.13) +
-              sum(perwt[married == F & respmode == 'Internet' & year < 2019])*(1-.024),
-            n_spouse_2019 = sum(perwt[married == T & year == 2019]),
-            n_spouse_pre_2019 = sum(perwt[married == T & year < 2019]),
-            n_partner_2019 = sum(perwt[married == F & year == 2019]),
-            n_partner_pre_2019 = sum(perwt[married == F & year < 2019]),
-            n_recent = sum(perwt[year == yrimmig + 1]),
-            n_spouse_recent = sum(perwt[married == T & year == yrimmig + 1]),
-            n_partner_recent = sum(perwt[married == F & year == yrimmig + 1])) %>%
-  # summarize(n = n(), 
-  #           n_spouse = sum(married == T),
-  #           n_partner = sum(married == F),
-  #           n_spouse_oneimm = sum(imm_couple == 'one' & married == T),
-  #           n_partner_oneimm = sum(imm_couple == 'one' & married == F),
-  #           # n_spouse_mail = sum(respmode == 'Mail' & married == T), 
-  #           # n_spouse_cati = sum(respmode == 'CATI/CAPI' & married == T), 
-  #           # n_spouse_internet = sum(respmode == 'Internet' & married == T), 
-  #           # n_partner_mail = sum(married == F & respmode == 'Mail'), 
-  #           # n_partner_cati = sum(married == F & respmode == 'CATI/CAPI'), 
-  #           # n_partner_internet = sum(married == F & respmode == 'Internet'),
-  #           n_spouse_adj = sum(married == T & year == 2019) +
-  #             sum(respmode == 'Mail' & married == T & year < 2019)*(1-(.59+.474)/2) +
-  #             sum(respmode == 'CATI/CAPI' & married == T & year < 2019)*(1-.46) +
-  #             sum(respmode == 'Internet' & married == T & year < 2019)*(1-.225),
-  #           n_partner_adj = sum(married == F & year == 2019) +
-  #             sum(married == F & respmode == 'Mail' & year < 2019)*(1-(.07+.056)/2) +
-  #             sum(married == F & respmode == 'CATI/CAPI' & year < 2019)*(1-.13) +
-  #             sum(married == F & respmode == 'Internet' & year < 2019)*(1-.024),
-  #           n_spouse_2019 = sum(married == T & year == 2019),
-  #           n_spouse_pre_2019 = sum(married == T & year < 2019),
-  #           n_partner_2019 = sum(married == F & year == 2019),
-  #           n_partner_pre_2019 = sum(married == F & year < 2019)) %>%
-  ungroup() %>%
-  mutate(same_sex = ifelse(same_sex == T, 'same_sex', 'dif_sex')) %>%
-  pivot_wider(names_from = 'same_sex', values_from = 4:ncol(.)) %>% 
-  replace(is.na(.), 0) %>%
-  left_join(country_yrimmig_df) %>%
-  left_join(distinct(dplyr::select(acs_dyad, bpld, bpldid))) %>%
-  mutate(
-    # prop_spouse_same_sex_adj = (n_spouse_mail_same_sex*(1-(.59+.474)/2) +
-    #        n_spouse_cati_same_sex*(1-.46) +
-    #          n_spouse_internet_same_sex*(1-.225)) / n_total * 100,
-    #      prop_partner_same_sex_adj = (n_partner_mail_same_sex*(1-(.07+.056)/2) +
-    #                                 n_partner_cati_same_sex*(1-.13) +
-    #                                 n_partner_internet_same_sex*(1-.024))
-    #        / n_total * 100,
-    #prop_same_sex = n_same_sex / n_total*100,
-    prop_spouse_same_sex_adj = n_spouse_adj_same_sex / n_total * 100,
-    prop_partner_same_sex_adj = n_partner_adj_same_sex / n_total * 100,
-    prop_same_sex_adj = prop_spouse_same_sex_adj + prop_partner_same_sex_adj,
-    prop_dif_sex = n_dif_sex / n_total * 100,
-    prop_spouse_same_sex = n_spouse_same_sex / n_total * 100,
-    prop_partner_same_sex = n_partner_same_sex / n_total * 100,
-    prop_same_sex = prop_spouse_same_sex + prop_partner_same_sex,
-    prop_same_sex_oneimm = (n_spouse_oneimm_same_sex + n_partner_oneimm_same_sex) / n_total * 100,
-    prop_same_sex_twoimm = (n_spouse_twoimm_same_sex + n_partner_twoimm_same_sex) / n_total * 100,
-    prop_same_sex_recent = (n_spouse_recent_same_sex + n_partner_recent_same_sex) / n_total_recent * 100)
-
-
-
-
-# acs_prop_yrimmig %>%
-#   pivot_longer(c(prop_same_sex, prop_dif_sex)) %>%
-#   filter(value != 0) %>%
-#   ggplot(aes(x = value)) +
-#   geom_histogram() +
-#   facet_wrap(~name)
-
-
-# Top-10 immigrant countries
-# top_countries <- acs %>%
-#   filter(citizen == 2 | citizen == 3) %>%
-#   group_by(bpld) %>%
-#   count(wt = perwt) %>%
-#   arrange(desc(n)) %>%
-#   pull(bpld) %>%
-#   as_factor() %>%
-#   as.data.frame()
-# write_csv(top_countries, here('data', 'top_countries.csv'))
-
-write_csv(acs_prop_yrimmig, here('data', 'acs_prop_yrimmig.csv'))
 write_csv(acs_coupled_imms, here('data', 'acs_coupled_imms.csv'))
 write_csv(acs_dyad, here('data', 'acs_dyad.csv'))
-write_csv(acs_dyad2, here('data', 'acs_dyad2.csv'))
 
 acs_wide %>%
   filter(imm_couple != 'none', allocated == F) %>%
@@ -383,7 +216,6 @@ write_csv(state_income_df, here('data', 'state_income_adj.csv'))
 
 ## Making final datasets ####
 acs_coupled_imms <- read.csv(here('data', 'acs_coupled_imms.csv'))
-acs_prop_yrimmig <- read.csv(here('data', 'acs_prop_yrimmig.csv'))
 acs_dyad <- read.csv(here('data', 'acs_dyad.csv'))
 state_income_df <- read_csv(here('data', 'state_income_adj.csv'))
 
@@ -411,8 +243,6 @@ for(country_loop in unique(penn_wages$country)){
 penn_wages <- penn_wages %>%
   mutate(wage_dif = adjust_for_inflation(wage_dif, 2017, "US", to_date = 1999))
 
-# filter(penn_wages, is.na(wage_dif) & !is.na(rgdpe)) %>%
-#   View()
 wb_unemp <- read_csv(here('data', 'world_bank_unemployment.csv')) %>%
   pivot_longer(!1:4, names_to = 'year', values_to = 'unemployment') %>%
   select(-`Indicator Name`, -`Indicator Code`) %>%
@@ -428,8 +258,6 @@ for(year in usa_unemp$year){
   }
 }
 
-# vdem <- read.csv(here('data', 'V-Dem-CY-Core-v10.csv'))
-
 vdem <- read_csv(here('data', 'V-Dem-CY-Core-v11.1.csv')) %>%
   select(country_name, country_text_id, COWcode, year, v2x_libdem) %>%
   mutate(iso_o1 = countrycode(COWcode, origin = 'cowc', destination = 'iso3c'),
@@ -438,32 +266,6 @@ vdem <- read_csv(here('data', 'V-Dem-CY-Core-v11.1.csv')) %>%
   select(iso_o, country = country_name, year, vdem = v2x_libdem) %>%
   filter(!is.na(iso_o))
 
-
-# polity5 <- read.csv(here('data', 'polity5.csv')) %>%
-#   mutate(iso_o1 = countrycode(scode, origin = 'cowc', destination = 'iso3c'),
-#          iso_o2 = countrycode(country, origin = 'country.name', destination = 'iso3c'),
-#          iso_o = ifelse(!is.na(iso_o1), iso_o1, iso_o2)) %>%
-#   select(iso_o, country, year, polity5 = polity2) %>%
-#   filter(!is.na(iso_o))
-# 
-# polity5 <- polity5 %>%
-#   group_by(iso_o) %>%
-#   expand(year = full_seq(min(year):2020, 1)) %>%
-#   left_join(polity5)
-# 
-# # Linearly interpolate polity5 missing values during regime change
-# polity5_list <- list()
-# for(country_loop in unique(polity5$iso_o)){
-#   polity5_loop <- with(filter(polity5, iso_o == country_loop), 
-#                        zoo(polity5, min(year):2020)) %>%
-#     na_interpolation(option = "linear") #%>%
-#   #na_locf()
-#   
-#   polity5_list[[country_loop]] <- bind_cols(iso_o = country_loop,
-#                                             year = index(polity5_loop), 
-#                                             polity5 = as.data.frame(polity5_loop)[[1]])
-# }
-# polity5 <- bind_rows(polity5_list)
 
 # Policy variables
 lgbt_policy <- read.csv(here('data', 'lgb_origin_index.csv')) %>%
@@ -540,21 +342,6 @@ state_policy <- state_policy %>%
            conversion_therapy_ban + housing_discrim_so + state_ban_local_nondiscrimimation) %>%
   select(State, Year, state_policy, state_couple_laws)
 
-acs_prop <- acs_prop_yrimmig %>%
-  # mutate(pre_1991 = yrimmig <1991,
-  #        yrimmig = ifelse(yrimmig < 1991, 1991, yrimmig)) %>%
-  left_join(lgbt_policy, by = c('yrimmig' = 'year', 'bpldid' = 'Code')) %>%
-  left_join(select(yearly_prop, -bpldid), by = c('yrimmig' = 'year', 'iso_o' = 'iso_o')) %>%
-  filter(!is.na(origin_score)) %>%
-  mutate(prop_same_sex = prop_same_sex,
-         prop_dif_sex = prop_dif_sex,
-         prop_same_std = (prop_same_sex - mean(prop_same_sex))/sd(prop_same_sex),
-         prop_dif_std = (prop_dif_sex - mean(prop_dif_sex))/sd(prop_dif_sex),
-         origin_std = (origin_score - mean(origin_score))/sd(origin_score),
-         yr_fac = as.factor(yrimmig)) %>%
-  # include only complete cases for regressions
-  drop_na(prop_same_sex, distw, contig, comlang_off, comlang_ethno, colony,
-          wage_dif, unemp_dif, vdem, origin_score, bpld) 
 
 lgbt_policy_lag <- lgbt_policy %>%
   select(origin_score_lag = origin_score, year, Code) %>%
@@ -568,10 +355,6 @@ acs_prop_state1 <- acs_dyad %>%
   mutate(mean_year_immig = round(mean_year_immig)) %>%
   left_join(yearly_prop, by = c('mean_year_immig' = 'year', 'bpldid')) %>%
   filter(mean_year_immig >= 1991) %>%
-  # mutate(pre_1991 = mean_year_immig < 1991,
-  #   mean_year_immig = ifelse(mean_year_immig >= 1991, 
-  #                                 mean_year_immig,
-  #                                 1991)) %>%
   left_join(lgbt_policy, by = c('mean_year_immig' = 'year', 'bpldid' = 'Code')) %>%
   left_join(state_policy, by = c('year' = 'Year', 'state' = 'State')) %>%
   left_join(lgbt_policy_lag, by = c('mean_year_immig' = 'year', 'bpldid' = 'Code')) %>%
@@ -594,34 +377,6 @@ acs_prop_state1 <- acs_dyad %>%
     prop_same_sex_twoimm = (n_spouse_twoimm_same_sex + n_partner_twoimm_same_sex) / 
       (n_spouse_twoimm_same_sex + n_partner_twoimm_same_sex + n_spouse_twoimm_dif_sex + n_partner_twoimm_dif_sex) * 100)
 
-# acs_prop_state <- acs_prop_state%>%
-#   mutate(   prop_same_sex_recent = (n_spouse_recent_same_sex + n_partner_recent_same_sex) /
-#               (n_spouse_recent_same_sex + n_partner_recent_same_sex + n_spouse_recent_dif_sex + n_partner_recent_dif_sex) * 100,
-#             prop_same_sex_oneimm = (n_spouse_oneimm_same_sex + n_partner_oneimm_same_sex) /
-#               (n_spouse_oneimm_same_sex + n_partner_oneimm_same_sex + (n_spouse_oneimm_dif_sex + n_partner_oneimm_dif_sex)) * 100,
-#             prop_same_sex_twoimm = (n_spouse_twoimm_same_sex + n_partner_twoimm_same_sex) /
-#               (n_spouse_twoimm_same_sex + n_partner_twoimm_same_sex + n_spouse_twoimm_dif_sex + n_partner_twoimm_dif_sex) * 100)
-# 
-
-  
-  # mutate(prop_same_sex = same_sex_stock / state_stock_year * 100,
-  #        prop_dif_sex = opp_sex_stock / state_stock_year * 100)
-
-
-# acs_prop_state1_old <- acs_dyad %>%
-#   mutate(mean_year_immig = round(mean_year_immig)) %>%
-#   left_join(yearly_prop, by = c('mean_year_immig' = 'year', 'bpldid')) %>%
-#   filter(mean_year_immig >= 1991) %>%
-#   # mutate(pre_1991 = mean_year_immig < 1991,
-#   #   mean_year_immig = ifelse(mean_year_immig >= 1991, 
-#   #                                 mean_year_immig,
-#   #                                 1991)) %>%
-#   left_join(lgbt_policy, by = c('mean_year_immig' = 'year', 'bpldid' = 'Code')) %>%
-#   left_join(state_policy,by = c('mean_year_immig' = 'Year', 'state' = 'State')) %>%
-#   filter(!is.na(origin_score)) %>%
-#   mutate(prop_same_sex = same_sex_stock / state_stock_year * 100,
-#          prop_dif_sex = opp_sex_stock / state_stock_year * 100)
-
 
 unemploy <- read.table(here('data', 'la.data.3.AllStatesS.txt'), header = T,
                        fill = T) %>% 
@@ -637,24 +392,12 @@ unemploy <- read.table(here('data', 'la.data.3.AllStatesS.txt'), header = T,
 state_income_df <- read_csv(here('data', 'state_income_adj.csv'))
 
 
-  
-
-
-# state_income_df <- acs_prop_state%>%
-#   select(state_income, year, state) %>%
-#   distinct(state_income, year, state)
-
 acs_prop_state <- acs_prop_state1 %>%
   left_join(unemploy,  by = c('year', 'state')) %>%
   left_join(state_income_df,  by = c('year', 'state'))  %>%
   drop_na(state_policy, origin_score, distw, contig, comlang_off, comlang_ethno, colony,
           wage_dif, unemp_dif, vdem, state_unemploy, state_income, Country, state)
 
-# acs_prop_state_old <- acs_prop_state1_old %>%
-#   left_join(unemploy,  by = c('mean_year_immig' = 'year', 'state')) %>%
-#   left_join(state_income_df,  by = c('mean_year_immig' = 'year', 'state'))  %>%
-#   drop_na(state_policy, origin_score, distw, contig, comlang_off, comlang_ethno, colony,
-#           wage_dif, unemp_dif, vdem, state_unemploy, state_income, Country, state)
 
 # Individual dataset
 # Binning state policy into three categories
@@ -663,11 +406,6 @@ state_policy$state_policy_binned <- cut(state_policy$state_policy, breaks = c(-2
 
 acs_ind <- acs_coupled_imms %>%
   left_join(yearly_prop, by = c('yrimmig' = 'year', 'bpldid')) %>%
-  # filter(yrimmig >= 1991) %>%
-  # mutate(pre_1991 = yrimmig < 1991,
-  #   yrimmig = ifelse(yrimmig >= 1991, 
-  #                         round(yrimmig),
-  #                         1991)) %>%
   left_join(lgbt_policy, by = c('yrimmig' = 'year', 'bpldid' = 'Code')) %>%
   left_join(state_policy,by = c('year' = 'Year', 'state' = 'State')) %>%
   left_join(unemploy) %>%
@@ -689,22 +427,6 @@ acs_ind <- acs_ind %>%
   filter(allocated == F)
 
 write_rds(acs_ind, here('data', 'acs_ind.rds'))
-write_csv(acs_prop, here('data', 'acs_prop.csv'))
 write_csv(acs_prop_state, here('data', 'acs_prop_state.csv'))
-# write_csv(acs_prop_state_old, here('data'acs_prop, 'acs_prop_state_old.csv'))
-
-  
-# acs_prop_old <- read_csv(here('data', 'acs_prop_old.csv'))
-
-
-# acs_prop_yrimmig %>%
-#   filter(yrimmig >= 2007 & yrimmig <= 2018) %>%
-#   group_by(yrimmig) %>%
-#   summarize(n_recent_samesex = sum(n_spouse_recent_same_sex + n_partner_recent_same_sex),
-#             n_recent_difsex = sum(n_spouse_recent_dif_sex + n_partner_recent_dif_sex)) %>%
-#   pivot_longer(-yrimmig) %>%
-#   ggplot(aes(x = yrimmig, y = value)) +
-#   facet_wrap(~name, scales = 'free') +
-#   geom_line()
 
   

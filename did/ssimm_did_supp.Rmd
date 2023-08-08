@@ -22,9 +22,10 @@ header-includes:
   - \usepackage{fancyhdr}
   - \usepackage{amsmath}
   - \usepackage{float}
-  # - \pagestyle{fancy}
-  # - \setlength{\headheight}{15pt}
-  # - \lhead{Hoffmann and Velasco}
+  - \pagestyle{fancy}
+  - \setlength{\headheight}{15pt}
+  - \lhead{Hoffmann \& Velasco}
+  - \rhead{Online Appendix}
   # - \rhead{`r format(Sys.time(), '%B %e, %Y')`}
 editor_options: 
   
@@ -37,16 +38,18 @@ geometry: margin=1in
 indent: yes
 link-citations: yes
 linkcolor: blue
-bibliography: "/Users/nathan/My Drive/Projects/2020 Same-Sex Immigrant Couples/ssimm/Same-Sex Immigration.bib"
+bibliography: "/Users/nathan/My Drive/Projects/2020 Same-Sex Immigrant Couples/Same-Sex Immigration.bib"
 csl: chicago-author-date.csl
 title: "Online Appendix"
 subtitle: "Policy Effects on Mixed-Citizenship, Same-Sex Unions: A Triple-Difference Analysis"
 # date: "`r format(Sys.time(), '%B %e, %Y')`"
-# author:
-# - Nathan I. Hoffmann, Department of Sociology, University of California, Los Angeles
-# - Kristopher Velasco, Department of Sociology, Princeton University
+author:
+- Nathan I. Hoffmann, Department of Sociology, University of California, Los Angeles
+- Kristopher Velasco, Department of Sociology, Princeton University
 
 ---
+
+<!-- \renewcommand{\thepage}{S\arabic{page}} -->
 
 <!-- Turn off hyphenation -->
 <!-- \usepackage[none]{hyphenat} -->
@@ -340,7 +343,7 @@ huxreg(list('Full sample' = mod_mixed, 'Progressive' = mod_os_high, 'Regressive'
                 'Post-2013' = 'post_2013TRUE',
                 'State LGB policy' = 'state_policy',
                 'State unemployment' = 'state_unemploy',
-                'State per-capita income' = 'state_income'
+                'State per capita income' = 'state_income'
                 ),
   note = '{stars}. The "Regressive" sample includes only countries with a LGB policy score less than 0, and the "Progressive" sample includes only those with a score greater than 3. Group-clustered standard errors shown in parentheses. Source: American Community Survey 2008-2019. Authors\' calculations.',
        stars = c(`†` = 0.1, `*` = 0.05, `**` = 0.01, `***` = 0.001),
@@ -350,7 +353,7 @@ huxreg(list('Full sample' = mod_mixed, 'Progressive' = mod_os_high, 'Regressive'
   set_all_padding(0) %>% set_caption_pos('topleft') %>%
   huxtable::set_caption('Married before immigration: Triple-difference (DDD), quasi-Poisson 
   regressions of counts of individuals in mixed-citizenship, same-sex couples, stratifying by 
-  state-country-year-group average policy environment. Models include controls for state LGB policy, state unemployment, and state per-capita income. The full sample is limited to married couples, and the mixed-citizenship sample is limited to couples where the non-citizen partner immigrated after marriage.')
+  state-country-year-group average policy environment. Models include controls for state LGB policy, state unemployment, and state per capita income. The full sample is limited to married couples, and the mixed-citizenship sample is limited to couples where the non-citizen partner immigrated after marriage.')
 ```
 
 ```{r marr-after-tab}
@@ -401,7 +404,7 @@ huxreg(list('Full sample' = mod_mixed, 'Progressive' = mod_os_high, 'Regressive'
                 'Post-2013' = 'post_2013TRUE',
                 'State LGB policy' = 'state_policy',
                 'State unemployment' = 'state_unemploy',
-                'State per-capita income' = 'state_income'
+                'State per capita income' = 'state_income'
                 ),
   note = "{stars}. The \"Regressive\" sample includes only countries with a LGB policy score less than 0, and the \"Progressive\" sample includes only those with a score greater than 3. Group-clustered standard errors shown in parentheses. Source: American Community Survey 2008-2019. Authors\' calculations.",
        stars = c(`†` = 0.1, `*` = 0.05, `**` = 0.01, `***` = 0.001),
@@ -414,7 +417,7 @@ huxreg(list('Full sample' = mod_mixed, 'Progressive' = mod_os_high, 'Regressive'
   state-country-year-group average policy environment. The full sample is limited to married couples, and the mixed-citizenship sample is limited to couples where the non-citizen partner immigrated before or in the same year as marriage.')
 ```
 
-\newpage
+\clearpage
 
 # Sensitivity to Hypothetical Sex Misreporting
 
@@ -544,7 +547,7 @@ ggplot(misreporting_df, aes(x = rate, y = estimate, color = policy)) +
 <!--        coefs = c('Post-2013' = 'post_2013TRUE', -->
 <!--                  'State LGB policy' = 'state_policy', -->
 <!--                 'State unemployment' = 'state_unemploy', -->
-<!--                 'State per-capita income' = 'state_income'), -->
+<!--                 'State per capita income' = 'state_income'), -->
 <!--   note = '{stars}. The "Regressive" sample includes only countries with a LGB policy score less than 0, and the "Progressive" sample includes only those with a score greater than 3. Group-clustered standard errors shown in parentheses. Source: American Community Survey 2008-2019. Authors\' calculations.', -->
 <!--        stars = c(`†` = 0.1, `*` = 0.05, `**` = 0.01, `***` = 0.001), -->
 <!--        statistics = c('Observations' = 'nobs')) %>% -->
@@ -596,7 +599,7 @@ ggplot(misreporting_df, aes(x = rate, y = estimate, color = policy)) +
 <!--                 'Post-2013' = 'post_2013TRUE', -->
 <!--                 'State LGB policy' = 'state_policy', -->
 <!--                 'State unemployment' = 'state_unemploy', -->
-<!--                 'State per-capita income' = 'state_income'), -->
+<!--                 'State per capita income' = 'state_income'), -->
 <!--   note = '{stars}. The "Regressive" sample includes only countries with a LGB policy score less than 0, and the "Progressive" sample includes only those with a score greater than 3. Group-clustered standard errors shown in parentheses. Source: American Community Survey 2008-2019. Authors\' calculations.', -->
 <!--        stars = c(`†` = 0.1, `*` = 0.05, `**` = 0.01, `***` = 0.001), -->
 <!--        statistics = c('Observations' = 'nobs')) %>% -->
@@ -655,7 +658,7 @@ huxreg(list('Full sample' = mod_mixed, 'Progressive' = mod_os_high, 'Regressive'
                 'Post-2013' = 'post_2013TRUE',
                 'State LGB policy' = 'state_policy',
                 'State unemployment' = 'state_unemploy',
-                'State per-capita income' = 'state_income'),
+                'State per capita income' = 'state_income'),
   note = '{stars}. The "Regressive" sample includes only countries with a LGB policy score less than 0, and the "Progressive" sample includes only those with a score greater than 3. Group-clustered standard errors shown in parentheses. Source: American Community Survey 2008-2019. Authors\' calculations.',
        stars = c(`†` = 0.1, `*` = 0.05, `**` = 0.01, `***` = 0.001),
        statistics = c('Observations' = 'nobs')) %>%
@@ -713,7 +716,7 @@ huxreg(list('Full sample' = mod_mixed, 'Progressive' = mod_os_high, 'Regressive'
                 'Post-2013' = 'post_2013TRUE',
                 'State LGB policy' = 'state_policy',
                 'State unemployment' = 'state_unemploy',
-                'State per-capita income' = 'state_income'),
+                'State per capita income' = 'state_income'),
   note = '{stars}. The "Regressive" sample includes only countries with a LGB policy score less than 0, and the "Progressive" sample includes only those with a score greater than 3. Group-clustered standard errors shown in parentheses. Source: American Community Survey 2008-2019. Authors\' calculations.',
        stars = c(`†` = 0.1, `*` = 0.05, `**` = 0.01, `***` = 0.001),
        statistics = c('Observations' = 'nobs')) %>%
@@ -771,7 +774,7 @@ huxreg(list('Full sample' = mod_mixed, 'Progressive' = mod_os_high, 'Regressive'
                 'Post-2013' = 'post_2013TRUE',
                 'State LGB policy' = 'state_policy',
                 'State unemployment' = 'state_unemploy',
-                'State per-capita income' = 'state_income'),
+                'State per capita income' = 'state_income'),
   note = '{stars}. The "Regressive" sample includes only countries with a LGB policy score less than 0, and the "Progressive" sample includes only those with a score greater than 3. Group-clustered standard errors shown in parentheses. Source: American Community Survey 2008-2019. Authors\' calculations.',
        stars = c(`†` = 0.1, `*` = 0.05, `**` = 0.01, `***` = 0.001),
        statistics = c('Observations' = 'nobs')) %>%
@@ -782,11 +785,13 @@ huxreg(list('Full sample' = mod_mixed, 'Progressive' = mod_os_high, 'Regressive'
   state-country-year-group average policy environment')
 ```
 
-\newpage
 
-\newpage
 
-\newpage
+
+
+\clearpage
+
+
 
 # Parallel Trends Assumption for DD Model
 ```{r lag-plot-dd, fig.height = 3, fig.pos = 'H', out.extra = '', fig.cap = 'Dynamic specifications of DD quasi-Poisson regression with two-way fixed effects for sample of only same-sex couples, displaying the coefficient for the Year × Mixed-citizenship interaction. Survey years are aggregated into pairs, with 2008-2009 as the base category.'}
@@ -957,7 +962,7 @@ huxreg(list('Full sample' = mod_mixed, 'Progressive' = mod_os_high, 'Regressive'
                 'Post-2013' = 'post_2013TRUE',
                 'State LGB policy' = 'state_policy',
                 'State unemployment' = 'state_unemploy',
-                'State per-capita income' = 'state_income'),
+                'State per capita income' = 'state_income'),
   note = '{stars}. The "Regressive" sample includes only countries with a LGB policy score less than 0, and the "Progressive" sample includes only those with a score greater than 3. Group-clustered standard errors shown in parentheses. Source: American Community Survey 2008-2019. Authors\' calculations.',
        stars = c(`†` = 0.1, `*` = 0.05, `**` = 0.01, `***` = 0.001),
        statistics = c('Observations' = 'nobs')) %>%
@@ -1030,7 +1035,7 @@ huxreg(list('Full sample' = mod_mixed, 'Progressive' = mod_os_high, 'Regressive'
                 'Post-2013' = 'post_2013TRUE',
                 'State LGB policy' = 'state_policy',
                 'State unemployment' = 'state_unemploy',
-                'State per-capita income' = 'state_income'),
+                'State per capita income' = 'state_income'),
   note = '{stars}. The "Regressive" sample includes only countries with a LGB policy score less than 0, and the "Progressive" sample includes only those with a score greater than 3. Group-clustered standard errors shown in parentheses. Source: American Community Survey 2008-2019. Authors\' calculations.',
        stars = c(`†` = 0.1, `*` = 0.05, `**` = 0.01, `***` = 0.001),
        statistics = c('Observations' = 'nobs')) %>%
@@ -1141,7 +1146,7 @@ huxreg(list('Full sample' = mod_mixed, 'Progressive' = mod_os_high, 'Regressive'
 <!--                 'Post-2015' = 'post_2015TRUE', -->
 <!--                 'State LGB policy' = 'state_policy', -->
 <!--                 'State unemployment' = 'state_unemploy', -->
-<!--                 'State per-capita income' = 'state_income'), -->
+<!--                 'State per capita income' = 'state_income'), -->
 <!--   note = '{stars}. The "Regressive" sample includes only countries with a LGB policy score less than 0, and the "Progressive" sample includes only those with a score greater than 3. Group-clustered standard errors shown in parentheses. Source: American Community Survey 2008-2019. Authors\' calculations.', -->
 <!--        stars = c(`†` = 0.1, `*` = 0.05, `**` = 0.01, `***` = 0.001), -->
 <!--        statistics = c('Observations' = 'nobs')) %>% -->

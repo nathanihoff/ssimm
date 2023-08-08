@@ -112,8 +112,6 @@ knitr::opts_chunk$set(error=TRUE)
 ```{r load, include = F}
 acs_wide <- read.csv(here('data', 'acs_wide.csv'))
 acs_ind <- readRDS(here('data', 'acs_ind.rds')) 
-acs_prop <- read.csv(here('data', 'acs_prop.csv')) %>%
-  mutate(post_2013 = (yrimmig > 2013)) 
 acs_prop_state <- read.csv(here('data', 'acs_prop_state.csv')) %>%
   mutate(post_2013 = (year > 2013)) 
 
@@ -380,15 +378,6 @@ sens_df <- list()
 
 
 for(i in 1:nrow(mis_df)){
-  sens_mod <- lm(prop_same_sex_adj2 ~ wage_dif + unemp_dif + vdem  + stock_prop + bpld +
-                   #distw + contig + comlang_off + comlang_ethno + colony +
-                     post_2013*origin_score,
-         data = acs_prop %>%
-           mutate(prop_same_sex_adj2 = (n_spouse_pre_2019_same_sex*(1-mis_df[i,1]) + 
-                                         n_spouse_2019_same_sex + 
-                                         n_partner_pre_2019_same_sex*(1-mis_df[i,2]) +
-                                         n_partner_2019_same_sex)/n_total * 100))
-  
   sens_mod2 <- lm(prop_same_sex_adj2 ~ state_policy + origin_score + # distw + contig + 
                           # comlang_off + comlang_ethno + colony +
                           wage_dif + unemp_dif + vdem + stock_prop +
@@ -400,12 +389,9 @@ for(i in 1:nrow(mis_df)){
                                          n_partner_2019_same_sex)/state_stock_year * 100))
   
   
-  coef_os <- coeftest(sens_mod, vcov = vcovCL(sens_mod, cluster = ~ bpld))['post_2013TRUE:origin_score',]
   coef_os2 <- coeftest(sens_mod2, vcov = vcovCL(sens_mod2, cluster = ~ bpld + Country))['state_policy',]
   coef_os3 <- coeftest(sens_mod2, vcov = vcovCL(sens_mod2, cluster = ~ bpld + Country))['origin_score',]
-  sens_df[[i]] <- data.frame(est = coef_os[[1]],
-                             se = coef_os[[2]],
-                             est2 = coef_os2[[1]],
+  sens_df[[i]] <- data.frame(est2 = coef_os2[[1]],
                              se2 = coef_os2[[2]],
                              est3 = coef_os3[[1]],
                              se3 = coef_os3[[2]],

@@ -20,16 +20,17 @@ header-includes:
   - \usepackage{setspace}\doublespace
   - \usepackage{bbm}
   - \usepackage{amsmath}
-  # - \usepackage{fancyhdr}
   - usepackage{endnotes}
   - \let\footnote=\endnote
+  # - \usepackage{fancyhdr}
   # - \pagestyle{fancy}
   # - \setlength{\headheight}{15pt}
   # - \lhead{Hoffmann and Velasco}
   # - \rhead{`r format(Sys.time(), '%B %e, %Y')`}
 editor_options: 
-  
   chunk_output_type: console
+  
+
 citeproc: no
 # fontfamily: mathpazo
 mainfont: "Times New Roman"
@@ -38,10 +39,11 @@ geometry: margin=1in
 indent: yes
 # link-citations: yes
 # linkcolor: blue
-bibliography: "/Users/nathan/My Drive/Projects/2020 Same-Sex Immigrant Couples/ssimm/Same-Sex Immigration.bib"
-csl: chicago-author-date.csl
+bibliography: "/Users/nathan/My Drive/Projects/2020 Same-Sex Immigrant Couples/Same-Sex Immigration.bib"
+# csl: chicago-author-date.csl
 
 title: "Policy Effects on Mixed-Citizenship, Same-Sex Unions: A Triple-Difference Analysis"
+# subtitle: "Forthcoming in Social Forces"
 # subtitle: "ASA 2022 Submission"
 # date: "`r format(Sys.time(), '%B %e, %Y')`"
 # author:
@@ -70,7 +72,7 @@ library(tidyverse)
 library(kableExtra)
 
 knitr::opts_chunk$set(echo = F, warning = F, message = F, cache = T, # results = 'asis',
-                      cache.lazy = F, dpi = 600)
+                      cache.lazy = F, dpi = 1200)
 
 # knitr::opts_chunk$set(error=TRUE) 
 
@@ -243,7 +245,7 @@ country_count <- acs_count_base %>%
 
 <!-- In the United States, research on unions, "a term encompassing marriage and nonmarital cohabitation" [@bloome_2020_marriage, p. 1754], historically privileges those in different-sex relationships. But following pioneering work, this line of research is increasingly recognizing the importance of incorporating same-sex couples [@baumle_2009; @carrington_1999_no; @rosenfeld_2005_independence; @kolk_2020_two; @moore_2011_invisible; @sullivan_2004_family; @umberson_2015_challenges]. New cultural and legal recognition of these alternative family formations helps drive more research into this domain. Now, studies seek to understand how previous demographic and sociological theories are strengthened or must be re-imagined when considering these alternative arrangements [@martell_2020; @reczek_2017_promise; @manning_2016]. We contribute to this rich scholarly tradition by considering an additional union type: those containing individuals of the same sex but of mixed citizenship statuses -- where one partner is a U.S. citizen and the other a non-U.S. citizen. -->
 
-While mixed-citizenship couples generally face barriers to union formation [@lopez_2021_unauthorized], numbers of same-sex couples containing one U.S. citizen and one non-citizen are dramatically increasing. This has co-occurred with an important policy change: In 2013, the U.S. Supreme Court ruled the Defense of Marriage Act (DOMA) unconstitutional.^1^ For the first time, U.S. citizens could sponsor the visa of their same-sex fiancé or spouse [@edwards_2013; @carron_2015_marriagebased]. In the years since, the U.S. population of immigrant-containing same-sex couples has grown rapidly [hoffmann_Forthcoming_sexuality; @redpath_2022_spousal]. Data on cohabiting partners and spouses from the American Community Survey [ACS, @ruggles_2021] show that numbers of individuals in different-sex, mixed-citizenship couples grew by `r round((total_dif_mixed[12]/total_dif_mixed[5]-1) * 100)` percent from 2013 to 2019 (from `r total_dif_mixed[5]/1e6` million to `r total_dif_mixed[12]/1e6` million), while those in corresponding same-sex couples increased by `r round((total_same_mixed[12]/total_same_mixed[5]-1) * 100)` percent (from `r total_same_mixed[5]/1e3` thousand to `r total_same_mixed[12]/1e3` thousand) in the same period. Despite this rapid increase, research on this population has been limited; existing work has largely focused on such unions only outside of the U.S. [@chauvin_2021_class; @salcedorobledo_2013_couples; @badgett_2011_separated].  
+While mixed-citizenship couples generally face barriers to union formation [@lopez_2021_unauthorized], numbers of same-sex couples containing one U.S. citizen and one non-citizen are dramatically increasing. This has co-occurred with an important policy change: In 2013, the U.S. Supreme Court ruled the Defense of Marriage Act (DOMA) unconstitutional.^1^ For the first time, U.S. citizens could sponsor the visa of their same-sex fiancé or spouse [@edwards_2013; @carron_2015_marriagebased]. In the years since, the U.S. population of immigrant-containing same-sex couples has grown rapidly [@hoffmann_Forthcoming_sexuality; @redpath_2022_spousal]. Data on cohabiting partners and spouses from the American Community Survey [ACS, @ruggles_2021] show that numbers of individuals in different-sex, mixed-citizenship couples grew by `r round((total_dif_mixed[12]/total_dif_mixed[5]-1) * 100)` percent from 2013 to 2019 (from `r total_dif_mixed[5]/1e6` million to `r total_dif_mixed[12]/1e6` million), while those in corresponding same-sex couples increased by `r round((total_same_mixed[12]/total_same_mixed[5]-1) * 100)` percent (from `r total_same_mixed[5]/1e3` thousand to `r total_same_mixed[12]/1e3` thousand) in the same period. Despite this rapid increase, research on this population has been limited; existing work has largely focused on such unions only outside of the U.S. [@chauvin_2021_class; @salcedorobledo_2013_couples; @badgett_2011_separated].  
 
 The growth of this union type calls for additional research to understand how this population confirms or complicates existing theory. While the DOMA decision opened this union pathway to all, uptake is unlikely to be homogeneous and may reinforce existing inequalities. Namely, we bring in theories from cultural sociology to argue that, like all relationship forms, same-sex unions are cultural objects specific to time and place [@kalmijn_2007_explaining; @treas_2014_attitudes; @wang_2018_coming; @perelli-harris_2015_exploring]. These cultural objects impact and are impacted by prevailing attitudes and norms as well as individuals' material circumstances. By defining what is possible, state policies that exist at an immigrant's country of origin shape the cultural products to which they aspire and have the capacity to actualize. For example, legally entering a same-sex union was neither thinkable nor desirable for many until quite recently; progressive LGB policies institutionalize this new cultural form and then expand support and participation in a recursive process [@baiocco_2014_desire; @abou-chadi_2019_rights]. On the other hand, regressive LGB policies can limit the horizon of union possibilities, instill fear of state or familial punishment for disclosing one's same-sex union, cut off resources that can enable migration, and negatively influence whether U.S. immigration officials view same-sex relationships from these countries as credible [@carron_2015_marriagebased]. Therefore, we ask: How do country-of-origin policies influence the incidence of mixed-citizenship, same-sex couples in the U.S. following the repeal of DOMA? Ultimately, we argue that the repeal of DOMA likely functions as a pathway to spousal visas only when an immigrant's country of origin's institutional context is affirming of LGB communities.  
 
@@ -335,7 +337,7 @@ y_{gst} = &\exp[\beta_0 + \beta_1 post_t + \beta_2 (post_t \times M_g) + \beta_3
 &+ \delta (post_t \times M_g \times S_g ) + \alpha_{gs} + \gamma_{t} + \zeta ' \mathbf x_{st}]  + \epsilon_{gst}
 \end{aligned}$$
 
-where $y_{gst}$ is the count of individuals in group $g$ in state $s$ in survey year $t$; $post_t$ is an indicator variable for $t > 2013$; $M_g$ is an indicator variable for group $g$ being mixed-citizenship; $S_g$ is an indicator variable for group $g$ being same-sex; $\alpha_{gs}$ are group-state fixed effects; $\gamma_t$ are survey year fixed effects; and $\epsilon_{gst}$ is an error term such that $\mathbb E(\epsilon_{gst} \mid post_t, M_g, S_g, \alpha_{gs}, \gamma_{t}, \mathbf x_{st}) = 0$. In our final models, we add $\mathbf x_{st}$, a vector of state-level controls in year $t$: unemployment rate, per-capita income, and local LGB policy. The coefficient of interest is $\delta$; the incidence ratio $\exp(\delta)$ estimates the relative increase of individuals in mixed-citizenship, same-sex couples after 2013, relative to other couples. We assume parallel trends in log counts; we provide support for this assumption by conducting pre-trend $\chi^2$ tests for pre-2013 coefficients from dynamic (event-study) models.
+where $y_{gst}$ is the count of individuals in group $g$ in state $s$ in survey year $t$; $post_t$ is an indicator variable for $t > 2013$; $M_g$ is an indicator variable for group $g$ being mixed-citizenship; $S_g$ is an indicator variable for group $g$ being same-sex; $\alpha_{gs}$ are group-state fixed effects; $\gamma_t$ are survey year fixed effects; and $\epsilon_{gst}$ is an error term such that $\mathbb E(\epsilon_{gst} \mid post_t, M_g, S_g, \alpha_{gs}, \gamma_{t}, \mathbf x_{st}) = 0$. In our final models, we add $\mathbf x_{st}$, a vector of state-level controls in year $t$: unemployment rate, per capita income, and local LGB policy. The coefficient of interest is $\delta$; the incidence ratio $\exp(\delta)$ estimates the relative increase of individuals in mixed-citizenship, same-sex couples after 2013, relative to other couples. We assume parallel trends in log counts; we provide support for this assumption by conducting pre-trend $\chi^2$ tests for pre-2013 coefficients from dynamic (event-study) models.
 
 <!-- $$\mathbb E[y_{gst}] = \exp(\beta_0 + \beta_1 \bbm 1_{\{t \geq 2013\}} + \beta_2 \bbm 1_{\{t \geq 2013\}}$$ -->
 
@@ -495,7 +497,7 @@ Table \@ref(tab:DD-mod) shows corresponding results for the DD analysis. These m
 
 Finally, Table \@ref(tab:DDD-mod) presents results from our DDD specifications. While the DD models control for numbers in same-sex couples overall, the DDD models also control for numbers in mixed-citizenship couples, regardless of sex composition. Here, the coefficient of interest is the three-way interaction between indicators for post-2013, same-sex, and mixed-citizenship. For the full sample, the incidence of individuals in mixed-citizenship, same-sex couples grew by $100 \times [\exp(`r base_effect`) -1] =$ `r 100*(exp(base_effect) - 1)` percent after 2013, relative to those in couples that were not same-sex or mixed-citizenship. When we focus on individuals from progressive countries, the result is even stronger, at `r 100*(exp(high_effect) - 1)` percent. However, those from regressive countries saw no significant increase.  
 
-Although the two-way fixed effects in our specifications help allay concerns of confounders, it is still possible that time-varying state- and group-level variables may be confounding results. We test the robustness of our results by re-specifying our models while adjusting for state per-capita income, annual unemployment rates, and state LGB policy. Table \@ref(tab:controls-tab) replicates Table \@ref(tab:DDD-mod), but with these additional controls. Substantive conclusions do not change. Notably, the coefficient for state LGB policy is small and nonsignificant; in these models, state LGB policy does not appear related to the incidence of same-sex unions.
+Although the two-way fixed effects in our specifications help allay concerns of confounders, it is still possible that time-varying state- and group-level variables may be confounding results. We test the robustness of our results by re-specifying our models while adjusting for state per capita income, annual unemployment rates, and state LGB policy. Table \@ref(tab:controls-tab) replicates Table \@ref(tab:DDD-mod), but with these additional controls. Substantive conclusions do not change. Notably, the coefficient for state LGB policy is small and nonsignificant; in these models, state LGB policy does not appear related to the incidence of same-sex unions.
 
 <!-- ^[In the Online Appendix, we also respecify the simple-difference and difference-in-differences models with these state-level controls. Coefficients of interest shift only slightly.]  -->
 
@@ -624,6 +626,14 @@ low_test_p <- low_test$`Pr(>Chisq)`[2]
 8. We include evidence for the parallel trends assumption for the DD models in Section D of the Online Appendix; a pre-trend test provides support for parallel trends.
 
 9.  We test that coefficients for 2010 and 2012 are both equal to 0, $\delta_{2010} = \delta_{2012} = 0$. This pre-trend test follows a $\chi^2$ distribution. For the full sample, the $\chi^2$ value is `r base_test$Chisq[2]` with a p-value of `r base_test_p`. For the progressive subsample, the $\chi^2$ value is `r high_test$Chisq[2]` with a p-value of `r high_test_p`. In both cases, we fail to reject the hypothesis that both coefficients are equal to 0, providing support for the parallel trends assumption.
+
+\newpage
+
+# About the Authors
+
+Nathan I. Hoffmann is a doctoral candidate in the Department of Sociology at the University of California, Los Angeles. Nathan studies how state policies affect the decisions and well-being of immigrants, with a focus on schoolchildren and queer migrants. Recently his work has been published in *International Migration Review*, *Ethnic and Racial Studies*, and *Journal of Ethnic and Migration Studies*.
+
+Kristopher Velasco is an Assistant Professor of Sociology at Princeton University. Kristopher uses the case of LGBT+ rights to illuminate changes within international organizations, civil society, transnational processes, and world culture. His recent work appears in *American Sociological Review*, *American Journal of Sociology*, and *International Migration Review*. Kristopher received his BA from the University of Kansas and MA and PhD from the University of Texas at Austin.
 
 \newpage
 
@@ -761,7 +771,7 @@ huxreg(list('Full sample' = mod_mixed, 'Progressive' = mod_os_high, 'Regressive'
                 'Post-2013' = 'post_2013TRUE',
                 'State LGB policy' = 'state_policy',
                 'State unemployment' = 'state_unemploy',
-                'State per-capita income' = 'state_income'),
+                'State per capita income' = 'state_income'),
   note = '{stars}. The "Regressive" sample includes only countries with a LGB policy score less than 0, and the "Progressive" sample includes only those with a score greater than 3. Group-clustered standard errors shown in parentheses. Source: American Community Survey 2008-2019. Authors\' calculations.',
        stars = c(`†` = 0.1, `*` = 0.05, `**` = 0.01, `***` = 0.001),
        statistics = c('Observations' = 'nobs')) %>%
@@ -800,6 +810,8 @@ bind_rows(
 \newpage
 
 ```{r method-desc, fig.height = 3.5, fig.cap = 'Conceptual comparison of simple-difference (D), difference-in-differences (DD), and triple-difference (DDD) designs. The trend of interest is shown in orange, and the vertical, dashed lines represent the moment the treatment is applied. Authors\' creation.'}
+library(ggbrace)
+
 df <- data.frame(year = c(2008, 2013, 2019),
            same_mixed = c(100, 150, 250),
            same_same = c(300, 310, 330),
