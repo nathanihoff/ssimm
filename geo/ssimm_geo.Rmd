@@ -1,0 +1,364 @@
+---
+output:
+  # bookdown::pdf_document2:
+  bookdown::word_document2:
+    reference_docx: "word-template.docx"
+    toc: no
+    number_sections: no
+    pandoc_args: !expr rmdfiltr::add_wordcount_filter(rmdfiltr::add_citeproc_filter(args = NULL))
+    latex_engine: xelatex
+always_allow_html: true
+header-includes:
+  # - \usepackage{setspace}\doublespace
+  - \setlength{\headheight}{13.6pt}
+  - \usepackage{fancyhdr}
+  - \pagestyle{fancy}
+  - \lhead{Nathan I. Hoffmann}
+  # - \rhead{PAA 2024}
+  - \rhead{`r format(Sys.time(), '%B %e, %Y')`}
+#  - \usepackage[nomarkers,nolists,heads]{endfloat}
+#  - \rhead{nathanihoff@ucla.edu}
+# - \newcommand{\beginsupplement}{\setcounter{table}{0}  
+# \renewcommand{\thetable}{A\arabic{table}} \setcounter{figure}{0} 
+# \renewcommand{\thefigure}{A\arabic{figure}}}
+  
+
+
+editor_options: 
+  chunk_output_type: console
+
+
+citeproc: no
+fontfamily: mathpazo
+fontsize: 11pt
+geometry: margin= 1in
+indent: yes
+link-citations: yes
+linkcolor: blue
+lang: 'en-US'
+
+title: "LGB Policy and the Geography of Immigrants in Same-Sex Couples in the United States"
+subtitle: "Same-sex marriage and Migration workshop in Amsterdam"
+date: "`r format(Sys.time(), '%B %e, %Y')`"
+author:
+- Nathan I. Hoffmann, Department of Sociology, UCLA
+- Kristopher Velasco, Department of Sociology, Princeton University
+
+abstract: "How do queer immigrants decide where to settle? The policy landscape for same-sex couples in the United States has changed rapidly in recent years, with immigrants being particularly affected. After the 2013 end of the Defense of Marriage Act, U.S. citizens could finally sponsor the visa of a same-sex partner. As previous work of ours has shown, in the wake of this policy change there has been a rapid increase of immigrants in same-sex couples, at least for those from progressive countries (Hoffmann & Velasco 2024). But little is known about where these immigrants choose to settle and enjoy their new rights. Do they gravitate toward queer-friendly cities and states, or are they more concerned with job opportunities or cost of living? How have these patterns changed over time, especially in response to local policy changes relevant to queer people and immigrants? Using American Community Survey data from 2008-2022, this paper will implement descriptive analyses and conditional logit models to study how settlement patterns of immigrants in same-sex couples in the U.S. respond to local and national policy changes as well as other local factors. These geographic measures will include the Human Rights Campaign’s Municipal Equality Index, Velasco’s LGBT Policy Index for U.S. states, and a host of other local measures such as housing prices, average income, queer density, and prevalence of immigrants from the same national origins."
+
+
+---
+
+<!-- Turn off hyphenation -->
+
+<!-- \usepackage[none]{hyphenat} -->
+
+```{r setup, include=F}
+library(knitr)
+library(broom)
+library(huxtable)
+library(sandwich)
+library(lmtest)
+library(here)
+library(stargazer)
+library(patchwork)
+library(flextable)
+library(kableExtra)
+library(maps)
+library(tigris)
+library(fiftystater)
+library(ggthemes)
+library(srvyr)
+library(tidyverse)
+
+
+knitr::opts_chunk$set(echo = F, warning = F, message = F, cache = T, # results = 'asis',
+                      cache.lazy = F, dpi = 1200)
+
+
+options("yaml.eval.expr" = TRUE)
+
+uclablue = '#2774AE'
+gray = '#808080'
+black = '#000000'
+uclagold = '#FFB81C'
+ucla_palette = c(uclablue, black, gray)
+palette_dark <- rev(RColorBrewer::brewer.pal(n=3,"Dark2"))
+
+# theme_set(theme_cowplot(font_family = 'Palatino') + 
+theme_set(theme_classic(base_family = 'Palatino') + 
+            theme(axis.line = element_line(size = .3), 
+                  axis.ticks = element_line(size = .3), 
+                  legend.title=element_blank(), 
+                  panel.grid.major.y = element_line('grey80', size = .3),
+                  legend.background = element_rect(fill = "transparent")))
+# ggplot <- function(...) ggplot2::ggplot(...) + scale_color_manual(values = ucla_palette) +
+#   scale_fill_manual(values = ucla_palette)
+ggplot <- function(...) ggplot2::ggplot(...) + scale_color_brewer(palette="Dark2") +
+  scale_fill_brewer(palette="Dark2")
+
+# library(colorspace)
+# colorspace_palette = 'RdPu'
+# ggplot <- function(...) ggplot2::ggplot(...) +
+#   scale_color_discrete_sequential(palette=colorspace_palette) +
+#   scale_fill_discrete_sequential(palette=colorspace_palette)
+
+options(scipen=1, digits=2)
+knit_hooks$set(inline = function(x) {
+  prettyNum(x, big.mark=",")
+})
+knitr::opts_chunk$set(error=TRUE) 
+
+set_flextable_defaults(font.family = 'Times New Roman',
+                       # padding.bottom = 1,
+                       # padding.top = 1,
+                       # padding.left = 3,
+                       # padding.right = 1,
+                       theme_fun = 'theme_booktabs',
+                       digits = 3, 
+                       big.mark = ',',
+                       line_spacing = 1)
+
+```
+
+```{r load, include = F}
+# acs_ind <- readRDS(here('data', 'acs_ind.rds')) 
+
+
+# acs_count_base <- read_csv(here('data', 'acs_count_base.csv')) 
+
+immigrants <- read_csv(here('data', 'immigrants_geo.csv'))  %>%
+  mutate(policy_cat = case_when(
+    origin_score < 0 ~ 'low',
+    origin_score > 3 ~ 'high'),
+    post_2013 = year > 2013) %>%
+  mutate(origin_score_centered = origin_score - mean({.$origin_score}, na.rm = T))
+
+acs_geo <- read_csv(here('data', 'acs_geo_survey.csv'))
+
+pumas_tab <- immigrants %>%
+  mutate(same_sex = ifelse(same_sex == T, 'same_sex', 'dif_sex')) %>%
+  # filter(year == 2019) %>%
+  group_by(state, puma, same_sex) %>%
+  summarize(n = sum(perwt)) %>%
+  pivot_wider(names_from = 'same_sex', values_from = 'n') %>%
+  mutate(prop = same_sex/dif_sex) %>%
+  select(state, puma, prop) %>%
+  replace(is.na(.), 0) 
+
+
+pumas_tab_year <- immigrants %>%
+  mutate(same_sex = ifelse(same_sex == T, 'same_sex', 'dif_sex')) %>%
+  # filter(year == 2019) %>%
+  group_by(year, state, puma, same_sex) %>%
+  summarize(n = sum(perwt)) %>%
+  pivot_wider(names_from = 'same_sex', values_from = 'n') %>%
+  mutate(prop = same_sex/dif_sex*100) %>%
+  select(state, puma, prop) %>%
+  replace(is.na(.), 0) %>%
+  left_join(acs_geo) %>%
+  left_join(immigrants %>% group_by(year, state, puma) %>%
+  summarize(across(c(density, state_policy), ~mean(.x, na.rm = T))))
+
+
+immigrants_survey <- immigrants %>% 
+  as_survey_design(weights = perwt)
+```
+
+
+
+```{r desc-calc, eval = F}
+desc_tab <- immigrants_survey %>%
+  group_by(same_sex) %>%
+  summarize(across(c(bachelors_puma, black_puma, hispanic_puma, inctot_puma,
+                     log_inctot_puma, owned_puma, age_puma, immigrant_puma,
+                     poverty_100_puma, poverty_200_puma, hwsei_puma, 
+                     unemployed_puma, valueh_puma,
+                     rent_puma, costelec_puma, density, pctmetro), 
+            ~ survey_mean(.x, na.rm = T)))
+
+write_csv(desc_tab, here('geo/files', 'desc_tab.csv'))
+
+desc_tab_time <- immigrants_survey %>%
+  group_by(same_sex, year) %>%
+  summarize(across(c(bachelors_puma, black_puma, hispanic_puma, inctot_puma,
+                     log_inctot_puma, owned_puma, age_puma, immigrant_puma,
+                     poverty_100_puma, poverty_200_puma, hwsei_puma, 
+                     unemployed_puma, valueh_puma,
+                     rent_puma, costelec_puma, density, pctmetro), 
+            ~ survey_mean(.x, na.rm = T)))
+
+write_csv(desc_tab_time, here('geo/files', 'desc_tab_time.csv'))
+```
+
+```{r}
+
+# desc_tab_se <- immigrants_survey %>%
+#   group_by(same_sex) %>%
+#   summarize(across(c(bachelors_puma_se, black_puma_se, hispanic_puma_se, inctot_puma,
+#                      log_inctot_puma_se, owned_puma_se, age_puma_se, immigrant_puma,
+#                      poverty_100_puma_se, poverty_200_puma_se, hwsei_puma_se, 
+#                      unemployed_puma_se, valueh_puma,
+#                      rent_puma_se, costelec_puma_se, density, pctmetro),
+#             ~ sqrt(sum(perwt*(.x^2), na.rm = T)/sum(perwt, na.rm = T)^2)
+#   ))
+            #~ sqrt(survey_mean(.x^2, na.rm = T)/n())))
+
+desc_tab <- read_csv(here('geo/files', 'desc_tab.csv'))
+
+desc_tab %>%
+  t() %>%
+  as.data.frame() %>%
+  mutate(different_sex = round(V1, 3), same_sex = round(V2, 3)) %>%
+  select(different_sex, same_sex) %>%
+  rownames_to_column('variable') %>%
+  filter(!str_detect(variable, '_se')) %>%
+  kable(booktabs = T, linesep = '', caption = 'Mean values for geographic variables for immigrants in different- or same-sex couples, 2008-2022')
+
+
+```
+
+```{r desc-time}
+
+desc_tab_time <- read_csv(here('geo/files', 'desc_tab_time.csv'))
+
+desc_tab_time %>%
+  select(!ends_with('_se')) %>%
+  pivot_longer(-c(same_sex, year)) %>%
+  mutate(same_sex = ifelse(same_sex == T, 'Same-sex', 'Different-sex')) %>%
+  ggplot(aes(x = year, y = value, color = same_sex)) +
+  geom_line() +
+  facet_wrap(~name, scales = 'free_y')
+
+
+
+
+
+```
+
+
+```{r puma-regression}
+list('no FE' = lm(prop ~ bachelors_puma + black_puma + hispanic_puma + inctot_puma +
+                     log_inctot_puma + owned_puma + age_puma + immigrant_puma +
+                     poverty_100_puma + poverty_200_puma + hwsei_puma + 
+                     unemployed_puma + valueh_puma +
+                     rent_puma + costelec_puma + density + state_policy,
+                  data = pumas_tab_year),
+   'State FE and clustered errors' = lm(prop ~ bachelors_puma + black_puma + hispanic_puma + inctot_puma +
+                     log_inctot_puma + owned_puma + age_puma + immigrant_puma +
+                     poverty_100_puma + poverty_200_puma + hwsei_puma + 
+                     unemployed_puma + valueh_puma +
+                     rent_puma + costelec_puma + density + state_policy + state,
+                     data = pumas_tab_year) %>%
+     coeftest(vcov = vcovCL(., cluster = ~ state), save = T),
+    'State and year FE and clustered errors' = lm(prop ~ bachelors_puma + black_puma + hispanic_puma + inctot_puma +
+                     log_inctot_puma + owned_puma + age_puma + immigrant_puma +
+                     poverty_100_puma + poverty_200_puma + hwsei_puma + 
+                     unemployed_puma + valueh_puma +
+                     rent_puma + costelec_puma + density + state_policy + state + year,
+                     data = pumas_tab_year) %>%
+     coeftest(vcov = vcovCL(., cluster = ~ state + year), save = T) ) %>%
+  huxtable::huxreg()
+```
+
+
+
+```{r state-props-calc, eval = F}
+state_tab <- immigrants_survey %>%
+  group_by(state, year, same_sex) %>%
+  summarize(survey_prop()) %>%
+  filter(same_sex == T) %>%
+  complete(state, year) %>%
+  replace(is.na(.), 0) 
+  
+write_csv(state_tab, here('geo/files', 'state_tab.csv'))
+```
+
+
+
+
+
+```{r state-map, fig.cap = 'Percentage of cohabiting immigrants in same-sex couples in U.S. states, averaging over ACS survey years 2008 to 2019.'}
+state_tab <- read_csv(here('geo/files', 'state_tab.csv')) %>%
+  mutate(year_cat = case_when(
+         year < 2013 ~ '2008-2012',
+         year %in% 2013:2017 ~ '2013-2017',
+         year > 2017 ~ '2018-2022'),
+         state = tolower(state)) %>%
+  filter(state != 'district of columbia') %>%
+  group_by(year_cat, state) %>%
+  summarize(prop_samesex = mean(coef)*100) 
+
+
+state_tab %>%
+  # mutate(prop_samesex = ifelse(prop_samesex > 4, 4, prop_samesex)) %>%
+  ggplot(aes(map_id = state, fill = prop_samesex)) +
+  geom_map(map = fiftystater::fifty_states) +
+  expand_limits(x = fiftystater::fifty_states$long, y = fiftystater::fifty_states$lat) +
+  coord_map() +
+  scale_fill_gradient(low = uclablue, high = uclagold, na.value = 'gray95') +
+                      #breaks = c(0,7), labels=format(c(0,7))) +
+  theme_map() + # font_family = 'Palatino') +
+  facet_wrap(~year_cat, ncol = 1) +
+  labs(fill = "Same-sex (%)")
+
+# (state_tab %>%
+#   filter(year_cat == '2008-2013') %>%
+#   ggplot(aes(map_id = state, fill = prop_samesex)) +
+#   geom_map(map = fiftystater::fifty_states) +
+#   expand_limits(x = fiftystater::fifty_states$long, y = fiftystater::fifty_states$lat) +
+#   coord_map() +
+#   scale_fill_gradient(low = uclablue, high = uclagold, na.value = 'gray95') +
+#                       #breaks = c(0,7), labels=format(c(0,7))) +
+#   theme_map() + # font_family = 'Palatino') +
+#   facet_wrap(~year_cat, ncol = 1) +
+#   labs(fill = "Same-sex (%)")) /
+#   (state_tab %>%
+#   filter(year_cat == '2014-2017') %>%
+#   ggplot(aes(map_id = state, fill = prop_samesex)) +
+#   geom_map(map = fiftystater::fifty_states) +
+#   expand_limits(x = fiftystater::fifty_states$long, y = fiftystater::fifty_states$lat) +
+#   coord_map() +
+#   scale_fill_gradient(low = uclablue, high = uclagold, na.value = 'gray95') +
+#                       #breaks = c(0,7), labels=format(c(0,7))) +
+#   theme_map() + # font_family = 'Palatino') +
+#   facet_wrap(~year_cat, ncol = 1) +
+#   labs(fill = "Same-sex (%)")) /
+#   (state_tab %>%
+#   filter(year_cat == '2019-2022') %>%
+#   ggplot(aes(map_id = state, fill = prop_samesex)) +
+#   geom_map(map = fiftystater::fifty_states) +
+#   expand_limits(x = fiftystater::fifty_states$long, y = fiftystater::fifty_states$lat) +
+#   coord_map() +
+#   scale_fill_gradient(low = uclablue, high = uclagold, na.value = 'gray95') +
+#                       #breaks = c(0,7), labels=format(c(0,7))) +
+#   theme_map() + # font_family = 'Palatino') +
+#   facet_wrap(~year_cat, ncol = 1) +
+#   labs(fill = "Same-sex (%)"))
+
+
+
+```
+
+
+```{r puma-map}
+
+
+
+
+pumas <- tigris::pumas(cb = T, year = 2019)
+
+immigrants %>%
+  left_join(ne_pov, by = c("STATEFP10" = "ST", "PUMACE10" = "PUMA")) %>%
+  ggplot(aes(fill = pct_in_pov)) +
+  geom_sf() +
+  scale_fill_viridis_b(
+    name = NULL,
+    option = "magma",
+    labels = scales::label_percent(1)
+    ) +
+  labs(title = "Percentage of population below 200% of the poverty line") +
+  theme_void()
+
+```
+
