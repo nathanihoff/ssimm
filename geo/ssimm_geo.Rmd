@@ -154,6 +154,10 @@ immigrants_survey <- immigrants %>%
   as_survey_design(weights = perwt)
 
 acs_geo <- read_csv(here('data', 'acs_geo_survey.csv')) 
+  # left_join(select(read_csv(here('geo/files', 'nonprofits_puma.csv')), -statefp), by = c()) %>%
+  # mutate(lgbt_nonprofits = ifelse(is.na(lgbt_nonprofits), 0, lgbt_nonprofits)) %>%
+  # left_join(select(read_csv(here('geo/files', 'imm_nonprofits.csv')), -statefp)) %>%
+  # mutate(immigrant_nonprofits = ifelse(is.na(immigrant_nonprofits), 0, immigrant_nonprofits))
 
 # acs_geo <- read_csv(here('data', 'acs_geo_survey.csv')) %>%
 #   mutate(across(c(bachelors_puma, black_puma, hispanic_puma, owned_puma, immigrant_puma, poverty_100_puma,
@@ -185,7 +189,7 @@ prop_tab_year <- immigrants %>%
   select(state, puma, prop) %>%
   left_join(acs_geo) %>%
   left_join(immigrants %>% group_by(year, state, puma) %>%
-  summarize(across(c(density, state_policy, lgbt_nonprofits), ~mean(.x, na.rm = T))))
+  summarize(across(c(density, state_policy, lgbt_nonprofits, immigrant_nonprofits), ~mean(.x, na.rm = T))))
 
 
 gay_prop_tab_year <- all_geo %>%
@@ -202,7 +206,7 @@ gay_prop_tab_year <- all_geo %>%
   select(state, puma, prop) %>%
   left_join(acs_geo) %>%
   left_join(immigrants %>% group_by(year, state, puma) %>%
-  summarize(across(c(density, state_policy, lgbt_nonprofits), ~mean(.x, na.rm = T))))
+  summarize(across(c(density, state_policy, lgbt_nonprofits, immigrant_nonprofits), ~mean(.x, na.rm = T))))
 
 
 count_tab_year <- all_geo %>%
@@ -212,7 +216,7 @@ count_tab_year <- all_geo %>%
   complete(year, state, puma, group, fill = list('n' = 0)) %>%
   left_join(acs_geo) %>%
   left_join(all_geo %>% group_by(year, state, puma) %>%
-  summarize(across(c(density, state_policy, lgbt_nonprofits), ~mean(.x, na.rm = T))))
+  summarize(across(c(density, state_policy, lgbt_nonprofits, immigrant_nonprofits), ~mean(.x, na.rm = T))))
 
 
 
@@ -221,12 +225,9 @@ count_tab_year <- all_geo %>%
 
 # Introduction
 
-In 2013, the U.S. Supreme Court overturned the Defense of Marriage Act and required the U.S. government to begin recognizing marriages between same-sex spouses. Among many consequences, this decision radically changed the immigration landscape: For the first time, same-sex spouses of U.S. citizens and lawful permanent residents were eligible to file a spousal petition for an immigrant visa [@edwards_2013]. In the years since, the U.S. population of immigrants in same-sex couples has grown rapidly [@hoffmann_2023_sexuality; @hoffmann_2024_policy].
+In 2013, the U.S. Supreme Court overturned the Defense of Marriage Act and required the U.S. government to begin recognizing marriages between same-sex spouses. Among many consequences, this decision radically changed the immigration landscape: For the first time, same-sex spouses of U.S. citizens and lawful permanent residents were eligible to file a spousal petition for an immigrant visa [@edwards_2013]. In the years since, the U.S. population of lesbian, gay, and bisexual (LGB) immigrants has grown rapidly. As @hoffmann_2024_policy show, numbers of different-sex couples containing immigrants increased by 22 percent from 2008 to 2019 (from 7.8 million to 9.5 million), while those of corresponding same-sex couples grew by 140 percent in the same period (from 44 thousand to 107 thousand). Furthermore, @hoffmann_2023_sexuality show that, compared to immigrants in different-sex couples, those in same-sex couples come from richer, more democratic, and more LGB-friendly countries that are less represented by immigrants in the U.S. They also tend to be more highly educated, work in more prestigious occupations, and have higher incomes. Hence, despite previous queer migration scholarship largely focusing on asylum seekers and others escaping repressive contexts, these migrants appear to be among the most well-off immigrants in the U.S.  
 
-The Supreme Court ruling occurred against a backdrop of rapidly changing laws concerning same-sex couples -- and LGB communities, generally -- both in the U.S. and abroad. As some countries expanded rights and social recognition, others imposed new forms of repression [@hadler_2018_world]. These varied dynamics raise an important question: How do changing policy environments influence the migration patterns of individuals in same-sex couples into and across the U.S.? Migration scholarship has begun to recognize the role of the state to shape both the aspirations and capabilities to migrate through social policies, even those unrelated to migration itself [@dehaas_2021; @fitzgerald_2014]. Moreover, while gender is increasingly recognized as an integral part of the migration process [@lutz_2010; @hondagneu-sotelo_2012], sexuality receives relatively scant attention. Emerging qualitative work has demonstrated that both sexuality and the policies governing it are highly salient factors influencing migration decisions to the U.S. [@ahmad_2013; @carrillo_2018; @mai_2009; @gorman-murray_2009]. Studying the migration of same-sex couples into and across the U.S. allows us to make broader inferences into how the interaction between sexuality and policy shape migration decisions, underscoring the importance of political and "lifestyle" considerations into understandings of migration [@benson_2012; @fitzgerald_2014].  
-
-
-How do queer immigrants decide where to settle? The policy landscape for same-sex couples in the United States has changed rapidly in recent years, with immigrants being particularly affected. After the 2013 end of the Defense of Marriage Act, U.S. citizens could finally sponsor the visa of a same-sex partner. As previous work of ours has shown, in the wake of this policy change there has been a rapid increase of immigrants in same-sex couples, at least for those from progressive countries (Hoffmann & Velasco 2024). But little is known about where these immigrants choose to settle and enjoy their new rights. Do they gravitate toward queer-friendly cities and states, or are they more concerned with job opportunities or cost of living? How have these patterns changed over time, especially in response to local policy changes relevant to queer people and immigrants? Using American Community Survey data from 2008-2022, this paper will implement descriptive analyses and conditional logit models to study how settlement patterns of immigrants in same-sex couples in the U.S. respond to local and national policy changes as well as other local factors. These geographic measures will include the Human Rights Campaign’s Municipal Equality Index, Velasco’s LGBT Policy Index for U.S. states, and a host of other local measures such as housing prices, average income, queer density, and prevalence of immigrants from the same national origins.
+Despite this work, little is known on *where* LGB migrants tend to settle after they arrive in the U.S. In the wake of the DOMA decision, where do these immigrants choose to settle and enjoy their new rights? Do they gravitate toward queer-friendly cities and states, or are they more concerned with job opportunities or cost of living? How have these patterns changed over time, especially in response to local policy changes relevant to queer people and immigrants? Using American Community Survey data from 2008-2022, this paper implements descriptive analyses and regression analyses to study how settlement patterns of immigrants in same-sex couples in the U.S. respond to local and national policy changes as well as other local factors. 
 
 # Background
 
@@ -252,13 +253,33 @@ We reshape the data so that each observation is the percentage of individual coh
 
 Most of our variables come from the ACS and are calculated at the level of the Public Use Microdata Area (PUMA), a unit of analysis that includes at least 100,000.  
 
-We also use data from two other sources. First, to examine LGB policies at state of destination, we use original datasets. To create the U.S. state policy index, we compile data from the Movement Advancement Project^[https://www.lgbtmap.org/], a leading LGB organization in the U.S. that collects data on a number of relevant policies. Our state index encompasses both progressive policies (full marriage equality, state recognition of civil unions and domestic partnerships, ban on all employment and housing discrimination based on sexual orientation, hate crime protections based on sexual orientation, legal joint adoption by same-sex couples, and a ban on conversation therapy for minors) and regressive policies (criminalization of sodomy, state constitutional bans of marriage equality, religious freedom exemptions to discriminate against same-sex couples in adoption, and state-level bans on local non-discrimination ordinances encompassing sexual orientation). The state index ranges from X to X, and the mean state policy score for immigrants in our sample is X.  
+We also use data from two other sources. First, to examine LGB policies at state of destination, we use original datasets. To create the U.S. state policy index, we compile data from the Movement Advancement Project^[https://www.lgbtmap.org/], a leading LGB organization in the U.S. that collects data on a number of relevant policies. Our state index encompasses both progressive policies (full marriage equality, state recognition of civil unions and domestic partnerships, ban on all employment and housing discrimination based on sexual orientation, hate crime protections based on sexual orientation, legal joint adoption by same-sex couples, and a ban on conversation therapy for minors) and regressive policies (criminalization of sodomy, state constitutional bans of marriage equality, religious freedom exemptions to discriminate against same-sex couples in adoption, and state-level bans on local non-discrimination ordinances encompassing sexual orientation). The state index ranges from XX to XX, and the mean state policy score for immigrants in our sample is XX.  
 
 Our second outside data source is a measure of the prevalence of LGBT nonprofits in a given PUMA. These come from complete IRS data on nonprofits.  
 
 
 # Results
 
+
+
+## Descriptive Results
+
+To show broadly how the geography of immigrants in same-sex couples has changed over the past 15 years, Figure \@ref(fig:state-map) presents the percentage coupled immigrants in eage state who are in same-sex couples and how these figures have changed over time. The figure shows maps for three time periods: 2008-2012, 2013-2017, and 2018-2022. Most states had greater proportions of immigrants in same-sex couples in 2022 than in 2008. In addition, the pattern of growth is meaningful. Shortly after the end of the Defense of Marriage Act in 2013, their growth was concentrated in the Northeast, where states were relatively early adopters of same-sex marriage, including Massachusetts (2004), Connecticut (2008), Vermont (2009), New Hampshire (2010), New York (2011), Maine (2012), and Maryland (2013). However, in the next period (2018-2022), more of the map shows higher percentages of immigrants in same-sex couples, including more relatively conservative states.  
+
+Table \@ref(tab:desc) prevents descriptive statistics for PUMA-level characteristics, separated by the three groups of interest: immigrants in different-sex couples, immigrants in same-sex couples, and non-immigrants partnered with same-sex non-immigrants. In the table, all variables are averaged over the full range of survey years. Figures \@ref(fig:desc-time-1) and \@ref(fig:desc-time-2)  present the same statistics over time. Immigrants in same- and different-sex couples are similar on a number of attributes. They live in areas with similar proportions of immigrants and Hispanic people, they live in areas with higher home values and rent, and they live in denser areas. They also bear some similarities to non-immigrants in same-sex couples, with similar values of 
+
+However, immigrants in same-sex couples live in areas with somewhat more advantage than the other two groups. They live in areas with higher incomes and higher occupational prestige. In addition, the home and rent prices of their areas are somewhat higher than those of immigrants more broadly. They also live in denser areas.  
+
+Clear differences also arise around the number of nonprofits in their areas. On average, immigrants in same-sex couples live in PUMAs with 1.2 LGBT nonprofits, while LGB non-immigrants live in PUMAs with 0.76 and immigrants in different-sex couples with 0.30. They also live in areas with more immigrant nonprofits, with an average of 1.0. Surprisingly, the number of immigrant nonprofits for the average immigrant in a different-sex couple and average non-immigrant in a same sex couple are quite similar, at about 0.8. 
+
+Figures \@ref(fig:desc-time-1) and \@ref(fig:desc-time-2) show how these differences are fairly stable over time. One notable change is the average percent of Black residents in the typical area for each group: Around 2010, immigrants in same-sex couples were 1 to 2 percentage points more likely to live in areas with Black respondents than the other groups, but in recent years the numbers are very similar.  
+
+
+## Models
+
+Table \@ref(tab:prop-regression) presents OLS regressions for the percentage of immigrants in same-sex couples, out of all immigrants in couples, at the PUMA level. Model 1 does not include fixed effects, Model 2 includes state fixed effects and errors clustered at the state level, and Model 3 includes both state and year fixed effects and clusters errors at the state and year levels. Model 3 shows that a number of factors remain significant even in models with these fixed effects. Areas are more likely to have higher proportions of immigrants in same-sex couples if fewer people own their own home, if the percentage of immigrants is lower, if more people are over the poverty line, if homes are worth somewhat less, if the density is lower, and if the number of LGBT nonprofits is higher.  
+
+Table \@ref(tab:gay-prop-regression) presents corresponding regressions for the proportion of all people in same-sex couples who are immigrants. Again, a number of coefficients are significant in Model 3, which includes state and year fixed effects. LGB immigrants tend to live in areas with lower income, higher percentages of immigrants, lower unemployment, lower rent, and higher density than LGB non-immigrants.  
 
 # Discussion and Conclusion
 
@@ -281,7 +302,7 @@ desc_tab <- all_geo_survey %>%
                      owned_puma, age_puma, immigrant_puma,
                      poverty_100_puma, poverty_200_puma, hwsei_puma, 
                      unemployed_puma, valueh_puma,
-                     rent_puma, costelec_puma, density, pctmetro, lgbt_nonprofits), 
+                     rent_puma, costelec_puma, density, lgbt_nonprofits, immigrant_nonprofits), 
             ~ survey_mean(.x, na.rm = T)))
 
 write_csv(desc_tab, here('geo/files', 'desc_tab.csv'))
@@ -292,7 +313,7 @@ desc_tab_time <- all_geo_survey %>%
                      owned_puma, age_puma, immigrant_puma,
                      poverty_100_puma, poverty_200_puma, hwsei_puma, 
                      unemployed_puma, valueh_puma,
-                     rent_puma, costelec_puma, density, pctmetro, lgbt_nonprofits), 
+                     rent_puma, costelec_puma, density, lgbt_nonprofits, immigrant_nonprofits), 
             ~ survey_mean(.x, na.rm = T)))
 
 
@@ -313,23 +334,24 @@ write_csv(desc_tab_time, here('geo/files', 'desc_tab_time.csv'))
             #~ sqrt(survey_mean(.x^2, na.rm = T)/n())))
 
 variable_names <- c('Bachelor\'s degree (%)' = 'bachelors_puma', 
-                             'Black (%)' = 'black_puma',
-                             'Hispanic (%)' = 'hispanic_puma', 
-                             'Mean personal income' = 'inctot_puma',
-                             # 'Log mean personal income' = 'log_inctot_puma', 
-                             'Individuals own home (%)' = 'owned_puma', 
-                             'Mean age' = 'age_puma', 
-                             'Immigrant (%)' = 'immigrant_puma',
-                             'Individuals under 100% of poverty line (%)' = 'poverty_100_puma', 
-                             'Individuals under 200% of poverty line (%)' = 'poverty_200_puma', 
-                             'Mean HWSEI occupation score' = 'hwsei_puma', 
-                             'Unemployed (%)' = 'unemployed_puma', 
-                             'Mean individual\'s value of home ($1000s)' = 'valueh_puma',
-                             'Mean individual\'s rent' = 'rent_puma', 
-                             'Mean cost of electricity' = 'costelec_puma', 
-                             'Density (persons per sq. mile)' = 'density', 
-                             'State LGB policy score' = 'state_policy', 
-                             'Number of LGBT nonprofits' = 'lgbt_nonprofits')
+                    'Black (%)' = 'black_puma',
+                    'Hispanic (%)' = 'hispanic_puma', 
+                    'Mean personal income' = 'inctot_puma',
+                    # 'Log mean personal income' = 'log_inctot_puma', 
+                    'Individuals own home (%)' = 'owned_puma', 
+                    'Mean age' = 'age_puma', 
+                    'Immigrant (%)' = 'immigrant_puma',
+                    'Individuals under 100% of poverty line (%)' = 'poverty_100_puma', 
+                    'Individuals under 200% of poverty line (%)' = 'poverty_200_puma', 
+                    'Mean HWSEI occupation score' = 'hwsei_puma', 
+                    'Unemployed (%)' = 'unemployed_puma', 
+                    'Mean individual\'s value of home ($1000s)' = 'valueh_puma',
+                    'Mean individual\'s rent' = 'rent_puma', 
+                    'Mean cost of electricity' = 'costelec_puma', 
+                    'Density (persons per sq. mile)' = 'density', 
+                    'State LGB policy score' = 'state_policy', 
+                    'Number of LGBT nonprofits' = 'lgbt_nonprofits',
+                    'Number of immigrant nonprofits' = 'immigrant_nonprofits')
 
 variable_names_swap <- names(variable_names)
 names(variable_names_swap) <- as.vector(variable_names)
@@ -350,9 +372,9 @@ desc_tab %>%
   # mutate(`Different-sex, immigrant` = round(V1, 3), `Same-sex, immigrant` = round(V2, 3),
   #        `Same-sex, non-immigrant` = round(V3, 3)) %>%
   # select(different_sex, same_sex) %>%
-  rownames_to_column('variable') %>%
-  filter(!str_detect(variable, '_se')) %>%
-  mutate(variable = recode(variable, !!!variable_names_swap)) %>%
+  rownames_to_column('Variable') %>%
+  filter(!str_detect(Variable, '_se')) %>%
+  mutate(Variable = recode(Variable, !!!variable_names_swap)) %>%
   flextable() %>%
   FitFlextableToPage() %>% # flextable::autofit() %>%
   flextable::set_caption('Mean values for geographic variables for immigrants in different- or same-sex couples, 2008-2022') 
@@ -367,24 +389,24 @@ desc_tab %>%
 list(#'no FE' = 
   lm(prop ~ bachelors_puma + black_puma + hispanic_puma + 
                      log_inctot_puma + owned_puma + age_puma + immigrant_puma +
-                     poverty_100_puma + hwsei_puma + 
+                     poverty_200_puma + hwsei_puma + 
                      unemployed_puma + valueh_puma +
-                     rent_puma + costelec_puma + density + state_policy + lgbt_nonprofits,
+                     rent_puma + costelec_puma + density + state_policy + lgbt_nonprofits + immigrant_nonprofits,
                   data = prop_tab_year),
    #'State FE and clustered errors' = 
    lm(prop ~ bachelors_puma + black_puma + hispanic_puma + 
                      log_inctot_puma + owned_puma + age_puma + immigrant_puma +
-                     poverty_100_puma + hwsei_puma + 
+                     poverty_200_puma + hwsei_puma + 
                      unemployed_puma + valueh_puma +
-                     rent_puma + costelec_puma + density + state_policy + lgbt_nonprofits + state,
+                     rent_puma + costelec_puma + density + state_policy + lgbt_nonprofits + immigrant_nonprofits + state,
                      data = prop_tab_year) %>%
      coeftest(vcov = vcovCL(., cluster = ~ state), save = T),
     #'State and year FE and clustered errors' = 
     lm(prop ~ bachelors_puma + black_puma + hispanic_puma + 
                      log_inctot_puma + owned_puma + age_puma + immigrant_puma +
-                     poverty_100_puma  + hwsei_puma + 
+                     poverty_200_puma  + hwsei_puma + 
                      unemployed_puma + valueh_puma +
-                     rent_puma + costelec_puma + density + state_policy + state + lgbt_nonprofits + year,
+                     rent_puma + costelec_puma + density + state_policy + state + lgbt_nonprofits + immigrant_nonprofits + year,
                      data = prop_tab_year) %>%
      coeftest(vcov = vcovCL(., cluster = ~ state + year), save = T)) %>%
   huxtable::huxreg(coefs = c('Bachelor\'s degree (%)' = 'bachelors_puma', 
@@ -395,8 +417,8 @@ list(#'no FE' =
                              'Individuals own home (%)' = 'owned_puma', 
                              'Mean age' = 'age_puma', 
                              'Immigrant (%)' = 'immigrant_puma',
-                             'Individuals under 100% of poverty line (%)' = 'poverty_100_puma', 
-                             # 'Individuals under 200% of poverty line (%)' = 'poverty_200_puma', 
+                             # 'Individuals under 100% of poverty line (%)' = 'poverty_100_puma', 
+                             'Individuals under 200% of poverty line (%)' = 'poverty_200_puma', 
                              'Mean HWSEI occupation score' = 'hwsei_puma', 
                              'Unemployed (%)' = 'unemployed_puma', 
                              'Mean individual\'s value of home ($1000s)' = 'valueh_puma',
@@ -404,7 +426,8 @@ list(#'no FE' =
                              'Mean cost of electricity' = 'costelec_puma', 
                              'Density (persons per sq. mile)' = 'density', 
                              'State LGB policy score' = 'state_policy', 
-                             'Number of LGBT nonprofits' = 'lgbt_nonprofits'),
+                             'Number of LGBT nonprofits' = 'lgbt_nonprofits',
+                             'Number of immigrant nonprofits' = 'immigrant_nonprofits'),
                    stars = c(`†` = 0.1, `*` = 0.05, `**` = 0.01, `***` = 0.001),
                    statistics = c('Observations' = 'nobs')) %>%
   huxtable::insert_row(c('State FEs and clustered errors?', 'no', 'yes', 'yes'), after = nrow(.) - 2) %>%
@@ -420,22 +443,22 @@ list(#'no FE' =
 ```{r gay-prop-regression}
 list(lm(prop ~ bachelors_puma + black_puma + hispanic_puma + 
                      log_inctot_puma + owned_puma + age_puma + immigrant_puma +
-                     poverty_100_puma + hwsei_puma + 
+                     poverty_200_puma + hwsei_puma + 
                      unemployed_puma + valueh_puma +
-                     rent_puma + costelec_puma + density + state_policy + lgbt_nonprofits,
+                     rent_puma + costelec_puma + density + state_policy + lgbt_nonprofits + immigrant_nonprofits,
                   data = gay_prop_tab_year),
    lm(prop ~ bachelors_puma + black_puma + hispanic_puma + 
                      log_inctot_puma + owned_puma + age_puma + immigrant_puma +
-                     poverty_100_puma + hwsei_puma + 
+                     poverty_200_puma + hwsei_puma + 
                      unemployed_puma + valueh_puma +
-                     rent_puma + costelec_puma + density + state_policy + lgbt_nonprofits + state,
+                     rent_puma + costelec_puma + density + state_policy + lgbt_nonprofits + immigrant_nonprofits + state,
                      data = gay_prop_tab_year) %>%
      coeftest(vcov = vcovCL(., cluster = ~ state), save = T),
     lm(prop ~ bachelors_puma + black_puma + hispanic_puma + 
                      log_inctot_puma + owned_puma + age_puma + immigrant_puma +
-                     poverty_100_puma  + hwsei_puma + 
+                     poverty_200_puma  + hwsei_puma + 
                      unemployed_puma + valueh_puma +
-                     rent_puma + costelec_puma + density + state_policy + state + lgbt_nonprofits + year,
+                     rent_puma + costelec_puma + density + state_policy + state + lgbt_nonprofits + immigrant_nonprofits + year,
                      data = gay_prop_tab_year) %>%
      coeftest(vcov = vcovCL(., cluster = ~ state + year), save = T) ) %>%
   huxtable::huxreg(coefs = c('Bachelor\'s degree (%)' = 'bachelors_puma', 
@@ -446,8 +469,8 @@ list(lm(prop ~ bachelors_puma + black_puma + hispanic_puma +
                              'Individuals own home (%)' = 'owned_puma', 
                              'Mean age' = 'age_puma', 
                              'Immigrant (%)' = 'immigrant_puma',
-                             'Individuals under 100% of poverty line (%)' = 'poverty_100_puma', 
-                             # 'Individuals under 200% of poverty line (%)' = 'poverty_200_puma', 
+                             # 'Individuals under 100% of poverty line (%)' = 'poverty_100_puma', 
+                             'Individuals under 200% of poverty line (%)' = 'poverty_200_puma', 
                              'Mean HWSEI occupation score' = 'hwsei_puma', 
                              'Unemployed (%)' = 'unemployed_puma', 
                              'Mean individual\'s value of home ($1000s)' = 'valueh_puma',
@@ -455,7 +478,8 @@ list(lm(prop ~ bachelors_puma + black_puma + hispanic_puma +
                              'Mean cost of electricity' = 'costelec_puma', 
                              'Density (persons per sq. mile)' = 'density', 
                              'State LGB policy score' = 'state_policy', 
-                             'Number of LGBT nonprofits' = 'lgbt_nonprofits'),
+                             'Number of LGBT nonprofits' = 'lgbt_nonprofits',
+                             'Number of immigrant nonprofits' = 'immigrant_nonprofits'),
                    statistics = c('Observations' = 'nobs')) %>%
   huxtable::insert_row(c('State FEs and clustered errors?', 'no', 'yes', 'yes'), after = nrow(.) - 2) %>%
   huxtable::insert_row(c('Year FEs and clustered errors?', 'no', 'no', 'yes'), after = nrow(.) - 2) %>%
@@ -516,50 +540,6 @@ list('no FE' = glm(n ~ group*(bachelors_puma + black_puma + hispanic_puma +
 \newpage
 
 # Figures
-
-```{r desc-time-1, fig.height = 6, fig.cap = 'Geographic characteristics (percentages) over time for immigrants in different- and same-sex couples, based on American Community Survey data for 2008-2022'}
-
-desc_tab_time <- read_csv(here('geo/files', 'desc_tab_time.csv')) 
-
-desc_tab_time %>%
-  select(!ends_with('_se')) %>%
-  pivot_longer(-c(group, year), names_to = 'variable') %>%
-  mutate(variable = recode(variable, !!!variable_names_swap)) %>%
-  filter(str_detect(variable, '(%)')) %>%
-  # mutate(same_sex = ifelse(same_sex == T, 'Same-sex', 'Different-sex')) %>%
-  ggplot(aes(x = year, y = value, color = group)) +
-  geom_line() +
-  facet_wrap(~variable, scales = 'free_y', ncol = 2) +
-  labs(x = 'Year', y = '') +
-  theme(legend.position = 'bottom',
-        text = element_text(size = 9))
-
-
-```
-
-\newpage 
-
-```{r desc-time-2, fig.height = 6, fig.cap = 'Geographic characteristics (means) over time for immigrants in different- and same-sex couples, based on American Community Survey data for 2008-2022'}
-
-desc_tab_time %>%
-  select(!ends_with('_se')) %>%
-  pivot_longer(-c(group, year), names_to = 'variable') %>%
-  mutate(variable = recode(variable, !!!variable_names_swap)) %>%
-  filter(!str_detect(variable, '(%)')) %>%
-  # mutate(same_sex = ifelse(same_sex == T, 'Same-sex', 'Different-sex')) %>%
-  ggplot(aes(x = year, y = value, color = group)) +
-  geom_line() +
-  facet_wrap(~variable, scales = 'free_y', ncol = 2) +
-  labs(x = 'Year', y = '') +
-  theme(legend.position = 'bottom',
-        text = element_text(size = 9))
-
-
-```
-
-
-\newpage
-
 
 ```{r state-props-calc, eval = F}
 state_tab <- immigrants_survey %>%
@@ -640,6 +620,52 @@ state_tab %>%
 
 
 ```
+
+\newpage
+
+```{r desc-time-1, fig.height = 5.5, fig.cap = 'Geographic characteristics (percentages) over time for immigrants in different- and same-sex couples, based on American Community Survey data for 2008-2022'}
+
+desc_tab_time <- read_csv(here('geo/files', 'desc_tab_time.csv')) 
+
+desc_tab_time %>%
+  select(!ends_with('_se')) %>%
+  pivot_longer(-c(group, year), names_to = 'variable') %>%
+  mutate(variable = recode(variable, !!!variable_names_swap)) %>%
+  filter(str_detect(variable, '(%)')) %>%
+  # mutate(same_sex = ifelse(same_sex == T, 'Same-sex', 'Different-sex')) %>%
+  ggplot(aes(x = year, y = value, color = group)) +
+  geom_line() +
+  facet_wrap(~variable, scales = 'free_y', ncol = 2) +
+  labs(x = 'Year', y = '') +
+  theme(legend.position = 'bottom',
+        text = element_text(size = 9))
+
+
+```
+
+\newpage 
+
+```{r desc-time-2, fig.height = 5.5, fig.cap = 'Geographic characteristics (means) over time for immigrants in different- and same-sex couples, based on American Community Survey data for 2008-2022'}
+
+desc_tab_time %>%
+  select(!ends_with('_se')) %>%
+  pivot_longer(-c(group, year), names_to = 'variable') %>%
+  mutate(variable = recode(variable, !!!variable_names_swap)) %>%
+  filter(!str_detect(variable, '(%)')) %>%
+  # mutate(same_sex = ifelse(same_sex == T, 'Same-sex', 'Different-sex')) %>%
+  ggplot(aes(x = year, y = value, color = group)) +
+  geom_line() +
+  facet_wrap(~variable, scales = 'free_y', ncol = 2) +
+  labs(x = 'Year', y = '') +
+  theme(legend.position = 'bottom',
+        text = element_text(size = 9))
+
+
+```
+
+
+
+
 
 
 ```{r puma-map, eval = F, fig.cap = 'Percentage of cohabiting immigrants in same-sex couples in U.S. PUMAs, averaging over ACS survey years 2008 to 2022.'}
