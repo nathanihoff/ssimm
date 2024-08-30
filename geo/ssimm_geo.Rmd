@@ -150,61 +150,72 @@ acs_geo <- read_csv(here('data', 'acs_geo_survey.csv'))
 #                   poverty_200_puma, unemployed_puma), 
 #                 ~.x*100))
 
-prop_tab <- immigrants %>%
-  mutate(same_sex = ifelse(same_sex == T, 'same_sex', 'dif_sex')) %>%
-  # filter(year == 2019) %>%
-  group_by(state, puma, puma5ce, same_sex) %>%
-  summarize(n = sum(perwt)) %>%
-  ungroup() %>%
-  pivot_wider(names_from = 'same_sex', values_from = 'n') %>%
+prop_tab <- acs_geo %>%
+  select(state, puma) %>%
+  distinct() %>%
+  left_join(immigrants %>%
+    mutate(same_sex = ifelse(same_sex == T, 'same_sex', 'dif_sex')) %>%
+    # filter(year == 2019) %>%
+    group_by(state, puma, same_sex) %>%
+    summarize(n = sum(perwt)) %>%
+    ungroup() %>%
+    pivot_wider(names_from = 'same_sex', values_from = 'n')) %>% 
+  replace(is.na(.), 0) %>%
+  # complete(year, state, puma, same_sex, fill = list('n' = 0)) %>%
   mutate(prop = same_sex/(same_sex + dif_sex)*100) %>%
-  select(state, puma, puma5ce, prop) %>%
-  replace(is.na(.), 0)
+  filter(!is.nan(prop))
 
 
-prop_tab_year <- immigrants %>%
-  mutate(same_sex = ifelse(same_sex == T, 'same_sex', 'dif_sex')) %>%
-  # filter(year == 2019) %>%
-  group_by(year, state, puma, same_sex) %>%
-  summarize(n = sum(perwt)) %>%
-  ungroup() %>%
-  complete(year, state, puma, same_sex, fill = list('n' = 0)) %>%
-  pivot_wider(names_from = 'same_sex', values_from = 'n') %>%
+prop_tab_year <- acs_geo %>%
+  select(state, puma, year) %>%
+  left_join(immigrants %>%
+    mutate(same_sex = ifelse(same_sex == T, 'same_sex', 'dif_sex')) %>%
+    # filter(year == 2019) %>%
+    group_by(year, state, puma, same_sex) %>%
+    summarize(n = sum(perwt)) %>%
+    ungroup() %>%
+    pivot_wider(names_from = 'same_sex', values_from = 'n')) %>% 
+  replace(is.na(.), 0) %>%
+  # complete(year, state, puma, same_sex, fill = list('n' = 0)) %>%
   mutate(prop = same_sex/(same_sex + dif_sex)*100) %>%
   filter(!is.nan(prop)) %>%
-  select(state, puma, prop) %>%
-  left_join(acs_geo) %>%
-  left_join(immigrants %>% group_by(year, state, puma) %>%
-  summarize(across(c(density, state_policy, lgbt_nonprofits, immigrant_nonprofits), ~mean(.x, na.rm = T))))
+  select(state, puma, year, prop) %>%
+  left_join(acs_geo) 
 
 
-gay_prop_tab_year <- all_geo %>%
-  filter(group != 'Different-sex, immigrant') %>%
-  # filter(year == 2019) %>%
-  group_by(year, state, puma, group) %>%
-  summarize(n = sum(perwt)) %>%
-  ungroup() %>%
-  complete(year, state, puma, group, fill = list('n' = 0)) %>%
-  pivot_wider(names_from = 'group', values_from = 'n') %>%
+gay_prop_tab_year <- acs_geo %>%
+  select(state, puma, year) %>%
+  left_join(all_geo %>%
+    filter(group != 'Different-sex, immigrant') %>%
+    # filter(year == 2019) %>%
+    group_by(year, state, puma, group) %>%
+    summarize(n = sum(perwt)) %>%
+    ungroup() %>%
+    pivot_wider(names_from = 'group', values_from = 'n')) %>% 
+  replace(is.na(.), 0) %>%
+  # complete(year, state, puma, same_sex, fill = list('n' = 0)) %>%
   mutate(prop = `Same-sex, immigrant`/(`Same-sex, immigrant` + `Same-sex, non-immigrant`)*100) %>%
   filter(!is.nan(prop)) %>%
-  #replace(is.na(.), 0) %>%
-  select(state, puma, prop) %>%
-  left_join(acs_geo) %>%
-  left_join(immigrants %>% group_by(year, state, puma) %>%
-  summarize(across(c(density, state_policy, lgbt_nonprofits, immigrant_nonprofits), ~mean(.x, na.rm = T))))
+  select(state, puma, year, prop) %>%
+  left_join(acs_geo) 
+
+  # left_join(immigrants %>% group_by(year, state, puma) %>%
+  # summarize(across(c(density, state_policy, lgbt_nonprofits, immigrant_nonprofits), ~mean(.x, na.rm = T))))
 
 
-count_tab_year <- all_geo %>%
-  group_by(year, state, puma, group) %>%
-  summarize(n = sum(perwt)) %>%
-  ungroup() %>%
-  complete(year, state, puma, group, fill = list('n' = 0)) %>%
-  left_join(acs_geo) %>%
-  left_join(all_geo %>% group_by(year, state, puma) %>%
-  summarize(across(c(density, state_policy, lgbt_nonprofits, immigrant_nonprofits), ~mean(.x, na.rm = T))))
-
-
+count_tab_year <- acs_geo %>%
+  select(state, puma, year) %>%
+  left_join(all_geo %>%
+    # filter(year == 2019) %>%
+    group_by(year, state, puma, group) %>%
+    summarize(n = sum(perwt)) %>%
+    ungroup() %>%
+    pivot_wider(names_from = 'group', values_from = 'n') %>% 
+    replace(is.na(.), 0)) %>%
+  # complete(year, state, puma, same_sex, fill = list('n' = 0)) %>%
+  left_join(acs_geo) 
+  
+  
 
 ```
 
@@ -213,10 +224,14 @@ count_tab_year <- all_geo %>%
 
 In 2013, the U.S. Supreme Court overturned the Defense of Marriage Act and required the U.S. government to begin recognizing marriages between same-sex spouses. Among many consequences, this decision radically changed the immigration landscape: For the first time, same-sex spouses of U.S. citizens and lawful permanent residents were eligible to file a spousal petition for an immigrant visa [@edwards_2013]. In the years since, the U.S. population of lesbian, gay, and bisexual (LGB) immigrants has grown rapidly. As @hoffmann_2024_policy show, numbers of different-sex couples containing immigrants increased by 22 percent from 2008 to 2019 (from 7.8 million to 9.5 million), while those of corresponding same-sex couples grew by 140 percent in the same period (from 44 thousand to 107 thousand). Furthermore, @hoffmann_2023_sexuality show that, compared to immigrants in different-sex couples, those in same-sex couples come from richer, more democratic, and more LGB-friendly countries that are less represented by immigrants in the U.S. They also tend to be more highly educated, work in more prestigious occupations, and have higher incomes. Hence, despite previous queer migration scholarship largely focusing on asylum seekers and others escaping repressive contexts, these migrants appear to be among the most well-off immigrants in the U.S.  
 
-Despite this work, little is known on *where* LGB migrants tend to settle after they arrive in the U.S. In the wake of the DOMA decision, where do these immigrants choose to settle and enjoy their new rights? Do they gravitate toward queer-friendly cities and states, or are they more concerned with job opportunities or cost of living? How have these patterns changed over time, especially in response to local policy changes relevant to queer people and immigrants? Using American Community Survey data from 2008-2022, this paper implements descriptive analyses and regression analyses to study how settlement patterns of immigrants in same-sex couples in the U.S. respond to local and national policy changes as well as other local factors. 
+Despite this work, little is known on *where* LGB migrants tend to settle after they arrive in the U.S. In the wake of the DOMA decision, where do these immigrants choose to settle and enjoy their new rights? Do they gravitate toward queer-friendly cities and states, or are they more concerned with job opportunities or cost of living? How have these patterns changed over time, especially in response to local policy changes relevant to queer people and immigrants? In their patterns of settlement, are LGB migrants more like migrants more broadly, or more like LGB Americans?   
+
+Using American Community Survey data from 2008-2022, this paper implements descriptive analyses and regression analyses to study how settlement patterns of immigrants in same-sex couples in the U.S. respond to local and national policy changes as well as other local factors. Findings suggest that LGB migrants are more similar to migrants than to LGB people who are not migrants. However, they tend to live in more advantaged areas than either group.
+
+
 
 # Background
-There is great interest in residential equity and the geographic distribution of people living in the United States. These spatial patterns are linked to a variety of important demographic and social outcomes like health and well-being, exposure to environmental and social hazards, access to quality of education, and social capital, among others. For immigrants, there is often an additional interest as variation in distribution can reveal the types and characteristics of immigrants entering the U.S. and indicate patterns of integration and assimilation into the dominant society. Questions of segregation are also relevant for native-born populations. This is especially true for LGBTQ+ populations as research consistently shows a concentration into neighborhood enclaves, i.e., "gayborhoods," but this concentration is declining -- perhaps indicating greater social acceptance as LGBTQ+ individuals integrate further other areas [@spring_2024]. Here, we combine these two often distinct literatures, one on immigrant settlement patterns and the other on LGBTQ+ residential patterns, to understand where immigrants in same-sex relationships live in the United States. We focus on this new, burgeoning population as little prior work has been done in understanding these patterns [@hoffmann_2023]. Therefore, this lets us investigate whether the residential distribution of immigrants in same-sex couples adheres most similarly to their co-migrants or, instead, to their native-born counterparts.
+There is great interest in residential equity and the geographic distribution of people living in the United States. These spatial patterns are linked to a variety of important demographic and social outcomes like health and well-being, exposure to environmental and social hazards, access to quality of education, and social capital, among others. For immigrants, there is often an additional interest as variation in distribution can reveal the types and characteristics of immigrants entering the U.S. and indicate patterns of integration and assimilation into the dominant society. Questions of segregation are also relevant for native-born populations. This is especially true for LGBTQ+ populations as research consistently shows a concentration into neighborhood enclaves, i.e., "gayborhoods," but this concentration is declining -- perhaps indicating greater social acceptance as LGBTQ+ individuals integrate further other areas [@spring_2024]. Here, we combine these two often distinct literatures, one on immigrant settlement patterns and the other on LGBTQ+ residential patterns, to understand where immigrants in same-sex relationships live in the United States. We focus on this new, burgeoning population as little prior work has been done in understanding these patterns [@hoffmann_2023_sexuality]. Therefore, this lets us investigate whether the residential distribution of immigrants in same-sex couples adheres most similarly to their co-migrants or, instead, to their native-born counterparts.
 
 ## Immigrant Settlement in the United States
 There is a long history in migration studies of explaining the settlement patterns of migrants. The theories of choice of destination within a country are similar to theories of migration more broadly. At one level, neoclassical economic theories predict that migrants will follow wage and unemployment differentials to places with high labor demand [@hatton_2005a; @todaro_1980].  @newbold_1999_spatial shows how these economic factors help explain settlement patterns in the U.S., also pointing to the importance of government welfare programs and the local immigration rate. This last effects highlights the importance of migrant networks that share information and resources to lower the cost of migration and settling in the destination [@massey_1987]. Relatedly, institutions that arise to recruit workers and ease entry and settlement can promote migration to particular destinations [@hernandez-leon_2013]. Local political factors can also influence migrant settlement. For example, @watson_2013_enforcement shows that U.S. metropolitan areas that adopt 287(g) agreements -- allowing local agencies to enforce Federal immigration law -- see significantly greater propensity of immigrants to leave and relocate within the United States.  
@@ -226,20 +241,38 @@ Settlement also varies by individual characteristics of immigrants. For Latino i
 In recent years, scholars have turned to studying so called "new" immigrant destinations in the U.S. In the age of massive migration in the late 1800s and early 1900s, immigrants from Europe tended to settle in densely populated urban areas, especially major Eastern and Midwestern cities such as New York and Chicago. As the century progressed, migration from Europe was mostly cut off [@waldinger_2023_impeding; @zolberg_2008_nation]. As migration from Latin America increased, major cities along the border -- especially in  California and Texas -- saw the greatest growth in migrants [@chiswick_2004_where]. But in in a trend first noticed in the 1990s and early 2000s [@durand_2000_changing; @singer_2004_rise; @zuniga_2005_new; @massey_2008_new], migration to urban areas slowed and migrants relocated to rural areas and small towns in the Sun Belt and the Deep South. @flippen_2021_new offer three explanations for this shift. First is an economic explanation: An overabundance of workers in traditional gateways -- driven in part by mass legalization in the 1990s -- resulted in excess labor supply, especially in California. At the same time, manufacturing and meat processing plants relocated to lower-wage, right-to-work states that were experiencing population growth and a demand for construction [@ribas_2015_line]. Second, labor recruitment contributed to the movement of migrants from traditional areas to the new destinations, and migrant networks sustained the new migrant pathways [@stuesse_2016_scratching]. Finally, increased immigration enforcement and hostile policies in the 1990s in border states such as California drove migrants further east [@durand_2019_evolution]. Due to their lack of established migrant communities, dynamics of settlement differ in these new destinations: Comparing new and established migrant destinations, @hall_2013_residential finds greater segregation in new destinations, even when controlling for other local factors and individual characteristics.
 
 ## Distribution of Same-Sex Couples in the United States
-Concerns of residential distribution, segregation, and equity have also been a prominent line of research for LGB populations in the U.S., generally, and same-sex couples, specifically. Similar to settlement patterns of migrants, LGB Americans are also influenced by the role of economic conditions in their settlement patterns. For example, those in same-sex couples are generally found to be in areas with greater socioeconomic conditions, like more college-educated individuals, higher property values, and access to greater local amenities [@florida_2001; @florida_2005; @black_2002; @lee_2018]. These patterns reflect same-sex couples' relatively higher discretionary income and ability to take advantage of local amenities and spend more on housing [@black_2002]. Network effects appear to also be in play as a consistent finding shows that those in same-sex couples are often located in areas with high concentrations of other same-sex couples -- similar to other ethnic and migrant enclaves. This clustering may help protect same-sex couples from violence and harassment [@Hayslett_2011; @lee_2018]. Because of this concentration, though, a significant amount of research on residential patterns of same-sex couples focuses on their relative concentration in particular urban gayborhoods [@ghaziani_2010]. By extension, this urban-focused set of research looks at transformations of gayborhoods and changes in sexuality-based residential segregation [@ghaziani_2010; @spring_2024]. Finally, one distinct characteristic is the role of progressive policies like same-sex marriage and non-discrimination protections in influencing attitudes toward migration and actual migration practices [@baumle_2023]. @marcen_2022 finds that the legalization of same-sex marriage across U.S. states led to an increase in same-sex couples moving to those states, but only for men in such couples.   
+Concerns of residential distribution, segregation, and equity have also been a prominent line of research for LGB populations in the U.S., generally, and same-sex couples, specifically. Similar to settlement patterns of migrants, LGB Americans are also influenced by the role of economic conditions in their settlement patterns. For example, those in same-sex couples are generally found to be in areas with greater socioeconomic conditions, like more college-educated individuals, higher property values, and access to greater local amenities [@florida_2001; @florida_2005; @black_2002; @lee_2018]. These patterns reflect same-sex couples' relatively higher discretionary income and ability to take advantage of local amenities and spend more on housing [@black_2002]. Network effects appear to also be in play as a consistent finding shows that those in same-sex couples are often located in areas with high concentrations of other same-sex couples -- similar to other ethnic and migrant enclaves. This clustering may help protect same-sex couples from violence and harassment [@hayslett_2011; @lee_2018]. Because of this concentration, though, a significant amount of research on residential patterns of same-sex couples focuses on their relative concentration in particular urban gayborhoods [@ghaziani_2010]. By extension, this urban-focused set of research looks at transformations of gayborhoods and changes in sexuality-based residential segregation [@ghaziani_2010; @spring_2024]. Finally, one distinct characteristic is the role of progressive policies like same-sex marriage and non-discrimination protections in influencing attitudes toward migration and actual migration practices [@baumle_2023]. @marcen_2022_effect finds that the legalization of same-sex marriage across U.S. states led to an increase in same-sex couples moving to those states, but only for men in such couples.   
 
 Combined, these trends have often emphasized same-sex couples living in urban gayborhoods with access to (relatively) more progressive legal environments. But, both changes in demographic trends and academic attention have shifted greater attention to LGB individuals and same-sex couples living beyond these particular locales. From 2000 to 2010 and then continuing to 2020, the concentration of same-sex couples into their own segregated, urban communities has declined [@spring_2013; @spring_2024]. These trends have invited additional research to understand the spread of same-sex couples into suburban and rural localities. For example, some find same-sex couples to leave urban centers due to rising housing values, patterns of poverty, and discriminatory lending practices encourage dispersion of the population [@spring_2024]. These trends also underscore the argument made by @stone_2018 that researchers of LGBTQ+ geography need to look beyond the "great cities" and toward more ordinary citiies, the South, and rural locals. Indeed, same-sex couples' increased representation within red states and rural counties may underscore the increased acceptance and social integration of these unions [@marino_2024].
 
-Unfortunately, data on LGBTQ+ residential location in the United States is quite limited. Reliance on data from the decennial census and the American Community Survey have necessarily constrained insights to those in cohabiting, same-sex couples. There has also been a bias to examine only urban residential patterns, despite increased settlement into suburban and rural locations [@marino_2024]. More research is needed, then, to understand patterns at lower levels of aggregation [@spring_2024]. Additionally, this research on same-sex couples typically assumes all respondents are native-born Americans. Consequently, it is unknown whether the patterns exhibited here are in anyway reflective of immigrants in similar unions. Because @hoffmann_2024 find immigrants in same-sex couples to be of relatively more privileged socioeconomic status compared to immigrants in different-sex couples, it is possible these immigrants may be settled in patterns more reflective of their native LGB counterparts than their fellow immigrants. Considering that a key driver of immigrants in same-sex couples is through mixed-status marriages after DOMA [@hoffmann_2024], it likely means settlement patterns are more similar to native-born LGB individuals. 
+Unfortunately, data on LGBTQ+ residential location in the United States is quite limited. Reliance on data from the decennial census and the American Community Survey have necessarily constrained insights to those in cohabiting, same-sex couples. There has also been a bias to examine only urban residential patterns, despite increased settlement into suburban and rural locations [@marino_2024]. More research is needed, then, to understand patterns at lower levels of aggregation [@spring_2024]. Additionally, this research on same-sex couples typically assumes all respondents are native-born Americans. Consequently, it is unknown whether the patterns exhibited here are in anyway reflective of immigrants in similar unions. Because @hoffmann_2024_policy find immigrants in same-sex couples to be of relatively more privileged socioeconomic status compared to immigrants in different-sex couples, it is possible these immigrants may be settled in patterns more reflective of their native LGB counterparts than their fellow immigrants. Considering that a key driver of immigrants in same-sex couples is through mixed-status marriages after DOMA [@hoffmann_2024_policy], it likely means settlement patterns are more similar to native-born LGB individuals. 
 
 # Data and Methods
 
-Our main source of data is the American Community Survey for 2008 to 2022 (except for 2020, when data quality was not good) [@ruggles_2021].  Each year, the ACS surveys a 1-percent representative sample of U.S. households about their education, occupation, income, family structure, immigration status, country of origin, location, and a variety of other individual and household attributes. We define a same-sex couple as two individuals of the same sex in the same household who report their relationship as "spouse" or "unmarried partner." We limit the sample to individuals age 18 to 64, and immigrants in the sample migrated at the age of 18 or older. 
+Our main source of data is the American Community Survey (ACS) for 2008 to 2022 (except for 2020, when data quality was not of adequate quality) [@ruggles_2024]. Each year, the ACS surveys a 1-percent representative sample of U.S. households about their education, occupation, income, family structure, immigration status, country of origin, location, and a variety of other individual and household attributes. We define a same-sex couple as two individuals of the same sex in the same household who report their relationship as "spouse" or "unmarried partner." We limit the sample to individuals age 18 to 64, and immigrants in the sample migrated at the age of 18 or older.  
 
-We consider the spatial distribution of three groups: immigrants in same-sex couples, immigrants in different-sex couples, and individuals in same-sex couples where neither individual is an immigrant. The 14 years of survey data contain XX cases.  
+```{r sample-size-calc}
+sample_size <- all_geo %>%
+  group_by(group) %>%
+  summarize(n = n(),
+            n_weighted = sum(perwt))
+```
 
-We use "LGB" to refer to all individuals who may be in romantic relationships with members of the same sex, although we recognize that some individuals in same-sex relationships may not identify as lesbian, gay, or bisexual. We also recognize that we are not able to identify bisexual (or pansexual, multisexual, etc.) individuals cohabiting with different-sex partners. Furthermore, measuring the prevalence of same-sex couples in the U.S. is difficult [@michaels_2013]. As in most nationally representative demographic work on same-sex couples [@baumle_2013; @baumle_2019], we are able to identify only LGB couples that cohabit; unpartnered LGB individuals and those who do not live with their partner are not included in the analysis [@baumle_2009, p. 6]. In addition, LGB individuals who do not feel comfortable with the partner labels of the ACS are not in the sample. Another pitfall is measurement error: Misreporting may result when different-sex couples accidentally misspecify the gender of one of the partners [@gates_2009; @goodnature_2021]. Beginning in 2008, the Census Bureau made changes to ACS gender and partnership questions in order to prevent such errors [@u.s.censusbureau_2013], so we rely on data only from 2008 onward, but difficulties remain. If even a small number of different-sex couples misreport one partner's sex, the counts of same-sex couples will be inflated. Following @gates_2009, we remove all respondents that had either their relationship or sex variable allocated by the Census Bureau, which results in dropping XX immigrants in same-sex couples and XX in different-sex couples, or XX percent of the sample. This is the strategy used by most studies of same-sex couples in the ACS [e.g. @boertien_2019; @gates_2013; @goldberg_2021; @christafore_2019; @martell_2020]. In Section C of the Online Appendix we include robustness checks to test the sensitivity of our results to hypothetically high rates of misreporting.  
 
+We consider the spatial distribution of three groups: immigrants in same-sex couples (unweighted $N$ = `r sample_size$n[sample_size$group == 'Same-sex, immigrant']`), immigrants in different-sex couples ($N$ = `r sample_size$n[sample_size$group == 'Different-sex, immigrant']`), and individuals in same-sex couples where neither individual is an immigrant ($N$ = `r sample_size$n[sample_size$group == 'Same-sex, non-immigrant']`). The weighted sample is equivalent to `r sum(all_geo$perwt)` individuals over the 14 years of data.
+
+We use "LGB" to refer to all individuals who may be in romantic relationships with members of the same sex, although we recognize that some individuals in same-sex relationships may not identify as lesbian, gay, or bisexual. We also recognize that we are not able to identify bisexual (or pansexual, multisexual, etc.) individuals cohabiting with different-sex partners. Furthermore, measuring the prevalence of same-sex couples in the U.S. is difficult [@michaels_2013]. As in most nationally representative demographic work on same-sex couples [@baumle_2013; @baumle_2019], we are able to identify only LGB couples that cohabit; unpartnered LGB individuals and those who do not live with their partner are not included in the analysis [@baumle_2009, p. 6]. In addition, LGB individuals who do not feel comfortable with the partner labels of the ACS are not in the sample. Another pitfall is measurement error: Misreporting may result when different-sex couples accidentally misspecify the gender of one of the partners [@gates_2009; @goodnature_2021]. Beginning in 2008, the Census Bureau made changes to ACS gender and partnership questions in order to prevent such errors [@u.s.censusbureau_2013], so we rely on data only from 2008 onward, but difficulties remain. If even a small number of different-sex couples misreport one partner's sex, the counts of same-sex couples will be inflated. Following @gates_2009, we remove all respondents that had either their relationship or sex variable allocated by the Census Bureau. This is the strategy used by most studies of same-sex couples in the ACS [e.g. @boertien_2019; @gates_2013; @goldberg_2021; @christafore_2019; @martell_2020]. 
+
+
+## Variables
+
+Most of our variables come from the ACS and are calculated at the level of the Public Use Microdata Area (PUMA), a geographic unit of analysis that includes at least 100,000 and does not cross state lines. PUMAs partition the entirety of the United States, and most of our analyses are at the level of the country as a whole.  
+
+We consider a variety of social, economic, and spatial variables at the PUMA level in the ACS. The first set of variables are the percentage of individuals in the PUMA with the following characteristics: who hold at least a bachelor's degree, who identify as Black, who identify as Hispanic, who own their own home, who are immigrants (born outside the U.S.), whose income is under 100% or 200% of the poverty line, and who are unemployed. Next are the mean PUMA-level values of personal income, age, Hauser-Warren occupational prestige score [HWSEI, @hauser_1997_socioeconomic], value of home (in $1000s), rent, and cost of electricity. We also use a measure of of density of the PUMA in persons per square mile.  
+
+We also use data from two other sources. First, to examine LGB policies at state of destination, we use original datasets. To create the U.S. state policy index, we compile data from the Movement Advancement Project^[https://www.lgbtmap.org/], a leading LGB organization in the U.S. that collects data on a number of relevant policies. A higher score represents more progress state-level policies. Progressive policies include full marriage equality, state recognition of civil unions and domestic partnerships, ban on all employment and housing discrimination based on sexual orientation, hate crime protections based on sexual orientation, legal joint adoption by same-sex couples, and a ban on conversation therapy for minors. For regressive policies, we consider criminalization of sodomy, state constitutional bans of marriage equality, religious freedom exemptions to discriminate against same-sex couples in adoption, and state-level bans on local non-discrimination ordinances encompassing sexual orientation. The state index ranges from `r min(all_geo$state_policy, na.rm = T)` to `r max(all_geo$state_policy, na.rm = T)`, and the mean state policy score in this time period is `r mean(all_geo$state_policy, na.rm = T)`.  
+
+Our second outside data source is a measure of the prevalence of LGBT nonprofits in a given PUMA. These come from complete IRS data on nonprofits.  
 
 ## Analytic Strategy 
 Many of our analyses entail descriptive statistics of ACS data. For these and for the reshaping described below, we apply survey weights from the ACS. 
@@ -248,14 +281,6 @@ One of our goals is to isolate the effect of country-of-origin LGB policy on the
 
 We reshape the data so that each observation is the percentage of individual cohabiting immigrants in same-sex couples from country $x$ in state $y$ in survey year $z$
 
-
-## Variables
-
-Most of our variables come from the ACS and are calculated at the level of the Public Use Microdata Area (PUMA), a unit of analysis that includes at least 100,000.  
-
-We also use data from two other sources. First, to examine LGB policies at state of destination, we use original datasets. To create the U.S. state policy index, we compile data from the Movement Advancement Project^[https://www.lgbtmap.org/], a leading LGB organization in the U.S. that collects data on a number of relevant policies. Our state index encompasses both progressive policies (full marriage equality, state recognition of civil unions and domestic partnerships, ban on all employment and housing discrimination based on sexual orientation, hate crime protections based on sexual orientation, legal joint adoption by same-sex couples, and a ban on conversation therapy for minors) and regressive policies (criminalization of sodomy, state constitutional bans of marriage equality, religious freedom exemptions to discriminate against same-sex couples in adoption, and state-level bans on local non-discrimination ordinances encompassing sexual orientation). The state index ranges from XX to XX, and the mean state policy score for immigrants in our sample is XX.  
-
-Our second outside data source is a measure of the prevalence of LGBT nonprofits in a given PUMA. These come from complete IRS data on nonprofits.  
 
 
 # Results
@@ -270,16 +295,18 @@ Table \@ref(tab:desc) prevents descriptive statistics for PUMA-level characteris
 
 However, immigrants in same-sex couples live in areas with somewhat more advantage than the other two groups. They live in areas with higher incomes and higher occupational prestige. In addition, the home and rent prices of their areas are somewhat higher than those of immigrants more broadly. They also live in denser areas.  
 
-Clear differences also arise around the number of nonprofits in their areas. On average, immigrants in same-sex couples live in PUMAs with 1.2 LGBT nonprofits, while LGB non-immigrants live in PUMAs with 0.76 and immigrants in different-sex couples with 0.30. They also live in areas with more immigrant nonprofits, with an average of 1.0. Surprisingly, the number of immigrant nonprofits for the average immigrant in a different-sex couple and average non-immigrant in a same sex couple are quite similar, at about 0.8. 
+Clear differences also arise around two variables relevant to queer people. First, although all three groups tend to live in relatively progressive states with a score of at least 3, immigrants in same-sex couples live in states with an average score of nearly 4.
+
+the number of nonprofits in their areas. On average, immigrants in same-sex couples live in PUMAs with 1.2 LGBT nonprofits, while LGB non-immigrants live in PUMAs with 0.76 and immigrants in different-sex couples with 0.30. They also live in areas with more immigrant nonprofits, with an average of 1.0. Surprisingly, the number of immigrant nonprofits for the average immigrant in a different-sex couple and average non-immigrant in a same sex couple are quite similar, at about 0.8. 
 
 Figures \@ref(fig:desc-time-1) and \@ref(fig:desc-time-2) show how these differences are fairly stable over time. One notable change is the average percent of Black residents in the typical area for each group: Around 2010, immigrants in same-sex couples were 1 to 2 percentage points more likely to live in areas with Black respondents than the other groups, but in recent years the numbers are very similar.  
 
 
 ## Models
 
-Table \@ref(tab:prop-regression) presents OLS regressions for the percentage of immigrants in same-sex couples, out of all immigrants in couples, at the PUMA level. Model 1 does not include fixed effects, Model 2 includes state fixed effects and errors clustered at the state level, and Model 3 includes both state and year fixed effects and clusters errors at the state and year levels. Model 3 shows that a number of factors remain significant even in models with these fixed effects. Areas are more likely to have higher proportions of immigrants in same-sex couples if fewer people own their own home, if the percentage of immigrants is lower, if more people are over the poverty line, if homes are worth somewhat less, if the density is lower, and if the number of LGBT nonprofits is higher.  
+Table \@ref(tab:prop-regression) presents OLS regressions for the percentage of immigrants in same-sex couples, out of all immigrants in couples, at the PUMA level. Model 1 does not include fixed effects, Model 2 includes state fixed effects and errors clustered at the state level, and Model 3 includes both state and year fixed effects and clusters errors at the state and year levels. Model 3 shows that a number of factors remain significant even in models with these fixed effects. Areas are more likely to have higher proportions of immigrants in same-sex couples if fewer people own their own home, if the percentage of immigrants is lower, if more people are over the poverty line, if homes are worth somewhat less, and if the number of LGBT nonprofits is higher, and if the number of immigrant nonprofits is lower.  
 
-Table \@ref(tab:gay-prop-regression) presents corresponding regressions for the proportion of all people in same-sex couples who are immigrants. Again, a number of coefficients are significant in Model 3, which includes state and year fixed effects. LGB immigrants tend to live in areas with lower income, higher percentages of immigrants, lower unemployment, lower rent, and higher density than LGB non-immigrants.  
+Table \@ref(tab:gay-prop-regression) presents corresponding regressions for the proportion of all people in same-sex couples who are immigrants. Again, a number of coefficients are significant in Model 3, which includes state and year fixed effects. LGB immigrants tend to live in areas with more Black and Hispanic people, lower income, higher percentages of immigrants, lower unemployment, lower rent, higher density, and (surprisingly) with fewer immigrant nonprofits than LGB non-immigrants.  
 
 # Discussion and Conclusion
 
@@ -302,7 +329,8 @@ desc_tab <- all_geo_survey %>%
                      owned_puma, age_puma, immigrant_puma,
                      poverty_100_puma, poverty_200_puma, hwsei_puma, 
                      unemployed_puma, valueh_puma,
-                     rent_puma, costelec_puma, density, lgbt_nonprofits, immigrant_nonprofits), 
+                     rent_puma, costelec_puma, density, state_policy, 
+                     lgbt_nonprofits, immigrant_nonprofits), 
             ~ survey_mean(.x, na.rm = T)))
 
 write_csv(desc_tab, here('geo/files', 'desc_tab.csv'))
@@ -313,7 +341,8 @@ desc_tab_time <- all_geo_survey %>%
                      owned_puma, age_puma, immigrant_puma,
                      poverty_100_puma, poverty_200_puma, hwsei_puma, 
                      unemployed_puma, valueh_puma,
-                     rent_puma, costelec_puma, density, lgbt_nonprofits, immigrant_nonprofits), 
+                     rent_puma, costelec_puma, density, state_policy,
+                     lgbt_nonprofits, immigrant_nonprofits), 
             ~ survey_mean(.x, na.rm = T)))
 
 
@@ -348,10 +377,10 @@ variable_names <- c('Bachelor\'s degree (%)' = 'bachelors_puma',
                     'Mean individual\'s value of home ($1000s)' = 'valueh_puma',
                     'Mean individual\'s rent' = 'rent_puma', 
                     'Mean cost of electricity' = 'costelec_puma', 
-                    'Density (persons per sq. mile)' = 'density', 
+                    'Density (persons per sq. mile)' = 'density_puma', 
                     'State LGB policy score' = 'state_policy', 
-                    'Number of LGBT nonprofits' = 'lgbt_nonprofits',
-                    'Number of immigrant nonprofits' = 'immigrant_nonprofits')
+                    'Mean number of LGBT nonprofits' = 'lgbt_nonprofits',
+                    'Mean number of immigrant nonprofits' = 'immigrant_nonprofits')
 
 variable_names_swap <- names(variable_names)
 names(variable_names_swap) <- as.vector(variable_names)
@@ -366,6 +395,7 @@ FitFlextableToPage <- function(ft, pgwidth = 6){
 }
 
 desc_tab %>%
+  left_join(sample_size) %>%
   column_to_rownames('group') %>%
   t() %>%
   as.data.frame() %>%
@@ -375,7 +405,8 @@ desc_tab %>%
   rownames_to_column('Variable') %>%
   filter(!str_detect(Variable, '_se')) %>%
   mutate(Variable = recode(Variable, !!!variable_names_swap)) %>%
-  flextable() %>%
+  flextable() %>% 
+  colformat_double(i = (length(variable_names)+1):(length(variable_names)+2), digits = 0) %>%
   FitFlextableToPage() %>% # flextable::autofit() %>%
   flextable::set_caption('Mean values for geographic variables for immigrants in different- or same-sex couples, 2008-2022') 
   # kable(booktabs = T, linesep = '', caption = 'Mean values for geographic variables for immigrants in different- or same-sex couples, 2008-2022')
@@ -391,14 +422,14 @@ list(#'no FE' =
                      log_inctot_puma + owned_puma + age_puma + immigrant_puma +
                      poverty_200_puma + hwsei_puma + 
                      unemployed_puma + valueh_puma +
-                     rent_puma + costelec_puma + density + state_policy + lgbt_nonprofits + immigrant_nonprofits,
+                     rent_puma + costelec_puma + density_puma + state_policy + lgbt_nonprofits + immigrant_nonprofits,
                   data = prop_tab_year),
    #'State FE and clustered errors' = 
    lm(prop ~ bachelors_puma + black_puma + hispanic_puma + 
                      log_inctot_puma + owned_puma + age_puma + immigrant_puma +
                      poverty_200_puma + hwsei_puma + 
                      unemployed_puma + valueh_puma +
-                     rent_puma + costelec_puma + density + state_policy + lgbt_nonprofits + immigrant_nonprofits + state,
+                     rent_puma + costelec_puma + density_puma + state_policy + lgbt_nonprofits + immigrant_nonprofits + state,
                      data = prop_tab_year) %>%
      coeftest(vcov = vcovCL(., cluster = ~ state), save = T),
     #'State and year FE and clustered errors' = 
@@ -406,7 +437,7 @@ list(#'no FE' =
                      log_inctot_puma + owned_puma + age_puma + immigrant_puma +
                      poverty_200_puma  + hwsei_puma + 
                      unemployed_puma + valueh_puma +
-                     rent_puma + costelec_puma + density + state_policy + state + lgbt_nonprofits + immigrant_nonprofits + year,
+                     rent_puma + costelec_puma + density_puma + state_policy + state + lgbt_nonprofits + immigrant_nonprofits + year,
                      data = prop_tab_year) %>%
      coeftest(vcov = vcovCL(., cluster = ~ state + year), save = T)) %>%
   huxtable::huxreg(coefs = c('Bachelor\'s degree (%)' = 'bachelors_puma', 
@@ -424,10 +455,10 @@ list(#'no FE' =
                              'Mean individual\'s value of home ($1000s)' = 'valueh_puma',
                              'Mean individual\'s rent' = 'rent_puma', 
                              'Mean cost of electricity' = 'costelec_puma', 
-                             'Density (persons per sq. mile)' = 'density', 
+                             'Density (persons per sq. mile)' = 'density_puma', 
                              'State LGB policy score' = 'state_policy', 
-                             'Number of LGBT nonprofits' = 'lgbt_nonprofits',
-                             'Number of immigrant nonprofits' = 'immigrant_nonprofits'),
+                             'Mean number of LGBT nonprofits' = 'lgbt_nonprofits',
+                             'Mean number of immigrant nonprofits' = 'immigrant_nonprofits'),
                    stars = c(`†` = 0.1, `*` = 0.05, `**` = 0.01, `***` = 0.001),
                    statistics = c('Observations' = 'nobs')) %>%
   huxtable::insert_row(c('State FEs and clustered errors?', 'no', 'yes', 'yes'), after = nrow(.) - 2) %>%
@@ -445,20 +476,20 @@ list(lm(prop ~ bachelors_puma + black_puma + hispanic_puma +
                      log_inctot_puma + owned_puma + age_puma + immigrant_puma +
                      poverty_200_puma + hwsei_puma + 
                      unemployed_puma + valueh_puma +
-                     rent_puma + costelec_puma + density + state_policy + lgbt_nonprofits + immigrant_nonprofits,
+                     rent_puma + costelec_puma + density_puma + state_policy + lgbt_nonprofits + immigrant_nonprofits,
                   data = gay_prop_tab_year),
    lm(prop ~ bachelors_puma + black_puma + hispanic_puma + 
                      log_inctot_puma + owned_puma + age_puma + immigrant_puma +
                      poverty_200_puma + hwsei_puma + 
                      unemployed_puma + valueh_puma +
-                     rent_puma + costelec_puma + density + state_policy + lgbt_nonprofits + immigrant_nonprofits + state,
+                     rent_puma + costelec_puma + density_puma + state_policy + lgbt_nonprofits + immigrant_nonprofits + state,
                      data = gay_prop_tab_year) %>%
      coeftest(vcov = vcovCL(., cluster = ~ state), save = T),
     lm(prop ~ bachelors_puma + black_puma + hispanic_puma + 
                      log_inctot_puma + owned_puma + age_puma + immigrant_puma +
                      poverty_200_puma  + hwsei_puma + 
                      unemployed_puma + valueh_puma +
-                     rent_puma + costelec_puma + density + state_policy + state + lgbt_nonprofits + immigrant_nonprofits + year,
+                     rent_puma + costelec_puma + density_puma + state_policy + state + lgbt_nonprofits + immigrant_nonprofits + year,
                      data = gay_prop_tab_year) %>%
      coeftest(vcov = vcovCL(., cluster = ~ state + year), save = T) ) %>%
   huxtable::huxreg(coefs = c('Bachelor\'s degree (%)' = 'bachelors_puma', 
@@ -476,10 +507,10 @@ list(lm(prop ~ bachelors_puma + black_puma + hispanic_puma +
                              'Mean individual\'s value of home ($1000s)' = 'valueh_puma',
                              'Mean individual\'s rent' = 'rent_puma', 
                              'Mean cost of electricity' = 'costelec_puma', 
-                             'Density (persons per sq. mile)' = 'density', 
+                             'Density (persons per sq. mile)' = 'density_puma', 
                              'State LGB policy score' = 'state_policy', 
-                             'Number of LGBT nonprofits' = 'lgbt_nonprofits',
-                             'Number of immigrant nonprofits' = 'immigrant_nonprofits'),
+                             'Mean number of LGBT nonprofits' = 'lgbt_nonprofits',
+                             'Mean number of immigrant nonprofits' = 'immigrant_nonprofits'),
                    statistics = c('Observations' = 'nobs')) %>%
   huxtable::insert_row(c('State FEs and clustered errors?', 'no', 'yes', 'yes'), after = nrow(.) - 2) %>%
   huxtable::insert_row(c('Year FEs and clustered errors?', 'no', 'no', 'yes'), after = nrow(.) - 2) %>%
@@ -494,20 +525,20 @@ list('no FE' = glm(n ~ group*(bachelors_puma + black_puma + hispanic_puma +
                      log_inctot_puma + owned_puma + age_puma + immigrant_puma +
                      poverty_100_puma + hwsei_puma + 
                      unemployed_puma + valueh_puma +
-                     rent_puma + costelec_puma + density + state_policy + lgbt_nonprofits),
+                     rent_puma + costelec_puma + density_puma + state_policy + lgbt_nonprofits),
                   data = count_tab_year, family = 'quasipoisson')) %>% huxtable::huxreg()
    # 'State FE and clustered errors' = glm(n ~ group + bachelors_puma + black_puma + hispanic_puma + 
    #                   log_inctot_puma + owned_puma + age_puma + immigrant_puma +
    #                   poverty_100_puma + hwsei_puma + 
    #                   unemployed_puma + valueh_puma +
-   #                   rent_puma + costelec_puma + density + state_policy + lgbt_nonprofits + state,
+   #                   rent_puma + costelec_puma + density_puma + state_policy + lgbt_nonprofits + state,
    #                   data = count_tab_year, family = 'quasipoisson') %>%
    #   coeftest(vcov = vcovCL(., cluster = ~ state), save = T),
    #  'State and year FE and clustered errors' = glm(n ~ group + bachelors_puma + black_puma + hispanic_puma + 
    #                   log_inctot_puma + owned_puma + age_puma + immigrant_puma +
    #                   poverty_100_puma  + hwsei_puma + 
    #                   unemployed_puma + valueh_puma +
-   #                   rent_puma + costelec_puma + density + state_policy + state + lgbt_nonprofits + year,
+   #                   rent_puma + costelec_puma + density_puma + state_policy + state + lgbt_nonprofits + year,
    #                   data = count_tab_year, family = 'quasipoisson') %>%
    #   coeftest(vcov = vcovCL(., cluster = ~ state + year), save = T) ) %>%
   huxtable::huxreg(coefs = c('Same-sex, immigrant' = 'groupSame-sex, immigrant',
@@ -527,9 +558,9 @@ list('no FE' = glm(n ~ group*(bachelors_puma + black_puma + hispanic_puma +
                              'Mean individual\'s value of home ($1000s)' = 'valueh_puma',
                              'Mean individual\'s rent' = 'rent_puma', 
                              'Mean cost of electricity' = 'costelec_puma', 
-                             'Density (persons per sq. mile)' = 'density', 
+                             'Density (persons per sq. mile)' = 'density_puma', 
                              'State LGB policy score' = 'state_policy', 
-                             'Number of LGBT nonprofits' = 'lgbt_nonprofits'),
+                             'Mean number of LGBT nonprofits' = 'lgbt_nonprofits'),
                    stars = c(`†` = 0.1, `*` = 0.05, `**` = 0.01, `***` = 0.001)) %>%
   huxtable::set_width(1) %>%
   set_wrap(T) %>%
