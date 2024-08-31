@@ -753,6 +753,77 @@ state_tab %>%
 
 ```
 
+```{r state-map-2, eval = F, fig.cap = 'Number of cohabiting immigrants in same-sex couples in U.S. states, averaging over ACS survey years 2008 to 2022.'}
+
+state_tab <- count_tab_year %>%
+  filter(group == 'Same-sex, immigrant') %>%
+   mutate(year_cat = case_when(
+         year < 2013 ~ '2008-2012',
+         year %in% 2013:2017 ~ '2013-2017',
+         year > 2017 ~ '2018-2022'),
+         state = tolower(state)) %>%
+  group_by(state, year_cat) %>%
+  summarize(n = sum(n))
+
+
+
+state_tab %>%
+  # mutate(prop_samesex = ifelse(prop_samesex > 4, 4, prop_samesex)) %>%
+  ggplot(aes(map_id = state, fill = n)) +
+  geom_map(map = fiftystater::fifty_states) +
+  expand_limits(x = fiftystater::fifty_states$long, y = fiftystater::fifty_states$lat) +
+  coord_map() +
+  # scale_fill_gradient(low = "#7570B3", high = "#1B9E77", na.value = 'gray95') +
+  scale_fill_gradient(low = uclablue, high = uclagold, na.value = 'gray95') +
+                      #breaks = c(0,7), labels=format(c(0,7))) +
+  theme_void() + # font_family = 'Palatino') +
+  facet_wrap(~year_cat, ncol = 1) +
+  labs(fill = "Same-sex imm.") +
+  # guides(color = guide_legend(override.aes = list(size = 0.5))) +
+  theme(legend.title = element_text(size=8), legend.text=element_text(size=8))
+  # theme(legend.title=element_blank(), 
+  #       panel.grid.major.y = element_line('grey80'),
+  #       legend.background = element_rect(fill = "transparent"))
+
+
+# (state_tab %>%
+#   filter(year_cat == '2008-2013') %>%
+#   ggplot(aes(map_id = state, fill = prop_samesex)) +
+#   geom_map(map = fiftystater::fifty_states) +
+#   expand_limits(x = fiftystater::fifty_states$long, y = fiftystater::fifty_states$lat) +
+#   coord_map() +
+#   scale_fill_gradient(low = uclablue, high = uclagold, na.value = 'gray95') +
+#                       #breaks = c(0,7), labels=format(c(0,7))) +
+#   theme_map() + # font_family = 'Palatino') +
+#   facet_wrap(~year_cat, ncol = 1) +
+#   labs(fill = "Same-sex (%)")) /
+#   (state_tab %>%
+#   filter(year_cat == '2014-2017') %>%
+#   ggplot(aes(map_id = state, fill = prop_samesex)) +
+#   geom_map(map = fiftystater::fifty_states) +
+#   expand_limits(x = fiftystater::fifty_states$long, y = fiftystater::fifty_states$lat) +
+#   coord_map() +
+#   scale_fill_gradient(low = uclablue, high = uclagold, na.value = 'gray95') +
+#                       #breaks = c(0,7), labels=format(c(0,7))) +
+#   theme_map() + # font_family = 'Palatino') +
+#   facet_wrap(~year_cat, ncol = 1) +
+#   labs(fill = "Same-sex (%)")) /
+#   (state_tab %>%
+#   filter(year_cat == '2019-2022') %>%
+#   ggplot(aes(map_id = state, fill = prop_samesex)) +
+#   geom_map(map = fiftystater::fifty_states) +
+#   expand_limits(x = fiftystater::fifty_states$long, y = fiftystater::fifty_states$lat) +
+#   coord_map() +
+#   scale_fill_gradient(low = uclablue, high = uclagold, na.value = 'gray95') +
+#                       #breaks = c(0,7), labels=format(c(0,7))) +
+#   theme_map() + # font_family = 'Palatino') +
+#   facet_wrap(~year_cat, ncol = 1) +
+#   labs(fill = "Same-sex (%)"))
+
+
+
+```
+
 \newpage
 
 ```{r desc-time-1, fig.height = 5.5, fig.cap = 'Geographic characteristics (percentages) over time for immigrants in different- and same-sex couples, based on American Community Survey data for 2008-2022'}
