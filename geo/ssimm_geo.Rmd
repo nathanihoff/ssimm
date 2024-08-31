@@ -276,7 +276,7 @@ We consider a variety of social, economic, and spatial variables at the PUMA lev
 
 We also use data from two other sources. First, to examine LGB policies at state of destination, we use original datasets. To create the U.S. state policy index, we compile data from the Movement Advancement Project^[https://www.lgbtmap.org/], a leading LGB organization in the U.S. that collects data on a number of relevant policies. A higher score represents more progress state-level policies. Progressive policies include full marriage equality, state recognition of civil unions and domestic partnerships, ban on all employment and housing discrimination based on sexual orientation, hate crime protections based on sexual orientation, legal joint adoption by same-sex couples, and a ban on conversation therapy for minors. For regressive policies, we consider criminalization of sodomy, state constitutional bans of marriage equality, religious freedom exemptions to discriminate against same-sex couples in adoption, and state-level bans on local non-discrimination ordinances encompassing sexual orientation. The state index ranges from `r min(all_geo$state_policy, na.rm = T)` to `r max(all_geo$state_policy, na.rm = T)`, and the mean state policy score in this time period is `r mean(all_geo$state_policy, na.rm = T)`.  
 
-Our second outside data source is a measure of the prevalence of LGBTQ+ and immigrant-serving nonprofits in a given PUMA. These data come from the Internal Revenue Service's Business Master File (BMF). The BMF collects basic, administrative data on all tax-exempt entities required to submit a Form 990 annually. For our purposes, we restrict our sample to just 501c(3) charitable organizations. Additionally, the IRS assigns each organization an activity code from the National Taxonomy of Exempt Entities (NTEE). These NTEE codes help designate whether an organization is focused on "Arts & Culture" (code: A20) or "Homeless Shelters" (code: L82). We classify nonprofits with NTEE codes "Ethnic & Immigrant Centers (code: P84) and "Immigrant Rights" (code: R21) as immigrant serving. While LGBTQ+ nonprofits are those designed as "LGBT Centers" (code: P88) and "Lesbian & Gay Rights" (code: R26). We additionally supplement our classification of LGBTQ+ nonprofits with those used by @velasco_2023_deconstructed, who found LGBTQ+ nonprofits operating under other classification designations.
+Our second outside data source is a measure of the prevalence of LGBTQ+ and immigrant-serving nonprofits in a given PUMA. These data come from the Internal Revenue Service's Business Master File (BMF). The BMF collects basic, administrative data on all tax-exempt entities required to submit a Form 990 annually. For our purposes, we restrict our sample to just 501c(3) charitable organizations. Additionally, the IRS assigns each organization an activity code from the National Taxonomy of Exempt Entities (NTEE). These NTEE codes help designate whether an organization is focused on "Arts & Culture" (code: A20) or "Homeless Shelters" (code: L82). We classify nonprofits with NTEE codes "Ethnic & Immigrant Centers (code: P84) and "Immigrant Rights" (code: R21) as immigrant serving. While LGBTQ+ nonprofits are those designed as "LGBT Centers" (code: P88) and "Lesbian & Gay Rights" (code: R26). We additionally supplement our classification of LGBTQ+ nonprofits with those used by @velasco_2022_deconstructed, who found LGBTQ+ nonprofits operating under other classification designations.
 
 Means for all of these variables by group are presented in Table \@ref(tab:desc).  
 
@@ -417,6 +417,7 @@ desc_tab %>%
 \newpage
 
 ```{r prop-regression}
+
 list(#'no FE' = 
   lm(prop ~ bachelors_puma + black_puma + hispanic_puma + 
                      log_inctot_puma + owned_puma + age_puma + immigrant_puma +
@@ -440,25 +441,26 @@ list(#'no FE' =
                      rent_puma + costelec_puma + density_puma + state_policy + state + lgbt_nonprofits + immigrant_nonprofits + year,
                      data = prop_tab_year) %>%
      coeftest(vcov = vcovCL(., cluster = ~ state + year), save = T)) %>%
-  huxtable::huxreg(coefs = c('Bachelor\'s degree (%)' = 'bachelors_puma', 
-                             'Black (%)' = 'black_puma',
-                             'Hispanic (%)' = 'hispanic_puma', 
-                             # 'Mean personal income' = 'inctot_puma',
-                             'Log mean personal income' = 'log_inctot_puma', 
-                             'Individuals own home (%)' = 'owned_puma', 
-                             'Mean age' = 'age_puma', 
-                             'Immigrant (%)' = 'immigrant_puma',
-                             # 'Individuals under 100% of poverty line (%)' = 'poverty_100_puma', 
-                             'Individuals under 200% of poverty line (%)' = 'poverty_200_puma', 
-                             'Mean HWSEI occupation score' = 'hwsei_puma', 
-                             'Unemployed (%)' = 'unemployed_puma', 
-                             'Mean individual\'s value of home ($1000s)' = 'valueh_puma',
-                             'Mean individual\'s rent' = 'rent_puma', 
-                             'Mean cost of electricity' = 'costelec_puma', 
-                             'Density (persons per sq. mile)' = 'density_puma', 
-                             'State LGB policy score' = 'state_policy', 
-                             'Mean number of LGBT nonprofits' = 'lgbt_nonprofits',
-                             'Mean number of immigrant nonprofits' = 'immigrant_nonprofits'),
+  huxtable::huxreg(coefs = variable_names[!(variable_names %in% c('inctot_puma', 'poverty_100_puma'))],
+                     # c('Bachelor\'s degree (%)' = 'bachelors_puma', 
+                     #         'Black (%)' = 'black_puma',
+                     #         'Hispanic (%)' = 'hispanic_puma', 
+                     #         # 'Mean personal income' = 'inctot_puma',
+                     #         'Log mean personal income' = 'log_inctot_puma', 
+                     #         'Individuals own home (%)' = 'owned_puma', 
+                     #         'Mean age' = 'age_puma', 
+                     #         'Immigrant (%)' = 'immigrant_puma',
+                     #         # 'Individuals under 100% of poverty line (%)' = 'poverty_100_puma', 
+                     #         'Individuals under 200% of poverty line (%)' = 'poverty_200_puma', 
+                     #         'Mean HWSEI occupation score' = 'hwsei_puma', 
+                     #         'Unemployed (%)' = 'unemployed_puma', 
+                     #         'Mean individual\'s value of home ($1000s)' = 'valueh_puma',
+                     #         'Mean individual\'s rent' = 'rent_puma', 
+                     #         'Mean cost of electricity' = 'costelec_puma', 
+                     #         'Density (persons per sq. mile)' = 'density_puma', 
+                     #         'State LGB policy score' = 'state_policy', 
+                     #         'Mean number of LGBT nonprofits' = 'lgbt_nonprofits',
+                     #         'Mean number of immigrant nonprofits' = 'immigrant_nonprofits'),
                    stars = c(`†` = 0.1, `*` = 0.05, `**` = 0.01, `***` = 0.001),
                    statistics = c('Observations' = 'nobs')) %>%
   huxtable::insert_row(c('State FEs and clustered errors?', 'no', 'yes', 'yes'), after = nrow(.) - 2) %>%
@@ -591,7 +593,7 @@ list('Different-sex, immigrant' = as.data.frame(comparisons) %>%
 \newpage
 
 ```{r poisson-regression-separate, eval = T}
-list('Different-sex, immigrant' = glm(n ~ bachelors_puma + black_puma + hispanic_puma + 
+mod_list <- list('Different-sex, immigrant' = glm(n ~ bachelors_puma + black_puma + hispanic_puma + 
                      log_inctot_puma + owned_puma + age_puma + immigrant_puma +
                      poverty_200_puma  + hwsei_puma + 
                      unemployed_puma + valueh_puma +
@@ -617,33 +619,52 @@ list('Different-sex, immigrant' = glm(n ~ bachelors_puma + black_puma + hispanic
                      immigrant_nonprofits + year,
                      data = filter(count_tab_year, group == 'Same-sex, non-immigrant'), 
                      family = 'quasipoisson') %>%
-       coeftest(vcov = vcovCL(., cluster = ~ state + year), save = T)) %>%
-  huxtable::huxreg(coefs = c('Bachelor\'s degree (%)' = 'bachelors_puma', 
-                             'Black (%)' = 'black_puma',
-                             'Hispanic (%)' = 'hispanic_puma', 
-                             # 'Mean personal income' = 'inctot_puma',
-                             'Log mean personal income' = 'log_inctot_puma', 
-                             'Individuals own home (%)' = 'owned_puma', 
-                             'Mean age' = 'age_puma', 
-                             'Immigrant (%)' = 'immigrant_puma',
-                             # 'Individuals under 100% of poverty line (%)' = 'poverty_100_puma', 
-                             'Individuals under 200% of poverty line (%)' = 'poverty_200_puma', 
-                             'Mean HWSEI occupation score' = 'hwsei_puma', 
-                             'Unemployed (%)' = 'unemployed_puma', 
-                             'Mean individual\'s value of home ($1000s)' = 'valueh_puma',
-                             'Mean individual\'s rent' = 'rent_puma', 
-                             'Mean cost of electricity' = 'costelec_puma', 
-                             'Density (persons per sq. mile)' = 'density_puma', 
-                             'State LGB policy score' = 'state_policy', 
-                             'Mean number of LGBT nonprofits' = 'lgbt_nonprofits',
-                             'Mean number of immigrant nonprofits' = 'immigrant_nonprofits'),
-                   stars = c(`†` = 0.1, `*` = 0.05, `**` = 0.01, `***` = 0.001)) %>%
+       coeftest(vcov = vcovCL(., cluster = ~ state + year), save = T)) 
+
+
+
+same_dif <- (tidy(mod_list[['Same-sex, immigrant']])$estimate - tidy(mod_list[['Different-sex, immigrant']])$estimate) /
+             sqrt(tidy(mod_list[['Same-sex, immigrant']])$std.error^2 + tidy(mod_list[['Different-sex, immigrant']])$std.error^2)
+same_dif <- 2*(1-pnorm(abs(same_dif)))
+
+
+imm_nonimm <- (tidy(mod_list[['Same-sex, immigrant']])$estimate - tidy(mod_list[['Same-sex, non-immigrant']])$estimate) /
+             sqrt(tidy(mod_list[['Same-sex, immigrant']])$std.error^2 + tidy(mod_list[['Same-sex, non-immigrant']])$std.error^2)
+imm_nonimm <- 2*(1-pnorm(abs(imm_nonimm)))
+
+diff_df <- data.frame(term = tidy(mod_list[['Same-sex, immigrant']])$term,
+           same_dif,
+           imm_nonimm
+) %>%
+  # mutate(across(c(same_dif, imm_nonimm), ~round(.x, 3))) %>%
+  mutate(across(c(same_dif, imm_nonimm), ~case_when(
+    .x < .001 ~ '***',
+    .x < .01 ~ '**',
+    .x < .05 ~ '*',
+    .x < .1 ~ '†',
+    T ~ ' '
+  ))) %>%
+  filter(term %in% variable_names) %>%
+  mutate(term = factor(term, levels = variable_names)) %>%
+  arrange(term) %>%
+  group_by(grp = row_number()) %>% 
+  group_modify(~ add_row(.x, term = NA)) %>% 
+  ungroup() %>% 
+  select(-grp)
+diff_df <- rbind(NA, diff_df, NA, NA, NA, NA) 
+
+mod_list %>%
+  huxtable::huxreg(coefs = variable_names[!(variable_names %in% c('inctot_puma', 'poverty_100_puma'))],
+                   stars = c(`†` = 0.1, `*` = 0.05, `**` = 0.01, `***` = 0.001),
+                   statistics = 'nobs') %>%
   huxtable::insert_row(c('State FEs and clustered errors?', 'yes', 'yes', 'yes'), after = nrow(.) - 2) %>%
   huxtable::insert_row(c('Year FEs and clustered errors?', 'yes', 'yes', 'yes'), after = nrow(.) - 2) %>%
+  huxtable::insert_column(diff_df$same_dif, after = 2) %>%
+  huxtable::insert_column(diff_df$imm_nonimm, after = 4) %>% 
   huxtable::set_width(1) %>%
   set_wrap(T) %>%
   set_all_padding(0) %>%
-  huxtable::set_caption('Quasi-poisson models by PUMA, regressed on PUMA-level factors, separately by group')
+  huxtable::set_caption('Quasi-poisson models by PUMA, regressed on PUMA-level factors, separately by group. Symbols between columns represent significance level for a Z-test of the difference in coefficient bewteen the two adject models.')
 ```
 
 \newpage
