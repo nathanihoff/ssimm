@@ -206,15 +206,16 @@ gay_prop_tab_year <- acs_geo %>%
   # summarize(across(c(density, state_policy, lgbt_nonprofits, immigrant_nonprofits), ~mean(.x, na.rm = T))))
 
 
-count_tab_year <- acs_geo %>%
-  select(state, puma, year) %>%
+count_tab_year <- bind_rows(
+  select(acs_geo, state, puma, year) %>% mutate(group = 'Different-sex, immigrant'),
+  select(acs_geo, state, puma, year) %>% mutate(group = 'Same-sex, immigrant'),
+  select(acs_geo, state, puma, year) %>% mutate(group = 'Same-sex, non-immigrant')) %>%
   left_join(all_geo %>%
     # filter(year == 2019) %>%
     group_by(year, state, puma, group) %>%
     summarize(n = sum(perwt)) %>%
-    ungroup() %>%
-    pivot_wider(names_from = 'group', values_from = 'n') %>% 
-    replace(is.na(.), 0)) %>%
+    ungroup()) %>% 
+    replace(is.na(.), 0) %>%
   # complete(year, state, puma, same_sex, fill = list('n' = 0)) %>%
   left_join(acs_geo) 
   
@@ -519,28 +520,48 @@ list(lm(prop ~ bachelors_puma + black_puma + hispanic_puma +
   huxtable::set_caption('Proportion of same-sex partnered people who are immigrants by PUMA, regressed on PUMA-level factors')
 ```
 
-```{r poisson-regression, eval = F}
-list('no FE' = glm(n ~ group*(bachelors_puma + black_puma + hispanic_puma + 
-                     log_inctot_puma + owned_puma + age_puma + immigrant_puma +
-                     poverty_100_puma + hwsei_puma + 
-                     unemployed_puma + valueh_puma +
-                     rent_puma + costelec_puma + density_puma + state_policy + lgbt_nonprofits),
-                  data = count_tab_year, family = 'quasipoisson')) %>% huxtable::huxreg()
-   # 'State FE and clustered errors' = glm(n ~ group + bachelors_puma + black_puma + hispanic_puma + 
-   #                   log_inctot_puma + owned_puma + age_puma + immigrant_puma +
-   #                   poverty_100_puma + hwsei_puma + 
-   #                   unemployed_puma + valueh_puma +
-   #                   rent_puma + costelec_puma + density_puma + state_policy + lgbt_nonprofits + state,
-   #                   data = count_tab_year, family = 'quasipoisson') %>%
-   #   coeftest(vcov = vcovCL(., cluster = ~ state), save = T),
-   #  'State and year FE and clustered errors' = glm(n ~ group + bachelors_puma + black_puma + hispanic_puma + 
-   #                   log_inctot_puma + owned_puma + age_puma + immigrant_puma +
-   #                   poverty_100_puma  + hwsei_puma + 
-   #                   unemployed_puma + valueh_puma +
-   #                   rent_puma + costelec_puma + density_puma + state_policy + state + lgbt_nonprofits + year,
-   #                   data = count_tab_year, family = 'quasipoisson') %>%
-   #   coeftest(vcov = vcovCL(., cluster = ~ state + year), save = T) ) %>%
-  huxtable::huxreg(coefs = c('Same-sex, immigrant' = 'groupSame-sex, immigrant',
+```{r poisson-regression-interact, eval = F}
+poisson_interact <- glm(n ~ imm_ss_group*(bachelors_puma + black_puma + hispanic_puma + 
+                       log_inctot_puma + owned_puma + age_puma + immigrant_puma +
+                       poverty_200_puma  + hwsei_puma + 
+                       unemployed_puma + valueh_puma +
+                       rent_puma + costelec_puma + density_puma + state_policy + 
+                       lgbt_nonprofits + immigrant_nonprofits + 
+                       state + year),
+                     data = rename(count_tab_year, imm_ss_group = group), 
+                     family = 'quasipoisson') 
+
+comparisons <- marginaleffects::avg_comparisons(
+                  poisson_interact, 
+                  by = 'imm_ss_group', 
+                  variables = c('bachelors_puma', 'black_puma', 'hispanic_puma', 
+                                'log_inctot_puma', 'owned_puma', 'age_puma', 'immigrant_puma',
+                                'poverty_200_puma ', 'hwsei_puma',
+                                'unemployed_puma', 'valueh_puma',
+                                'rent_puma', 'costelec_puma', 'density_puma', 'state_policy',
+                                'lgbt_nonprofits', 'immigrant_nonprofits'),
+                  vcov = ~state + year)
+
+write_csv(as.data.frame(comparisons), here('geo/files', 'poisson_comparisons.csv'))
+
+comparisons %>%
+  as.data.frame() %>%
+  select(term, imm_ss_group, estimate, std.error) %>%
+  pivot_wider(names_from  = 'imm_ss_group', values_from = c('estimate', 'std.error'))
+
+select(term, estimate, std.error, statistic, p.value) 
+
+
+list('Different-sex, immigrant' = as.data.frame(comparisons) %>%
+       filter(imm_ss_group == 'Different-sex, immigrant') %>%
+       select(term, estimate, std.error, statistic, p.value) %>%,
+     'Same-sex, immigrant' = as.data.frame(comparisons) %>%
+       filter(imm_ss_group == 'Same-sex, immigrant') %>%
+       select(term, estimate, std.error, statistic, p.value),
+     'Same-sex, non-immigrant' = as.data.frame(comparisons) %>%
+       filter(imm_ss_group == 'Same-sex, non-immigrant') %>%
+       select(term, estimate, std.error, statistic, p.value)) %>%
+  huxtable::huxreg()coefs = c('Same-sex, immigrant' = 'groupSame-sex, immigrant',
                              'Same-sex, non-immigrant' = 'groupSame-sex, non-immigrant',
                              'Bachelor\'s degree (%)' = 'bachelors_puma', 
                              'Black (%)' = 'black_puma',
@@ -565,6 +586,64 @@ list('no FE' = glm(n ~ group*(bachelors_puma + black_puma + hispanic_puma +
   set_wrap(T) %>%
   set_all_padding(0) %>%
   huxtable::set_caption('Quasi-poisson models of immigrants in same-sex couples by PUMA, regressed on PUMA-level factors')
+```
+
+\newpage
+
+```{r poisson-regression-separate, eval = T}
+list('Different-sex, immigrant' = glm(n ~ bachelors_puma + black_puma + hispanic_puma + 
+                     log_inctot_puma + owned_puma + age_puma + immigrant_puma +
+                     poverty_200_puma  + hwsei_puma + 
+                     unemployed_puma + valueh_puma +
+                     rent_puma + costelec_puma + density_puma + state_policy + state + lgbt_nonprofits + 
+                     immigrant_nonprofits + year,
+                     data = filter(count_tab_year, group == 'Different-sex, immigrant'), 
+                     family = 'quasipoisson') %>%
+       coeftest(vcov = vcovCL(., cluster = ~ state + year), save = T),
+     'Same-sex, immigrant' = glm(n ~ bachelors_puma + black_puma + hispanic_puma + 
+                     log_inctot_puma + owned_puma + age_puma + immigrant_puma +
+                     poverty_200_puma  + hwsei_puma + 
+                     unemployed_puma + valueh_puma +
+                     rent_puma + costelec_puma + density_puma + state_policy + state + lgbt_nonprofits + 
+                     immigrant_nonprofits + year,
+                     data = filter(count_tab_year, group == 'Same-sex, immigrant'), 
+                     family = 'quasipoisson') %>%
+  coeftest(vcov = vcovCL(., cluster = ~ state + year), save = T),
+     'Same-sex, non-immigrant' = glm(n ~ bachelors_puma + black_puma + hispanic_puma + 
+                     log_inctot_puma + owned_puma + age_puma + immigrant_puma +
+                     poverty_200_puma  + hwsei_puma + 
+                     unemployed_puma + valueh_puma +
+                     rent_puma + costelec_puma + density_puma + state_policy + state + lgbt_nonprofits + 
+                     immigrant_nonprofits + year,
+                     data = filter(count_tab_year, group == 'Same-sex, non-immigrant'), 
+                     family = 'quasipoisson') %>%
+       coeftest(vcov = vcovCL(., cluster = ~ state + year), save = T)) %>%
+  huxtable::huxreg(coefs = c('Bachelor\'s degree (%)' = 'bachelors_puma', 
+                             'Black (%)' = 'black_puma',
+                             'Hispanic (%)' = 'hispanic_puma', 
+                             # 'Mean personal income' = 'inctot_puma',
+                             'Log mean personal income' = 'log_inctot_puma', 
+                             'Individuals own home (%)' = 'owned_puma', 
+                             'Mean age' = 'age_puma', 
+                             'Immigrant (%)' = 'immigrant_puma',
+                             # 'Individuals under 100% of poverty line (%)' = 'poverty_100_puma', 
+                             'Individuals under 200% of poverty line (%)' = 'poverty_200_puma', 
+                             'Mean HWSEI occupation score' = 'hwsei_puma', 
+                             'Unemployed (%)' = 'unemployed_puma', 
+                             'Mean individual\'s value of home ($1000s)' = 'valueh_puma',
+                             'Mean individual\'s rent' = 'rent_puma', 
+                             'Mean cost of electricity' = 'costelec_puma', 
+                             'Density (persons per sq. mile)' = 'density_puma', 
+                             'State LGB policy score' = 'state_policy', 
+                             'Mean number of LGBT nonprofits' = 'lgbt_nonprofits',
+                             'Mean number of immigrant nonprofits' = 'immigrant_nonprofits'),
+                   stars = c(`†` = 0.1, `*` = 0.05, `**` = 0.01, `***` = 0.001)) %>%
+  huxtable::insert_row(c('State FEs and clustered errors?', 'yes', 'yes', 'yes'), after = nrow(.) - 2) %>%
+  huxtable::insert_row(c('Year FEs and clustered errors?', 'yes', 'yes', 'yes'), after = nrow(.) - 2) %>%
+  huxtable::set_width(1) %>%
+  set_wrap(T) %>%
+  set_all_padding(0) %>%
+  huxtable::set_caption('Quasi-poisson models by PUMA, regressed on PUMA-level factors, separately by group')
 ```
 
 \newpage
