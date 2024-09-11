@@ -44,29 +44,30 @@ acs <- read_dta('/Users/nathan/Data/ACS/acs_2008_2022.dta') %>%
 # PUMA variables
 
 # set.seed(100)
-acs_geo <- acs %>%
-  # filter(year == 2019) %>%
-  # sample_n(1000) %>%
-  # as_survey_design(weights = perwt) %>%
-  group_by(puma, year) %>%
-  summarize(bachelors_puma = sum(perwt[educ == 'college' & age >= 25], na.rm = T)/sum(perwt, na.rm = T),
-            black_puma = sum(perwt[race == 2], na.rm = T)/sum(perwt, na.rm = T),
-            hispanic_puma = sum(perwt[hispan != 0], na.rm = T)/sum(perwt, na.rm = T),
-            inctot_puma = sum(perwt*inctot, na.rm = T)/sum(perwt, na.rm = T),
-            log_inctot_puma = log(inctot_puma),
-            owned_puma = sum(perwt[ownershp == 1], na.rm = T)/sum(perwt, na.rm = T),
-            age_puma = sum(perwt*age, na.rm = T)/sum(perwt, na.rm = T),
-            immigrant_puma = sum(perwt[citizen %in% c(2,3)], na.rm = T)/sum(perwt, na.rm = T),
-            poverty_100_puma = sum(perwt[poverty <= 100 & poverty != 0], na.rm = T)/sum(perwt, na.rm = T),
-            poverty_200_puma = sum(perwt[poverty <= 200 & poverty != 0], na.rm = T)/sum(perwt, na.rm = T),
-            hwsei_puma = sum(perwt*hwsei, na.rm = T)/sum(perwt, na.rm = T),
-            unemployed_puma = sum(perwt[empstat == 2 & age >= 25], na.rm = T)/sum(perwt, na.rm = T),
-            valueh_puma = sum(perwt*valueh, na.rm = T)/sum(perwt, na.rm = T),
-            rent_puma = sum(perwt*rent, na.rm = T)/sum(perwt, na.rm = T),
-            costelec_puma = sum(perwt*costelec, na.rm = T)/sum(perwt, na.rm = T)
-  )
-  
-write_csv(acs_geo, here('data', 'acs_geo.csv'))
+# acs_geo <- acs %>%
+#   # filter(year == 2019) %>%
+#   # sample_n(1000) %>%
+#   # as_survey_design(weights = perwt) %>%
+#   group_by(state, puma, year) %>%
+#   summarize(bachelors_puma = sum(perwt[educ == 'college' & age >= 25], na.rm = T)/sum(perwt, na.rm = T),
+#             black_puma = sum(perwt[race == 2], na.rm = T)/sum(perwt, na.rm = T),
+#             hispanic_puma = sum(perwt[hispan != 0], na.rm = T)/sum(perwt, na.rm = T),
+#             inctot_puma = sum(perwt*inctot, na.rm = T)/sum(perwt, na.rm = T),
+#             log_inctot_puma = log(inctot_puma),
+#             owned_puma = sum(perwt[ownershp == 1], na.rm = T)/sum(perwt, na.rm = T),
+#             age_puma = sum(perwt*age, na.rm = T)/sum(perwt, na.rm = T),
+#             immigrant_puma = sum(perwt[citizen %in% c(2,3)], na.rm = T)/sum(perwt, na.rm = T),
+#             poverty_100_puma = sum(perwt[poverty <= 100 & poverty != 0], na.rm = T)/sum(perwt, na.rm = T),
+#             poverty_200_puma = sum(perwt[poverty <= 200 & poverty != 0], na.rm = T)/sum(perwt, na.rm = T),
+#             hwsei_puma = sum(perwt*hwsei, na.rm = T)/sum(perwt, na.rm = T),
+#             unemployed_puma = sum(perwt[empstat == 2 & age >= 25], na.rm = T)/sum(perwt, na.rm = T),
+#             valueh_puma = sum(perwt*valueh, na.rm = T)/sum(perwt, na.rm = T),
+#             rent_puma = sum(perwt*rent, na.rm = T)/sum(perwt, na.rm = T),
+#             costelec_puma = sum(perwt*costelec, na.rm = T)/sum(perwt, na.rm = T),
+#             density_puma = mean(density, na.rm = T)
+#   )
+#   
+# write_csv(acs_geo, here('data', 'acs_geo.csv'))
 
 
 # acs_geo_survey <- acs %>%
@@ -91,27 +92,120 @@ write_csv(acs_geo, here('data', 'acs_geo.csv'))
 #             costelec_puma = survey_mean(costelec, na.rm = T)
 #)
 
+# State LGB policy
+
+state_policy <- read.csv(here('data', 'state_policy.csv')) 
+
+state_policy[is.na(state_policy)] <- 0
+
+state_policy <- state_policy %>%
+  mutate(state_policy = -sodomy_illega + -marriage_ban + marriage_equality + civil_union + 
+           employment_discrim_so + hate_crime_so + joint_adoption + -adoption_religious_freedom +
+           conversion_therapy_ban + housing_discrim_so + state_ban_local_nondiscrimimation) %>%
+  select(state = State, year = Year, state_policy, state_couple_laws)
+state_policy_2020 <- state_policy %>%
+  filter(year == 2020) 
+
+state_policy <- bind_rows(state_policy,
+                          state_policy_2020 %>%
+                            slice(rep(1:n(), each = 2)) %>%
+                            mutate(year = c(rep(c(2021, 2022), times = nrow(state_policy_2020))))
+)
+
+lgbt_nonprofits <- read_csv(here('data', 'lgbt nonprofits by zipcode.csv')) %>%
+  filter(year >= 2008) %>%
+  mutate(zip = str_pad(zip_final, 5, pad = '0')) %>%
+  select(-zip_final)
+lgbt_nonprofits <- lgbt_nonprofits %>%
+  bind_rows(lgbt_nonprofits %>%
+              filter(year == 2021) %>%
+              mutate(year = 2022))
+
+# from census.gov https://www.census.gov/programs-surveys/geography/guidance/geo-areas/pumas.html
+# 2017 data works well (only about 100 missing after merging)
+zip_to_tract_2010 <- readxl::read_excel(here('geo/data', 'ZIP_TRACT_032010.xlsx')) %>%
+  rename_with(tolower) %>%
+  mutate(statefp = substr(tract, 1, 2),
+         countyfp = substr(tract, 3, 5),
+         tractce = substr(tract, 6, 11))
+
+# zip_to_county_2010 <- readxl::read_excel(here('geo/data', 'ZIP_COUNTY_032010.xlsx')) %>%
+#   rename_with(tolower) %>%
+#   mutate(statefp = substr(tract, 1, 2),
+#          countyfp = substr(tract, 3, 5),
+#          tractce = substr(tract, 6, 11))
+
+zip_to_tract <- readxl::read_excel(here('geo/data', 'ZIP_TRACT_032017.xlsx')) %>%
+  rename_with(tolower) %>%
+  mutate(statefp = substr(tract, 1, 2),
+         countyfp = substr(tract, 3, 5),
+         tractce = substr(tract, 6, 11))
+# from OPDR https://www.huduser.gov/apps/public/uspscrosswalk/home
+tract_to_puma <- read_csv(here('geo/data', '2010_Census_Tract_to_2010_PUMA.txt')) %>%
+  rename_with(tolower) 
+
+# https://staff.washington.edu/glynn/StateFIPSicsprAB.pdf
+statefip <- readxl::read_excel(here('geo/data', 'StateFIPSicsprAB.xls')) %>%
+  mutate(statefp = str_pad(FIPS, 2, pad = '0')) %>%
+  select(state = NAME, statefp)
+
+zip_to_puma <- left_join(zip_to_tract, tract_to_puma) %>%
+  group_by(zip, statefp, puma5ce) %>%
+  summarize(bus_ratio = sum(bus_ratio)) %>%
+  ungroup()
+
+lgbt_nonprofits_puma <- left_join(lgbt_nonprofits, zip_to_puma) %>%
+  mutate(lgbt_np_weighted = lgbt_np*bus_ratio) %>%
+  group_by(year, statefp, puma5ce) %>%
+  summarize(lgbt_nonprofits = sum(lgbt_np_weighted)) %>%
+  ungroup() %>%
+  left_join(statefip)
+
+
+imm_nonprofits <- readxl::read_excel(here('geo/data', 'immigrant nonprofits.xlsx')) %>%
+  filter(year >= 2008) %>%
+  mutate(zip = str_pad(zipcode, 5, pad = '0')) %>%
+  select(-zipcode) %>%
+  left_join(zip_to_puma) %>%
+  mutate(immigrant_np_weighted = immigrant_np*bus_ratio) %>%
+  group_by(year, statefp, puma5ce) %>%
+  summarize(immigrant_nonprofits = sum(immigrant_np_weighted)) %>%
+  ungroup() %>%
+  left_join(statefip)
+
+write_csv(lgbt_nonprofits_puma, here('geo/files', 'nonprofits_puma.csv'))
+write_csv(imm_nonprofits, here('geo/files', 'imm_nonprofits.csv'))
+
 
 acs_geo_survey_mean <- acs %>%
   # filter(year == 2019) %>%
   # sample_n(1000) %>%
-  group_by(puma, year) %>%
-  summarize(bachelors_puma = weighted.mean(educ == 'college' & age >= 25, w = perwt, na.rm = T),
-            black_puma = weighted.mean(race == 2, w = perwt, na.rm = T),
-            hispanic_puma = weighted.mean(hispan != 0, w = perwt, na.rm = T),
+  group_by(state, puma, year) %>%
+  summarize(bachelors_puma = 100*weighted.mean(educ == 'college' & age >= 25, w = perwt, na.rm = T),
+            black_puma = 100*weighted.mean(race == 2, w = perwt, na.rm = T),
+            hispanic_puma = 100*weighted.mean(hispan != 0, w = perwt, na.rm = T),
             inctot_puma = weighted.mean(inctot, w = perwt, na.rm = T),
             log_inctot_puma = log(inctot_puma),
-            owned_puma = weighted.mean(ownershp == 1, w = perwt, na.rm = T),
+            owned_puma = 100*weighted.mean(ownershp == 1, w = perwt, na.rm = T),
             age_puma = weighted.mean(age, w = perwt, na.rm = T),
-            immigrant_puma = weighted.mean(citizen %in% c(2,3), w = perwt, na.rm = T),
-            poverty_100_puma = weighted.mean(poverty <= 100 & poverty != 0, w = perwt, na.rm = T),
-            poverty_200_puma = weighted.mean(poverty <= 200 & poverty != 0, w = perwt, na.rm = T),
+            immigrant_puma = 100*weighted.mean(citizen %in% c(2,3), w = perwt, na.rm = T),
+            poverty_100_puma = 100*weighted.mean(poverty <= 100 & poverty != 0, w = perwt, na.rm = T),
+            poverty_200_puma = 100*weighted.mean(poverty <= 200 & poverty != 0, w = perwt, na.rm = T),
             hwsei_puma = weighted.mean(hwsei, w = perwt, na.rm = T),
-            unemployed_puma = weighted.mean(empstat == 2 & age >= 25, w = perwt, na.rm = T),
+            unemployed_puma = 100*weighted.mean(empstat == 2 & age >= 25, w = perwt, na.rm = T),
             valueh_puma = weighted.mean(valueh, w = perwt, na.rm = T),
             rent_puma = weighted.mean(rent, w = perwt, na.rm = T),
-            costelec_puma = weighted.mean(costelec, w = perwt, na.rm = T)
-            )
+            costelec_puma = weighted.mean(costelec, w = perwt, na.rm = T),
+            density_puma = mean(density, na.rm = T)
+            ) %>%
+  mutate(state = as.character(as_factor(state))) %>%
+  left_join(state_policy) %>%
+  mutate(puma5ce = str_pad(puma, 5, pad = '0')) %>%
+  left_join(select(lgbt_nonprofits_puma, -statefp)) %>%
+  mutate(lgbt_nonprofits = ifelse(is.na(lgbt_nonprofits), 0, lgbt_nonprofits)) %>%
+  left_join(select(imm_nonprofits, -statefp)) %>%
+  mutate(immigrant_nonprofits = ifelse(is.na(immigrant_nonprofits), 0, immigrant_nonprofits))
+
 
 # Cochrane SE
 # Donald F. Gatz and Luther Smith https://www.sciencedirect.com/science/article/pii/135223109400210C
@@ -127,33 +221,35 @@ weighted.var.se <- function(x, w, na.rm=F){
   return(out)
 }
 
+
 acs_geo_survey_se <- acs %>%
   # filter(year == 2019) %>%
   # sample_n(1000) %>%
-  group_by(puma, year) %>%
-  summarize(bachelors_puma = weighted.var.se(educ == 'college' & age >= 25, w = perwt, na.rm = T),
-            black_puma = weighted.var.se(race == 2, w = perwt, na.rm = T),
-            hispanic_puma = weighted.var.se(hispan != 0, w = perwt, na.rm = T),
+  group_by(state, puma, year) %>%
+  summarize(bachelors_puma = weighted.var.se(100*educ == 'college' & age >= 25, w = perwt, na.rm = T),
+            black_puma = weighted.var.se(100*race == 2, w = perwt, na.rm = T),
+            hispanic_puma = weighted.var.se(100*hispan != 0, w = perwt, na.rm = T),
             inctot_puma = weighted.var.se(inctot, w = perwt, na.rm = T),
             log_inctot_puma = sqrt(log(inctot_puma^2)),
-            owned_puma = weighted.var.se(ownershp == 1, w = perwt, na.rm = T),
+            owned_puma = weighted.var.se(100*ownershp == 1, w = perwt, na.rm = T),
             age_puma = weighted.var.se(age, w = perwt, na.rm = T),
-            immigrant_puma = weighted.var.se(citizen %in% c(2,3), w = perwt, na.rm = T),
-            poverty_100_puma = weighted.var.se(poverty <= 100 & poverty != 0, w = perwt, na.rm = T),
-            poverty_200_puma = weighted.var.se(poverty <= 200 & poverty != 0, w = perwt, na.rm = T),
+            immigrant_puma = weighted.var.se(100*citizen %in% c(2,3), w = perwt, na.rm = T),
+            poverty_100_puma = weighted.var.se(100*poverty <= 100 & poverty != 0, w = perwt, na.rm = T),
+            poverty_200_puma = weighted.var.se(100*poverty <= 200 & poverty != 0, w = perwt, na.rm = T),
             hwsei_puma = weighted.var.se(hwsei, w = perwt, na.rm = T),
-            unemployed_puma = weighted.var.se(empstat == 2 & age >= 25, w = perwt, na.rm = T),
+            unemployed_puma = weighted.var.se(100*empstat == 2 & age >= 25, w = perwt, na.rm = T),
             valueh_puma = weighted.var.se(valueh, w = perwt, na.rm = T),
             rent_puma = weighted.var.se(rent, w = perwt, na.rm = T),
             costelec_puma = weighted.var.se(costelec, w = perwt, na.rm = T)
-  )
+  ) %>%
+  mutate(state = as.character(as_factor(state)))
 
 
 acs_geo_survey <- acs_geo_survey_mean %>%
   # rename_with(~paste0(.x, '_mean'), !any_of(c('puma', 'year'))) %>%
   left_join(
     acs_geo_survey_se %>%
-    rename_with(~paste0(.x, '_se'), !any_of(c('puma', 'year')))
+    rename_with(~paste0(.x, '_se'), !any_of(c('puma', 'year', 'state')))
     ) %>%
   # use delta method to get approximation for variance of log
   # https://stats.stackexchange.com/questions/418313/variance-of-x-and-variance-of-logx-how-to-relate-them
@@ -161,7 +257,7 @@ acs_geo_survey <- acs_geo_survey_mean %>%
 
 write_csv(acs_geo_survey, here('data', 'acs_geo_survey.csv'))        
 
-            
+
   
 
 
@@ -203,13 +299,13 @@ acs_wide <- acs %>%
 
 
 acs_wide %>%
-  filter(imm_couple != 'none', allocated == F) %>%
-  write_csv(here('data', 'acs_wide.csv'))
+  filter(imm_couple != 'none' | same_sex == T, allocated == F) %>%
+  write_csv(here('data', 'acs_wide_geo.csv'))
 
 
 
 ## Make final datasets ####
-acs_wide <- read.csv(here('data', 'acs_wide.csv')) 
+acs_wide <- read.csv(here('data', 'acs_wide_geo.csv')) 
 
 # acs_wide <- acs_wide %>%
 #   mutate(bpldid_main = case_when(bpld_main %in% c(41000, 41100, 41410) ~ 41300, # England, Scotland, Northern Ireland
@@ -224,179 +320,32 @@ acs_wide <- read.csv(here('data', 'acs_wide.csv'))
 
 
 
-dist_dat <- read_dta(here('data', 'dist_cepii.dta')) %>%
-  filter(iso_d == 'USA') %>%
-  select(-iso_d) %>%
-  mutate(iso_o = ifelse(iso_o == 'ROM', 'ROU', iso_o))
-
-# Wage difference = USA - country of origin
-penn_wages <- read.csv(here('data', 'penn_wages.csv')) %>%
-  mutate(pc_income = rgdpe /pop / 1000) %>%
-  select(iso_o = countrycode, country, year, pc_income, rgdpe, pop)
-usa_wages <- filter(penn_wages, iso_o == 'USA')
-penn_wages$wage_dif <- NA
-for(country_loop in unique(penn_wages$country)){
-  for(year in penn_wages$year[penn_wages$country == country_loop]){
-    penn_wages$wage_dif[penn_wages$year == year & penn_wages$country == country_loop] <-
-      penn_wages$pc_income[penn_wages$year == year & penn_wages$country == country_loop] -
-      usa_wages$pc_income[usa_wages$year == year]
-    # penn_wages$usa_pc_income[penn_wages$year == year & penn_wages$country == country_loop] <- 
-    #   usa_wages$pc_income[usa_wages$year == year]
-  }
-}
-# penn_wages <- penn_wages %>%
-#   mutate(wage_dif = adjust_for_inflation(wage_dif, 2017, "US", to_date = 1999))
-
-wb_unemp <- read_csv(here('data', 'world_bank_unemployment.csv')) %>%
-  pivot_longer(!1:4, names_to = 'year', values_to = 'unemployment') %>%
-  select(-`Indicator Name`, -`Indicator Code`) %>%
-  rename(country = `Country Name`, iso_o = `Country Code`) %>%
-  mutate(year = as.numeric(year))
-usa_unemp <- filter(wb_unemp, iso_o == 'USA')
-wb_unemp$unemp_dif <- NA
-for(year in usa_unemp$year){
-  for(country in unique(wb_unemp$country)){
-    wb_unemp$unemp_dif[wb_unemp$year == year & wb_unemp$country == country] <-
-      wb_unemp$unemployment[wb_unemp$year == year & wb_unemp$country == country] -
-      usa_unemp$unemployment[usa_unemp$year == year]
-  }
-}
-
-vdem <- read_csv(here('data', 'V-Dem-CY-Core-v11.1.csv')) %>%
-  select(country_name, country_text_id, COWcode, year, v2x_libdem) %>%
-  mutate(iso_o1 = countrycode(COWcode, origin = 'cowc', destination = 'iso3c'),
-         iso_o2 = countrycode(country_name, origin = 'country.name', destination = 'iso3c'),
-         iso_o = ifelse(!is.na(iso_o1), iso_o1, iso_o2)) %>%
-  select(iso_o, country = country_name, year, vdem = v2x_libdem) %>%
-  filter(!is.na(iso_o))
-
-
-# Policy variables
-# For now use 2019 values for 2020-2022
-lgbt_policy <- read.csv(here('data', 'lgb_origin_index.csv'))
-
-lgbt_policy_2019 <- lgbt_policy %>%
-  filter(year == 2019) 
-
-lgbt_policy <- bind_rows(lgbt_policy,
-                         lgbt_policy_2019 %>%
-                           slice(rep(1:n(), each = 3)) %>%
-                           mutate(year = c(rep(c(2020, 2021, 2022), times = nrow(lgbt_policy_2019))))
-) %>% 
-  select(Country, year, Code, origin_score = origin_couple_score) %>%
-  mutate(iso_o = countrycode(Country, origin = 'country.name', destination = 'iso3c')) %>%
-  left_join(select(penn_wages, -country)) %>%
-  left_join(select(wb_unemp, -country)) %>%
-  left_join(vdem) %>%
-  left_join(dist_dat) %>%
-  arrange(Country, year)
-
-
-# migrant stock by year
-# UN data: 1990-2017, every 5 years
-un_mig <- read_csv(here('data', 'un_migration_1990_2017.csv')) %>%
-  filter(`Major area, region, country or area of destination` == 'United States of America') %>%
-  select(-c(2:6), year = Year) %>%
-  pivot_longer(-year, names_to = 'country', values_to = 'n') %>%
-  mutate(n = as.numeric(gsub("\\,", "", n)),
-         iso_o = countrycode(country, origin = 'country.name', destination = 'iso3c'))
-un_mig$prop <- NA
-for(year_loop in unique(un_mig$year)){
-  for(country_loop in unique(un_mig$country)){
-    un_mig$prop[un_mig$year == year_loop & un_mig$country == country_loop] <- 
-      un_mig$n[un_mig$year == year_loop & un_mig$country == country_loop] /
-      un_mig$n[un_mig$year == year_loop & un_mig$country == 'Total']
-  }
-}
-
-# World bank data, 1960-1980
-gbmd <- read_csv(here('data', 'gbmd.csv')) %>%
-  select(country = `Country Origin Name`,
-         iso_o = `Country Origin Code`,
-         7:9) %>%
-  pivot_longer(-c(country, iso_o), names_to = 'year', values_to = 'n') %>%
-  mutate(year = as.numeric(substr(year, 1, 4)),
-         n = as.numeric(n))
-gbmd$prop <- NA
-total <- list()
-for(year_loop in unique(gbmd$year)){
-  total[[as.character(year_loop)]] <- sum(gbmd$n[gbmd$year == year_loop], na.rm = T)
-}
-for(i in 1:nrow(gbmd)){
-  gbmd$prop[i] <- gbmd$n[i] / total[[as.character(gbmd$year[i])]]
-}
-
-# combine stock datasets and linearly interpolate
-yearly_prop <- bind_rows(gbmd, select(un_mig, names(gbmd))) %>%
-  drop_na()
-yearly_prop <- yearly_prop %>%
-  group_by(iso_o) %>%
-  expand(year = full_seq(1960:2022, 1)) %>%
-  left_join(yearly_prop)
-yearly_prop_list <- list()
-for(country_loop in unique(yearly_prop$iso_o)){
-  yearly_prop_loop <- with(filter(yearly_prop, iso_o == country_loop), 
-                           zoo(prop, 1960:2022)) %>%
-    na_interpolation(option = "linear")
-  yearly_prop_list[[country_loop]] <- bind_cols(iso_o = country_loop,
-                                                year = index(yearly_prop_loop), 
-                                                stock_prop = as.data.frame(yearly_prop_loop)[[1]])
-}
-yearly_prop <- bind_rows(yearly_prop_list) %>%
-  left_join(select(lgbt_policy, iso_o, bpldid = Code) %>% distinct())
-
-
-lgbt_policy_lag <- lgbt_policy %>%
-  select(origin_score_lag = origin_score, year, Code) %>%
-  mutate(year = year + 1)
-
-
-state_policy <- read.csv(here('data', 'state_policy.csv')) 
-
-state_policy[is.na(state_policy)] <- 0
-
-state_policy <- state_policy %>%
-  mutate(state_policy = -sodomy_illega + -marriage_ban + marriage_equality + civil_union + 
-           employment_discrim_so + hate_crime_so + joint_adoption + -adoption_religious_freedom +
-           conversion_therapy_ban + housing_discrim_so + state_ban_local_nondiscrimimation) %>%
-  select(state = State, year = Year, state_policy, state_couple_laws)
-state_policy_2020 <- state_policy %>%
-  filter(year == 2020) 
-
-state_policy <- bind_rows(state_policy,
-                          state_policy_2020 %>%
-                           slice(rep(1:n(), each = 2)) %>%
-                           mutate(year = c(rep(c(2021, 2022), times = nrow(state_policy_2020))))
-)
-
-
+# Final dataset
 acs_geo <- read_csv(here('data', 'acs_geo_survey.csv'))
 
 
 immigrants <- bind_rows(
   acs_wide %>% 
     filter(!is.na(yrimmig_main)) %>%
-    mutate(citizen_cat_mate = ifelse(citizen_partner == 'N/A', 'U.S.-born', citizen_partner),
-           citizen_mate = citizen_cat_mate != 'Not a citizen',
-           college_mate = educ_partner == 'college',
-           income_mate = inctot_partner) %>%
     select(!ends_with('_partner')) %>%
     rename_with(function(x) str_remove(x, '_main')),
   acs_wide %>% 
     filter(!is.na(yrimmig_partner)) %>%
-    mutate(citizen_cat_mate = ifelse(citizen_main == 'N/A', 'U.S.-born', citizen_main),
-           citizen_mate = citizen_cat_mate != 'Not a citizen',
-           college_mate = educ_main == 'college',
-           income_mate = inctot_main) %>%
+    select(!ends_with('_main')) %>%
+    rename_with(function(x) str_remove(x, '_partner')),
+  acs_wide %>% 
+    filter(same_sex == T & imm_couple == 'none') %>%
+    select(!ends_with('_partner')) %>%
+    rename_with(function(x) str_remove(x, '_main')),
+  acs_wide %>% 
+    filter(same_sex == T & imm_couple == 'none') %>%
     select(!ends_with('_main')) %>%
     rename_with(function(x) str_remove(x, '_partner'))
   ) %>% 
   filter(age >= 18 & age < 65) %>%
   mutate(yrimmig = ifelse(yrimmig < 1991, 1991, yrimmig)) %>%
-  left_join(yearly_prop, by = c('yrimmig' = 'year', 'bpldid')) %>%
-  left_join(select(lgbt_policy, -iso_o), by = c('yrimmig' = 'year', 'bpldid' = 'Code')) %>%
-  left_join(acs_geo) %>%
-  left_join(state_policy)
+  left_join(acs_geo) 
+  
 
 
 write_csv(immigrants, here('data', 'immigrants_geo.csv'))
