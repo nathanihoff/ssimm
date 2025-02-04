@@ -28,9 +28,8 @@ linkcolor: blue
 lang: 'en-US'
 bibliography: "/Users/nathan/My Drive/Projects/2020 Same-Sex Immigrant Couples/Same-Sex Immigration.bib"
 title: "The Geography of Immigrants in Same-Sex Couples in the United States"
-subtitle: "Same-sex Marriage and Migration Workshop in Amsterdam"
-date: "September 1, 2024"
-# date: "`r format(Sys.time(), '%B %e, %Y')`"
+# date: "September 1, 2024"
+date: "`r format(Sys.time(), '%B %e, %Y')`"
 author:
 - Nathan I. Hoffmann, Department of Sociology, UCLA
 - Kristopher Velasco, Department of Sociology, Princeton University
@@ -129,13 +128,22 @@ all_geo <- read_csv(here('data', 'immigrants_geo.csv')) %>%
     imm_couple == 'none' ~ 'Same-sex, non-immigrant',
     imm_couple != 'none' & same_sex == T ~ 'Same-sex, immigrant',
     imm_couple != 'none' & same_sex == F ~ 'Different-sex, immigrant'
-  ))
+  )) %>%
+  mutate(children = ifelse(nchild > 0, 'has children', 'no children'),
+         ethnicity = case_when(
+           hispan != 'Not Hispanic' ~ 'Hispanic',
+           race == 'White' ~ 'White',
+           race %in% c("Other Asian or Pacific Islander", "Chinese", "Japanese") ~ "Asian",
+           race == 'Black/African American' ~ 'Black',
+           !is.na(race) ~ 'Multiracial or Other'),
+         lgbt_nonprofits = ifelse(year == 2022, NA, lgbt_nonprofits),
+         immigrant_nonprofits = ifelse(year == 2022, NA, immigrant_nonprofits))
 
 all_geo_survey <- all_geo %>% 
   as_survey_design(weights = perwt)
 
 immigrants <- all_geo %>%
-  filter(imm_couple != 'none')
+  filter(imm_couple != 'none') 
 
 immigrants_survey <- immigrants %>% 
   as_survey_design(weights = perwt)
@@ -236,17 +244,26 @@ variable_names <- c('Bachelor\'s degree (%)' = 'bachelors_puma',
                     'Mean individual\'s value of home ($1000s)' = 'valueh_puma',
                     'Mean individual\'s rent' = 'rent_puma', 
                     'Mean cost of electricity' = 'costelec_puma', 
-                    'Density (persons per sq. mile)' = 'density_puma', 
+                    'Density (persons per sq. mile)' = 'density', 
                     'State LGB policy score' = 'state_policy', 
                     'Mean number of LGBT nonprofits' = 'lgbt_nonprofits',
-                    'Mean number of immigrant nonprofits' = 'immigrant_nonprofits')
+                    'Mean number of immigrant nonprofits' = 'immigrant_nonprofits',
+                    'Annual Gross Income (Thousands)' = 'inctot',
+                    'Hauser and Warren Socioeconomic Index' = 'hwsei',
+                    'High school graduate' = 'hs',
+                    'Four-year college graduate' = 'college',
+                    'Number of children' = 'nchild',
+                    'Has children' = 'has_children',
+                    'Age' = 'age',
+                    'n' = 'n',
+                    'n (weighted)' = 'n')
+
 
 variable_names_swap <- names(variable_names)
 names(variable_names_swap) <- as.vector(variable_names)
 
 ```
 
-**To the participants of the Same-sex Marriage and Migration Workshop in Amsterdam:** *Thank you for reading our paper! This is still a work in progress. We are looking especially to develop two areas. First, we have not fully fleshed out our theoretical framework, including incorporating a number of important works on LGB migration and settlement. Second, our analyses are still somewhat preliminary, and not all may be compelling. Any feedback on these areas -- what is effective and what may not be interesting -- or any other parts of the paper would be very much appreciated.*
 
 
 # Introduction
@@ -379,21 +396,84 @@ desc_tab <- all_geo_survey %>%
 
 write_csv(desc_tab, here('geo/files', 'desc_tab.csv'))
 
+desc_tab_ind <- all_geo_survey %>%
+  mutate(hs = if_else(educ %in% c('HS', 'some col', 'college'), 1, 0),
+         college = if_else(educ == 'college', 1, 0),
+         has_children = nchild > 0) %>% 
+  group_by(group) %>%
+  summarize(across(c(inctot, hs, college, hwsei, has_children, nchild, age), 
+            ~ survey_mean(.x, na.rm = T)))
+
+write_csv(desc_tab_ind, here('geo/files', 'desc_tab_ind.csv'))
+
 desc_tab_time <- all_geo_survey %>%
   group_by(group, year) %>%
   summarize(across(c(bachelors_puma, black_puma, hispanic_puma, inctot_puma,
                      owned_puma, age_puma, immigrant_puma,
-                     poverty_100_puma, poverty_200_puma, hwsei_puma, 
+                     poverty_100_puma, poverty_200_puma, hwsei_puma,
                      unemployed_puma, valueh_puma,
                      rent_puma, costelec_puma, density, state_policy,
-                     lgbt_nonprofits, immigrant_nonprofits), 
+                     lgbt_nonprofits, immigrant_nonprofits),
             ~ survey_mean(.x, na.rm = T)))
 
 
 write_csv(desc_tab_time, here('geo/files', 'desc_tab_time.csv'))
 ```
 
-```{r desc}
+```{r desc-ind}
+
+# desc_tab_se <- immigrants_survey %>%
+#   group_by(same_sex) %>%
+#   summarize(across(c(bachelors_puma_se, black_puma_se, hispanic_puma_se, inctot_puma,
+#                      log_inctot_puma_se, owned_puma_se, age_puma_se, immigrant_puma,
+#                      poverty_100_puma_se, poverty_200_puma_se, hwsei_puma_se, 
+#                      unemployed_puma_se, valueh_puma,
+#                      rent_puma_se, costelec_puma_se, density, pctmetro),
+#             ~ sqrt(sum(perwt*(.x^2), na.rm = T)/sum(perwt, na.rm = T)^2)
+#   ))
+            #~ sqrt(survey_mean(.x^2, na.rm = T)/n())))
+
+
+
+desc_tab_ind <- read_csv(here('geo/files', 'desc_tab_ind.csv'))
+
+FitFlextableToPage <- function(ft, pgwidth = 6){
+  ft_out <- ft %>% flextable::autofit()
+  ft_out <- flextable::width(ft_out, width = dim(ft_out)$widths*pgwidth /
+                               (flextable::flextable_dim(ft_out)$widths))
+  return(ft_out)
+}
+
+# desc_tab_ind %>%
+#   rename_with(~ paste0(.x, '_coef'), !ends_with('_se')) %>%
+#   pivot_longer(-group_coef, names_sep = '_')
+
+
+desc_tab_ind %>%
+  left_join(sample_size) %>%
+  column_to_rownames('group') %>%
+  t() %>%
+  as.data.frame() %>%
+  # mutate(`Different-sex, immigrant` = round(V1, 3), `Same-sex, immigrant` = round(V2, 3),
+  #        `Same-sex, non-immigrant` = round(V3, 3)) %>%
+  # select(different_sex, same_sex) %>%
+  rownames_to_column('Variable') %>%
+  # mutate(Variable = ifelse(str_detect(Variable, '_se'), Variable, paste0(Variable, '_coef'))) %>%
+  # pivot_wider(names_from = Variable, names_sep = '_')
+  filter(!str_detect(Variable, '_se')) %>%
+  mutate(Variable = recode(Variable, !!!variable_names_swap)) %>%
+  flextable() %>% 
+  colformat_double(i = 8:9, digits = 0) %>%
+  FitFlextableToPage() %>% # flextable::autofit() %>%
+  flextable::set_caption('Mean values for individual variables for immigrants in different- or same-sex couples, 2008-2022') 
+  # kable(booktabs = T, linesep = '', caption = 'Mean values for geographic variables for immigrants in different- or same-sex couples, 2008-2022')
+
+
+```
+
+\newpage
+
+```{r desc-geo}
 
 # desc_tab_se <- immigrants_survey %>%
 #   group_by(same_sex) %>%
@@ -429,7 +509,7 @@ desc_tab %>%
   filter(!str_detect(Variable, '_se')) %>%
   mutate(Variable = recode(Variable, !!!variable_names_swap)) %>%
   flextable() %>% 
-  colformat_double(i = (length(variable_names)+1):(length(variable_names)+2), digits = 0) %>%
+  colformat_double(i = 19:20, digits = 0) %>%
   FitFlextableToPage() %>% # flextable::autofit() %>%
   flextable::set_caption('Mean values for geographic variables for immigrants in different- or same-sex couples, 2008-2022') 
   # kable(booktabs = T, linesep = '', caption = 'Mean values for geographic variables for immigrants in different- or same-sex couples, 2008-2022')
@@ -439,180 +519,7 @@ desc_tab %>%
 
 \newpage
 
-```{r prop-regression}
-list(#'no FE' = 
-  lm(prop ~ bachelors_puma + black_puma + hispanic_puma + 
-                     log_inctot_puma + owned_puma + age_puma + immigrant_puma +
-                     poverty_200_puma + hwsei_puma + 
-                     unemployed_puma + valueh_puma +
-                     rent_puma + costelec_puma + density_puma + state_policy + lgbt_nonprofits + immigrant_nonprofits,
-                  data = prop_tab_year),
-   #'State FE and clustered errors' = 
-   lm(prop ~ bachelors_puma + black_puma + hispanic_puma + 
-                     log_inctot_puma + owned_puma + age_puma + immigrant_puma +
-                     poverty_200_puma + hwsei_puma + 
-                     unemployed_puma + valueh_puma +
-                     rent_puma + costelec_puma + density_puma + state_policy + lgbt_nonprofits + immigrant_nonprofits + state,
-                     data = prop_tab_year) %>%
-     coeftest(vcov = vcovCL(., cluster = ~ state), save = T),
-    #'State and year FE and clustered errors' = 
-    lm(prop ~ bachelors_puma + black_puma + hispanic_puma + 
-                     log_inctot_puma + owned_puma + age_puma + immigrant_puma +
-                     poverty_200_puma  + hwsei_puma + 
-                     unemployed_puma + valueh_puma +
-                     rent_puma + costelec_puma + density_puma + state_policy + state + lgbt_nonprofits + immigrant_nonprofits + year,
-                     data = mutate(prop_tab_year, year = as.factor(year))) %>%
-     coeftest(vcov = vcovCL(., cluster = ~ state + year), save = T)) %>%
-  huxtable::huxreg(coefs = variable_names[!(variable_names %in% c('inctot_puma', 'poverty_100_puma'))],
-                     # c('Bachelor\'s degree (%)' = 'bachelors_puma', 
-                     #         'Black (%)' = 'black_puma',
-                     #         'Hispanic (%)' = 'hispanic_puma', 
-                     #         # 'Mean personal income' = 'inctot_puma',
-                     #         'Log mean personal income' = 'log_inctot_puma', 
-                     #         'Individuals own home (%)' = 'owned_puma', 
-                     #         'Mean age' = 'age_puma', 
-                     #         'Immigrant (%)' = 'immigrant_puma',
-                     #         # 'Individuals under 100% of poverty line (%)' = 'poverty_100_puma', 
-                     #         'Individuals under 200% of poverty line (%)' = 'poverty_200_puma', 
-                     #         'Mean HWSEI occupation score' = 'hwsei_puma', 
-                     #         'Unemployed (%)' = 'unemployed_puma', 
-                     #         'Mean individual\'s value of home ($1000s)' = 'valueh_puma',
-                     #         'Mean individual\'s rent' = 'rent_puma', 
-                     #         'Mean cost of electricity' = 'costelec_puma', 
-                     #         'Density (persons per sq. mile)' = 'density_puma', 
-                     #         'State LGB policy score' = 'state_policy', 
-                     #         'Mean number of LGBT nonprofits' = 'lgbt_nonprofits',
-                     #         'Mean number of immigrant nonprofits' = 'immigrant_nonprofits'),
-                   stars = c(`†` = 0.1, `*` = 0.05, `**` = 0.01, `***` = 0.001),
-                   statistics = c('Observations' = 'nobs')) %>%
-  huxtable::insert_row(c('State FEs and clustered errors?', 'no', 'yes', 'yes'), after = nrow(.) - 2) %>%
-  huxtable::insert_row(c('Year FEs and clustered errors?', 'no', 'no', 'yes'), after = nrow(.) - 2) %>%
-  huxtable::set_width(1) %>%
-  set_wrap(T) %>%
-  set_all_padding(0) %>%
-  huxtable::set_caption('Proportion of immigrants in same-sex couples by PUMA, regressed on PUMA-level factors')
-```
 
-\newpage
-
-```{r gay-prop-regression}
-list(lm(prop ~ bachelors_puma + black_puma + hispanic_puma + 
-                     log_inctot_puma + owned_puma + age_puma + immigrant_puma +
-                     poverty_200_puma + hwsei_puma + 
-                     unemployed_puma + valueh_puma +
-                     rent_puma + costelec_puma + density_puma + state_policy + lgbt_nonprofits + immigrant_nonprofits,
-                  data = gay_prop_tab_year),
-   lm(prop ~ bachelors_puma + black_puma + hispanic_puma + 
-                     log_inctot_puma + owned_puma + age_puma + immigrant_puma +
-                     poverty_200_puma + hwsei_puma + 
-                     unemployed_puma + valueh_puma +
-                     rent_puma + costelec_puma + density_puma + state_policy + lgbt_nonprofits + immigrant_nonprofits + state,
-                     data = gay_prop_tab_year) %>%
-     coeftest(vcov = vcovCL(., cluster = ~ state), save = T),
-    lm(prop ~ bachelors_puma + black_puma + hispanic_puma + 
-                     log_inctot_puma + owned_puma + age_puma + immigrant_puma +
-                     poverty_200_puma  + hwsei_puma + 
-                     unemployed_puma + valueh_puma +
-                     rent_puma + costelec_puma + density_puma + state_policy + state + lgbt_nonprofits + immigrant_nonprofits + year,
-                     data = mutate(gay_prop_tab_year, year = as.factor(year))) %>%
-     coeftest(vcov = vcovCL(., cluster = ~ state + year), save = T) ) %>%
-  huxtable::huxreg(coefs = c('Bachelor\'s degree (%)' = 'bachelors_puma', 
-                             'Black (%)' = 'black_puma',
-                             'Hispanic (%)' = 'hispanic_puma', 
-                             # 'Mean personal income' = 'inctot_puma',
-                             'Log mean personal income' = 'log_inctot_puma', 
-                             'Individuals own home (%)' = 'owned_puma', 
-                             'Mean age' = 'age_puma', 
-                             'Immigrant (%)' = 'immigrant_puma',
-                             # 'Individuals under 100% of poverty line (%)' = 'poverty_100_puma', 
-                             'Individuals under 200% of poverty line (%)' = 'poverty_200_puma', 
-                             'Mean HWSEI occupation score' = 'hwsei_puma', 
-                             'Unemployed (%)' = 'unemployed_puma', 
-                             'Mean individual\'s value of home ($1000s)' = 'valueh_puma',
-                             'Mean individual\'s rent' = 'rent_puma', 
-                             'Mean cost of electricity' = 'costelec_puma', 
-                             'Density (persons per sq. mile)' = 'density_puma', 
-                             'State LGB policy score' = 'state_policy', 
-                             'Mean number of LGBT nonprofits' = 'lgbt_nonprofits',
-                             'Mean number of immigrant nonprofits' = 'immigrant_nonprofits'),
-                   statistics = c('Observations' = 'nobs')) %>%
-  huxtable::insert_row(c('State FEs and clustered errors?', 'no', 'yes', 'yes'), after = nrow(.) - 2) %>%
-  huxtable::insert_row(c('Year FEs and clustered errors?', 'no', 'no', 'yes'), after = nrow(.) - 2) %>%
-  huxtable::set_width(1) %>%
-  set_wrap(T) %>%
-  set_all_padding(0) %>%
-  huxtable::set_caption('Proportion of same-sex partnered people who are immigrants by PUMA, regressed on PUMA-level factors')
-```
-
-```{r poisson-regression-interact, eval = F}
-poisson_interact <- glm(n ~ imm_ss_group*(bachelors_puma + black_puma + hispanic_puma + 
-                       log_inctot_puma + owned_puma + age_puma + immigrant_puma +
-                       poverty_200_puma  + hwsei_puma + 
-                       unemployed_puma + valueh_puma +
-                       rent_puma + costelec_puma + density_puma + state_policy + 
-                       lgbt_nonprofits + immigrant_nonprofits + 
-                       state + year),
-                     data = rename(count_tab_year, imm_ss_group = group), 
-                     family = 'quasipoisson') 
-
-comparisons <- marginaleffects::avg_comparisons(
-                  poisson_interact, 
-                  by = 'imm_ss_group', 
-                  variables = c('bachelors_puma', 'black_puma', 'hispanic_puma', 
-                                'log_inctot_puma', 'owned_puma', 'age_puma', 'immigrant_puma',
-                                'poverty_200_puma ', 'hwsei_puma',
-                                'unemployed_puma', 'valueh_puma',
-                                'rent_puma', 'costelec_puma', 'density_puma', 'state_policy',
-                                'lgbt_nonprofits', 'immigrant_nonprofits'),
-                  vcov = ~state + year)
-
-write_csv(as.data.frame(comparisons), here('geo/files', 'poisson_comparisons.csv'))
-
-comparisons %>%
-  as.data.frame() %>%
-  select(term, imm_ss_group, estimate, std.error) %>%
-  pivot_wider(names_from  = 'imm_ss_group', values_from = c('estimate', 'std.error'))
-
-select(term, estimate, std.error, statistic, p.value) 
-
-
-list('Different-sex, immigrant' = as.data.frame(comparisons) %>%
-       filter(imm_ss_group == 'Different-sex, immigrant') %>%
-       select(term, estimate, std.error, statistic, p.value) %>%,
-     'Same-sex, immigrant' = as.data.frame(comparisons) %>%
-       filter(imm_ss_group == 'Same-sex, immigrant') %>%
-       select(term, estimate, std.error, statistic, p.value),
-     'Same-sex, non-immigrant' = as.data.frame(comparisons) %>%
-       filter(imm_ss_group == 'Same-sex, non-immigrant') %>%
-       select(term, estimate, std.error, statistic, p.value)) %>%
-  huxtable::huxreg()coefs = c('Same-sex, immigrant' = 'groupSame-sex, immigrant',
-                             'Same-sex, non-immigrant' = 'groupSame-sex, non-immigrant',
-                             'Bachelor\'s degree (%)' = 'bachelors_puma', 
-                             'Black (%)' = 'black_puma',
-                             'Hispanic (%)' = 'hispanic_puma', 
-                             # 'Mean personal income' = 'inctot_puma',
-                             'Log mean personal income' = 'log_inctot_puma', 
-                             'Individuals own home (%)' = 'owned_puma', 
-                             'Mean age' = 'age_puma', 
-                             'Immigrant (%)' = 'immigrant_puma',
-                             'Individuals under 100% of poverty line (%)' = 'poverty_100_puma', 
-                             # 'Individuals under 200% of poverty line (%)' = 'poverty_200_puma', 
-                             'Mean HWSEI occupation score' = 'hwsei_puma', 
-                             'Unemployed (%)' = 'unemployed_puma', 
-                             'Mean individual\'s value of home ($1000s)' = 'valueh_puma',
-                             'Mean individual\'s rent' = 'rent_puma', 
-                             'Mean cost of electricity' = 'costelec_puma', 
-                             'Density (persons per sq. mile)' = 'density_puma', 
-                             'State LGB policy score' = 'state_policy', 
-                             'Mean number of LGBT nonprofits' = 'lgbt_nonprofits'),
-                   stars = c(`†` = 0.1, `*` = 0.05, `**` = 0.01, `***` = 0.001)) %>%
-  huxtable::set_width(1) %>%
-  set_wrap(T) %>%
-  set_all_padding(0) %>%
-  huxtable::set_caption('Quasi-poisson models of immigrants in same-sex couples by PUMA, regressed on PUMA-level factors')
-```
-
-\newpage
 
 ```{r poisson-regression-separate, eval = T}
 mod_list <- list('Different-sex, immigrant' = glm(n ~ bachelors_puma + black_puma + hispanic_puma + 
@@ -699,6 +606,53 @@ merge_cells(hux_out, nrow(hux_out))
 \newpage
 
 # Figures
+
+
+```{r desc-ind-figures, fig.cap = 'Individual descriptive statistics for immigrants in couples 2008-2019, with survey weights and 95% confidence intervals. Currency in thousands of 1999 dollars.'}
+income <- all_geo %>%
+  group_by(year, group) %>%
+  summarize(var = weighted.mean(inctot, perwt, na.rm = T)) %>%
+  mutate(var_name = 'Annual Gross Income (Thousands)')
+
+hs <- all_geo %>%
+  mutate(hs = if_else(educ %in% c('HS', 'some col', 'college'), 1, 0)) %>%
+  group_by(year, group) %>%
+  summarize(var = weighted.mean(hs, perwt, na.rm = T)) %>%
+  mutate(var_name = 'High School Completion')
+
+college <- all_geo %>%
+  mutate(college = if_else(educ == 'college', 1, 0)) %>%
+  group_by(year, group) %>%
+  summarize(var = weighted.mean(college, perwt, na.rm = T)) %>%
+  mutate(var_name = 'College Completion')
+
+hwsei <- all_geo %>%
+  group_by(year, group) %>%
+  summarize(var = weighted.mean(hwsei, perwt, na.rm = T)) %>%
+  mutate(var_name = 'Hauser and Warren Socioeconomic Index')
+
+has_children <- all_geo %>%
+  group_by(year, group) %>%
+  mutate(has_children = nchild > 0) %>%
+  summarize(var = weighted.mean(has_children, perwt, na.rm = T)) %>%
+  mutate(var_name = 'Have Children')
+
+age <- all_geo %>%
+  group_by(year, group) %>%
+  summarize(var = weighted.mean(age, perwt, na.rm = T)) %>%
+  mutate(var_name = 'Age')
+  
+
+bind_rows(income, hs, college, hwsei, has_children, age) %>%
+  rename(Year = year) %>%
+  ggplot(aes(x = Year, y = var, linetype = group, color = group)) +
+  geom_line() +
+  #geom_ribbon(aes(ymin = var_low, ymax = var_upp, group = group, col = NULL), alpha = .2) +
+  facet_wrap(~var_name, scales = "free", ncol = 2) +
+  ylab('') +
+  theme(legend.position="bottom")
+      #text = element_text(size = 8))
+```
 
 ```{r state-props-calc, eval = F}
 state_tab <- immigrants_survey %>%
@@ -855,15 +809,23 @@ state_tab %>%
 
 \newpage
 
-```{r desc-time-1, fig.height = 5.5, fig.cap = 'Geographic characteristics (percentages) over time for immigrants in different- and same-sex couples, based on American Community Survey data for 2008-2022'}
+```{r desc-time-1, fig.height = 6.5, fig.cap = 'Geographic characteristics (percentages) over time for immigrants in different- and same-sex couples, based on American Community Survey data for 2008-2022'}
 
 desc_tab_time <- read_csv(here('geo/files', 'desc_tab_time.csv')) 
 
+
+
+
 desc_tab_time %>%
   select(!ends_with('_se')) %>%
+  select(group, year,
+         inctot_puma, unemployed_puma, hwsei_puma, valueh_puma,
+         bachelors_puma, black_puma, hispanic_puma, immigrant_puma, 
+         density, state_policy, lgbt_nonprofits, immigrant_nonprofits) %>%
   pivot_longer(-c(group, year), names_to = 'variable') %>%
   mutate(variable = recode(variable, !!!variable_names_swap)) %>%
-  filter(str_detect(variable, '(%)')) %>%
+  mutate(variable = factor(variable, levels = unique({.$variable}))) %>%
+  # filter(str_detect(variable, '(%)')) %>%
   # mutate(same_sex = ifelse(same_sex == T, 'Same-sex', 'Different-sex')) %>%
   ggplot(aes(x = year, y = value, color = group)) +
   geom_line() +
@@ -875,25 +837,7 @@ desc_tab_time %>%
 
 ```
 
-\newpage 
 
-```{r desc-time-2, fig.height = 5.5, fig.cap = 'Geographic characteristics (means) over time for immigrants in different- and same-sex couples, based on American Community Survey data for 2008-2022'}
-
-desc_tab_time %>%
-  select(!ends_with('_se')) %>%
-  pivot_longer(-c(group, year), names_to = 'variable') %>%
-  mutate(variable = recode(variable, !!!variable_names_swap)) %>%
-  filter(!str_detect(variable, '(%)')) %>%
-  # mutate(same_sex = ifelse(same_sex == T, 'Same-sex', 'Different-sex')) %>%
-  ggplot(aes(x = year, y = value, color = group)) +
-  geom_line() +
-  facet_wrap(~variable, scales = 'free_y', ncol = 2) +
-  labs(x = 'Year', y = '') +
-  theme(legend.position = 'bottom',
-        text = element_text(size = 9))
-
-
-```
 
 
 
@@ -925,7 +869,7 @@ pumas_tigris %>%
 ```
 
 
-```{r tidy-dfs}
+```{r tidy-dfs, eval = F}
 prop_regression_df <-
 bind_rows(#'no FE' = 
   lm(prop ~ bachelors_puma + black_puma + hispanic_puma + 
