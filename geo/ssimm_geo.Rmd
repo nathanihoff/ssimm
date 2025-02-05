@@ -255,7 +255,7 @@ variable_names <- c('Bachelor\'s degree (%)' = 'bachelors_puma',
                     'Has children' = 'has_children',
                     'Age' = 'age',
                     'n' = 'n',
-                    'n (weighted)' = 'n')
+                    'n (weighted)' = 'n_weighted')
 
 
 variable_names_swap <- names(variable_names)
@@ -413,7 +413,8 @@ desc_tab_time <- all_geo_survey %>%
                      unemployed_puma, valueh_puma,
                      rent_puma, costelec_puma, density, state_policy,
                      lgbt_nonprofits, immigrant_nonprofits),
-            ~ survey_mean(.x, na.rm = T)))
+            ~ survey_mean(.x, na.rm = T))) %>%
+  replace(. == 0, NA)
 
 
 write_csv(desc_tab_time, here('geo/files', 'desc_tab_time.csv'))
@@ -520,7 +521,7 @@ desc_tab %>%
 
 
 
-```{r poisson-regression-separate, eval = T}
+```{r poisson-regression-separate, eval = F}
 mod_list <- list('Different-sex, immigrant' = glm(n ~ bachelors_puma + black_puma + hispanic_puma + 
                      log_inctot_puma + owned_puma + age_puma + immigrant_puma +
                      poverty_200_puma  + hwsei_puma + 
@@ -602,56 +603,12 @@ merge_cells(hux_out, nrow(hux_out))
   
 ```
 
-\newpage
+
 
 # Figures
 
 
-```{r desc-ind-figures, fig.cap = 'Individual descriptive statistics for immigrants in couples 2008-2019, with survey weights and 95% confidence intervals. Currency in thousands of 1999 dollars.'}
-income <- all_geo %>%
-  group_by(year, group) %>%
-  summarize(var = weighted.mean(inctot, perwt, na.rm = T)) %>%
-  mutate(var_name = 'Annual Gross Income (Thousands)')
 
-hs <- all_geo %>%
-  mutate(hs = if_else(educ %in% c('HS', 'some col', 'college'), 1, 0)) %>%
-  group_by(year, group) %>%
-  summarize(var = weighted.mean(hs, perwt, na.rm = T)) %>%
-  mutate(var_name = 'High School Completion')
-
-college <- all_geo %>%
-  mutate(college = if_else(educ == 'college', 1, 0)) %>%
-  group_by(year, group) %>%
-  summarize(var = weighted.mean(college, perwt, na.rm = T)) %>%
-  mutate(var_name = 'College Completion')
-
-hwsei <- all_geo %>%
-  group_by(year, group) %>%
-  summarize(var = weighted.mean(hwsei, perwt, na.rm = T)) %>%
-  mutate(var_name = 'Hauser and Warren Socioeconomic Index')
-
-has_children <- all_geo %>%
-  group_by(year, group) %>%
-  mutate(has_children = nchild > 0) %>%
-  summarize(var = weighted.mean(has_children, perwt, na.rm = T)) %>%
-  mutate(var_name = 'Have Children')
-
-age <- all_geo %>%
-  group_by(year, group) %>%
-  summarize(var = weighted.mean(age, perwt, na.rm = T)) %>%
-  mutate(var_name = 'Age')
-  
-
-bind_rows(income, hs, college, hwsei, has_children, age) %>%
-  rename(Year = year) %>%
-  ggplot(aes(x = Year, y = var, linetype = group, color = group)) +
-  geom_line() +
-  #geom_ribbon(aes(ymin = var_low, ymax = var_upp, group = group, col = NULL), alpha = .2) +
-  facet_wrap(~var_name, scales = "free", ncol = 2) +
-  ylab('') +
-  theme(legend.position="bottom")
-      #text = element_text(size = 8))
-```
 
 ```{r state-props-calc, eval = F}
 state_tab <- immigrants_survey %>%
@@ -808,12 +765,58 @@ state_tab %>%
 
 \newpage
 
-```{r desc-time-1, fig.height = 6.5, fig.cap = 'Geographic characteristics (percentages) over time for immigrants in different- and same-sex couples, based on American Community Survey data for 2008-2022'}
+```{r desc-ind-figures, fig.cap = 'Individual characteristics over time for immigrants in different- and same-sex couples and non-immigrants in same-sex couples, based on American Community Survey data for 2008-2022. Estimates incorporate sampling weights.'}
+income <- all_geo %>%
+  group_by(year, group) %>%
+  summarize(var = weighted.mean(inctot, perwt, na.rm = T)) %>%
+  mutate(var_name = 'Annual Gross Income (Thousands)')
+
+hs <- all_geo %>%
+  mutate(hs = if_else(educ %in% c('HS', 'some col', 'college'), 1, 0)) %>%
+  group_by(year, group) %>%
+  summarize(var = weighted.mean(hs, perwt, na.rm = T)) %>%
+  mutate(var_name = 'High School Completion')
+
+college <- all_geo %>%
+  mutate(college = if_else(educ == 'college', 1, 0)) %>%
+  group_by(year, group) %>%
+  summarize(var = weighted.mean(college, perwt, na.rm = T)) %>%
+  mutate(var_name = 'College Completion')
+
+hwsei <- all_geo %>%
+  group_by(year, group) %>%
+  summarize(var = weighted.mean(hwsei, perwt, na.rm = T)) %>%
+  mutate(var_name = 'Hauser and Warren Socioeconomic Index')
+
+has_children <- all_geo %>%
+  group_by(year, group) %>%
+  mutate(has_children = nchild > 0) %>%
+  summarize(var = weighted.mean(has_children, perwt, na.rm = T)) %>%
+  mutate(var_name = 'Have Children')
+
+age <- all_geo %>%
+  group_by(year, group) %>%
+  summarize(var = weighted.mean(age, perwt, na.rm = T)) %>%
+  mutate(var_name = 'Age')
+  
+
+bind_rows(income, hwsei, hs, college, has_children, age) %>%
+  mutate(var_name = factor(var_name, levels = unique({.$var_name}))) %>%
+  rename(Year = year) %>%
+  ggplot(aes(x = Year, y = var, linetype = group, color = group)) +
+  geom_line() +
+  #geom_ribbon(aes(ymin = var_low, ymax = var_upp, group = group, col = NULL), alpha = .2) +
+  facet_wrap(~var_name, scales = "free", ncol = 2) +
+  ylab('') +
+  theme(legend.position="bottom",
+        text = element_text(size = 9))
+```
+
+\newpage
+
+```{r desc-geo-figures, fig.height = 6.5, fig.cap = 'Geographic characteristics over time for immigrants in different- and same-sex couples and non-immigrants in same-sex couples, based on American Community Survey data for 2008-2022. Estimates incorporate sampling weights.'}
 
 desc_tab_time <- read_csv(here('geo/files', 'desc_tab_time.csv')) 
-
-
-
 
 desc_tab_time %>%
   select(!ends_with('_se')) %>%
@@ -839,145 +842,3 @@ desc_tab_time %>%
 
 
 
-
-
-
-
-```{r puma-map, eval = F, fig.cap = 'Percentage of cohabiting immigrants in same-sex couples in U.S. PUMAs, averaging over ACS survey years 2008 to 2022.'}
-statefip <- readxl::read_excel(here('geo/data', 'StateFIPSicsprAB.xls')) %>%
-  mutate(statefp = str_pad(FIPS, 2, pad = '0')) %>%
-  select(state = NAME, statefp)
-
-pumas_tigris <- tigris::pumas(cb = T, year = 2019) %>%
-  left_join(statefip, by = c('STATEFP10' = 'statefp')) %>%
-  tibble()
-
-pumas_tigris %>%
-  left_join(prop_tab, by = c('state', 'PUMACE10' = 'puma5ce')) %>%
-  ggplot(aes(fill = prop)) +
-  geom_sf(aes(geometry = geometry)) +
-  scale_fill_gradient(low = uclablue, high = uclagold, na.value = 'gray95') +
-  coord_sf(xlim = c(-180,-60), ylim = c(13, 71)) +
-  # scale_fill_viridis_b(
-  #   name = NULL,
-  #   option = "magma",
-  #   labels = scales::label_percent(1)
-  #   ) +
-  theme_void()
-
-```
-
-
-```{r tidy-dfs, eval = F}
-prop_regression_df <-
-bind_rows(#'no FE' = 
-  lm(prop ~ bachelors_puma + black_puma + hispanic_puma + 
-                     log_inctot_puma + owned_puma + age_puma + immigrant_puma +
-                     poverty_200_puma + hwsei_puma + 
-                     unemployed_puma + valueh_puma +
-                     rent_puma + costelec_puma + density_puma + state_policy + lgbt_nonprofits + immigrant_nonprofits,
-                  data = prop_tab_year) %>%
-    tidy() %>%
-    mutate(model = 'basic'),
-   lm(prop ~ bachelors_puma + black_puma + hispanic_puma + 
-                     log_inctot_puma + owned_puma + age_puma + immigrant_puma +
-                     poverty_200_puma + hwsei_puma + 
-                     unemployed_puma + valueh_puma +
-                     rent_puma + costelec_puma + density_puma + state_policy + lgbt_nonprofits + immigrant_nonprofits + state,
-                     data = prop_tab_year) %>%
-     coeftest(vcov = vcovCL(., cluster = ~ state), save = T) %>%
-      tidy() %>%
-     mutate(model = 'state fixed effects and clustered SE'),
-    lm(prop ~ bachelors_puma + black_puma + hispanic_puma + 
-                     log_inctot_puma + owned_puma + age_puma + immigrant_puma +
-                     poverty_200_puma  + hwsei_puma + 
-                     unemployed_puma + valueh_puma +
-                     rent_puma + costelec_puma + density_puma + state_policy + state + lgbt_nonprofits + immigrant_nonprofits + year,
-                     data = mutate(prop_tab_year, year = as.factor(year))) %>%
-     coeftest(vcov = vcovCL(., cluster = ~ state + year), save = T) %>%
-    tidy() %>%
-     mutate(model = 'state and year fixed effects and clustered SE')) %>%
-  filter(!str_detect(term, 'state') | term == 'state_policy') %>%
-  filter(!str_detect(term, 'year'))
-
-
-gay_prop_regression_df <-
-bind_rows(#'no FE' = 
-  lm(prop ~ bachelors_puma + black_puma + hispanic_puma + 
-                     log_inctot_puma + owned_puma + age_puma + immigrant_puma +
-                     poverty_200_puma + hwsei_puma + 
-                     unemployed_puma + valueh_puma +
-                     rent_puma + costelec_puma + density_puma + state_policy + lgbt_nonprofits + immigrant_nonprofits,
-                  data = gay_prop_tab_year) %>%
-    tidy() %>%
-    mutate(model = 'basic'),
-   lm(prop ~ bachelors_puma + black_puma + hispanic_puma + 
-                     log_inctot_puma + owned_puma + age_puma + immigrant_puma +
-                     poverty_200_puma + hwsei_puma + 
-                     unemployed_puma + valueh_puma +
-                     rent_puma + costelec_puma + density_puma + state_policy + lgbt_nonprofits + immigrant_nonprofits + state,
-                     data = gay_prop_tab_year) %>%
-     coeftest(vcov = vcovCL(., cluster = ~ state), save = T) %>%
-      tidy() %>%
-     mutate(model = 'state fixed effects and clustered SE'),
-    lm(prop ~ bachelors_puma + black_puma + hispanic_puma + 
-                     log_inctot_puma + owned_puma + age_puma + immigrant_puma +
-                     poverty_200_puma  + hwsei_puma + 
-                     unemployed_puma + valueh_puma +
-                     rent_puma + costelec_puma + density_puma + state_policy + state + lgbt_nonprofits + immigrant_nonprofits + year,
-                     data = mutate(gay_prop_tab_year, year = as.factor(year))) %>%
-     coeftest(vcov = vcovCL(., cluster = ~ state + year), save = T) %>%
-    tidy() %>%
-     mutate(model = 'state and year fixed effects and clustered SE')) %>%
-  filter(!str_detect(term, 'state') | term == 'state_policy') %>%
-  filter(!str_detect(term, 'year'))
- 
-
-
-
-
-poisson_df <- bind_rows(
-  glm(n ~ bachelors_puma + black_puma + hispanic_puma + 
-                     log_inctot_puma + owned_puma + age_puma + immigrant_puma +
-                     poverty_200_puma  + hwsei_puma + 
-                     unemployed_puma + valueh_puma +
-                     rent_puma + costelec_puma + density_puma + state_policy + state + lgbt_nonprofits + 
-                     immigrant_nonprofits + year,
-                     data = filter(count_tab_year, group == 'Different-sex, immigrant') %>%
-                       mutate(year = as.factor(year)), 
-                     family = 'quasipoisson') %>%
-    coeftest(vcov = vcovCL(., cluster = ~ state + year), save = T) %>%
-    tidy() %>%
-    mutate(model = 'Different-sex, immigrant'),
-  glm(n ~ bachelors_puma + black_puma + hispanic_puma + 
-                     log_inctot_puma + owned_puma + age_puma + immigrant_puma +
-                     poverty_200_puma  + hwsei_puma + 
-                     unemployed_puma + valueh_puma +
-                     rent_puma + costelec_puma + density_puma + state_policy + state + lgbt_nonprofits + 
-                     immigrant_nonprofits + year,
-                     data = filter(count_tab_year, group == 'Same-sex, immigrant') %>%
-                       mutate(year = as.factor(year)), 
-                     family = 'quasipoisson') %>%
-    coeftest(vcov = vcovCL(., cluster = ~ state + year), save = T) %>%
-    tidy() %>%
-    mutate(model = 'Different-sex, immigrant'),
-  glm(n ~ bachelors_puma + black_puma + hispanic_puma + 
-                     log_inctot_puma + owned_puma + age_puma + immigrant_puma +
-                     poverty_200_puma  + hwsei_puma + 
-                     unemployed_puma + valueh_puma +
-                     rent_puma + costelec_puma + density_puma + state_policy + state + lgbt_nonprofits + 
-                     immigrant_nonprofits + year,
-                     data = filter(count_tab_year, group == 'Same-sex, non-immigrant') %>%
-                       mutate(year = as.factor(year)), 
-                     family = 'quasipoisson') %>%
-    coeftest(vcov = vcovCL(., cluster = ~ state + year), save = T) %>%
-    tidy() %>%
-    mutate(model = 'Different-sex, immigrant')) %>%
-  filter(!str_detect(term, 'state') | term == 'state_policy') %>%
-  filter(!str_detect(term, 'year'))
-  
-
-write_csv(prop_regression_df, here('geo/files', 'prop_regression_df.csv'))
-write_csv(gay_prop_regression_df, here('geo/files', 'gay_prop_regression_df.csv'))
-write_csv(poisson_df, here('geo/files', 'poisson_df.csv'))
-```

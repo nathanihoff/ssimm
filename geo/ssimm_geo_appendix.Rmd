@@ -1,0 +1,354 @@
+---
+output:
+  # bookdown::pdf_document2:
+  bookdown::word_document2:
+    reference_docx: "word-template.docx"
+    toc: no
+    number_sections: no
+    pandoc_args: !expr rmdfiltr::add_wordcount_filter(rmdfiltr::add_citeproc_filter(args = NULL))
+    latex_engine: xelatex
+always_allow_html: true
+header-includes:
+  # - \usepackage{setspace}\doublespace
+  - \setlength{\headheight}{13.6pt}
+  - \usepackage{fancyhdr}
+  - \pagestyle{fancy}
+  - \lhead{Nathan I. Hoffmann}
+  - \rhead{`r format(Sys.time(), '%B %e, %Y')`}
+  
+editor_options: 
+  chunk_output_type: console
+citeproc: no
+fontfamily: mathpazo
+fontsize: 11pt
+geometry: margin= 1in
+indent: yes
+link-citations: yes
+linkcolor: blue
+lang: 'en-US'
+bibliography: "/Users/nathan/My Drive/Projects/2020 Same-Sex Immigrant Couples/Same-Sex Immigration.bib"
+title: "Appendix"
+subtitle: "The Geography of Immigrants in Same-Sex Couples in the United States"
+# date: "September 1, 2024"
+date: "`r format(Sys.time(), '%B %e, %Y')`"
+author:
+- Nathan I. Hoffmann, Department of Sociology, UCLA
+- Kristopher Velasco, Department of Sociology, Princeton University
+
+---
+
+<!-- Turn off hyphenation -->
+
+<!-- \usepackage[none]{hyphenat} -->
+
+```{r setup, include=F}
+library(knitr)
+library(broom)
+library(huxtable)
+library(sandwich)
+library(lmtest)
+library(here)
+library(stargazer)
+library(patchwork)
+library(flextable)
+library(kableExtra)
+library(maps)
+library(tigris)
+library(fiftystater)
+library(ggthemes)
+library(srvyr)
+library(tidyverse)
+
+
+knitr::opts_chunk$set(echo = F, warning = F, message = F, cache = T, # results = 'asis',
+                      cache.lazy = F, dpi = 1200)
+
+
+options("yaml.eval.expr" = TRUE)
+
+uclablue = '#2774AE'
+gray = '#808080'
+black = '#000000'
+uclagold = '#FFB81C'
+rust = '#C47A2B'
+# ucla_palette = c(uclablue, black, gray)
+ucla_palette = c(black, uclablue, rust)
+palette_dark <- rev(RColorBrewer::brewer.pal(n=3,"Dark2"))
+
+# theme_set(theme_cowplot(font_family = 'Palatino') + 
+theme_set(theme_classic() + 
+            theme(legend.title=element_blank(), 
+                  axis.line = element_line(size = .3), 
+                  axis.ticks = element_line(size = .3),
+                  panel.grid.major.y = element_line('grey80', size = .3),
+                  legend.background = element_rect(fill = "transparent")))
+ggplot <- function(...) ggplot2::ggplot(...) + scale_color_manual(values = ucla_palette) +
+  scale_fill_manual(values = ucla_palette)
+
+# theme_set(theme_classic() + 
+#             theme(axis.line = element_line(size = .3), 
+#                   axis.ticks = element_line(size = .3), 
+#                   legend.title=element_blank(), 
+#                   panel.grid.major.y = element_line('grey80', size = .3),
+#                   legend.background = element_rect(fill = "transparent")))
+# ggplot <- function(...) ggplot2::ggplot(...) + scale_color_brewer(palette="Dark2") +
+#   scale_fill_brewer(palette="Dark2")
+
+# library(colorspace)
+# colorspace_palette = 'RdPu'
+# ggplot <- function(...) ggplot2::ggplot(...) +
+#   scale_color_discrete_sequential(palette=colorspace_palette) +
+#   scale_fill_discrete_sequential(palette=colorspace_palette)
+
+options(scipen=1, digits=2)
+knit_hooks$set(inline = function(x) {
+  prettyNum(x, big.mark=",")
+})
+knitr::opts_chunk$set(error=TRUE) 
+
+set_flextable_defaults(font.family = 'Times New Roman',
+                       # padding.bottom = 1,
+                       # padding.top = 1,
+                       # padding.left = 3,
+                       # padding.right = 1,
+                       theme_fun = 'theme_booktabs',
+                       digits = 3, 
+                       big.mark = ',',
+                       line_spacing = 1)
+
+```
+
+```{r load, include = F, eval = F}
+# acs_ind <- readRDS(here('data', 'acs_ind.rds')) 
+
+
+# acs_count_base <- read_csv(here('data', 'acs_count_base.csv')) 
+
+all_geo <- read_csv(here('data', 'immigrants_geo.csv')) %>% 
+  mutate(group = case_when(
+    imm_couple == 'none' ~ 'Same-sex, non-immigrant',
+    imm_couple != 'none' & same_sex == T ~ 'Same-sex, immigrant',
+    imm_couple != 'none' & same_sex == F ~ 'Different-sex, immigrant'
+  )) %>%
+  mutate(children = ifelse(nchild > 0, 'has children', 'no children'),
+         ethnicity = case_when(
+           hispan != 'Not Hispanic' ~ 'Hispanic',
+           race == 'White' ~ 'White',
+           race %in% c("Other Asian or Pacific Islander", "Chinese", "Japanese") ~ "Asian",
+           race == 'Black/African American' ~ 'Black',
+           !is.na(race) ~ 'Multiracial or Other'
+         ) )
+
+all_geo_survey <- all_geo %>% 
+  as_survey_design(weights = perwt)
+
+immigrants <- all_geo %>%
+  filter(imm_couple != 'none') 
+
+immigrants_survey <- immigrants %>% 
+  as_survey_design(weights = perwt)
+
+acs_geo <- read_csv(here('data', 'acs_geo_survey.csv')) 
+
+
+
+  # left_join(select(read_csv(here('geo/files', 'nonprofits_puma.csv')), -statefp), by = c()) %>%
+  # mutate(lgbt_nonprofits = ifelse(is.na(lgbt_nonprofits), 0, lgbt_nonprofits)) %>%
+  # left_join(select(read_csv(here('geo/files', 'imm_nonprofits.csv')), -statefp)) %>%
+  # mutate(immigrant_nonprofits = ifelse(is.na(immigrant_nonprofits), 0, immigrant_nonprofits))
+
+# acs_geo <- read_csv(here('data', 'acs_geo_survey.csv')) %>%
+#   mutate(across(c(bachelors_puma, black_puma, hispanic_puma, owned_puma, immigrant_puma, poverty_100_puma,
+#                   poverty_200_puma, unemployed_puma), 
+#                 ~.x*100))
+
+prop_tab <- acs_geo %>%
+  select(state, puma) %>%
+  distinct() %>%
+  left_join(immigrants %>%
+    mutate(same_sex = ifelse(same_sex == T, 'same_sex', 'dif_sex')) %>%
+    # filter(year == 2019) %>%
+    group_by(state, puma, same_sex) %>%
+    summarize(n = sum(perwt)) %>%
+    ungroup() %>%
+    pivot_wider(names_from = 'same_sex', values_from = 'n')) %>% 
+  replace(is.na(.), 0) %>%
+  # complete(year, state, puma, same_sex, fill = list('n' = 0)) %>%
+  mutate(prop = same_sex/(same_sex + dif_sex)*100) %>%
+  filter(!is.nan(prop))
+
+
+prop_tab_year <- acs_geo %>%
+  select(state, puma, year) %>%
+  left_join(immigrants %>%
+    mutate(same_sex = ifelse(same_sex == T, 'same_sex', 'dif_sex')) %>%
+    # filter(year == 2019) %>%
+    group_by(year, state, puma, same_sex) %>%
+    summarize(n = sum(perwt)) %>%
+    ungroup() %>%
+    pivot_wider(names_from = 'same_sex', values_from = 'n')) %>% 
+  replace(is.na(.), 0) %>%
+  # complete(year, state, puma, same_sex, fill = list('n' = 0)) %>%
+  mutate(prop = same_sex/(same_sex + dif_sex)*100) %>%
+  filter(!is.nan(prop)) %>%
+  select(state, puma, year, prop) %>%
+  left_join(acs_geo) 
+
+
+gay_prop_tab_year <- acs_geo %>%
+  select(state, puma, year) %>%
+  left_join(all_geo %>%
+    filter(group != 'Different-sex, immigrant') %>%
+    # filter(year == 2019) %>%
+    group_by(year, state, puma, group) %>%
+    summarize(n = sum(perwt)) %>%
+    ungroup() %>%
+    pivot_wider(names_from = 'group', values_from = 'n')) %>% 
+  replace(is.na(.), 0) %>%
+  # complete(year, state, puma, same_sex, fill = list('n' = 0)) %>%
+  mutate(prop = `Same-sex, immigrant`/(`Same-sex, immigrant` + `Same-sex, non-immigrant`)*100) %>%
+  filter(!is.nan(prop)) %>%
+  select(state, puma, year, prop) %>%
+  left_join(acs_geo) 
+
+  # left_join(immigrants %>% group_by(year, state, puma) %>%
+  # summarize(across(c(density, state_policy, lgbt_nonprofits, immigrant_nonprofits), ~mean(.x, na.rm = T))))
+
+
+count_tab_year <- bind_rows(
+  select(acs_geo, state, puma, year) %>% mutate(group = 'Different-sex, immigrant'),
+  select(acs_geo, state, puma, year) %>% mutate(group = 'Same-sex, immigrant'),
+  select(acs_geo, state, puma, year) %>% mutate(group = 'Same-sex, non-immigrant')) %>%
+  left_join(all_geo %>%
+    # filter(year == 2019) %>%
+    group_by(year, state, puma, group) %>%
+    summarize(n = sum(perwt)) %>%
+    ungroup()) %>% 
+    replace(is.na(.), 0) %>%
+  # complete(year, state, puma, same_sex, fill = list('n' = 0)) %>%
+  left_join(acs_geo) 
+  
+  
+variable_names <- c('Bachelor\'s degree (%)' = 'bachelors_puma', 
+                    'Black (%)' = 'black_puma',
+                    'Hispanic (%)' = 'hispanic_puma', 
+                    'Mean personal income' = 'inctot_puma',
+                    # 'Log mean personal income' = 'log_inctot_puma', 
+                    'Individuals own home (%)' = 'owned_puma', 
+                    'Mean age' = 'age_puma', 
+                    'Immigrant (%)' = 'immigrant_puma',
+                    'Individuals under 100% of poverty line (%)' = 'poverty_100_puma', 
+                    'Individuals under 200% of poverty line (%)' = 'poverty_200_puma', 
+                    'Mean HWSEI occupation score' = 'hwsei_puma', 
+                    'Unemployed (%)' = 'unemployed_puma', 
+                    'Mean individual\'s value of home ($1000s)' = 'valueh_puma',
+                    'Mean individual\'s rent' = 'rent_puma', 
+                    'Mean cost of electricity' = 'costelec_puma', 
+                    'Density (persons per sq. mile)' = 'density_puma', 
+                    'State LGB policy score' = 'state_policy', 
+                    'Mean number of LGBT nonprofits' = 'lgbt_nonprofits',
+                    'Mean number of immigrant nonprofits' = 'immigrant_nonprofits')
+
+variable_names_swap <- names(variable_names)
+names(variable_names_swap) <- as.vector(variable_names)
+
+```
+
+# Maps of state-level proportions for subgroups
+
+```{r subgroups-calc, eval = F}
+
+subgroups <- function(variable){
+  subgroups_out <- list()
+  variable_values <- unique(immigrants[[variable]])
+  
+  for(value in variable_values){
+    subgroups_out[[value]] <- immigrants %>%
+      mutate(state = tolower(state),
+             value_true = !!sym(variable) == value) %>%
+      filter(state != 'district of columbia') %>%
+      filter(same_sex == T) %>%
+      group_by(state) %>%
+      summarize(prop = 100 * weighted.mean(value_true, perwt)) %>% 
+      complete() %>%
+      replace(is.na(.), 0) %>%
+      mutate(variable = variable, value = value)
+  }
+  
+  return(bind_rows(subgroups_out))
+}
+
+all_subgroups_list <- list()
+for(variable_name in c('sex', 'ethnicity', 'children')){
+  all_subgroups_list[[variable_name]] <- subgroups(variable_name)
+}
+
+bind_rows(all_subgroups_list) %>%
+  write_csv(here('geo/files', 'state_tab_subgroups.csv'))
+```
+
+```{r subgroups, fig.cap = 'Percentage of migrants in same-sex couples in each state consisting of particular subgroups, from ACS estimates that incorporate sampling weights (2008-2019 and 2021-2022).'}
+state_tab_subgroups <- read_csv(here('geo/files', 'state_tab_subgroups.csv'))
+
+state_tab_subgroups %>%
+  mutate(variable = paste0(str_to_title(variable), ':'),
+         value = str_to_sentence(value)) %>%
+  ggplot(aes(map_id = state, fill = prop)) +
+  geom_map(map = fiftystater::fifty_states) +
+  expand_limits(x = fiftystater::fifty_states$long, y = fiftystater::fifty_states$lat) +
+  coord_map() +
+  scale_fill_gradient(low = uclablue, high = uclagold, na.value = 'gray95') +
+  theme_void() +
+  facet_wrap(~variable + value) +
+  labs(fill = "Subgroup (%)") +
+  theme(legend.title = element_text(size=8), legend.text=element_text(size=8)) 
+
+# 
+# state_tab_male <- immigrants %>%
+#   mutate(state = tolower(state)) %>%
+#   filter(state != 'district of columbia') %>%
+#   filter(sex == 'Male') %>%
+#   group_by(state) %>%
+#   summarize(prop_samesex = 100 * weighted.mean(same_sex, perwt)) %>% 
+#   complete() %>%
+#   replace(is.na(.), 0) 
+# 
+# state_tab_female <- immigrants %>%
+#   mutate(state = tolower(state)) %>%
+#   filter(state != 'district of columbia') %>%
+#   filter(sex == 'Female') %>%
+#   group_by(state) %>%
+#   summarize(prop_samesex = 100 * weighted.mean(same_sex, perwt)) %>% 
+#   complete() %>%
+#   replace(is.na(.), 0) 
+# 
+# bind_rows(
+#   mutate(state_tab_female, variable = 'Sex', value = 'Female'),
+#   mutate(state_tab_male, variable = 'Sex', value = 'Male')) %>%
+  
+  
+  
+
+# (state_tab_male %>%
+#   ggplot(aes(map_id = state, fill = prop_samesex)) +
+#   geom_map(map = fiftystater::fifty_states) +
+#   expand_limits(x = fiftystater::fifty_states$long, y = fiftystater::fifty_states$lat) +
+#   coord_map() +
+#   theme_void()) + 
+#     (state_tab_female %>%
+#     ggplot(aes(map_id = state, fill = prop_samesex)) +
+#     geom_map(map = fiftystater::fifty_states) +
+#     expand_limits(x = fiftystater::fifty_states$long, y = fiftystater::fifty_states$lat) +
+#     coord_map() +
+#     theme_void()) +
+#   plot_layout(guides = 'collect') &
+#   scale_fill_gradient(limits = range(state_tab_male$prop_samesex, state_tab_female$prop_samesex),
+#                       low = uclablue, high = uclagold, na.value = 'gray95')
+#   labs(fill = "Same-sex (%)") &
+#   theme(legend.title = element_text(size=8), legend.text=element_text(size=8)) 
+  
+```
+
+
+
+
