@@ -260,6 +260,7 @@ variable_names <- c('Bachelor\'s degree (%)' = 'bachelors_puma',
                     'Multiracial or Other' = 'other',
                     'Male' = 'male',
                     'Female' = 'female',
+                    'Married' = 'married',
                     'Age' = 'age',
                     'n' = 'n',
                     'n (weighted)' = 'n_weighted')
@@ -417,7 +418,7 @@ desc_tab_ind <- all_geo_survey %>%
          Male = sex == 'Male') %>% 
   group_by(group) %>%
   summarize(across(c(inctot, hs, college, hwsei, has_children, nchild, age,
-                     white, black, hispanic, asian, other, Female, Male), 
+                     white, black, hispanic, asian, other, Female, Male, married), 
             ~ survey_mean(.x, na.rm = T)))
 
 write_csv(desc_tab_ind, here('geo/files', 'desc_tab_ind.csv'))
@@ -811,13 +812,19 @@ has_children <- all_geo %>%
   summarize(var = weighted.mean(has_children, perwt, na.rm = T)) %>%
   mutate(var_name = 'Have Children')
 
-age <- all_geo %>%
+married <- all_geo %>%
   group_by(year, group) %>%
-  summarize(var = weighted.mean(age, perwt, na.rm = T)) %>%
-  mutate(var_name = 'Age')
+  summarize(var = weighted.mean(married, perwt, na.rm = T)) %>%
+  mutate()
+  mutate(var_name = 'Married')
+
+# age <- all_geo %>%
+#   group_by(year, group) %>%
+#   summarize(var = weighted.mean(age, perwt, na.rm = T)) %>%
+#   mutate(var_name = 'Age')
   
 
-bind_rows(income, hwsei, hs, college, has_children, age) %>%
+bind_rows(income, hwsei, hs, college, has_children, married) %>%
   mutate(var_name = factor(var_name, levels = unique({.$var_name}))) %>%
   rename(Year = year) %>%
   ggplot(aes(x = Year, y = var, linetype = group, color = group)) +
