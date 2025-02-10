@@ -253,6 +253,13 @@ variable_names <- c('Bachelor\'s degree (%)' = 'bachelors_puma',
                     'Four-year college graduate' = 'college',
                     'Number of children' = 'nchild',
                     'Has children' = 'has_children',
+                    'White' = 'white',
+                    'Black' = 'black',
+                    'Asian' = 'asian',
+                    'Hispanic' = 'hispanic',
+                    'Multiracial or Other' = 'other',
+                    'Male' = 'male',
+                    'Female' = 'female',
                     'Age' = 'age',
                     'n' = 'n',
                     'n (weighted)' = 'n_weighted')
@@ -315,10 +322,7 @@ sample_size <- all_geo %>%
 
 We consider the spatial distribution of three groups: immigrants in same-sex couples (unweighted $N$ = `r sample_size$n[sample_size$group == 'Same-sex, immigrant']`), immigrants in different-sex couples ($N$ = `r sample_size$n[sample_size$group == 'Different-sex, immigrant']`), and individuals in same-sex couples where neither individual is an immigrant ($N$ = `r sample_size$n[sample_size$group == 'Same-sex, non-immigrant']`). The weighted sample is equivalent to `r sum(all_geo$perwt)/1e6` million individuals over the 14 years of data.
 
-We use "LGB" to refer to all individuals who may be in romantic relationships with members of the same sex, although we recognize that some individuals in same-sex relationships may not identify as lesbian, gay, or bisexual. We also recognize that we are not able to identify bisexual (or pansexual, multisexual, etc.) individuals cohabiting with different-sex partners. Furthermore, measuring the prevalence of same-sex couples in the U.S. is difficult [@michaels_2013]. As in most nationally representative demographic work on same-sex couples [@baumle_2013; @baumle_2019], we are able to identify only LGB couples that cohabit; unpartnered LGB individuals and those who do not live with their partner are not included in the analysis [@baumle_2009, p. 6]. In addition, LGB individuals who do not feel comfortable with the partner labels of the ACS are not in the sample. Another pitfall is measurement error: Misreporting may result when different-sex couples accidentally misspecify the gender of one of the partners [@gates_2009; @goodnature_2021]. Beginning in 2008, the Census Bureau made changes to ACS gender and partnership questions in order to prevent such errors [@u.s.censusbureau_2013], so we rely on data only from 2008 onward, but difficulties remain. If even a small number of different-sex couples misreport one partner's sex, the counts of same-sex couples will be inflated. Following @gates_2009, we remove all respondents that had either their relationship or sex variable allocated by the Census Bureau. This is the strategy used by most studies of same-sex couples in the ACS [e.g. @boertien_2019; @gates_2013; @goldberg_2021; @christafore_2019; @martell_2020]. 
-
-
-## Variables
+We use "LGB" to refer to all individuals who may be in romantic relationships with members of the same sex, although we recognize that some individuals in same-sex relationships may not identify as lesbian, gay, or bisexual. We also recognize that we are not able to identify bisexual (or pansexual, multisexual, etc.) individuals cohabiting with different-sex partners. Furthermore, measuring the prevalence of same-sex couples in the U.S. is difficult [@michaels_2013]. As in most nationally representative demographic work on same-sex couples [@baumle_2013; @baumle_2019], we are able to identify only LGB couples that cohabit; unpartnered LGB individuals and those who do not live with their partner are not included in the analysis [@baumle_2009, p. 6]. In addition, LGB individuals who do not feel comfortable with the partner labels of the ACS are not in the sample. Another pitfall is measurement error: Misreporting may result when different-sex couples accidentally misspecify the gender of one of the partners [@gates_2009; @goodnature_2021]. Beginning in 2008, the Census Bureau made changes to ACS gender and partnership questions in order to prevent such errors [@u.s.censusbureau_2013], so we rely on data only from 2008 onward, but difficulties remain. If even a small number of different-sex couples misreport one partner's sex, the counts of same-sex couples will be inflated. Following @gates_2009, we remove all respondents that had either their relationship or sex variable allocated by the Census Bureau. This is the strategy used by most studies of same-sex couples in the ACS [e.g. @boertien_2019; @gates_2013; @goldberg_2021; @christafore_2019; @martell_2020].  
 
 Most of our variables come from the ACS and are calculated at the level of the Public Use Microdata Area (PUMA), a geographic unit of analysis that covers a population of at least 100,000 and does not cross state lines. PUMAs partition the entirety of the United States, and most of our analyses are at the level of the country as a whole.  
 
@@ -330,39 +334,39 @@ We also use social data from two other sources. First, to examine LGB policies a
 
 Our second outside data source is a measure of the prevalence of LGBTQ+ and immigrant-serving nonprofits in a given PUMA. We expect that LGB migrants will choose to live in areas with more LGBTQ+-serving nonprofits, and we expect that migrants more broadly will prefer to live in areas with more immigrant-serving nonprofits. These data come from the Internal Revenue Service's Business Master File (BMF). The BMF collects basic, administrative data on all tax-exempt entities required to submit a Form 990 annually. For our purposes, we restrict our sample to just 501c(3) charitable organizations. Additionally, the IRS assigns each organization an activity code from the National Taxonomy of Exempt Entities (NTEE). These NTEE codes help designate whether an organization is focused on "Arts & Culture" (code: A20) or "Homeless Shelters" (code: L82). We classify nonprofits with NTEE codes "Ethnic & Immigrant Centers (code: P84) and "Immigrant Rights" (code: R21) as immigrant serving. While LGBTQ+ nonprofits are those designed as "LGBT Centers" (code: P88) and "Lesbian & Gay Rights" (code: R26). We additionally supplement our classification of LGBTQ+ nonprofits with those used by @velasco_2022_deconstructed, who found LGBTQ+ nonprofits operating under other classification designations. To calculate a PUMA-level measure of these nonprofits, we use their ZIP code to approximate the number of nonprofits in a PUMA in a given year. Due to data unavailability at the time of writing, we use 2021 data for 2022.  
 
-Means for all of these PUMA-level variables by group are presented in Table \@ref(tab:desc).  
+Our analyses are descriptive, presenting and comparing the contours of the populations of immigrants in same-sex couples, immigrants in different-sex couples, and U.S.-born in same-se couples. Means for individual variables by group are presented in Table \@ref(tab:desc-ind), and PUMA-level geographic variables by group are presented in Table \@ref(tab:desc-geo). We also examine the state-level proportion of immigrants in same-sex couples as well as the the variation in both individual and geographic variables over time.    
 
-## Analytic Strategy 
-Our analyses proceed in three parts. First, we present descriptive statistics of ACS data. For these and for the reshaping described below, we apply survey weights from the ACS. 
-
-For the second stage of the analysis, we use OLS models. One of our goals is to isolate the effect of country-of-origin LGB policy on the immigration of immigrants in same-sex couples. The ideal survey would follow potential immigrants over time and have information about sexual orientation, allowing us to estimate how choice of residence varies by sexual orientation. This ideal dataset does not exist, but we attempt to approximate it. First, to study how different LGB migrants are from straight ones, we reshape the data so that each observation is the percentage of individual cohabiting immigrants in same-sex couples in PUMA $x$ in survey year $y$, out of all cohabiting immigrants in that PUMA. We regress the resulting percentage on the set of variables discussed above, adding state and year fixed effects and clustering errors at the state and year levels. We then repeat this analysis, but with the aim of determining how different LGB migrants are from LGB non-migrants. We reshape the data so that each observation is the percentage of immigrants in same-sex couples *out of all same-sex couples*, in PUMA $x$ in survey year $y$.  
-
-The third set of results come from quasi-Poisson models. Regressing yearly counts within PUMAs on the full set of geographic variables discussed above, we estimate separate models for our three groups -- immigrants in same-sex couples, immigrants in different-sex couples, and non-immigrants in same-sex couples. We compare the significance of coefficients across models using Z-tests.  
 
 
 
 # Results
 
 
+## Individual Characteristics
 
-## Descriptive Results
+Table \@ref(tab:desc-ind) presents means of individual variables for immigrants in different-sex couples, immigrants in same-sex couples, and U.S.-born individuals in same-sex couples, while Figure \@ref(fig:desc-ind-figures) shows how the group means of a numeric subset of these variables change over time. Beginning with socioeconomic characteristics, individuals in same-sex couples -- regardless of nativity --  are generally more advantaged than immigrants in different-sex couples. This is true for annual income, occupational prestige score (as measured by the Hauser and Warren Socioeconomic Index), high school completion, or college completion. Income and occupational prestige are nearly indistinguishable between the two groups of LGB individuals. Interestingly, compared to U.S.-born LGB individuals, LGB immigrants have lower rates of high school completion but higher rates of college completion. This implies a bimodal distribution: LGB immigrants consist of individuals with high education and those with relatively little education.  
+
+LGB individuals in general are much less likely than heterosexual ones to have children, however, before 2015, LGB immigrants were more likely to have children than the LGB U.S.-born. In recent years both LGB groups are equally likely, to have children, at about 20 percent. Children of LGB people tend to be from previous heterosexual relationships, which may have been more likely for LGB immigrants in the past. LGB migrants have also become younger than heterosexual ones in recent years.  
+
+Turning to identity characteristics, immigrants in same-sex couples are more likely to be White than those in different sex couples (28 compared to 19 percent), but much less likely to be white than the U.S.-born in same-sex couples (77 percent). Proportions of Black and Hispanic LGB immigrants are similar to those for heterosexual immigrants, but the proportion Asian is lower (23 percent for LGB compared to 31 percent for heterosexuals). As for sex, while there are slightly more females than males among heterosexual immigrants and the LGB U.S.-born, there are nearly twice as many males than females among LGB migrants.^[Note that we are constrained in reporting sex and gender by the questions asked in the ACS, which include only a binary option for sex and no question about gender.]
+
+
+## Geographic Characteristics
+
+
 
 To show broadly how the geography of immigrants in same-sex couples has changed over the past 15 years, Figure \@ref(fig:state-map) presents the percentage coupled immigrants in each state who are in same-sex couples and how these figures have changed over time. The figure shows maps for three time periods: 2008-2012, 2013-2017, and 2018-2022. Most states had greater proportions of immigrants in same-sex couples in 2022 than in 2008. In addition, the pattern of growth is meaningful. Shortly after the end of the Defense of Marriage Act in 2013 -- when U.S. citizens and permanent residents could finally sponsor the visa of a same-sex partner -- their growth was concentrated in the Northeast, where states were relatively early adopters of same-sex marriage, including Massachusetts (2004), Connecticut (2008), Vermont (2009), New Hampshire (2010), New York (2011), Maine (2012), and Maryland (2013). However, in the next period (2018-2022), more of the map shows higher percentages of immigrants in same-sex couples, including more relatively conservative states.  
 
-Table \@ref(tab:desc) presents descriptive statistics for PUMA-level characteristics, separated by the three groups of interest: immigrants in different-sex couples, immigrants in same-sex couples, and non-immigrants partnered with same-sex non-immigrants. In the table, all variables are averaged over the full range of survey years. Immigrants in same-sex couples tend to be more similar to immigrants in different-sex couples than non-immigrants in same-sex couples. Most notably, immigrants in same- and different-sex couples live in areas with similar proportions of immigrants and Hispanic people, with higher home values and rent, and in denser areas. However, immigrants in same-sex couples live in areas with somewhat more advantage than the other two groups. They live in areas with higher incomes and higher occupational prestige, and the home and rent prices of their areas are somewhat higher than those of immigrants more broadly. They also live in denser areas.  
+In the Appendix Figure \@ref(fig:subgroups), we present maps of subgroup distributions. Aggregating all of our years of data, these maps show the percentage of immigrants in same-sex couples in a given state who belong to three types of subgroups: ethnicity, sex, and whether they have children.  Higher proportions of LGB immigrants with children live in the Midwest than the coasts. 
+
+Table \@ref(tab:desc-geo) presents descriptive statistics for PUMA-level characteristics, separated by the three groups of interest: immigrants in different-sex couples, immigrants in same-sex couples, and non-immigrants partnered with same-sex non-immigrants. In the table, all variables are averaged over the full range of survey years. Immigrants in same-sex couples tend to be more similar to immigrants in different-sex couples than non-immigrants in same-sex couples. Most notably, immigrants in same- and different-sex couples live in areas with similar proportions of immigrants and Hispanic people, with higher home values and rent, and in denser areas. However, immigrants in same-sex couples live in areas with somewhat more advantage than the other two groups. They live in areas with higher incomes and higher occupational prestige, and the home and rent prices of their areas are somewhat higher than those of immigrants more broadly. They also live in denser areas.  
 
 Clear differences also arise around two variables relevant to LGBTQ+ people. First, although all three groups tend to live in relatively progressive states with a score of at least 3, immigrants in same-sex couples live in states with an average score of nearly 4. Also notable are differences around the number of LGBT nonprofits. On average, immigrants in same-sex couples live in PUMAs with 1.2 LGBT nonprofits, while LGB non-immigrants live in PUMAs with 0.76 and immigrants in different-sex couples with 0.30. They also live in areas with more immigrant nonprofits, with an average of 1.0. Surprisingly, the number of immigrant nonprofits for the average immigrant in a different-sex couple and average non-immigrant in a same sex couple are quite similar, at about 0.8. 
 
 Figures \@ref(fig:desc-time-1) and \@ref(fig:desc-time-2) show how these differences are fairly stable over time. One notable change is the average percent of Black residents in the typical area for each group: Around 2010, immigrants in same-sex couples were 1 to 2 percentage points more likely to live in areas with Black respondents than the other groups, but in recent years the numbers are very similar.  
 
 
-## Models
 
-Table \@ref(tab:prop-regression) presents OLS regressions for the percentage of immigrants in same-sex couples, out of all immigrants in couples, at the PUMA level. Model 1 does not include fixed effects, Model 2 includes state fixed effects and errors clustered at the state level, and Model 3 includes both state and year fixed effects and clusters errors at the state and year levels. Model 3 shows that a number of factors remain significant even in models with these fixed effects. Areas are more likely to have higher proportions of immigrants in same-sex couples (out of all coupled immigrants) if fewer people own their own home, the average age is higher, the percentage of immigrants is lower, more people are above the poverty line, homes are worth somewhat less, the number of LGBT nonprofits is higher, and the number of immigrant nonprofits is lower. In addition, although the coefficient is not significant in Model 3, the state LGB policy score has a positive effect in Models 1 and 2. States with more progressive LGB policies have greater proportions of immigrants in same-sex couples, but the lack of significance in models with fixed effects implies that variation is mostly between-state and between-year.  
-
-Table \@ref(tab:gay-prop-regression) presents corresponding regressions for the proportion of all people in same-sex couples who are immigrants. Again, a number of coefficients are significant in Model 3, which includes state and year fixed effects. Compared to LGB individuals more broadly, LGB immigrants tend to live in areas with more Black and Hispanic people, lower income, more people who own their own home, higher percentages of immigrants, higher home prices greater density, and with fewer immigrant nonprofits. 
-
-Lastly, Table \@ref(tab:poisson-regression-separate) presents coefficients from our quasi-Poisson models separately predicting counts of immigrants in different-sex couples, immigrants in same-sex couples, and non-immigrants in same-sex couples. The symbols between columns represents Z-tests, where the difference in coefficients for the same variable are evaluated for statistical significance. While descriptive results suggested that immigrants in same-sex couples are more similar to immigrants in different-sex couples than to non-immigrants in same-sex couples, the results here differ somewhat. More coefficients are significantly different from immigrants in different-sex couples (percentage Hispanic, percentage who own their own home, mean age, percentage immigrant, mean value of home, state LGB policy score, number of LGB nonprofits, and number of immigrant nonprofits) than from non-immigrants in same-sex couples (percentage black, percentage Hispanic, and percentage immigrant). Notably, compared to straight migrants, LGB migrants are more likely to live in LGB-friendly states and near LGBT nonprofits, and they are less likely to live near immigrant nonprofits.  
 
 # Discussion and Conclusion
 In 2013, the U.S. Supreme Court overturned the Defense of Marriage Act and required the U.S. government to begin recognizing marriages between same-sex spouses. Once immigrants in same-sex couples had access to spousal and finané(e) visas, their numbers increased rapidly [@hoffmann_2024_policy]. Where is it, then, that these immigrants settle in the United States over time? Investigating this question is important given the strong connection between residential distribution and a variety of important demographic and social outcomes such as health and well-being, exposure to environmental and social hazards, access to quality of education, and social integration.  
@@ -403,9 +407,17 @@ write_csv(desc_tab, here('geo/files', 'desc_tab.csv'))
 desc_tab_ind <- all_geo_survey %>%
   mutate(hs = if_else(educ %in% c('HS', 'some col', 'college'), 1, 0),
          college = if_else(educ == 'college', 1, 0),
-         has_children = nchild > 0) %>% 
+         has_children = nchild > 0,
+         white = ethnicity == 'White',
+         black = ethnicity == 'Black',
+         hispanic = ethnicity == 'Hispanic',
+         asian = ethnicity == 'Asian',
+         other = ethnicity == 'Multiracial or Other',
+         Female = sex == 'Female',
+         Male = sex == 'Male') %>% 
   group_by(group) %>%
-  summarize(across(c(inctot, hs, college, hwsei, has_children, nchild, age), 
+  summarize(across(c(inctot, hs, college, hwsei, has_children, nchild, age,
+                     white, black, hispanic, asian, other, Female, Male), 
             ~ survey_mean(.x, na.rm = T)))
 
 write_csv(desc_tab_ind, here('geo/files', 'desc_tab_ind.csv'))
@@ -468,7 +480,7 @@ desc_tab_ind %>%
   filter(!str_detect(Variable, '_se')) %>%
   mutate(Variable = recode(Variable, !!!variable_names_swap)) %>%
   flextable() %>% 
-  colformat_double(i = 8:9, digits = 0) %>%
+  colformat_double(i = 15:16, digits = 0) %>%
   FitFlextableToPage() %>% # flextable::autofit() %>%
   flextable::set_caption('Mean values for individual variables for immigrants in different- or same-sex couples, 2008-2022') 
   # kable(booktabs = T, linesep = '', caption = 'Mean values for geographic variables for immigrants in different- or same-sex couples, 2008-2022')
@@ -845,5 +857,62 @@ desc_tab_time %>%
 ```
 
 
+\newpage
 
+# (APPENDIX) Appendix {-}
+
+\setcounter{figure}{0}                      
+\renewcommand\thefigure{A.\arabic{figure}} 
+
+# Appendix
+
+```{r subgroups-calc, eval = F}
+
+subgroups <- function(variable){
+  subgroups_out <- list()
+  variable_values <- unique(immigrants[[variable]])
+  
+  for(value in variable_values){
+    subgroups_out[[value]] <- immigrants %>%
+      mutate(state = tolower(state),
+             value_true = !!sym(variable) == value) %>%
+      filter(state != 'district of columbia') %>%
+      filter(same_sex == T) %>%
+      group_by(state) %>%
+      summarize(prop = 100 * weighted.mean(value_true, perwt)) %>% 
+      complete() %>%
+      replace(is.na(.), 0) %>%
+      mutate(variable = variable, value = value)
+  }
+  
+  return(bind_rows(subgroups_out))
+}
+
+all_subgroups_list <- list()
+for(variable_name in c('sex', 'ethnicity', 'children')){
+  all_subgroups_list[[variable_name]] <- subgroups(variable_name)
+}
+
+bind_rows(all_subgroups_list) %>%
+  write_csv(here('geo/files', 'state_tab_subgroups.csv'))
+```
+
+```{r subgroups, fig.cap = 'Percentage of migrants in same-sex couples in each state consisting of particular subgroups, from ACS estimates that incorporate sampling weights (2008-2019 and 2021-2022).'}
+state_tab_subgroups <- read_csv(here('geo/files', 'state_tab_subgroups.csv'))
+
+state_tab_subgroups %>%
+  mutate(variable = paste0(str_to_title(variable), ':'),
+         value = str_to_sentence(value)) %>%
+  ggplot(aes(map_id = state, fill = prop)) +
+  geom_map(map = fiftystater::fifty_states) +
+  expand_limits(x = fiftystater::fifty_states$long, y = fiftystater::fifty_states$lat) +
+  coord_map() +
+  scale_fill_gradient(low = uclablue, high = uclagold, na.value = 'gray95') +
+  theme_void() +
+  facet_wrap(~variable + value) +
+  labs(fill = "Subgroup (%)") +
+  theme(legend.title = element_text(size=8), legend.text=element_text(size=8)) 
+
+  
+```
 
