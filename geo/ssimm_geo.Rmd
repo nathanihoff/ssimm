@@ -834,7 +834,7 @@ desc_tab_time %>%
   mutate(variable = factor(variable, levels = unique({.$variable}))) %>%
   # filter(str_detect(variable, '(%)')) %>%
   # mutate(same_sex = ifelse(same_sex == T, 'Same-sex', 'Different-sex')) %>%
-  ggplot(aes(x = year, y = value, color = group)) +
+  ggplot(aes(x = year, y = value, color = group, linetype = group)) +
   geom_line() +
   facet_wrap(~variable, scales = 'free_y', ncol = 2) +
   labs(x = 'Year', y = '') +
