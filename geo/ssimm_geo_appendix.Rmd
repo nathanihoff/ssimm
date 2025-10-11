@@ -4,7 +4,7 @@ output:
   bookdown::word_document2:
     reference_docx: "word-template.docx"
     toc: no
-    number_sections: no
+    number_sections: yes
     pandoc_args: !expr rmdfiltr::add_wordcount_filter(rmdfiltr::add_citeproc_filter(args = NULL))
     latex_engine: xelatex
 always_allow_html: true
@@ -15,7 +15,6 @@ header-includes:
   - \pagestyle{fancy}
   - \lhead{Nathan I. Hoffmann}
   - \rhead{`r format(Sys.time(), '%B %e, %Y')`}
-  
 editor_options: 
   chunk_output_type: console
 citeproc: no
@@ -26,15 +25,14 @@ indent: yes
 link-citations: yes
 linkcolor: blue
 lang: 'en-US'
-bibliography: "/Users/nathan/My Drive/Projects/2020 Same-Sex Immigrant Couples/Same-Sex Immigration.bib"
+# bibliography: "/Users/nathan/My Drive/Projects/2020 Same-Sex Immigrant Couples/Same-Sex Immigration.bib"
 title: "Appendix"
 subtitle: "The Geography of Immigrants in Same-Sex Couples in the United States"
 # date: "September 1, 2024"
-date: "`r format(Sys.time(), '%B %e, %Y')`"
+# date: "`r format(Sys.time(), '%B %e, %Y')`"
 author:
 - Nathan I. Hoffmann, Department of Sociology, UCLA
 - Kristopher Velasco, Department of Sociology, Princeton University
-
 ---
 
 <!-- Turn off hyphenation -->
@@ -118,7 +116,7 @@ set_flextable_defaults(font.family = 'Times New Roman',
 
 ```
 
-```{r load, include = F, eval = F}
+```{r load, include = F}
 # acs_ind <- readRDS(here('data', 'acs_ind.rds')) 
 
 
@@ -132,12 +130,15 @@ all_geo <- read_csv(here('data', 'immigrants_geo.csv')) %>%
   )) %>%
   mutate(children = ifelse(nchild > 0, 'has children', 'no children'),
          ethnicity = case_when(
-           hispan != 'Not Hispanic' ~ 'Hispanic',
-           race == 'White' ~ 'White',
-           race %in% c("Other Asian or Pacific Islander", "Chinese", "Japanese") ~ "Asian",
-           race == 'Black/African American' ~ 'Black',
-           !is.na(race) ~ 'Multiracial or Other'
-         ) )
+           hispan != 'not hispanic' ~ 'Hispanic',
+           race == 'white' ~ 'White',
+           race %in% c("other asian or pacific islander", "chinese", "japanese") ~ "Asian",
+           race == 'black/african american' ~ 'Black',
+           !is.na(race) ~ 'Multiracial or Other'),
+         lgbt_nonprofits = ifelse(year >= 2022, NA, lgbt_nonprofits),
+         immigrant_nonprofits = ifelse(year >= 2022, NA, immigrant_nonprofits),
+         married = ifelse(year < 2012 & same_sex == T,
+                                 NA, married))
 
 all_geo_survey <- all_geo %>% 
   as_survey_design(weights = perwt)
@@ -232,7 +233,7 @@ count_tab_year <- bind_rows(
 variable_names <- c('Bachelor\'s degree (%)' = 'bachelors_puma', 
                     'Black (%)' = 'black_puma',
                     'Hispanic (%)' = 'hispanic_puma', 
-                    'Mean personal income' = 'inctot_puma',
+                    'Annual personal income (thousands of 2023 USD)' = 'inctot_puma',
                     # 'Log mean personal income' = 'log_inctot_puma', 
                     'Individuals own home (%)' = 'owned_puma', 
                     'Mean age' = 'age_puma', 
@@ -244,32 +245,70 @@ variable_names <- c('Bachelor\'s degree (%)' = 'bachelors_puma',
                     'Mean individual\'s value of home ($1000s)' = 'valueh_puma',
                     'Mean individual\'s rent' = 'rent_puma', 
                     'Mean cost of electricity' = 'costelec_puma', 
-                    'Density (persons per sq. mile)' = 'density_puma', 
+                    'Density (persons per sq. mile)' = 'density', 
                     'State LGB policy score' = 'state_policy', 
                     'Mean number of LGBT nonprofits' = 'lgbt_nonprofits',
-                    'Mean number of immigrant nonprofits' = 'immigrant_nonprofits')
+                    'Mean number of immigrant nonprofits' = 'immigrant_nonprofits',
+                    'Annual Gross Income (Thousands)' = 'inctot',
+                    'Hauser and Warren Socioeconomic Index' = 'hwsei',
+                    'High school graduate' = 'hs',
+                    'Four-year college graduate' = 'college',
+                    'Number of children' = 'nchild',
+                    'Has children' = 'has_children',
+                    'Married' = 'married',
+                    'White' = 'white',
+                    'Black' = 'black',
+                    'Asian' = 'asian',
+                    'Hispanic' = 'hispanic',
+                    'Multiracial or Other' = 'other',
+                    'Male' = 'male',
+                    'Female' = 'female',
+                    'Age' = 'age',
+                    'n' = 'n',
+                    'n (weighted)' = 'n_weighted')
+
 
 variable_names_swap <- names(variable_names)
 names(variable_names_swap) <- as.vector(variable_names)
 
+
+sample_size <- all_geo %>%
+  group_by(group) %>%
+  summarize(n = n(),
+            n_weighted = sum(perwt))
 ```
+
+
+<!-- # (APPENDIX) {-} -->
+
+\setcounter{figure}{0}                      
+\renewcommand\thefigure{A.\arabic{figure}} 
+
+
+\newpage
 
 # Maps of state-level proportions for subgroups
 
+
+
 ```{r subgroups-calc, eval = F}
+
+# immigrants <- immigrants %>%
+#   mutate(married = ifelse(married == T, 'married', 'not married'))
 
 subgroups <- function(variable){
   subgroups_out <- list()
   variable_values <- unique(immigrants[[variable]])
+  variable_values <- variable_values[!is.na(variable_values)]
   
   for(value in variable_values){
-    subgroups_out[[value]] <- immigrants %>%
+    subgroups_out[[as.character(value)]] <- immigrants %>%
       mutate(state = tolower(state),
              value_true = !!sym(variable) == value) %>%
       filter(state != 'district of columbia') %>%
       filter(same_sex == T) %>%
       group_by(state) %>%
-      summarize(prop = 100 * weighted.mean(value_true, perwt)) %>% 
+      summarize(prop = 100 * weighted.mean(value_true, perwt, na.rm = T)) %>% 
       complete() %>%
       replace(is.na(.), 0) %>%
       mutate(variable = variable, value = value)
@@ -279,15 +318,18 @@ subgroups <- function(variable){
 }
 
 all_subgroups_list <- list()
-for(variable_name in c('sex', 'ethnicity', 'children')){
+for(variable_name in c('sex', 'ethnicity', 'children', 'married')){
   all_subgroups_list[[variable_name]] <- subgroups(variable_name)
 }
+
+all_subgroups_list$married <- all_subgroups_list$married %>%
+  mutate(value = ifelse(value == T, 'married', 'not married'))
 
 bind_rows(all_subgroups_list) %>%
   write_csv(here('geo/files', 'state_tab_subgroups.csv'))
 ```
 
-```{r subgroups, fig.cap = 'Percentage of migrants in same-sex couples in each state consisting of particular subgroups, from ACS estimates that incorporate sampling weights (2008-2019 and 2021-2022).'}
+```{r subgroups-map, fig.height = 5.5, fig.cap = 'Percentage of migrants in same-sex couples in each state consisting of particular subgroups, from ACS estimates that incorporate sampling weights (2008-2019 and 2021-2023).'}
 state_tab_subgroups <- read_csv(here('geo/files', 'state_tab_subgroups.csv'))
 
 state_tab_subgroups %>%
@@ -299,56 +341,228 @@ state_tab_subgroups %>%
   coord_map() +
   scale_fill_gradient(low = uclablue, high = uclagold, na.value = 'gray95') +
   theme_void() +
-  facet_wrap(~variable + value) +
+  facet_wrap(~variable + value, ncol = 3) +
   labs(fill = "Subgroup (%)") +
   theme(legend.title = element_text(size=8), legend.text=element_text(size=8)) 
 
-# 
-# state_tab_male <- immigrants %>%
-#   mutate(state = tolower(state)) %>%
-#   filter(state != 'district of columbia') %>%
-#   filter(sex == 'Male') %>%
-#   group_by(state) %>%
-#   summarize(prop_samesex = 100 * weighted.mean(same_sex, perwt)) %>% 
-#   complete() %>%
-#   replace(is.na(.), 0) 
-# 
-# state_tab_female <- immigrants %>%
-#   mutate(state = tolower(state)) %>%
-#   filter(state != 'district of columbia') %>%
-#   filter(sex == 'Female') %>%
-#   group_by(state) %>%
-#   summarize(prop_samesex = 100 * weighted.mean(same_sex, perwt)) %>% 
-#   complete() %>%
-#   replace(is.na(.), 0) 
-# 
-# bind_rows(
-#   mutate(state_tab_female, variable = 'Sex', value = 'Female'),
-#   mutate(state_tab_male, variable = 'Sex', value = 'Male')) %>%
-  
-  
-  
-
-# (state_tab_male %>%
-#   ggplot(aes(map_id = state, fill = prop_samesex)) +
-#   geom_map(map = fiftystater::fifty_states) +
-#   expand_limits(x = fiftystater::fifty_states$long, y = fiftystater::fifty_states$lat) +
-#   coord_map() +
-#   theme_void()) + 
-#     (state_tab_female %>%
-#     ggplot(aes(map_id = state, fill = prop_samesex)) +
-#     geom_map(map = fiftystater::fifty_states) +
-#     expand_limits(x = fiftystater::fifty_states$long, y = fiftystater::fifty_states$lat) +
-#     coord_map() +
-#     theme_void()) +
-#   plot_layout(guides = 'collect') &
-#   scale_fill_gradient(limits = range(state_tab_male$prop_samesex, state_tab_female$prop_samesex),
-#                       low = uclablue, high = uclagold, na.value = 'gray95')
-#   labs(fill = "Same-sex (%)") &
-#   theme(legend.title = element_text(size=8), legend.text=element_text(size=8)) 
   
 ```
 
+<!-- \newpage -->
 
+<!-- # Segregation Index for Subgroups -->
+<!-- ```{r segregation, fig.cap = 'Stratified by Index of Dissimilarity (H) measures by PUMA for 2008 to 2023, comparing immigrants in same-sex couples to immigrants in different-sex couples or to non-immigrants in same-sex couples.'} -->
+<!-- all_geo <- all_geo %>% -->
+<!--   mutate(year_group = floor(year/5)*5)  -->
+
+<!-- all_subgroups_list <- list() -->
+<!-- for(variable_name in c('sex', 'ethnicity', 'children')){ -->
+<!--   variable_values <- unique(immigrants[[variable_name]]) -->
+<!--   variable_values <- variable_values[!is.na(variable_values)] -->
+
+<!--   for(variable_value in variable_values){ -->
+<!--     all_subgroups_list[[paste0(variable_name, variable_value, 'imm')]] <- all_geo %>% -->
+<!--       filter(group %in% c('Same-sex, immigrant', 'Different-sex, immigrant'), -->
+<!--              !!sym(variable_name) == variable_value) %>% -->
+<!--       group_by(year_group) %>% -->
+<!--       group_modify(~segregation::dissimilarity(data = .x,  -->
+<!--                                               group = 'group',  -->
+<!--                                               unit = c('puma', 'state'), -->
+<!--                                               weight = 'perwt') -->
+<!--                    ) %>% -->
+<!--       mutate(comparison = 'Same-sex, imm. vs. dif.-sex, imm.', -->
+<!--              variable = variable_name, -->
+<!--              value = variable_value) -->
+
+<!--      all_subgroups_list[[paste0(variable_name, variable_value, 'lgbq')]] <- all_geo %>% -->
+<!--       filter(group %in% c('Same-sex, immigrant', 'Different-sex, immigrant'), -->
+<!--              !!sym(variable_name) == variable_value) %>% -->
+<!--       group_by(year_group) %>% -->
+<!--       group_modify(~segregation::dissimilarity(data = .x,  -->
+<!--                                               group = 'group',  -->
+<!--                                               unit = c('puma', 'state'), -->
+<!--                                               weight = 'perwt') -->
+<!--                    ) %>% -->
+<!--       mutate(comparison = 'Same-sex, imm. vs. same-sex, non-imm.', -->
+<!--              variable = variable_name, -->
+<!--              value = variable_value) -->
+<!--   } -->
+<!-- } -->
+
+
+
+<!-- bind_rows(all_subgroups_list) %>% -->
+<!--   ggplot(aes(x = year_group, y = est, color = comparison, linetype = comparison)) + -->
+<!--   geom_line() + -->
+<!--   geom_hline(yintercept = 0) + -->
+<!--   facet_wrap(~variable + value) + -->
+<!--   theme(legend.position = 'bottom') -->
+
+
+<!-- # bind_rows(yearly_theil, seg_imm, seg_lgbq) %>% -->
+<!-- #   ggplot(aes(x = year, y = est, color = comparison, linetype = comparison)) + -->
+<!-- #   geom_line() + -->
+<!-- #   geom_hline(yintercept = 0) + -->
+<!-- #   facet_wrap(~index, scales = 'free') -->
+<!-- ``` -->
+
+
+\newpage
+
+# Characteristics of married people (beginning in 2012)
+
+
+```{r desc-calc-married, eval = F}
+desc_tab <- all_geo_survey %>%
+  filter(married == T & year >= 2012) %>%
+  group_by(group) %>%
+  summarize(across(c(bachelors_puma, black_puma, hispanic_puma, inctot_puma,
+                     owned_puma, age_puma, immigrant_puma,
+                     poverty_100_puma, poverty_200_puma, hwsei_puma, 
+                     unemployed_puma, valueh_puma,
+                     rent_puma, costelec_puma, density, state_policy, 
+                     lgbt_nonprofits, immigrant_nonprofits), 
+            ~ survey_mean(.x, na.rm = T)))
+
+write_csv(desc_tab, here('geo/files', 'desc_tab_married.csv'))
+
+desc_tab_ind <- all_geo_survey %>%
+  filter(married == T & year >= 2012) %>%
+  mutate(hs = if_else(educ %in% c('HS', 'some col', 'college'), 1, 0),
+         college = if_else(educ == 'college', 1, 0),
+         has_children = nchild > 0,
+         white = ethnicity == 'White',
+         black = ethnicity == 'Black',
+         hispanic = ethnicity == 'Hispanic',
+         asian = ethnicity == 'Asian',
+         other = ethnicity == 'Multiracial or Other',
+         Female = sex == 'female',
+         Male = sex == 'male') %>% 
+  group_by(group) %>%
+  summarize(across(c(inctot, hs, college, hwsei, has_children, nchild, age,
+                     white, black, hispanic, asian, other, Female, Male), 
+            ~ survey_mean(.x, na.rm = T)))
+
+write_csv(desc_tab_ind, here('geo/files', 'desc_tab_ind_married.csv'))
+
+# desc_tab_time <- all_geo_survey %>%
+#   filter(married == T & year >= 2012) %>%
+#   group_by(group, year) %>%
+#   summarize(across(c(bachelors_puma, black_puma, hispanic_puma, inctot_puma,
+#                      owned_puma, age_puma, immigrant_puma,
+#                      poverty_100_puma, poverty_200_puma, hwsei_puma,
+#                      unemployed_puma, valueh_puma,
+#                      rent_puma, costelec_puma, density, state_policy,
+#                      lgbt_nonprofits, immigrant_nonprofits),
+#             ~ survey_mean(.x, na.rm = T))) %>%
+#   replace(. == 0, NA)
+# 
+# write_csv(desc_tab_time, here('geo/files', 'desc_tab_time_married.csv'))
+```
+
+```{r desc-ind-married}
+
+# desc_tab_se <- immigrants_survey %>%
+#   group_by(same_sex) %>%
+#   summarize(across(c(bachelors_puma_se, black_puma_se, hispanic_puma_se, inctot_puma,
+#                      log_inctot_puma_se, owned_puma_se, age_puma_se, immigrant_puma,
+#                      poverty_100_puma_se, poverty_200_puma_se, hwsei_puma_se, 
+#                      unemployed_puma_se, valueh_puma,
+#                      rent_puma_se, costelec_puma_se, density, pctmetro),
+#             ~ sqrt(sum(perwt*(.x^2), na.rm = T)/sum(perwt, na.rm = T)^2)
+#   ))
+            #~ sqrt(survey_mean(.x^2, na.rm = T)/n())))
+
+sample_size <- all_geo %>%
+  filter(married == T & year >= 2012) %>%
+  group_by(group) %>%
+  summarize(n = n(),
+            n_weighted = sum(perwt))
+
+
+desc_tab_ind <- read_csv(here('geo/files', 'desc_tab_ind_married.csv'))
+
+FitFlextableToPage <- function(ft, pgwidth = 6){
+  ft_out <- ft %>% flextable::autofit()
+  ft_out <- flextable::width(ft_out, width = dim(ft_out)$widths*pgwidth /
+                               (flextable::flextable_dim(ft_out)$widths))
+  return(ft_out)
+}
+
+# desc_tab_ind %>%
+#   rename_with(~ paste0(.x, '_coef'), !ends_with('_se')) %>%
+#   pivot_longer(-group_coef, names_sep = '_')
+
+
+desc_tab_ind %>%
+  left_join(sample_size) %>%
+  column_to_rownames('group') %>%
+  t() %>%
+  as.data.frame() %>%
+  # mutate(`Different-sex, immigrant` = round(V1, 3), `Same-sex, immigrant` = round(V2, 3),
+  #        `Same-sex, non-immigrant` = round(V3, 3)) %>%
+  # select(different_sex, same_sex) %>%
+  rownames_to_column('Variable') %>%
+  # mutate(Variable = ifelse(str_detect(Variable, '_se'), Variable, paste0(Variable, '_coef'))) %>%
+  # pivot_wider(names_from = Variable, names_sep = '_')
+  filter(!str_detect(Variable, '_se')) %>%
+  mutate(Variable = recode(Variable, !!!variable_names_swap)) %>%
+  flextable() %>% 
+  colformat_double(i = 15:16, digits = 0) %>%
+  FitFlextableToPage() %>% # flextable::autofit() %>%
+  flextable::set_caption('Married only: Mean values for individual variables for immigrants in different- or same-sex couples, 2012-2019 and 2021-2023. For same-sex couples, the married variable is coded as missing before 2012.') 
+  # kable(booktabs = T, linesep = '', caption = 'Mean values for geographic variables for immigrants in different- or same-sex couples, 2008-2023')
+
+
+```
+
+\newpage
+
+```{r desc-geo-married}
+
+# desc_tab_se <- immigrants_survey %>%
+#   group_by(same_sex) %>%
+#   summarize(across(c(bachelors_puma_se, black_puma_se, hispanic_puma_se, inctot_puma,
+#                      log_inctot_puma_se, owned_puma_se, age_puma_se, immigrant_puma,
+#                      poverty_100_puma_se, poverty_200_puma_se, hwsei_puma_se, 
+#                      unemployed_puma_se, valueh_puma,
+#                      rent_puma_se, costelec_puma_se, density, pctmetro),
+#             ~ sqrt(sum(perwt*(.x^2), na.rm = T)/sum(perwt, na.rm = T)^2)
+#   ))
+            #~ sqrt(survey_mean(.x^2, na.rm = T)/n())))
+
+
+
+desc_tab <- read_csv(here('geo/files', 'desc_tab_married.csv'))
+
+FitFlextableToPage <- function(ft, pgwidth = 6){
+  ft_out <- ft %>% flextable::autofit()
+  ft_out <- flextable::width(ft_out, width = dim(ft_out)$widths*pgwidth /
+                               (flextable::flextable_dim(ft_out)$widths))
+  return(ft_out)
+}
+
+desc_tab %>%
+  select(group, inctot_puma, unemployed_puma, hwsei_puma, valueh_puma,
+         bachelors_puma, black_puma, hispanic_puma, immigrant_puma, 
+         density, state_policy, lgbt_nonprofits, immigrant_nonprofits) %>%
+  left_join(sample_size) %>%
+  column_to_rownames('group') %>%
+  t() %>%
+  as.data.frame() %>%
+  # mutate(`Different-sex, immigrant` = round(V1, 3), `Same-sex, immigrant` = round(V2, 3),
+  #        `Same-sex, non-immigrant` = round(V3, 3)) %>%
+  # select(different_sex, same_sex) %>%
+  rownames_to_column('Variable') %>%
+  # filter(!str_detect(Variable, '_se')) %>%
+  mutate(Variable = recode(Variable, !!!variable_names_swap)) %>%
+  flextable() %>% 
+  colformat_double(i = 13:14, digits = 0) %>%
+  FitFlextableToPage() %>% # flextable::autofit() %>%
+  flextable::set_caption('Married only: Mean values for geographic variables for immigrants in different- or same-sex couples, 2008-2023') 
+  # kable(booktabs = T, linesep = '', caption = 'Only married: Mean values for geographic variables for immigrants in different- or same-sex couples, 2012-2019 and 2021-2023')
+
+
+```
 
 

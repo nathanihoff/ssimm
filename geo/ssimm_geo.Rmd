@@ -25,14 +25,14 @@ indent: yes
 link-citations: yes
 linkcolor: blue
 lang: 'en-US'
-bibliography: "/Users/nathan/My Drive/Projects/2020 Same-Sex Immigrant Couples/Same-Sex Immigration.bib"
+bibliography: '/Users/nihoffm/My Drive/Projects/2020 Same-Sex Immigrant Couples/Same-Sex Immigration.bib'
 title: "The Geography of Immigrants in Same-Sex Couples in the United States"
 # date: "September 1, 2024"
 date: "`r format(Sys.time(), '%B %e, %Y')`"
 author: 
 - Nathan I. Hoffmann, Department of Sociology, UCLA
 - Kristopher Velasco, Department of Sociology, Princeton University
-abstract: "The policy landscape for same-sex couples in the United States has changed rapidly in recent years, and the number of immigrants in same-sex couples have increased rapidly. Yet little is known about where these lesbian, gay, bisexual, and queer (LGBQ) immigrants choose to settle and enjoy their new rights. Using American Community Survey data from 2008-2023 and original datasets, this paper studies the geographic context of immigrants in same-sex couples in the U.S., comparing them to them to immigrants in different-sex couples and the U.S.-born in same-sex couples. We find that the distribution of immigrants in same-sex couples is expanding across the U.S. over time. Individually, these immigrants resemble U.S.-born LGBQ Americans, with higher incomes and educational attainment. At the geographic level, they appear more distinct, clustering in areas with more LGBTQ+ nonprofit organizations, greater numbers of immigrants, higher density, and higher property values than the areas that straight immigrants or the U.S.-born in same-sex couples tend to live in. Our findings contribute to a fuller understanding of this rapidly growing population and its unique characteristics."
+abstract: "The policy landscape for same-sex couples in the United States has changed rapidly in recent years, and the number of immigrants in same-sex couples have increased rapidly. Yet little is known about where these lesbian, gay, bisexual, and queer (LGBQ) immigrants choose to settle and enjoy their new rights. Using American Community Survey data from 2008-2023 and original datasets, this paper studies the geographic context of immigrants in same-sex cohabiting couples in the U.S., comparing them to them to immigrants in different-sex couples and the U.S.-born in same-sex couples. We find that the distribution of immigrants in same-sex couples is expanding across the U.S. over time. Individually, these immigrants resemble U.S.-born LGBQ Americans, with higher incomes and educational attainment. At the geographic level, they appear more distinct, clustering in areas with more LGBTQ+ nonprofit organizations, greater numbers of immigrants, higher density, and higher property values than the areas that straight immigrants or the U.S.-born in same-sex couples tend to live in. Our findings contribute to a fuller understanding of this rapidly growing population and its unique characteristics."
 ---
 
 <!-- Turn off hyphenation -->
@@ -286,7 +286,7 @@ Residential equity and the geographic distribution of people are linked to a var
 
 Despite increased interest on this growing population [@seo_2025_sexualities], especially in the wake of the DOMA decision, little is known on *where* LGBQ migrants settle and enjoy their new rights after entering the U.S. Do they gravitate toward LGBTQ+-friendly cities and states, or are they more concerned with job opportunities and cost of living? How have these patterns changed over time, especially in the context of shifting local policy changes relevant to LGBTQ+ people and immigrants? Research makes clear that LGBTQ+ migrants can often feel caught between their sexual identity and migrant community [@acosta_2008_lesbianas]. Do patterns of settlement align with their fellow migrants or, does their dispersion mirror their U.S-born LGBQ counterparts? Addressing this question offers important insights into how social processes ultimately affect populations caught in potentially countervailing forces, both in the U.S. and other countries where legal changes enable migration and partnering.  
 
-This paper implements descriptive analyses to study how settlement patterns of immigrants in same-sex couples in the U.S. respond to local and national policy changes as well as other local conditions. To tease apart the unique characteristics of our focal group -- immigrants in same-sex couples in the U.S. -- we compare them to two other groups: immigrants in different-sex couples and U.S.-born people in same-sex couples (where the partner is also U.S.-born). We compare individual characteristics of these three groups before turning to their geographic distribution and characteristics of their places of residence. We leverage data from the American Community Survey, spanning 2008 to 2023, to do so.  
+This paper implements descriptive analyses to study how settlement patterns of immigrants in same-sex cohabiting couples in the U.S. respond to local and national policy changes as well as other local conditions. To tease apart the unique characteristics of our focal group -- immigrants in same-sex couples in the U.S. -- we compare them to two other groups: immigrants in different-sex couples and U.S.-born people in same-sex couples (where the partner is also U.S.-born). We compare individual characteristics of these three groups before turning to their geographic distribution and characteristics of their places of residence. We leverage data from the American Community Survey, spanning 2008 to 2023, to do so.  
 
 <!-- We find that the distribution of immigrants in same-sex couples is expanding across the U.S. over time. Individually, these immigrants resemble U.S.-born LGBQ Americans, with higher incomes and educational attainment. At the geographic level, they appear more distinct, clustering in areas with more LGBT nonprofit organizations, greater numbers of immigrants, higher density, and higher property values than U.S.-born Americans in same-sex couples. Our findings contribute to a fuller understanding of this rapidly growing population and its unique characteristics. -->
 
@@ -336,7 +336,7 @@ Lastly, why might LGBQ migrants have residential patterns that do not reflect ei
 
 # Data and Methods
 
-Our main source of data is the American Community Survey (ACS) from 2008 to 2023 [@ruggles_2024_ipums]. We exclude data from the year 2020, when data was not of adequate quality. Each year, the ACS surveys a 1-percent representative sample of U.S. households about their education, occupation, income, family structure, immigration status, country of origin, location, and a variety of other individual and household attributes. We define a same-sex couple as two individuals of the same sex in the same household who report their relationship as "spouse" or "unmarried partner." We limit the sample to individuals ages 18 to 64, and immigrants in the sample must have migrated at age 18 or older.  
+Our main source of data is the American Community Survey (ACS) one-year estimates from 2008 to 2023 [@ruggles_2024_ipums]. We exclude data from the year 2020, when data was not of adequate quality. Each year, the ACS surveys a 1-percent representative sample of U.S. households about their education, occupation, income, family structure, immigration status, country of origin, location, and a variety of other individual and household attributes. We define a same-sex couple as two individuals of the same sex in the same household who report their relationship as "spouse" or "unmarried partner." We limit the sample to individuals ages 18 to 64, and immigrants in the sample must have migrated at age 18 or older.  
 
 We do not focus solely on married individuals for a few reasons. First, there is an issue of data availability; until 2012, the ACS re-labeled same-sex married couples as unmarried partners, even in states where same-sex marriage was legal. Including same-sex couples coded as "unmarried partners" allows us to look at a broader range of years, and some of these couples may in fact have been married before 2012. Second, previous work has shown that the DOMA decision was associated with a rise in same-sex cohabitation for immigrants, regardless of whether they were married or unmarried [@hoffmann_2024_policy]. This suggests that policy around marriage had broader effects not limited to married individuals. Lastly, the end of DOMA opened a pathway to visas for fiancé(e)s (as well as spouses); however, the ACS does not capture whether unmarried partners are engaged to be married, so we cannot measure the prevalence of fiancé(e)s in the data. For these reasons, we include both married and unmarried cohabiting couples in our analyses. As part of these, we examine rates of marriage beginning in the year 2012. In the Online Appendix, we replicate Tables \@ref(tab:desc-ind) and \@ref(tab:desc-geo) with the samples restricted to only married couples, using only data from 2012 onward. Descriptive statistics are very similar to those for the broader sample that includes cohabiting couples.   
 
@@ -349,7 +349,7 @@ We use "LGBQ" to refer to all individuals who may be in romantic relationships w
 
 Most of our variables come from the ACS. To place our geographic investigations in context, we rely on some individual-level characteristics. These include annual gross income (in thousands of 2023 U.S. dollars), education (with categories for being a high school or four-year college graduate), the Hauser-Warren Socioeconomic Index for occupational prestige [HWSEI, @hauser_1997_socioeconomic], the number of the respondent's own children in the household, race and ethnicity (with categories for non-Hispanic White and Black, Hispanic, Asian, and Multiraical or Other), age, and two-category sex.^[We are constrained in reporting sex and gender by the questions asked in the ACS, which include only a binary option for sex and no question about gender.]  
 
-For geographic variables, we calculate values at the level of the Public Use Microdata Area (PUMA) -- a geographic unit of analysis that covers a population of at least 100,000 and does not cross state lines. PUMAs partition the entirety of the United States. We consider a variety of variables at the PUMA level in the ACS. First are variables relevant to economic considerations; neoclassical economic theory suggests that immigrants choose to settle in areas with greater economic opportunities. We expect that people want to live in places with better job opportunities, as long as the cost of living is not too high. We include the percentage of individuals in the PUMA who hold at least a bachelor's degree and who are unemployed. We also consider the mean PUMA-level values of personal income, Hauser-Warren occupational prestige score, and value of home (in thousands of 2023 dollars)^[The VALUEH home value variable is top-coded at $1,000,000.].
+For geographic variables, we calculate values at the level of the Public Use Microdata Area (PUMA) -- a geographic unit of analysis that covers a population of at least 100,000 and does not cross state lines. PUMAs partition the entirety of the United States. We consider a variety of variables at the PUMA level in the ACS. First are variables relevant to economic considerations; neoclassical economic theory suggests that immigrants choose to settle in areas with greater economic opportunities. We expect that people want to live in more socioeconomically advantaged areas, as long as the cost of living is not too high. We include the percentage of individuals in the PUMA who hold at least a bachelor's degree and who are unemployed. We also consider the mean PUMA-level values of personal income, Hauser-Warren occupational prestige score, and value of home (in thousands of 2023 dollars)^[The VALUEH home value variable is top-coded at $1,000,000.].
 
 Second, we consider variables relevant to social considerations. Based on theories of immigrant networks and the migration industry, we expect the immigrants will want to live near other immigrants and with organizations that ease migration. Individuals may also take other social aspects into consideration, such as racial composition and density. From the ACS, we calculate the percentage of individuals in the PUMA who are immigrants (born outside the U.S.), who identify as Black, and who identify as Hispanic. We also use a measure from the ACS of the density of the PUMA in persons per square mile.
 
@@ -378,7 +378,7 @@ To show broadly how the geography of immigrants in same-sex couples has changed 
 
 In the Appendix, we present maps of subgroup distributions. Aggregating all of our years of data, these maps show the percentage of immigrants in same-sex couples in a given state who belong to four types of subgroups: race and ethnicity, sex, whether they have children, and whether they are married (rather than also including unmarried partners). Higher proportions of LGBQ immigrants with children live in the Midwest than the coasts. States close to the Mexican border have higher proportions of LGBQ migrants who are Hispanic, while those in the Midwest and East have somewhat higher proportions that are Asian. Marriage and sex do not seem to be strongly structured by geography.  
 
-```{r segregation-calc}
+```{r segregation-calc, eval = F}
 yearly_theil <- all_geo %>%
   group_by(year) %>%
   group_modify(~ segregation::mutual_total(data = .x, 
@@ -396,7 +396,8 @@ seg_imm <- all_geo %>%
   group_modify(~segregation::dissimilarity(data = .x, 
                                           group = 'group', 
                                           unit = c('puma', 'state'),
-                                          weight = 'perwt')
+                                          weight = 'perwt',
+                                          se = T)
                ) %>%
   mutate(comparison = 'Same-sex, imm. vs. dif.-sex, imm.',
          index = 'Dissimilarity Index')
@@ -408,13 +409,24 @@ seg_lgbq <- all_geo %>%
   group_modify(~segregation::dissimilarity(data = .x, 
                                           group = 'group', 
                                           unit = c('puma', 'state'),
-                                          weight = 'perwt')
+                                          weight = 'perwt',
+                                          se = T)
                )   %>%
   mutate(comparison = 'Same-sex, imm. vs. same-sex, non-imm.',
          index = 'Dissimilarity Index')
   
-
+bind_rows(seg_imm, seg_lgbq) |>
+  write_csv(here('geo/files/', 'seg.csv'))
 ```
+
+```{r seg-load}
+seg <- read_csv(here('geo/files/', 'seg.csv'))
+
+seg_imm <- filter(seg, comparison == 'Same-sex, imm. vs. dif.-sex, imm.')
+
+seg_lgbq <- filter(seg, comparison == 'Same-sex, imm. vs. same-sex, non-imm.')
+```
+
 
 We next consider segregation at the PUMA level between immigrants in same-sex couples and the other two groups. As shown in Figure \@ref(fig:segregation), the index of dissimilarity is quite high in both cases, though it has declined slightly between 2008 and 2023. In 2008, this index is equal to about `r seg_imm %>% filter(year == 2008) %>% pull(est) %>% round(2)` when comparing to immigrants in different-sex couples, meaning that `r 100*(seg_imm %>% filter(year == 2008) %>% pull(est) %>% round(2))` percent of immigrants in same-sex couples would need to move to a different PUMA to equalize the distribution between these two groups. By 2023, it decreases to `r seg_imm %>% filter(year == 2023) %>% pull(est) %>% round(2)`. As for segregation from the U.S.-born in same-sex couples, the index is even higher, at `r seg_lgbq %>% filter(year == 2008) %>% pull(est) %>% round(2)` in 2008 and `r seg_lgbq %>% filter(year == 2023) %>% pull(est) %>% round(2)` in 2023. To put these numbers in context, @massey_1990_american considers an index of dissimilarity above 0.6 to be "high segregation," and Black-White segregation by census tract in the most segregated U.S. cities ranges from 0.66 to 0.80 [@frey_2018_blackwhite]. This gives support to the idea that LGBQ immigrants are settling in unique enclaves in the U.S., away from both the broader immigrant and LGBQ populations.  
 
@@ -436,7 +448,7 @@ While this group resembles the LGBQ U.S.-born individually, at the geographic le
 
 This distinctiveness is further supported by geographic characteristics of the areas in which LGBQ migrants live. In some ways, the areas hosting these LGBQ immigrants resemble areas where straight immigrants live, with high proportions of Hispanic and immigrant individuals. However, these areas also differ in important ways; LGB migrants tend to live in areas with more LGBTQ+ nonprofit organizations, greater density, and higher property values than areas that host either the broader population of immigrants or the LGBQ U.S.-born. Overall, these immigrants live in diverse, cosmopolitan, and LGBTQ+ supportive locations that have relatively diverse racial and migratory compositions. This is counter to U.S.-born same-sex couples that are increasingly spreading to conservative states and non-urban locations. Furthermore, they do not seem to be following immigrants in different-sex couples' pathways to "new immigrant destinations." Due to their privileged socioeconomic status, they may be in a better position to consider lifestyle migration factors than others [@carrillo_2018; @dixon_2020]. However, much more research is needed to understand the direct mechanisms driving these distributional trends. Our interpretation here is only suggestive for future research. Moreover, it is not immediately clear how these patterns compare to LGBQ migrants in other countries, as limited representative studies have been conducted.
 
-This study is subject to a number of limitations that future research should attempt to overcome. First, ACS data limit analysis to LGBQ migrants in couples who live together, excluding single or non-cohabiting LGBQ migrants. Reliance on data from the decennial census and the American Community Survey has necessarily constrained insights to those in cohabiting, same-sex couples (whether married or unmarried). Representative quantitative data on single queer people is quite limited, due to the rarity of including survey questions about sexual orientation and gender identity. Second, PUMAs are large (including at least 100,000 people), so analysis can not be as fine-grained as would be ideal. Especially in rural areas, PUMAs can be quite vast; research at lower levels of aggregation is necessary to better understand the settlement of these areas. Third, summary statistics from the ACS are only proxies for the lived spatial experiences of LGBQ migrants in these areas. In-depth qualitative work is necessary to understand how LGBQ migrants consider various aspects of place and space in deciding where to settle. This latter point is particularly important because how individuals experience space can vary widely [@acosta_2008_lesbianas; @solveigar-oggudmundsdottir_2024_northtonorth]. And while existing work details how LGBQ migrants experience different locations, it is less clear how and why they choose the particular destinations they do. Further inquiries on this front can help connect our descriptive findings to subjective realities. 
+This study is subject to a number of limitations that future research should attempt to overcome. First, ACS data limit analysis to LGBQ migrants in couples who live together, excluding single or non-cohabiting LGBQ migrants. Reliance on data from the decennial census and the American Community Survey has necessarily constrained insights to those in cohabiting, same-sex couples (whether married or unmarried). Representative quantitative data on single queer people is quite limited, due to the rarity of including survey questions about sexual orientation and gender identity. Second, PUMAs are large (including at least 100,000 people), so analysis can not be as fine-grained as would be ideal. While urban areas have many PUMAs (for example, New York City has 55), in rural areas PUMAs can be quite vast; research at lower levels of aggregation is necessary to better understand the settlement of these areas. Third, summary statistics from the ACS are only proxies for the lived spatial experiences of LGBQ migrants in these areas. In-depth qualitative work is necessary to understand how LGBQ migrants consider various aspects of place and space in deciding where to settle. This latter point is particularly important because how individuals experience space can vary widely [@acosta_2008_lesbianas; @solveigar-oggudmundsdottir_2024_northtonorth]. And while existing work details how LGBQ migrants experience different locations, it is less clear how and why they choose the particular destinations they do. Relatedly, our data do not allow us to distinguish between migrants choosing a destination of their own accord and migrants being compelled to settle in a particular area due to reasons beyond their control. Further inquiries on this front can help connect our descriptive findings to subjective realities. 
 
 Our study generates new insights on the complex relationship between sexuality, place, and legal landscapes. One important implication relates to the politics of sexuality and migration. Recently, scholars have pointed to the unique position of queer migrants to reshape politics and activism related to both migration and LGBTQ+ rights due to how they alter conceptualizations of the nation [@girard_1987_subversion; @luibheid_2002_entry; @richardson_2018_sexuality; @terriquez_2015_intersectional]. @chavez_2013_queer, in particular, argues that queer migrants are able to construct "coalitional moments" in which their unique social positioning enables them to bridge multiple communities and advance a new type of politics. Moreover, while we find LGBQ migrants in more LGBTQ+-friendly locations, there is some evidence from Europe and Hong Kong that these migrants are the very ones advancing these progressive policy changes -- as opposed to simply selecting into destinations with such policies already [@ayoub_2019_migration; @suen_2021_sexual]. Indeed, as our findings showcase, one reason for this is because the LGBQ migrants in our sample are relatively privileged, perhaps enabling them to leverage their skills and resources to advocate for social change. However, since we find these migrants to primarily locate into their own, distinct communities, how diffuse these legal effects can be may be limited. Moreover, the fact that we are primarily analyzing relatively privileged, married LGBQ migrants suggests these may not be those pushing for more radical politics but, instead, are those advancing rights that adhere to existing social structures of the nation [@puar_2018_terrorist]. Regardless, our study demonstrates that LGBQ migration into the U.S. is rapidly expanding due to new legal recognitions of same-sex marriage. As these migrants settle across the U.S., more research will be needed to understand how they are altering social fabrics and geography.
 
@@ -543,9 +555,40 @@ desc_tab_ind %>%
   flextable() %>% 
   colformat_double(i = 16:17, digits = 0) %>%
   FitFlextableToPage() %>% # flextable::autofit() %>%
-  flextable::set_caption('Mean values for individual variables for immigrants in different- or same-sex couples, 2008-2019 and 2021-2023. For same-sex couples, the married variable is coded as missing before 2012.') 
+  flextable::set_caption('Mean values for individual variables for immigrants in different- or same-sex couples, 2008-2019 and 2021-2023. For same-sex couples, the married variable is coded as missing before 2012 (in this time period, all same-sex couples are designated as "unmarried parterns"). Differences in means between the three groups are significant in all cases.') 
   # kable(booktabs = T, linesep = '', caption = 'Mean values for geographic variables for immigrants in different- or same-sex couples, 2008-2022')
 
+# desc_tab_ind |>
+#   select(group, !ends_with("_se")) |>
+#   pivot_longer(!group, values_to = "estimate") |>
+#   mutate(estimate = as.character(signif(estimate, 2))) |>
+#   left_join(
+#     desc_tab_ind |>
+#       select(group, ends_with("_se")) |>
+#       pivot_longer(!group, values_to = "se") |>
+#       mutate(se = paste0("(", as.character(signif(se, 2)), ")"),
+#              name = str_remove(name, "_se$"))
+#   ) |>
+#   mutate(value = paste(estimate, se)) |>
+#   select(group, name, value) |>
+#   pivot_wider() |>
+#   left_join(sample_size) %>%
+#   column_to_rownames('group') %>%
+#   t() %>%
+#   as.data.frame() %>%
+#   # mutate(`Different-sex, immigrant` = round(V1, 3), `Same-sex, immigrant` = round(V2, 3),
+#   #        `Same-sex, non-immigrant` = round(V3, 3)) %>%
+#   # select(different_sex, same_sex) %>%
+#   rownames_to_column('Variable') %>%
+#   # mutate(Variable = ifelse(str_detect(Variable, '_se'), Variable, paste0(Variable, '_coef'))) %>%
+#   # pivot_wider(names_from = Variable, names_sep = '_')
+#   mutate(Variable = ifelse(str_detect(Variable, '_se'), '', Variable)) |>
+#   # filter(!str_detect(Variable, '_se')) %>%
+#   mutate(Variable = recode(Variable, !!!variable_names_swap)) %>%
+#   flextable() %>% 
+#   colformat_double(i = 17:18, digits = 0) %>%
+#   FitFlextableToPage() %>% # flextable::autofit() %>%
+#   flextable::set_caption('Mean values for individual variables for immigrants in different- or same-sex couples, 2008-2019 and 2021-2023. For same-sex couples, the married variable is coded as missing before 2012 (in this time period, all same-sex couples are designated as "unmarried parterns").') 
 
 ```
 
@@ -592,7 +635,7 @@ desc_tab %>%
   flextable() %>% 
   colformat_double(i = 13:14, digits = 0) %>%
   FitFlextableToPage() %>% # flextable::autofit() %>%
-  flextable::set_caption('Mean values for geographic variables for immigrants in different- or same-sex couples, 2008-2019 and 2021-2023') 
+  flextable::set_caption('Mean values for geographic variables for immigrants in different- or same-sex couples, 2008-2019 and 2021-2023. Differences in means between the three groups are significant in all cases.') 
   # kable(booktabs = T, linesep = '', caption = 'Mean values for geographic variables for immigrants in different- or same-sex couples, 2008-2022')
 
 
@@ -605,41 +648,38 @@ desc_tab %>%
 
 
 
-
-
-
-```{r desc-ind-figures, fig.cap = 'Individual characteristics over time for immigrants in different- and same-sex couples and non-immigrants in same-sex couples, based on American Community Survey data for 2008-2019 and 2021-2023. Estimates incorporate sampling weights.'}
-income <- all_geo %>%
+```{r desc-ind-figures-calc}
+income <- all_geo_survey %>%
   group_by(year, group) %>%
-  summarize(var = weighted.mean(inctot, perwt, na.rm = T)) %>%
+  summarize(var = survey_mean(inctot, na.rm = T)) %>%
   mutate(var_name = 'Annual Personal Income (Thousands)')
 
-hs <- all_geo %>%
+hs <- all_geo_survey %>%
   mutate(hs = if_else(educ %in% c('HS', 'some col', 'college'), 1, 0)) %>%
   group_by(year, group) %>%
-  summarize(var = weighted.mean(hs, perwt, na.rm = T)) %>%
+  summarize(var = survey_mean(hs, na.rm = T)) %>%
   mutate(var_name = 'High School Completion')
 
-college <- all_geo %>%
+college <- all_geo_survey %>%
   mutate(college = if_else(educ == 'college', 1, 0)) %>%
   group_by(year, group) %>%
-  summarize(var = weighted.mean(college, perwt, na.rm = T)) %>%
+  summarize(var = survey_mean(college, na.rm = T)) %>%
   mutate(var_name = 'College Completion')
 
-hwsei <- all_geo %>%
+hwsei <- all_geo_survey %>%
   group_by(year, group) %>%
-  summarize(var = weighted.mean(hwsei, perwt, na.rm = T)) %>%
+  summarize(var = survey_mean(hwsei, na.rm = T)) %>%
   mutate(var_name = 'Hauser and Warren Socioeconomic Index')
 
-has_children <- all_geo %>%
+has_children <- all_geo_survey %>%
   group_by(year, group) %>%
   mutate(has_children = nchild > 0) %>%
-  summarize(var = weighted.mean(has_children, perwt, na.rm = T)) %>%
+  summarize(var = survey_mean(has_children, na.rm = T)) %>%
   mutate(var_name = 'Have Children')
 
-married <- all_geo %>%
+married <- all_geo_survey %>%
   group_by(year, group) %>%
-  summarize(var = weighted.mean(married, perwt, na.rm = T)) %>%
+  summarize(var = survey_mean(married, na.rm = T)) %>%
   mutate(var = ifelse(var == 0, NA, var)) %>%
   mutate(var_name = 'Married')
 
@@ -647,14 +687,22 @@ married <- all_geo %>%
 #   group_by(year, group) %>%
 #   summarize(var = weighted.mean(age, perwt, na.rm = T)) %>%
 #   mutate(var_name = 'Age')
-  
 
-bind_rows(income, hwsei, hs, college, has_children, married) %>%
+bind_rows(income, hwsei, hs, college, has_children, married) |>
+  write_csv(here('geo/files', 'ind_fig.csv'))
+```
+
+
+
+```{r desc-ind-figures, fig.cap = 'Individual characteristics over time for immigrants in different- and same-sex couples and non-immigrants in same-sex couples, based on American Community Survey data for 2008-2019 and 2021-2023. Estimates incorporate sampling weights, and ribbons represent 95-percent confidence intervals.'}
+read_csv(here('geo/files', 'ind_fig.csv')) %>%
   mutate(var_name = factor(var_name, levels = unique({.$var_name}))) %>%
   rename(Year = year) %>%
-  ggplot(aes(x = Year, y = var, linetype = group, color = group)) +
+  ggplot(aes(x = Year, y = var, linetype = group, color = group, fill = group)) +
   geom_line() +
-  #geom_ribbon(aes(ymin = var_low, ymax = var_upp, group = group, col = NULL), alpha = .2) +
+  geom_ribbon(aes(ymin = var - 1.96*var_se, 
+                  ymax = var + 1.96*var_se, 
+                  color = NULL), alpha = .2) +
   facet_wrap(~var_name, scales = "free", ncol = 2) +
   ylab('') +
   theme(legend.position="bottom",
@@ -749,9 +797,12 @@ state_tab %>%
 
 ```{r segregation, fig.cap = 'Index of dissimilarity by PUMA for 2008 to 2023, comparing immigrants in same-sex couples to immigrants in different-sex couples or to non-immigrants in same-sex couples.'}
 
-bind_rows(seg_imm, seg_lgbq) %>%
-  ggplot(aes(x = year, y = est, color = comparison, linetype = comparison)) +
+seg %>%
+  ggplot(aes(x = year, y = est, color = comparison, fill = comparison,
+             linetype = comparison)) +
   geom_line() +
+  # geom_ribbon(aes(ymin = est - 1.96*se, ymax = est + 1.96*se, color = NULL),
+  #             alpha = 0.2) +
   geom_hline(yintercept = 0, color= 'transparent') +
   theme(legend.position = 'bottom') +
   labs(x = 'Year', y = 'Index of dissimilarity')
@@ -767,27 +818,51 @@ bind_rows(seg_imm, seg_lgbq) %>%
 
 \newpage
 
-```{r desc-geo-figures, fig.height = 6.5, fig.cap = 'Geographic characteristics over time for immigrants in different- and same-sex couples and non-immigrants in same-sex couples, based on American Community Survey data for 2008-2019 and 2021-2023. Estimates incorporate sampling weights.'}
+```{r desc-geo-figures, fig.height = 6.5, fig.cap = 'Geographic characteristics over time for immigrants in different- and same-sex couples and non-immigrants in same-sex couples, based on American Community Survey data for 2008-2019 and 2021-2023. Estimates incorporate sampling weights, and ribbons represent 95-percent confidence intervals.'}
 
 desc_tab_time <- read_csv(here('geo/files', 'desc_tab_time.csv')) 
 
-desc_tab_time %>%
-  select(!ends_with('_se')) %>%
-  select(group, year,
-         inctot_puma, unemployed_puma, hwsei_puma, valueh_puma,
-         bachelors_puma, black_puma, hispanic_puma, immigrant_puma, 
-         density, state_policy, lgbt_nonprofits, immigrant_nonprofits) %>%
-  pivot_longer(-c(group, year), names_to = 'variable') %>%
+# desc_tab_time %>%
+#   select(!ends_with('_se')) %>%
+#   select(group, year,
+#          inctot_puma, unemployed_puma, hwsei_puma, valueh_puma,
+#          bachelors_puma, black_puma, hispanic_puma, immigrant_puma, 
+#          density, state_policy, lgbt_nonprofits, immigrant_nonprofits) %>%
+#   pivot_longer(-c(group, year), names_to = 'variable') %>%
+#   mutate(variable = recode(variable, !!!variable_names_swap)) %>%
+#   mutate(variable = factor(variable, levels = unique({.$variable}))) %>%
+#   # filter(str_detect(variable, '(%)')) %>%
+#   # mutate(same_sex = ifelse(same_sex == T, 'Same-sex', 'Different-sex')) %>%
+#   ggplot(aes(x = year, y = value, color = group, linetype = group)) +
+#   geom_line() +
+#   facet_wrap(~variable, scales = 'free_y', ncol = 2) +
+#   labs(x = 'Year', y = '') +
+#   theme(legend.position = 'bottom',
+#         text = element_text(size = 9))
+
+
+left_join(
+  desc_tab_time %>%
+    select(!ends_with('_se')) %>%
+    pivot_longer(-c(group, year), names_to = 'variable', values_to = 'estimate'),
+  desc_tab_time %>%
+    select(group, year, ends_with('_se')) %>%
+    rename_with(
+    ~ str_remove(., "_se$"), ends_with("_se")) |>
+    pivot_longer(-c(group, year), names_to = 'variable', values_to = 'se')
+) |>
+  mutate(lower = estimate - 1.96*se, upper = estimate + 1.96*se) |>
   mutate(variable = recode(variable, !!!variable_names_swap)) %>%
   mutate(variable = factor(variable, levels = unique({.$variable}))) %>%
-  # filter(str_detect(variable, '(%)')) %>%
-  # mutate(same_sex = ifelse(same_sex == T, 'Same-sex', 'Different-sex')) %>%
-  ggplot(aes(x = year, y = value, color = group, linetype = group)) +
+  ggplot(aes(x = year, y = estimate, color = group, linetype = group)) +
   geom_line() +
+  geom_ribbon(aes(ymin = lower, ymax = upper, fill = group, color = NULL),
+              alpha = .2) +
   facet_wrap(~variable, scales = 'free_y', ncol = 2) +
   labs(x = 'Year', y = '') +
   theme(legend.position = 'bottom',
         text = element_text(size = 9))
+  
 
 
 ```
