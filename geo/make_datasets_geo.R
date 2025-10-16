@@ -12,7 +12,7 @@ library(tidyverse)
 
 
 ## Reshape ACS ####
-acs <- read_dta('/Users/nathan/Data/ACS/acs_2008_2022.dta') %>%
+acs <- read_dta('/Users/nathan/Data/ACS/acs_2008_2023.dta') %>%
   mutate(
     position = case_when(
       related == 101 ~ 'main',
@@ -24,8 +24,9 @@ acs <- read_dta('/Users/nathan/Data/ACS/acs_2008_2022.dta') %>%
     bpldid = as.numeric(bpld),
     state = stateicp,
     stateicp = as.numeric(stateicp),
-    ftotinc = ifelse(ftotinc == 9999999, NA, ftotinc*cpi99/1000),
-    inctot = ifelse(inctot == 9999999, NA, inctot*cpi99/1000),
+    ftotinc = ifelse(ftotinc >= 9999998, NA, ftotinc*cpi99*1.829/1000),
+    inctot = ifelse(inctot >= 9999998, NA, inctot*cpi99*1.829/1000),
+    valueh = ifelse(valueh >= 9999998 | valueh == 0, NA, valueh*cpi99*1.829/1000),
     hwsei = ifelse(hwsei == 0000, NA, hwsei),
     occscore = ifelse(occscore == 00, NA, occscore),
     hhid = paste0(year, '_', serial),
@@ -35,7 +36,7 @@ acs <- read_dta('/Users/nathan/Data/ACS/acs_2008_2022.dta') %>%
       educ %in% 7:9 ~ 'some col',
       educ %in% 10:11 ~ 'college'),
     bpldid = case_when(bpld %in% c(41000, 41100, 41410) ~ 41300, # England, Scotland, Northern Ireland
-                       as_factor(bpld) == 'Korea' ~ 50220,
+                       as_factor(bpld) == 'korea' ~ 50220,
                        # as_factor(bpld) == 'Hong Kong' ~ 50000,
                        T ~ bpldid)) %>%
   filter(year != 2020)
@@ -110,7 +111,8 @@ state_policy <- bind_rows(state_policy,
                           state_policy_2020 %>%
                             slice(rep(1:n(), each = 2)) %>%
                             mutate(year = c(rep(c(2021, 2022), times = nrow(state_policy_2020))))
-)
+) %>%
+  mutate(state = tolower(state))
 
 lgbt_nonprofits <- read_csv(here('data', 'lgbt nonprofits by zipcode.csv')) %>%
   filter(year >= 2008) %>%
@@ -159,7 +161,8 @@ lgbt_nonprofits_puma <- left_join(lgbt_nonprofits, zip_to_puma) %>%
   group_by(year, statefp, puma5ce) %>%
   summarize(lgbt_nonprofits = sum(lgbt_np_weighted)) %>%
   ungroup() %>%
-  left_join(statefip)
+  left_join(statefip) %>%
+  mutate(state = tolower(state))
 
 
 imm_nonprofits <- readxl::read_excel(here('geo/data', 'immigrant nonprofits.xlsx')) %>%
@@ -171,14 +174,15 @@ imm_nonprofits <- readxl::read_excel(here('geo/data', 'immigrant nonprofits.xlsx
   group_by(year, statefp, puma5ce) %>%
   summarize(immigrant_nonprofits = sum(immigrant_np_weighted)) %>%
   ungroup() %>%
-  left_join(statefip)
+  left_join(statefip) %>%
+  mutate(state = tolower(state))
 
 write_csv(lgbt_nonprofits_puma, here('geo/files', 'nonprofits_puma.csv'))
 write_csv(imm_nonprofits, here('geo/files', 'imm_nonprofits.csv'))
 
 
 acs_geo_survey_mean <- acs %>%
-  # filter(year == 2019) %>%
+  # filter(year == 2008) %>%
   # sample_n(1000) %>%
   group_by(state, puma, year) %>%
   summarize(bachelors_puma = 100*weighted.mean(educ == 'college' & age >= 25, w = perwt, na.rm = T),
@@ -223,21 +227,21 @@ weighted.var.se <- function(x, w, na.rm=F){
 
 
 acs_geo_survey_se <- acs %>%
-  # filter(year == 2019) %>%
-  # sample_n(1000) %>%
+  filter(year == 2019) %>%
+  sample_n(1000) %>%
   group_by(state, puma, year) %>%
-  summarize(bachelors_puma = weighted.var.se(100*educ == 'college' & age >= 25, w = perwt, na.rm = T),
-            black_puma = weighted.var.se(100*race == 2, w = perwt, na.rm = T),
-            hispanic_puma = weighted.var.se(100*hispan != 0, w = perwt, na.rm = T),
+  summarize(bachelors_puma = weighted.var.se(100*(educ == 'college' & age >= 25), w = perwt, na.rm = T),
+            black_puma = weighted.var.se(100*(race == 2), w = perwt, na.rm = T),
+            hispanic_puma = weighted.var.se(100*(hispan != 0), w = perwt, na.rm = T),
             inctot_puma = weighted.var.se(inctot, w = perwt, na.rm = T),
             log_inctot_puma = sqrt(log(inctot_puma^2)),
-            owned_puma = weighted.var.se(100*ownershp == 1, w = perwt, na.rm = T),
+            owned_puma = weighted.var.se(100*(ownershp == 1), w = perwt, na.rm = T),
             age_puma = weighted.var.se(age, w = perwt, na.rm = T),
-            immigrant_puma = weighted.var.se(100*citizen %in% c(2,3), w = perwt, na.rm = T),
-            poverty_100_puma = weighted.var.se(100*poverty <= 100 & poverty != 0, w = perwt, na.rm = T),
-            poverty_200_puma = weighted.var.se(100*poverty <= 200 & poverty != 0, w = perwt, na.rm = T),
+            immigrant_puma = weighted.var.se(100*(citizen %in% c(2,3)), w = perwt, na.rm = T),
+            poverty_100_puma = weighted.var.se(100*(poverty <= 100 & poverty != 0), w = perwt, na.rm = T),
+            poverty_200_puma = weighted.var.se(100*(poverty <= 200 & poverty != 0), w = perwt, na.rm = T),
             hwsei_puma = weighted.var.se(hwsei, w = perwt, na.rm = T),
-            unemployed_puma = weighted.var.se(100*empstat == 2 & age >= 25, w = perwt, na.rm = T),
+            unemployed_puma = weighted.var.se(100*(empstat == 2 & age >= 25), w = perwt, na.rm = T),
             valueh_puma = weighted.var.se(valueh, w = perwt, na.rm = T),
             rent_puma = weighted.var.se(rent, w = perwt, na.rm = T),
             costelec_puma = weighted.var.se(costelec, w = perwt, na.rm = T)
@@ -292,10 +296,10 @@ acs_wide <- acs %>%
            citizen_main %in% c(2,3) | citizen_partner %in% c(2,3) ~ 'one')) %>%
   # convert all labeled variables to factor
   as_factor() %>%
-  mutate(married = related_partner == 'Spouse' | 
-           qrelate_partner == 'Same sex spouse changed to unmarried partner',
-         allocated = (qrelate_main == 'Allocated' | qrelate_partner == 'Allocated' |
-                        qsex_main == 'Allocated' | qsex_partner == 'Allocated'))
+  mutate(married = related_partner == 'spouse' | 
+           qrelate_partner == 'same sex spouse changed to unmarried partner',
+         allocated = (qrelate_main == 'allocated' | qrelate_partner == 'allocated' |
+                        qsex_main == 'allocated' | qsex_partner == 'allocated'))
 
 
 acs_wide %>%

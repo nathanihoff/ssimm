@@ -566,3 +566,104 @@ desc_tab %>%
 ```
 
 
+<!-- # Other Segregation Indices -->
+
+<!-- ```{r sepration, eval = F, fig.cap = 'Separation Index by PUMA for 2008 to 2023, comparing immigrants in same-sex couples to immigrants in different-sex couples or to non-immigrants in same-sex couples.'} -->
+
+<!-- # Comparing ss imm to dif-s imm -->
+<!-- imm_geo <- all_geo |> -->
+<!--   filter(group %in% c("Same-sex, immigrant", "Different-sex, immigrant")) -->
+
+<!-- ss_imm_1 <- imm_geo |> -->
+<!--   filter(group == "Same-sex, immigrant") |> -->
+<!--   group_by(year, puma) |> -->
+<!--   summarize(p_1 = sum(perwt) / sum(imm_geo$perwt), -->
+<!--             n_1 = sum(perwt)) -->
+
+<!-- dif_imm <- imm_geo |> -->
+<!--   filter(group == "Different-sex, immigrant") |> -->
+<!--   group_by(year, puma) |> -->
+<!--   summarize(p_2 = sum(perwt) / sum(imm_geo$perwt), -->
+<!--             n_2 = sum(perwt)) -->
+
+<!-- imm <- full_join(ss_imm_1, dif_imm) %>% -->
+<!--   replace(is.na(.), 0) -->
+
+<!-- # Comparing ss imm to ss non-imm -->
+<!-- ss_geo <- all_geo |> -->
+<!--   filter(group %in% c("Same-sex, immigrant", "Same-sex, non-immigrant")) -->
+
+<!-- ss_imm_2 <- ss_geo |> -->
+<!--   filter(group == "Same-sex, immigrant") |> -->
+<!--   group_by(year, puma) |> -->
+<!--   summarize(p_1 = sum(perwt) / sum(ss_geo$perwt), -->
+<!--             n_1 = sum(perwt)) -->
+
+<!-- ss_nonimm <- all_geo |> -->
+<!--   filter(group == "Same-sex, non-immigrant") |> -->
+<!--   group_by(year, puma) |> -->
+<!--   summarize(p_2 = sum(perwt) / sum(ss_geo$perwt), -->
+<!--             n_2 = sum(perwt)) -->
+
+<!-- ss <- full_join(ss_imm_2, ss_nonimm) %>% -->
+<!--   replace(is.na(.), 0) -->
+
+<!-- s_tab <- bind_rows( -->
+<!--   left_join(ss_imm_1, dif_imm) %>% -->
+<!--     summarize(Separation = (1/sum(n_1)) * sum(n_1 * p_1) - (1/sum(n_2)) * sum(n_2 * p_1)) |> -->
+<!--     mutate(comparison = 'Same-sex, imm. vs. dif.-sex, imm.'), -->
+<!--   left_join(ss_imm_1, dif_imm) %>% -->
+<!--     summarize(Separation = (1/sum(n_2)) * sum(n_2 * p_2) - (1/sum(n_1)) * sum(n_1 * p_2)) |> -->
+<!--     mutate(comparison = 'Dif.-sex, imm. vs. same-sex, imm.'), -->
+<!--   ss %>% -->
+<!--     summarize(Separation = (1/sum(n_1)) * sum(n_1 * p_1) - (1/sum(n_2)) * sum(n_2 * p_1)) |> -->
+<!--     mutate(comparison = 'Same-sex, imm. vs. same-sex, non-imm.'), -->
+<!--   ss %>% -->
+<!--     summarize(Separation = (1/sum(n_2)) * sum(n_2 * p_2) - (1/sum(n_1)) * sum(n_1 * p_2)) |> -->
+<!--     mutate(comparison = 'Same-sex, non-imm. vs. same-sex, imm') -->
+<!-- ) -->
+
+
+<!-- s_tab |> -->
+<!--   ggplot(aes(x = year, y = Separation -->
+<!--              #color = of, linetype = of_to -->
+<!--              )) + -->
+<!--   geom_line() + -->
+<!--   geom_hline(yintercept = 0, color= 'transparent') + -->
+<!--   facet_wrap(~comparison) + -->
+<!--   theme(legend.position = 'bottom', -->
+<!--         strip.text.x = element_text(size = 8)) + -->
+<!--   labs(x = 'Year', y = 'Separation Index') -->
+<!-- ``` -->
+
+<!-- ```{r exposure, fig.cap = 'Exposure Index by PUMA for 2008 to 2023, comparing immigrants in same-sex couples to immigrants in different-sex couples or to non-immigrants in same-sex couples.'} -->
+
+<!-- seg <- read_csv(here('geo/files/', 'seg.csv')) -->
+
+<!-- seg %>% -->
+<!--   filter(index == "Exposure Index", -->
+<!--          of != to) %>% -->
+<!--   mutate(of_to = str_to_sentence(paste0("Exposure of ", of, "s to \n", to, "s"))) %>% -->
+<!--   ggplot(aes(x = year, y = exposure -->
+<!--              #color = of, linetype = of_to -->
+<!--              )) + -->
+<!--   geom_line() + -->
+<!--   geom_hline(yintercept = 0, color= 'transparent') + -->
+<!--   facet_wrap(~of_to) + -->
+<!--   theme(legend.position = 'bottom', -->
+<!--         strip.text.x = element_text(size = 8)) + -->
+<!--   labs(x = 'Year', y = 'Exposure Index') -->
+<!-- ``` -->
+
+<!-- ```{r isolation, fig.cap = 'Isolation Index by PUMA for 2008 to 2023, comparing immigrants in same-sex couples, immigrants in different-sex couples, and non-immigrants in same-sex couples.'} -->
+<!-- seg %>% -->
+<!--   filter(index == "Isolation Index") %>% -->
+<!--   ggplot(aes(x = year, y = isolation, -->
+<!--              color = group, linetype = group -->
+<!--              )) + -->
+<!--   geom_line() + -->
+<!--   geom_hline(yintercept = 0, color = 'transparent') + -->
+<!--   theme(legend.position = 'bottom', -->
+<!--         legend.text = element_text(size = 7)) + -->
+<!--   labs(x = 'Year', y = 'Isolatoin Index') -->
+<!-- ``` -->
